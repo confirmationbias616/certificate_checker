@@ -1,6 +1,6 @@
 import smtplib, ssl
 
-def communicate():
+def communicate(pandas_row):
 	port = 465 # for SSL
 	smtp_server = "smtp.gmail.com"
 	sender_email = "alex.roy616@gmail.com"
