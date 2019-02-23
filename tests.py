@@ -2,7 +2,7 @@ import unittest
 import pandas as pd
 from ddt import ddt, data, unpack
 from scraper import scrape
-from wrangler import clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title
+from wrangler import clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title, wrangle
 
 
 class TestScraping(unittest.TestCase):
@@ -121,6 +121,18 @@ class TestWrangleFuncs(unittest.TestCase):
         def test_clean_title(self, input_string, desired_string):
             output_string = clean_title(input_string)
             self.assertEqual(desired_string, output_string)
+
+        '''@data(
+            ("test", "test"),
+        )
+        @unpack
+        def test_wrangle_coord(self, input_string, desired_string):
+            output_string = wrangle_coord(input_string)
+            self.assertEqual(desired_string, output_string)
+        '''
+
+        def test_wrangle_(self):
+            wrangle()
 
 
 if __name__ == '__main__':

@@ -146,40 +146,38 @@ def clean_title(raw):
     title = raw
     return title
 
-def wrangle_coord(df):
-    clean_ops = {
-    'pub_date': clean_pub_date,
-    'city': clean_city,
-    'title': clean_title,
-    'owner': clean_company_name,
-    'contractor': clean_company_name,
-    }
-    for attr in clean_ops:
-        try:
-            df[attr] = df[attr].apply(clean_ops[attr])
-        except (KeyError, AttributeError):
-            pass
-    get_address_ops = {
-    'street_number': get_street_number,
-    'street_name': get_street_name,
-    }
-    for attr in get_address_ops:
-        try:
-            df[attr] = df['address'].apply(get_address_ops[attr])
-        except KeyError:
-            pass
-    for attr in ["title","owner","contractor"]:
-        df[f'{attr}_acronyms'] = df[attr].apply(get_acronyms)
-    return df
-
 def wrangle():
-    for filename in (
-        './data/raw_dilfo_certs.csv', 
-        f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv'
-        ):
-        df = pd.read_csv(filename)
-        wrangle_coord(df)
-        df.to_csv(filename.replace("raw","clean"), index=False)
+	def wrangle_coord(df):
+	    clean_ops = {
+	    'pub_date': clean_pub_date,
+	    'city': clean_city,
+	    'title': clean_title,
+	    'owner': clean_company_name,
+	    'contractor': clean_company_name,
+	    }
+	    for attr in clean_ops:
+	        try:
+	            df[attr] = df[attr].apply(clean_ops[attr])
+	        except (KeyError, AttributeError):
+	            pass
+	    get_address_ops = {
+	    'street_number': get_street_number,
+	    'street_name': get_street_name,
+	    }
+	    for attr in get_address_ops:
+	        try:
+	            df[attr] = df['address'].astype('str').apply(get_address_ops[attr])
+	        except KeyError:
+	            pass
+	    for attr in ["title","owner","contractor"]:
+	        df[f'{attr}_acronyms'] = df[attr].apply(get_acronyms)
+	    return df
+	
+	for filename in ('./data/raw_dilfo_certs.csv', f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv'):
+		df = pd.read_csv(filename, dtype={x:"str" for x in ["pub_date", "address", "title", "owner", "contractor", "engineer"]})
+		df = df.fillna(" ")
+		wrangle_coord(df)
+		df.to_csv(filename.replace("raw","clean"), index=False)
 
 if __name__=="__main__":
     wrangle()
