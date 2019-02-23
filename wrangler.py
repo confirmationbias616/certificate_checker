@@ -166,7 +166,7 @@ def wrangle():
         f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv'
         ):
         df = pd.read_csv(filename)
-        wrangle_ccord(df)
+        wrangle_coord(df)
         df.to_csv(filename.replace("raw","clean"), index=False)
 
 if __name__=="__main__":
