@@ -83,28 +83,35 @@ class TestWrangleFuncs(unittest.TestCase):
 
         @data(
             ("Ron Eastern Construction Ltd. (RECL)", ["RECL"]),
+            ("RECL", ["RECL"]),
+            ("Ellis Don for BGIS", ["BGIS"]),
+            ("ED/BGIS", ["BGIS"]),
+            ("Ron Eastern Construction Limited (RECL) for PWGSC", ["RECL", "PWGSC"]),
         )
         @unpack
         def test_get_acronyms(self, input_string, desired_string):
             output_string = get_acronyms(input_string)
             self.assertEqual(desired_string, output_string)
 
-        @data(
-            ("123 Fake St.", "123"),
+        address_test_data = (
+            ("123 Fake St.", "123", "fake"),
+            ("12 Carrière Rd", "12", "carriere"),
+            ("8-1230 marenger street", "1230", "marenger"),
+            ("apt. 8, 1230 marenger street", "1230", "marenger"),
+            ("8-1230 marenger street, apt. 8, ", "1230", "marenger"),
+            ("1230 apt. 8, marenger street", "1230", "marenger"),
+            ("8-1230, apt. 8, marenger street", "", ""),
         )
+        @data(*address_test_data)
         @unpack
-        def test_get_street_number(self, input_string, desired_string):
+        def test_get_street_number(self, input_string, desired_string1, desired_string2):
             output_string = get_street_number(input_string)
-            self.assertEqual(desired_string, output_string)
-
-        @data(
-            ("123 Fake St.", "fake"),
-            ("12 Carrière Rd", "carriere"),
-        )
+            self.assertEqual(desired_string1, output_string)
+        @data(*address_test_data)
         @unpack
-        def test_get_street_name(self, input_string, desired_string):
+        def test_get_street_name(self, input_string, desired_string1, desired_string2):
             output_string = get_street_name(input_string)
-            self.assertEqual(desired_string, output_string)
+            self.assertEqual(desired_string2, output_string)
 
         @data(
             ("test", "test"),
