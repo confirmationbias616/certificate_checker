@@ -134,7 +134,7 @@ def clean_title(raw):
     title = raw
     return title
 
-def wrangle(df):
+def wrangle_coord(df):
     clean_ops = {
     'pub_date': clean_pub_date,
     'city': clean_city,
@@ -160,14 +160,14 @@ def wrangle(df):
         df[f'{attr}_acronyms'] = df[attr].apply(get_acronyms)
     return df
 
-def wrangle_scripts():
+def wrangle():
     for filename in (
         './data/raw_dilfo_certs.csv', 
         f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv'
         ):
         df = pd.read_csv(filename)
-        wrangle(df)
+        wrangle_ccord(df)
         df.to_csv(filename.replace("raw","clean"), index=False)
 
 if __name__=="__main__":
-    wrangle_scripts()
+    wrangle()
