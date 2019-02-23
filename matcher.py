@@ -13,7 +13,7 @@ def match():
 		ranked = df_web.sort_values('contractor_match', ascending=False)
 		for i in range(len(ranked)):
 			if ranked.iloc[i]['contractor_match'] > 90:
-				send_email(ranked.iloc[i])
+				communicate(ranked.iloc[i])
 			else:
 				break
 
