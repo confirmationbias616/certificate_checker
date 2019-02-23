@@ -1,7 +1,10 @@
 cert_env
-
 .password.txt
 
+# Ignore all data
+data/*
+# But not these files...
+!data/raw_dilfo_certs.csv
 
 *.DS_Store
 
