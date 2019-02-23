@@ -108,7 +108,8 @@ def clean_company_name(raw):
 
 def get_acronyms(raw):
     try:
-        text = ''.join([x for x in raw if ((not x.isdigit()) and (x not in ',()-:;.&/'))])
+        text = ''.join([x for x in raw if ((not x.isdigit()) and (x not in ',()-:;.'))])
+        text = text.replace("/"," ").replace("&", " ")
         accronyms =  [x for x in text.split(" ") if len(x)>2 and x.isupper()]
         if len(accronyms) == 0:
             return np.nan
@@ -117,18 +118,32 @@ def get_acronyms(raw):
         return np.nan
 
 def get_street_number(raw):
+    raw = raw.lower()
+    if any([raw.startswith(x) for x in ["apt", "unit", "suite"]]):
+    	raw = raw.split(",")[1].lstrip(" ")
+    elif "-" in raw[:3]:
+    	raw = raw.split("-")[1]
     number = raw.split(' ')[0]
     try:
         int(number)
         return number
     except ValueError:
-        return np.nan
+        return ""
 
 def get_street_name(raw):
+    raw = raw.lower()
+    raw = unidecode.unidecode(raw)
+    if any([raw.startswith(x) for x in ["apt", "unit", "suite"]]):
+    	raw = raw.split(",")[1].lstrip(" ")
+    elif any([x in raw.split(",")[0] for x in ["apt", "unit", "suite"]]):
+    	raw = raw.split(",")[1]
     name = raw.split(' ')[1]
-    name = unidecode.unidecode(name)
-    name = name.lower()
-    return name
+    for unit_word in ["apt", "unit", "suite"]:
+    	name = name.replace(unit_word, "")
+    if name.isalpha():
+    	return name
+    else:
+    	return ""
 
 def clean_title(raw):
     title = raw
