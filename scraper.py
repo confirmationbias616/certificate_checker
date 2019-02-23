@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 
-def scrape():
+def scrape(limit=False):
     pub_date = []
     city = []
     address = []
@@ -40,6 +40,9 @@ def scrape():
     for i, entry in enumerate(soup.find_all("article", {"class":"cards-item"}), 1):
         print(f'getting entry #{i}...')
         get_details(entry)
+        if (limit) and (i >= limit):
+            break
+
 
     df_web = pd.DataFrame(
         data={
