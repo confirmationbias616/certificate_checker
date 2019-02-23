@@ -49,6 +49,7 @@ jobs:
           command: |
             . venv/bin/activate
             
+            coverage run tests.py
             codecov
 
       - store_artifacts:
