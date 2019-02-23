@@ -1,3 +1,4 @@
-"job_number","city","address","title","owner","contractor","engineer"
-"2404","Ottawa","300 Slater St","JET North Floors 3 & 5 Fit-Up","Morguard","RECL","Goodkey"
-"2157","Ottawa","","U of O Learning Centre","University of Ottawa","Pomerleau","WSP MMM"
+"job_number","city","address","title","owner","contractor","engineer","email_address"
+"2404","Ottawa","300 Slater St","JET North Floors 3 & 5 Fit-Up","Morguard","RECL","Goodkey","alex.roy@dilfo.com"
+"2157","Ottawa","","U of O Learning Centre","University of Ottawa","Pomerleau","WSP MMM","alex.roy616@gmail.com"
+"666","Ajax","87 Williamson","Renovation Building","Loblaws","Re-Con Retail","","alex.roy616@gmail.com"
