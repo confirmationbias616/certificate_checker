@@ -6,10 +6,14 @@ import unidecode
 
 
 def clean_pub_date(raw):
+    if raw == " ":
+        return ""
     date = raw.replace("\n", "").replace(" ", "")
     return date
 
 def clean_city(raw):
+    if raw == " ":
+        return ""
     city = raw.lower()
     for variant in [
         " ste ",
@@ -49,6 +53,8 @@ def clean_city(raw):
     return city
 
 def clean_company_name(raw):
+    if raw == " ":
+        return ""
     name = unidecode.unidecode(raw)
     name = cleanco(name).clean_name()
     name = name.lower()
@@ -107,6 +113,8 @@ def clean_company_name(raw):
     return name
 
 def get_acronyms(raw):
+    if raw == " ":
+        return []
     text = ''.join([x for x in raw if ((not x.isdigit()) and (x not in ',()-:;.'))])
     text = text.replace("/"," ").replace("&", " ")
     accronyms =  [x for x in text.split(" ") if len(x)>2 and x.isupper()]
@@ -115,6 +123,8 @@ def get_acronyms(raw):
     return accronyms
 
 def get_street_number(raw):
+    if raw == " ":
+        return ""
     raw = raw.lower()
     if any([raw.startswith(x) for x in ["apt", "unit", "suite"]]):
     	raw = raw.split(",")[1].lstrip(" ")
@@ -128,6 +138,8 @@ def get_street_number(raw):
         return ""
 
 def get_street_name(raw):
+    if raw == " ":
+        return ""
     raw = raw.lower()
     raw = unidecode.unidecode(raw)
     if any([raw.startswith(x) for x in ["apt", "unit", "suite"]]):
@@ -143,6 +155,8 @@ def get_street_name(raw):
     	return ""
 
 def clean_title(raw):
+    if raw == " ":
+        return ""
     title = raw
     return title
 
