@@ -50,7 +50,7 @@ jobs:
             . venv/bin/activate
             
             coverage run tests.py
-            codecov
+            coveralls
 
       - store_artifacts:
           path: test-reports
