@@ -6,7 +6,7 @@ from wrangler import clean_pub_date, clean_city, clean_company_name, get_acronym
 
 
 class TestScraping(unittest.TestCase):
-    def test_scarpe(self, input_string, desired_string):
+    def test_scarpe(self):
             test_limit = 10
             df = scrape(limit=test_limit)
             self.assertEqual(len(df), test_limit)
