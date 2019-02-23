@@ -107,15 +107,12 @@ def clean_company_name(raw):
     return name
 
 def get_acronyms(raw):
-    try:
-        text = ''.join([x for x in raw if ((not x.isdigit()) and (x not in ',()-:;.'))])
-        text = text.replace("/"," ").replace("&", " ")
-        accronyms =  [x for x in text.split(" ") if len(x)>2 and x.isupper()]
-        if len(accronyms) == 0:
-            return []
-        return accronyms
-    except TypeError:
+    text = ''.join([x for x in raw if ((not x.isdigit()) and (x not in ',()-:;.'))])
+    text = text.replace("/"," ").replace("&", " ")
+    accronyms =  [x for x in text.split(" ") if len(x)>2 and x.isupper()]
+    if len(accronyms) == 0:
         return []
+    return accronyms
 
 def get_street_number(raw):
     raw = raw.lower()
