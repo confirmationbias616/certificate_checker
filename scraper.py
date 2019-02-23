@@ -58,6 +58,7 @@ def scrape(limit=False):
     )
 
     df_web.astype('str').to_csv(f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv', index=False)
+    return df_web
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="scrapes DCM website and returns \

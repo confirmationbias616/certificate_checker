@@ -1,10 +1,18 @@
 import unittest
+import pandas as pd
 from ddt import ddt, data, unpack
+from scraper import scrape
 from wrangler import clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title
 
 
+class TestScraping(unittest.TestCase):
+    def test_scarpe(self, input_string, desired_string):
+            test_limit = 10
+            df = scrape(limit=test_limit)
+            self.assertEqual(len(df), test_limit)
+
 @ddt
-class TestName(unittest.TestCase):
+class TestWrangleFuncs(unittest.TestCase):
 
         @data(
             ("\n  2019-02-20\n", "2019-02-20"),
