@@ -4,4 +4,4 @@
 
 ### Stay on top of your holdback releases for construction projects in Ontario!
 
-Automatically scrapes the Daily Commercial News for Certificates of Substantial Completion being posted by general contractors of Ontario, checks for possible matches with your own list of projects, and help you stay on top of your holdback release. 
+Automatically scrapes the Daily Commercial News for Certificates of Substantial Completion being posted by general contractors of Ontario, checks for possible matches with your own list of projects, and help you stay on top of your holdback releases. 
