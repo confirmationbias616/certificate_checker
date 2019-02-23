@@ -1,6 +1,6 @@
 import unittest
 from ddt import ddt, data, unpack
-from wrangler import wrangle
+from wrangler.wrangle import *
 
 
 @ddt
