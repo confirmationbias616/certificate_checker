@@ -2,11 +2,9 @@ ignore:
   - "__init__.py"
   - "tests.py"
 
-[report]
+report:
+  exclude_lines: "if __name__=='__main__':""
 
-exclude_lines =
-    if __name__ == .__main__.:
-      
 codecov:
   notify:
     require_ci_to_pass: yes
