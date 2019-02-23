@@ -112,10 +112,10 @@ def get_acronyms(raw):
         text = text.replace("/"," ").replace("&", " ")
         accronyms =  [x for x in text.split(" ") if len(x)>2 and x.isupper()]
         if len(accronyms) == 0:
-            return np.nan
+            return []
         return accronyms
     except TypeError:
-        return np.nan
+        return []
 
 def get_street_number(raw):
     raw = raw.lower()

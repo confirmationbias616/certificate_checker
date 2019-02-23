@@ -87,6 +87,7 @@ class TestWrangleFuncs(unittest.TestCase):
             ("Ellis Don for BGIS", ["BGIS"]),
             ("ED/BGIS", ["BGIS"]),
             ("Ron Eastern Construction Limited (RECL) for PWGSC", ["RECL", "PWGSC"]),
+            ("Ron Eastern Construction Limited", []),
         )
         @unpack
         def test_get_acronyms(self, input_string, desired_string):
