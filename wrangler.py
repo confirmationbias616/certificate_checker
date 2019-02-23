@@ -160,11 +160,14 @@ def wrangle(df):
         df[f'{attr}_acronyms'] = df[attr].apply(get_acronyms)
     return df
 
+def wrangle_scripts():
+    for filename in (
+        './data/raw_dilfo_certs.csv', 
+        f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv'
+        ):
+        df = pd.read_csv(filename)
+        wrangle(df)
+        df.to_csv(filename.replace("raw","clean"), index=False)
 
-for filename in (
-    './data/raw_dilfo_certs.csv', 
-    f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv'
-    ):
-    df = pd.read_csv(filename)
-    wrangle(df)
-    df.to_csv(filename.replace("raw","clean"), index=False)
+if __name__=="__main__":
+    wrangle_scripts()
