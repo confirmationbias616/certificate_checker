@@ -1,7 +1,10 @@
 # certificate_checker 
-# :construction::office::arrow_right::crystal_ball::warning::arrow_right::date::arrow_right::moneybag:
 [![codecov](https://codecov.io/gh/confirmationbias616/certificate_checker/branch/master/graph/badge.svg)](https://codecov.io/gh/confirmationbias616/certificate_checker)
 [![CircleCI](https://circleci.com/gh/confirmationbias616/certificate_checker.svg?style=svg)](https://circleci.com/gh/confirmationbias616/certificate_checker)
+
+# :construction::office::arrow_right::crystal_ball::warning::arrow_right::date::arrow_right::moneybag:
+# &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;^
+
 
 ### Stay on top of your holdback releases for construction projects in Ontario!
 
