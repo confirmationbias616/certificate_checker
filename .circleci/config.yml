@@ -49,7 +49,7 @@ jobs:
           command: |
             . venv/bin/activate
             
-            python tester.py
+            codecov
 
       - store_artifacts:
           path: test-reports
