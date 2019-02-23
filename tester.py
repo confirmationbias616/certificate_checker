@@ -1,6 +1,6 @@
 import unittest
 from ddt import ddt, data, unpack
-from wrangler import *
+from wrangler import clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title
 
 
 @ddt
