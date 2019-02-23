@@ -1,6 +1,7 @@
 # certificate_checker
 [![CircleCI](https://circleci.com/gh/confirmationbias616/certificate_checker.svg?style=svg)](https://circleci.com/gh/confirmationbias616/certificate_checker)
 [![codecov](https://codecov.io/gh/confirmationbias616/certificate_checker/branch/master/graph/badge.svg)](https://codecov.io/gh/confirmationbias616/certificate_checker)
+[![Coverage Status](https://coveralls.io/repos/github/confirmationbias616/certificate_checker/badge.svg?branch=master)](https://coveralls.io/github/confirmationbias616/certificate_checker?branch=master)
 
 ### Stay on top of your holdback releases for construction projects in Ontario!
 
