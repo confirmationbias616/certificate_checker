@@ -165,10 +165,7 @@ def wrangle():
 	    'street_name': get_street_name,
 	    }
 	    for attr in get_address_ops:
-	        try:
-	            df[attr] = df['address'].astype('str').apply(get_address_ops[attr])
-	        except KeyError:
-	            pass
+            df[attr] = df['address'].astype('str').apply(get_address_ops[attr])
 	    for attr in ["title","owner","contractor"]:
 	        df[f'{attr}_acronyms'] = df[attr].apply(get_acronyms)
 	    return df
