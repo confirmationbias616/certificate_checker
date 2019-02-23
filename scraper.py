@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
+import argparse
 
 
 def scrape(limit=False):
@@ -59,4 +60,12 @@ def scrape(limit=False):
     df_web.astype('str').to_csv(f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv', index=False)
 
 if __name__=="__main__":
-    scrape()
+    parser = argparse.ArgumentParser(description="scrapes DCM website and returns \
+        certificates in the form of a pandas dataframe")
+    parser.add_argument(
+        "-l", "--limit",
+        type=int,
+        help="limits the amount of certificates to be scraped. Default is no limit.",
+    )
+    args = parser.parse_args()
+    scrape(limit=args.limit)
