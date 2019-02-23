@@ -16,6 +16,8 @@ class TestWrangleFuncs(unittest.TestCase):
 
         @data(
             ("\n  2019-02-20\n", "2019-02-20"),
+            ("2019-02-20", "2019-02-20"),
+            (" 2019-02-20 ", "2019-02-20"),
         )
         @unpack
         def test_clean_pub_date(self, input_string, desired_string):
