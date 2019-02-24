@@ -27,6 +27,7 @@ def communicate(web_row, dilfo_row):
 			with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
 			    server.login(sender_email, password)
 			    server.sendmail(sender_email, receiver_email, message)
+			print(f"Sccessfully sent an email to {receiver_email}")
 		except FileNotFoundError:
 			print("password not available -> could not send e-mail")
 
