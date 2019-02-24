@@ -39,13 +39,15 @@ def scrape(limit=False, test=False):
         lookup = {"Name of Owner": owner, "Name of Contractor": contractor, "Name of Certifier": engineer}
         for key in list(lookup.keys()):
             lookup[key].append(company_results.get(key, np.nan))
-
+    print(f'\ninitiating scraping...')
     for i, entry in enumerate(soup.find_all("article", {"class":"cards-item"}), 1):
-        print(f'getting entry #{i}...')
+        print(f'\tgetting entry #{i}...')
         get_details(entry)
+        print('\t\t->succeeded.')
         if limit and (i >= limit):
+            print("limit reached - breaking out of loop.")
             break
-
+    print("saving to df_web dataframe.")        
     df_web = pd.DataFrame(
         data={
             "pub_date": pub_date,
