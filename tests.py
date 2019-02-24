@@ -8,7 +8,7 @@ from wrangler import clean_pub_date, clean_city, clean_company_name, get_acronym
 class TestScraping(unittest.TestCase):
     def test_scarpe(self):
             test_limit = 3
-            df = scrape(limit=test_limit)
+            df = scrape(limit=test_limit, test=True)
             self.assertEqual(len(df), test_limit)
 
 @ddt
@@ -132,7 +132,7 @@ class TestWrangleFuncs(unittest.TestCase):
         '''
 
         def test_wrangle_(self):
-            wrangle()
+            wrangle(test=True)
 
 
 if __name__ == '__main__':

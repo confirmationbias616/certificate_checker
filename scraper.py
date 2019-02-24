@@ -6,7 +6,7 @@ import numpy as np
 import argparse
 
 
-def scrape(limit=False):
+def scrape(limit=False, test=False):
     pub_date = []
     city = []
     address = []
@@ -44,7 +44,6 @@ def scrape(limit=False):
         if (limit) and (i >= limit):
             break
 
-
     df_web = pd.DataFrame(
         data={
             "pub_date": pub_date,
@@ -57,7 +56,10 @@ def scrape(limit=False):
         }
     )
 
-    df_web.astype('str').to_csv(f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv', index=False)
+    if test is True:
+        df_web.astype('str').to_csv(f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv', index=False)
+    else:
+        df_web.astype('str').to_csv(f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv', index=False)
     return df_web
 
 if __name__=="__main__":
