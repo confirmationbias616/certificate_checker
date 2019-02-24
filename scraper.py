@@ -14,16 +14,18 @@ def scrape(limit=False, test=False):
     owner = []
     contractor = []
     engineer = []
+    cert_url = []
 
-    url = 'https://canada.constructconnect.com/dcn/certificates-and-notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor=&date=past_7&date_from=&date_to=#results'
+    search_url = 'https://canada.constructconnect.com/dcn/certificates-and-notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor=&date=past_7&date_from=&date_to=#results'
 
-    response = requests.get(url)
+    response = requests.get(search_url)
     html = response.content
     soup = BeautifulSoup(html, "html.parser")
 
     def get_details(entry):
-        project_details = 'https://canada.constructconnect.com' + entry.find("a")["href"]
-        response = requests.get(project_details)
+        url = 'https://canada.constructconnect.com' + entry.find("a")["href"]
+        cert_url.append(url)
+        response = requests.get(url)
         html = response.content
         entry_soup = BeautifulSoup(html, "html.parser")
         pub_date.append(entry_soup.find("time").get_text())

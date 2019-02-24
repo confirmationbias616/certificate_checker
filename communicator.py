@@ -9,14 +9,14 @@ def communicate(web_row, dilfo_row):
 
 	url = 'https://canada.constructconnect.com/dcn/certificates-and-notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor=&date=past_7&date_from=&date_to=#results'
 
-	def send_email(web_row):
+	def send_email():
 		message = (
 		    f"Subject: Alert for possible HB Release!!!"
 		    f"\n\n"
 		    f"See below for details:"
 		    f"{web_row}"
 		    f"\n\n"
-		    f"Go check the website {url}"
+		    f"Go check the website {dilfo_row.cert_url}"
 		)
 
 		context = ssl.create_default_context()
@@ -31,7 +31,7 @@ def communicate(web_row, dilfo_row):
 		except FileNotFoundError:
 			print("password not available -> could not send e-mail")
 
-	send_email(web_row)
+	send_email()
 
 if __name__=="__main__":
 	communicate()
