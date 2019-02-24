@@ -15,6 +15,7 @@ class TestScraping(unittest.TestCase):
 class TestWrangleFuncs(unittest.TestCase):
 
         @data(
+            (" ", ""),
             ("\n  2019-02-20\n", "2019-02-20"),
             ("2019-02-20", "2019-02-20"),
             (" 2019-02-20 ", "2019-02-20"),
@@ -25,6 +26,7 @@ class TestWrangleFuncs(unittest.TestCase):
             self.assertEqual(desired_string, output_string)
 
         @data(
+            (" ", ""),
             ("Timmins ON, South Porcupine ON, Temagami ON & New Liskeard ON", "timmin"),
             ("Ottawa, Ontario", "ottawa"),
             ("Frontenac County, City of Kingston, Selma Subdivision, Ontario", "kingston"),
@@ -62,6 +64,7 @@ class TestWrangleFuncs(unittest.TestCase):
             self.assertEqual(desired_string, output_string)
 
         @data(
+            (" ", ""),
             ("Frecon", "frecon"),
             ("Frecon", "frecon"),
             ("PCL Constructors", "pcl"),
@@ -82,6 +85,7 @@ class TestWrangleFuncs(unittest.TestCase):
             self.assertEqual(desired_string, output_string)
 
         @data(
+            (" ", []),
             ("Ron Eastern Construction Ltd. (RECL)", ["RECL"]),
             ("RECL", ["RECL"]),
             ("Ellis Don for BGIS", ["BGIS"]),
@@ -116,6 +120,7 @@ class TestWrangleFuncs(unittest.TestCase):
             self.assertEqual(desired_string2, output_string)
 
         @data(
+            (" ", ""),
             ("test", "test"),
         )
         @unpack
