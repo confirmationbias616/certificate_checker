@@ -1,6 +1,6 @@
 import smtplib, ssl
 
-def communicate(pandas_row):
+def communicate(web_row, dilfo_row):
 	port = 465 # for SSL
 	smtp_server = "smtp.gmail.com"
 	sender_email = "alex.roy616@gmail.com"
@@ -9,12 +9,12 @@ def communicate(pandas_row):
 
 	url = 'https://canada.constructconnect.com/dcn/certificates-and-notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor=&date=past_7&date_from=&date_to=#results'
 
-	def send_email(pandas_row):
+	def send_email(web_row):
 		message = (
 		    f"Subject: Alert for possible HB Release!!!"
 		    f"\n\n"
 		    f"See below for details:"
-		    f"{pandas_row}"
+		    f"{web_row}"
 		    f"\n\n"
 		    f"Go check the website {url}"
 		)
