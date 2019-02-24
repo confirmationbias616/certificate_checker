@@ -102,6 +102,7 @@ class TestWrangleFuncs(unittest.TestCase):
             ("8-1230 marenger street, apt. 8, ", "1230", "marenger"),
             ("1230 apt. 8, marenger street", "1230", "marenger"),
             ("8-1230, apt. 8, marenger street", "", ""),
+            ("1010 talbot st. unit #1", "1010", "talbot")
         )
         @data(*address_test_data)
         @unpack
