@@ -54,7 +54,8 @@ def scrape(limit=False, test=False):
             "title": title,
             "owner": owner,
             "contractor": contractor,
-            "engineer": engineer
+            "engineer": engineer,
+            "cert_url": cert_url,
         }
     )
 
