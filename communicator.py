@@ -1,7 +1,7 @@
 import smtplib, ssl
 import datetime
 
-def communicate(web_row, dilfo_row):
+def communicate(web_row, dilfo_row, test=False):
 	port = 465 # for SSL
 	smtp_server = "smtp.gmail.com"
 	sender_email = "dilfo.hb.release"
@@ -23,7 +23,7 @@ def communicate(web_row, dilfo_row):
 		    f"Hi {receiver_email.split('.')[0].title()},"
 		    f"\n"
 		    f"You're receiving this e-mail notification because either you or another "
-		    f"Dilfo employee added your project #{dilfo_row.job_number} - "
+		    f"Dilfo employee added the project #{dilfo_row.job_number} - "
 		    f"{dilfo_row.title} to the watchlist of upcoming holdback releases."
 		    f"\n"
 		    f"Since this project's certificate was just recently published this past "
@@ -41,20 +41,20 @@ def communicate(web_row, dilfo_row):
 		    f"Please be aware this is a fully automated message. "
 		    f"The info contained here could be erroneous."
 		)
-		
-		context = ssl.create_default_context()
 
-		try:
-			with open(".password.txt") as file: 
-				password = file.read()
-			with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-			    server.login(sender_email, password)
-			    server.sendmail(sender_email, receiver_email, message)
-			print(f"Sccessfully sent an email to {receiver_email}")
-		except FileNotFoundError:
-			print("password not available -> could not send e-mail")
+		if not test:
+			try:
+				context = ssl.create_default_context()
+				with open(".password.txt") as file: 
+					password = file.read()
+				with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+				    server.login(sender_email, password)
+				    server.sendmail(sender_email, receiver_email, message)
+				print(f"Sccessfully sent an email to {receiver_email}")
+			except FileNotFoundError:
+				print("password not available -> could not send e-mail")
+		else:
+			print("for testing purposes only, let's see that e-mail draft:\n\n")
+			print(message)
 
 	send_email()
-
-if __name__=="__main__":
-	communicate()

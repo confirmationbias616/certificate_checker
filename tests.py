@@ -1,8 +1,10 @@
 import unittest
 import pandas as pd
+import datetime
 from ddt import ddt, data, unpack
 from scraper import scrape
 from wrangler import clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title, wrangle
+from communicator import communicate
 
 
 class TestScraping(unittest.TestCase):
@@ -128,8 +130,14 @@ class TestWrangleFuncs(unittest.TestCase):
             output_string = clean_title(input_string)
             self.assertEqual(desired_string, output_string)
 
-        def test_wrangle_(self):
+        def test_wrangle(self):
             wrangle(test=True)
+
+class TestCommsFuncs(unittest.TestCase):
+        filenames = ('./data/raw_dilfo_certs.csv', f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv')
+        web_row, dilfo_row = [pd.read_csv(filename).iloc[0] for filename in filenames]
+        def test_communicate(self, web_row, dilfo_row):
+            communicate(web_row, dilfo_row, test=True)
 
 
 if __name__ == '__main__':
