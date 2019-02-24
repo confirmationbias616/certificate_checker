@@ -133,9 +133,16 @@ class TestWrangleFuncs(unittest.TestCase):
         def test_wrangle(self):
             wrangle(test=True)
 
+@ddt
 class TestCommsFuncs(unittest.TestCase):
-        filenames = ('./data/raw_dilfo_certs.csv', f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv')
-        web_row, dilfo_row = [pd.read_csv(filename).iloc[0] for filename in filenames]
+        filenames = (
+            f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv',
+            './data/raw_dilfo_certs.csv'
+        )
+        @data(
+            [pd.read_csv(filename).iloc[0] for filename in filenames],
+        )
+        @unpack
         def test_communicate(self, web_row, dilfo_row):
             communicate(web_row, dilfo_row, test=True)
 
