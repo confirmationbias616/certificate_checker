@@ -144,8 +144,8 @@ def get_street_name(raw):
     raw = unidecode.unidecode(raw)
     if any([raw.startswith(x) for x in ["apt", "unit", "suite"]]):
     	raw = raw.split(",")[1].lstrip(" ")
-    elif any([x in raw.split(",")[0] for x in ["apt", "unit", "suite"]]):
-    	raw = raw.split(",")[1]
+    elif "," in raw and any([x in raw.split(",")[0] for x in ["apt", "unit", "suite"]]):
+        raw = raw.split(",")[1]
     name = raw.split(' ')[1]
     for unit_word in ["apt", "unit", "suite"]:
     	name = name.replace(unit_word, "")
