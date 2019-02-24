@@ -122,15 +122,6 @@ class TestWrangleFuncs(unittest.TestCase):
             output_string = clean_title(input_string)
             self.assertEqual(desired_string, output_string)
 
-        '''@data(
-            ("test", "test"),
-        )
-        @unpack
-        def test_wrangle_coord(self, input_string, desired_string):
-            output_string = wrangle_coord(input_string)
-            self.assertEqual(desired_string, output_string)
-        '''
-
         def test_wrangle_(self):
             wrangle(test=True)
 
