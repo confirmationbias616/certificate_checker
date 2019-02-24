@@ -30,5 +30,7 @@ def communicate(pandas_row):
 		except FileNotFoundError:
 			print("password not available -> could not send e-mail")
 
+	send_email(web_row)
+
 if __name__=="__main__":
 	communicate()
