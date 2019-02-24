@@ -3,7 +3,7 @@ import smtplib, ssl
 def communicate(web_row, dilfo_row):
 	port = 465 # for SSL
 	smtp_server = "smtp.gmail.com"
-	sender_email = "alex.roy616@gmail.com"
+	sender_email = "dilfo.hb.release"
 
 	receiver_email = dilfo_row.receiver_email
 
