@@ -10,10 +10,29 @@ def match():
 
 	for i in range(len(df_dilfo)):
 		print(f"searching for potential match for project #{df_dilfo.iloc[i].job_number}...")
-		df_web['contractor_match'] = df_web['contractor'].apply(lambda row: fuzz.ratio(row, df_dilfo.iloc[i]['contractor']))
-		ranked = df_web.sort_values('contractor_match', ascending=False)
-		if ranked.iloc[0]['contractor_match'] > 90:
-			print('\t-> Found a match! -> getting ready to send notification...')
+		def attr_score(row, i, attr):
+			try:
+				return fuzz.ratio(row, df_dilfo.iloc[i][attr])
+			except TypeError:
+				return 0
+		scoreable_attrs = ['contractor', 'street_name', 'street_number']
+		for attr in scoreable_attrs:
+				df_web[f'{attr}_score'] = df_web[attr].apply(lambda row: attr_score(row, i, attr))
+		def multiply(row):
+		    scores = row[[f'{attr}_score' for attr in scoreable_attrs]]
+		    scores = [x/100 for x in scores if type(x)==int]
+		    result = 1
+		    for number in scores:
+		        result = result*number
+		    return result
+		df_web['total_score'] = df_web.apply(lambda row: multiply(row), axis=1)
+		ranked = df_web.sort_values('total_score', ascending=False)
+		top_score = ranked.iloc[0]['total_score']
+		if top_score > 0.9:
+			print(
+				f"\t-> Found a match with score of {top_score}!"
+				f"\n\tgetting ready to send notification..."
+			)
 			communicate(ranked.iloc[0], df_dilfo.iloc[i])
 		else:
 			print("\t-> nothing found.")
