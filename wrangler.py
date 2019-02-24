@@ -184,10 +184,10 @@ def wrangle(test=False):
             df[f'{attr}_acronyms'] = df[attr].apply(get_acronyms)
         return df
 
-    if test is True:
-        filenames = ('./data/raw_dilfo_certs.csv', f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv')
-    else:
+    if not test:
         filenames = ('./data/raw_dilfo_certs.csv', f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv')
+    else:
+        filenames = ('./data/raw_dilfo_certs.csv', f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv')
     for filename in filenames:
         df = pd.read_csv(filename, dtype={x:"str" for x in ["pub_date", "address", "title", "owner", "contractor", "engineer"]})
         df = df.fillna(" ")

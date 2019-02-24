@@ -56,10 +56,10 @@ def scrape(limit=False, test=False):
         }
     )
 
-    if test is True:
-        df_web.astype('str').to_csv(f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv', index=False)
-    else:
+    if not test:
         df_web.astype('str').to_csv(f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv', index=False)
+    else:
+        df_web.astype('str').to_csv(f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv', index=False)
     return df_web
 
 if __name__=="__main__":
