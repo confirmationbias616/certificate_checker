@@ -11,11 +11,10 @@ def match():
 	for i in range(len(df_dilfo)):
 		df_web['contractor_match'] = df_web['contractor'].apply(lambda row: fuzz.ratio(row, df_dilfo.iloc[i]['contractor']))
 		ranked = df_web.sort_values('contractor_match', ascending=False)
-		for i in range(len(ranked)):
-			if ranked.iloc[i]['contractor_match'] > 90:
-				communicate(ranked.iloc[i])
-			else:
-				break
+		if ranked.iloc[0]['contractor_match'] > 90:
+			communicate(ranked.iloc[0], df_dilfo.iloc[i])
+		else:
+			print("\t-> nothing found.")
 
 if __name__=="__main__":
 	match()
