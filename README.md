@@ -7,6 +7,6 @@
 Automatically scrapes the Daily Commercial News for Certificates of Substantial Completion being posted by general contractors of Ontario, checks for possible matches with your own list of projects, and help you stay on top of your holdback releases. 
 
 ---
+#### &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;v
 #### :construction::office::arrow_right::crystal_ball::warning::arrow_right::date::arrow_right::moneybag:
-#### &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;^
----
+## &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;^
