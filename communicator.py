@@ -5,7 +5,7 @@ def communicate(web_row, dilfo_row):
 	smtp_server = "smtp.gmail.com"
 	sender_email = "alex.roy616@gmail.com"
 
-	receiver_email = "alex.roy616@gmail.com"
+	receiver_email = dilfo_row.receiver_email
 
 	url = 'https://canada.constructconnect.com/dcn/certificates-and-notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor=&date=past_7&date_from=&date_to=#results'
 
