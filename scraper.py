@@ -1,9 +1,11 @@
 import datetime
+import re
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
 import argparse
+import progressbar
 
 
 def scrape(limit=False, test=False):
@@ -22,6 +24,9 @@ def scrape(limit=False, test=False):
     html = response.content
     soup = BeautifulSoup(html, "html.parser")
 
+    number_of_matches = int(re.compile('\d\d*').findall(
+        (soup.find('h4', {'class':'search-total h-normalize'}).get_text()))[0])
+
     def get_details(entry):
         url = 'https://canada.constructconnect.com' + entry.find("a")["href"]
         cert_url.append(url)
@@ -39,14 +44,17 @@ def scrape(limit=False, test=False):
         lookup = {"Name of Owner": owner, "Name of Contractor": contractor, "Name of Certifier": engineer}
         for key in list(lookup.keys()):
             lookup[key].append(company_results.get(key, np.nan))
-    print(f'\ninitiating scraping...')
+    print(f'\nscraping all of {number_of_matches} new certificates for this week...')
+    bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
+        widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+    bar.start()
     for i, entry in enumerate(soup.find_all("article", {"class":"cards-item"}), 1):
-        print(f'\tgetting entry #{i}...')
         get_details(entry)
-        print('\t\t->succeeded.')
         if limit and (i >= limit):
             print("limit reached - breaking out of loop.")
             break
+        bar.update(i+1)
+    bar.finish()
     print("saving to df_web dataframe.")        
     df_web = pd.DataFrame(
         data={
