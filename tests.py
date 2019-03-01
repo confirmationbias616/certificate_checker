@@ -7,12 +7,6 @@ from wrangler import clean_pub_date, clean_city, clean_company_name, get_acronym
 from communicator import communicate
 
 
-class TestScraping(unittest.TestCase):
-    def test_scarpe(self):
-            test_limit = 3
-            df = scrape(limit=test_limit, test=True)
-            self.assertEqual(len(df), test_limit)
-
 @ddt
 class TestWrangleFuncs(unittest.TestCase):
 
@@ -134,16 +128,14 @@ class TestWrangleFuncs(unittest.TestCase):
             wrangle(test=True)
 
 @ddt
-class TestCommsFuncs(unittest.TestCase):
-        filenames = (
-            f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv',
-            './data/raw_dilfo_certs.csv'
-        )
-        @data(
-            [pd.read_csv(filename).iloc[0] for filename in filenames],
-        )
-        @unpack
-        def test_communicate(self, web_row, dilfo_row):
+class IntegrationTests(unittest.TestCase):
+
+        def test_scarpe_to_communicate(self):
+            test_limit = 3
+            df = scrape(limit=test_limit, test=True)
+            self.assertEqual(len(df), test_limit)
+            web_row = pd.read_csv(f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv').iloc[0]
+            dilfo_row = pd.read_csv('./data/raw_dilfo_certs.csv').iloc[0]
             communicate(web_row, dilfo_row, test=True)
 
 
