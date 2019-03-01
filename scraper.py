@@ -10,14 +10,8 @@ from time import sleep
 
 
 def scrape(limit=False, test=False):
-    pub_date = []
-    city = []
-    address = []
-    title = []
-    owner = []
-    contractor = []
-    engineer = []
-    cert_url = []
+
+    pub_date, city, address, title, owner, contractor, engineer, cert_url = [[] for _ in range(8)]
 
     search_url = 'https://canada.constructconnect.com/dcn/certificates-and-notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor=&date=past_7&date_from=&date_to=#results'
 
