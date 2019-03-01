@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import argparse
 import progressbar
+from time import sleep
 
 
 def scrape(limit=False, test=False):
@@ -30,7 +31,13 @@ def scrape(limit=False, test=False):
     def get_details(entry):
         url = 'https://canada.constructconnect.com' + entry.find("a")["href"]
         cert_url.append(url)
-        response = requests.get(url)
+        while True:
+            try:
+                response = requests.get(url)
+                break
+            except requests.exceptions.ConnectionError:
+                sleep(1)
+                continue
         html = response.content
         entry_soup = BeautifulSoup(html, "html.parser")
         pub_date.append(entry_soup.find("time").get_text())
