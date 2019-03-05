@@ -3,7 +3,15 @@ import pandas as pd
 import numpy as np
 from cleanco import cleanco
 import unidecode
+import re
 
+
+def clean_job_number(raw):
+    try:
+        job_number = re.compile('\d{4}').findall(str(raw))[0]
+        return job_number
+    except IndexError:
+        return ""
 
 def clean_pub_date(raw):
     if raw == " ":
@@ -163,6 +171,7 @@ def clean_title(raw):
 def wrangle(ref=False, filenames=['./data/raw_dilfo_certs.csv', f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv']):
     def wrangle_coord(df):
         clean_ops = {
+        'job_number': clean_job_number,
         'pub_date': clean_pub_date,
         'city': clean_city,
         'title': clean_title,

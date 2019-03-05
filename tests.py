@@ -3,13 +3,26 @@ import pandas as pd
 import datetime
 from ddt import ddt, data, unpack
 from scraper import scrape
-from wrangler import clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title, wrangle
+from wrangler import clean_job_number, clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title, wrangle
 from matcher import match
 from communicator import communicate
 
 
 @ddt
 class TestWrangleFuncs(unittest.TestCase):
+
+        @data(
+            (" ", ""),
+            ("\n  #2404\n", "2404"),
+            ("no. 2404", "2404"),
+            ("# 2404", "2404"),
+            ("#2404", "2404"),
+            ("2404", "2404"),
+        )
+        @unpack
+        def test_clean_job_number(self, input_string, desired_string):
+            output_string = clean_job_number(input_string)
+            self.assertEqual(desired_string, output_string)
 
         @data(
             (" ", ""),
