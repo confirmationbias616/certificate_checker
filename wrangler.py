@@ -14,10 +14,11 @@ def clean_job_number(raw):
         return ""
 
 def clean_pub_date(raw):
-    if raw == " ":
+    try:
+        date = re.compile('\d{4}\-\d{2}\-\d{2}').findall(str(raw))[0]
+        return date
+    except IndexError:
         return ""
-    date = raw.replace("\n", "").replace(" ", "")
-    return date
 
 def clean_city(raw):
     if raw == " ":
@@ -121,14 +122,9 @@ def clean_company_name(raw):
     return name
 
 def get_acronyms(raw):
-    if raw == " ":
-        return []
-    text = ''.join([x for x in raw if ((not x.isdigit()) and (x not in ',()-:;.'))])
-    text = text.replace("/"," ").replace("&", " ")
-    accronyms =  [x for x in text.split(" ") if len(x)>2 and x.isupper()]
-    if len(accronyms) == 0:
-        return []
-    return accronyms
+    acronyms = re.compile('[A-Z\-\&]{3,}').findall(str(raw))
+    return acronyms
+
 
 def get_street_number(raw):
     if raw == " ":
