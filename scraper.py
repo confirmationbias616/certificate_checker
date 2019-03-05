@@ -9,7 +9,7 @@ import progressbar
 from time import sleep
 
 
-def scrape(limit=False, test=False):
+def scrape(limit=False, test=False, ref=False):
     pub_date = []
     city = []
     address = []
@@ -29,7 +29,11 @@ def scrape(limit=False, test=False):
         (soup.find('h4', {'class':'search-total h-normalize'}).get_text()))[0])
 
     def get_details(entry):
-        url = 'https://canada.constructconnect.com' + entry.find("a")["href"]
+            
+        if isinstance(ref, pd.DataFrame):
+            url = entry
+        else:
+            url = 'https://canada.constructconnect.com' + entry.find("a")["href"]
         cert_url.append(url)
         while True:
             try:
@@ -55,13 +59,17 @@ def scrape(limit=False, test=False):
     bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
         widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     bar.start()
-    for i, entry in enumerate(soup.find_all("article", {"class":"cards-item"}), 1):
-        get_details(entry)
-        if limit and (i >= limit):
-            print("limit reached - breaking out of loop.")
-            break
-        bar.update(i+1)
-    bar.finish()
+    if isinstance(ref, pd.DataFrame):
+        for link in ref.link_to_cert:
+            get_details(link)
+    else:
+        for i, entry in enumerate(soup.find_all("article", {"class":"cards-item"}), 1):
+            get_details(entry)
+            if limit and (i >= limit):
+                print("limit reached - breaking out of loop.")
+                break
+            bar.update(i+1)
+        bar.finish()
     print("saving to df_web dataframe.")        
     df_web = pd.DataFrame(
         data={
@@ -76,11 +84,10 @@ def scrape(limit=False, test=False):
         }
     )
 
-    if not test:
+    if not test and not isinstance(ref, pd.DataFrame):
         df_web.astype('str').to_csv(f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv', index=False)
     else:
-        df_web.astype('str').to_csv(f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv', index=False)
-    return df_web
+        return df_web
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="scrapes DCM website and returns \

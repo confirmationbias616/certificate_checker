@@ -160,7 +160,7 @@ def clean_title(raw):
     title = raw
     return title
 
-def wrangle(test=False):
+def wrangle(ref=False, filenames=['./data/raw_dilfo_certs.csv', f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv']):
     def wrangle_coord(df):
         clean_ops = {
         'pub_date': clean_pub_date,
@@ -183,16 +183,14 @@ def wrangle(test=False):
         for attr in ["title","owner","contractor"]:
             df[f'{attr}_acronyms'] = df[attr].apply(get_acronyms)
         return df
-
-    if not test:
-        filenames = ('./data/raw_dilfo_certs.csv', f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv')
+    if isinstance(ref, pd.DataFrame):
+        return wrangle_coord(ref)
     else:
-        filenames = ('./data/raw_dilfo_certs.csv', f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv')
-    for filename in filenames:
-        df = pd.read_csv(filename, dtype={x:"str" for x in ["pub_date", "address", "title", "owner", "contractor", "engineer"]})
-        df = df.fillna(" ")
-        wrangle_coord(df)
-        df.to_csv(filename.replace("raw","clean"), index=False)
+        for filename in filenames:
+            df = pd.read_csv(filename, dtype={x:"str" for x in ["pub_date", "address", "title", "owner", "contractor", "engineer"]})
+            df = df.fillna(" ")
+            wrangle_coord(df)
+            df.to_csv(filename.replace("raw","clean"), index=False)
 
 if __name__=="__main__":
     wrangle()
