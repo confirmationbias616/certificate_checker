@@ -139,16 +139,16 @@ class TestWrangleFuncs(unittest.TestCase):
             self.assertEqual(desired_string, output_string)
 
         def test_wrangle(self):
-            wrangle(test=True)
+            wrangle(filenames=['./data/raw_dilfo_certs.csv', f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv'])
 
 @ddt
 class IntegrationTests(unittest.TestCase):
 
         def test_scarpe_to_communicate(self):
             test_limit = 3
-            df = scrape(limit=test_limit, test=True)
-            self.assertEqual(len(df), test_limit)
-            web_row = pd.read_csv(f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv').iloc[0]
+            web_df = scrape(limit=test_limit, test=True)
+            self.assertEqual(len(web_df), test_limit)
+            web_row = web_df.iloc[0]
             dilfo_row = pd.read_csv('./data/raw_dilfo_certs.csv').iloc[0]
             communicate(web_row, dilfo_row, test=True)
 
