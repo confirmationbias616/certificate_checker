@@ -5,6 +5,7 @@ cert_env
 data/*
 # But not these files...
 !data/raw_dilfo_certs.csv
+!data/test_raw_dilfo_certs.csv
 
 *.DS_Store
 
