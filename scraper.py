@@ -11,9 +11,12 @@ from time import sleep
 
 def scrape(limit=False, test=False, ref=False):
 
-    pub_date, city, address, title, owner, contractor, engineer, cert_url = [[] for _ in range(8)]
+    pub_date, city, address, title, owner, contractor, engineer, cert_url = [
+        [] for _ in range(8)]
 
-    search_url = 'https://canada.constructconnect.com/dcn/certificates-and-notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor=&date=past_7&date_from=&date_to=#results'
+    search_url = 'https://canada.constructconnect.com/dcn/certificates-and-notices\
+    ?perpage=1000&phrase=&sort=publish_date&owner=&contractor=&date=past_7&\
+    date_from=&date_to=#results'
 
     response = requests.get(search_url)
     html = response.content
@@ -39,14 +42,21 @@ def scrape(limit=False, test=False, ref=False):
         html = response.content
         entry_soup = BeautifulSoup(html, "html.parser")
         pub_date.append(entry_soup.find("time").get_text())
-        city.append(entry_soup.find("div",{"class":"content-left"}).find("h4").get_text())
-        address.append(entry_soup.find("p",{"class":"print-visible"}).get_text())
-        title.append(entry_soup.find_all("section",{"class":"content"})[3].find("p").get_text())
+        city.append(
+            entry_soup.find("div",{"class":"content-left"}).find("h4").get_text())
+        address.append(
+            entry_soup.find("p",{"class":"print-visible"}).get_text())
+        title.append(
+            entry_soup.find_all("section",{"class":"content"})[3].find("p").get_text())
         company_soup = entry_soup.find_all("section",{"class":"content"})[4]
         company_results = {
             key.get_text():value.get_text() for key, value in zip(
                 company_soup.find_all("dt"), company_soup.find_all("dd"))}
-        lookup = {"Name of Owner": owner, "Name of Contractor": contractor, "Name of Certifier": engineer}
+        lookup = {
+            "Name of Owner": owner,
+            "Name of Contractor": contractor,
+            "Name of Certifier": engineer
+        }
         for key in list(lookup.keys()):
             lookup[key].append(company_results.get(key, np.nan))
     print(f'\nscraping all of {number_of_matches} new certificates for this week...')
@@ -79,9 +89,11 @@ def scrape(limit=False, test=False, ref=False):
     )
 
     if not test and not isinstance(ref, pd.DataFrame):
-        df_web.astype('str').to_csv(f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv', index=False)
+        df_web.astype('str').to_csv(
+            f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv', index=False)
     else:
         return df_web
+
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="scrapes DCM website and returns \
