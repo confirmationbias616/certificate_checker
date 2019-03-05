@@ -154,7 +154,10 @@ def get_street_name(raw):
     	raw = raw.split(",")[1].lstrip(" ")
     elif "," in raw and any([x in raw.split(",")[0] for x in ["apt", "unit", "suite"]]):
         raw = raw.split(",")[1]
-    name = raw.split(' ')[1]
+    try:
+        name = raw.split(' ')[1]
+    except IndexError:
+        return ""
     for unit_word in ["apt", "unit", "suite"]:
     	name = name.replace(unit_word, "")
     if name.isalpha():
