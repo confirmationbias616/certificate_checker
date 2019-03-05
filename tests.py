@@ -4,6 +4,7 @@ import datetime
 from ddt import ddt, data, unpack
 from scraper import scrape
 from wrangler import clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title, wrangle
+from matcher import match
 from communicator import communicate
 
 
@@ -137,6 +138,14 @@ class IntegrationTests(unittest.TestCase):
             web_row = pd.read_csv(f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv').iloc[0]
             dilfo_row = pd.read_csv('./data/raw_dilfo_certs.csv').iloc[0]
             communicate(web_row, dilfo_row, test=True)
+
+        def test_true_positives(self):
+            test_df_dilfo = pd.read_csv('./data/test_raw_dilfo_certs.csv')
+            test_web_df = scrape(ref=test_df_dilfo)
+            test_df_dilfo, test_web_df = wrangle(ref=test_df_dilfo), wrangle(ref=test_web_df)
+            match_count = match(test_df_dilfo, test_web_df, threshold=-1)
+            self.assertEqual(len(test_df_dilfo), match_count)
+
 
 
 if __name__ == '__main__':
