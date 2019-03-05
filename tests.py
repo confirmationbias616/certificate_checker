@@ -138,9 +138,6 @@ class TestWrangleFuncs(unittest.TestCase):
             output_string = clean_title(input_string)
             self.assertEqual(desired_string, output_string)
 
-        def test_wrangle(self):
-            wrangle(filenames=['./data/raw_dilfo_certs.csv', f'./data/test_raw_web_certs_{datetime.datetime.now().date()}.csv'])
-
 @ddt
 class IntegrationTests(unittest.TestCase):
 
