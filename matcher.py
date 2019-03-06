@@ -4,7 +4,7 @@ import datetime
 from communicator import communicate
 
 
-def match(df_dilfo=False, df_web=False, threshold=0.9):
+def match(df_dilfo=False, df_web=False, test=False, threshold=0.9):
 	if not isinstance(df_dilfo, pd.DataFrame):
 		df_dilfo = pd.read_csv('./data/clean_dilfo_certs.csv')
 	if not isinstance(df_web, pd.DataFrame):
@@ -35,7 +35,7 @@ def match(df_dilfo=False, df_web=False, threshold=0.9):
 				f"\t-> Found a match with score of {top_score}!"
 				f"\n\tgetting ready to send notification..."
 			)
-			communicate(ranked.iloc[0], df_dilfo.iloc[i])
+			communicate(ranked.iloc[0], df_dilfo.iloc[i], test=test)
 			match_count += 1
 		else:
 			print("\t-> nothing found.")
