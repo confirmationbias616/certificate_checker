@@ -195,7 +195,7 @@ def wrangle(ref=False, filenames=['./data/raw_dilfo_certs.csv', f'./data/raw_web
         return wrangle_coord(ref)
     else:
         for filename in filenames:
-            df = pd.read_csv(filename, dtype={x:"str" for x in ["pub_date", "address", "title", "owner", "contractor", "engineer"]})
+            df = pd.read_csv(filename, dtype={x:"str" for x in ["job_number", "pub_date", "address", "title", "owner", "contractor", "engineer"]})
             df = df.fillna(" ")
             wrangle_coord(df)
             df.to_csv(filename.replace("raw","clean"), index=False)
