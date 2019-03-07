@@ -154,7 +154,7 @@ class IntegrationTests(unittest.TestCase):
             test_df_dilfo = pd.read_csv('./data/test_raw_dilfo_certs.csv')
             test_web_df = scrape(ref=test_df_dilfo)
             test_df_dilfo, test_web_df = wrangle(ref=test_df_dilfo), wrangle(ref=test_web_df)
-            match_count = match(test_df_dilfo, test_web_df, threshold=-1)
+            match_count = match(test_df_dilfo, test_web_df, threshold=0.1, test=True)
             self.assertEqual(len(test_df_dilfo), match_count)
 
 
