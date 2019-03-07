@@ -8,14 +8,14 @@ import re
 
 def clean_job_number(raw):
     try:
-        job_number = re.compile('\d{4}').findall(str(raw))[0]
+        job_number = re.findall('\d{4}', str(raw))[0]
         return job_number
     except IndexError:
         return ""
 
 def clean_pub_date(raw):
     try:
-        date = re.compile('\d{4}\-\d{2}\-\d{2}').findall(str(raw))[0]
+        date = re.findall('\d{4}\-\d{2}\-\d{2}', str(raw))[0]
         return date
     except IndexError:
         return ""
@@ -122,7 +122,7 @@ def clean_company_name(raw):
     return name
 
 def get_acronyms(raw):
-    acronyms = re.compile('[A-Z\-\&]{3,}').findall(str(raw))
+    acronyms = re.findall('[A-Z\-\&]{3,}', str(raw))
     return acronyms
 
 
