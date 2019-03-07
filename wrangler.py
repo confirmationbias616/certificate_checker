@@ -67,6 +67,10 @@ def clean_company_name(raw):
     name = unidecode.unidecode(raw)
     name = cleanco(name).clean_name()
     name = name.lower()
+    try:
+        name = re.findall('o/a (.*)', name)[0]
+    except IndexError:
+        pass
     for stopword in [
         "of", 
         "d'",
@@ -74,7 +78,7 @@ def clean_company_name(raw):
     ]:
         name = name.replace(stopword,"")
     name = name.replace("and","&")
-    for punct in ["-", ".", ","]:
+    for punct in ["-", ".", ",", "(", ")"]:
         name = name.replace(punct," ")
     for punct in ["'"]:
         name = name.replace(punct,"")
@@ -117,7 +121,9 @@ def clean_company_name(raw):
         "commercial",
         "group",
         "insulation",
-        "insulators"
+        "insulators",
+        "ontario",
+        "canada"
     ]: name = name.replace(word,"")
     return name
 
