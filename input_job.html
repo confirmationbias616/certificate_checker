@@ -1,16 +1,61 @@
 <!DOCTYPE html>
 <html>
+
+<head>
+  <style>
+    body {background-color:white; font-family:"arial"}
+    h2 {font-family: "arial"; color:darkgreen}
+    h4 {font-family: "arial";}
+    input[type=submit]{font-family: "arial"; width: 23%; height: 3em; border: none; border-radius: 10px;}
+    input[type=reset]{font-family: "arial"; width: 23%; height: 3em; border: none; border-radius: 10px;}
+    fieldset{
+      background-color: lightgreen;
+      float: left;
+      width: 45%;
+      margin: 3;
+      padding: 2;
+      box-sizing: 2px border-box;
+      border:2px dotted black;}
+    legend{
+      padding: 0.2em 0.6em;
+      border:1px solid black;
+      background-color: lightgrey; 
+      font-size:120%;
+      text-align:right;}
+</style>
+</head>
+
+
+
 <body>
 
-<h2>Daily Commercial News<br>Certificate of Completion</h2>
-<h4>Sign up new project for holdback release notification<br>by filling out the form below and clicking the "send" button</h4>
+<h2 text-align:center">
+  Daily Commercial News
+</h2>
+
+<h2 text-align:center">
+  Certificate of Completion - Notification Service
+</h2>
+
+
+<h4>
+  Sign up new project for holdback release notification
+  by filling out the form below, hitting the "Generate Entry" button and sending the pop-up e-mail without modifying anything in its body.
+</h4>
+
 
 <form action="mailto:dilfo.hb.release@gmail.com?subject=New Job" method="post" enctype="text/plain">
+  <input type="submit" value="Generate Entry" title="Generates a pre-populated e-mail draft from your default client (typically, Outlook).
+  Just click send when this e-mail draft pops up and your entry will automatically be added to the project watchlist.">
+  <input type="reset" value="Reset" title="Clears all fields so you can start from scratch or get started a new entry once previous entry has been submitted.">
+  <br><br>
+  <fieldset>
+  <legend>Project Info</legend>
   Project Title<br>
   <input type="text" name="title" size="50" placeholder="ABC Tower D - Disruptek Office Fit-Up">
   <br><br>
   Dilfo Job #<br>
-  <input type="text" name="job_number" size="4" placeholder="2345">
+  <input type="text" name="job_number" size="4" placeholder="2345" pattern="\d{4}" title="4-digit Dilfo number (####)" required>
   <br><br>
   City<br>
   <input type="text" name="city" size="12" placeholder="Ottawa">
@@ -24,13 +69,22 @@
   Consultant<br>
   <input type="text" name="engineer" size="30" placeholder="Superior Associates Limited">
   <br><br>
-  Building Owner<br>
+  Owner<br>
   <input type="text" name="owner" size="30" placeholder="ASAP Properties Inc.">
+  </fieldset>
+  <fieldset>
+  <legend>Meta</legend>
+  How confident do you feel about accuracy of the Project Info you entered?<br>
+  <input type="radio" name="quality" value="5"> 5<br>
+  <input type="radio" name="quality" value="4"> 4<br>
+  <input type="radio" name="quality" value="3" checked> 3<br>
+  <input type="radio" name="quality" value="2"> 2<br>
+  <input type="radio" name="quality" value="1"> 1<br>
   <br><br>
-  <input type="submit" value="Send" title="Generates a pre-populated e-mail draft from your default client (typically, Outlook).
+  CC any notifications to:<br>
+  <input type="text" name="cc_email" size="14" pattern="[\w\.!@]*" title="Must be a valid email dilfo address (typically first_name.last_name@dilfo.com)" placeholder="Joe.Bob">@dilfo.com
+  </fieldset>  
 
-  Just click send when this e-mail draft pops up and your entry will automatically be added to the project watchlist.">
-  <input type="reset" value="Reset" title="Clears all fields so you can start from scratch or get started a new entry once previous entry has been submitted.">
 </form>
 
 </body>
