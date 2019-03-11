@@ -3,6 +3,7 @@ import email
 import imaplib
 import json
 import pandas as pd
+import numpy as np
 import re
 
 
@@ -40,15 +41,20 @@ def log_user_input():
         return results
 
     file_path = './data/raw_dilfo_certs.csv'
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(file_path, dtype={'job_number':str, 'quality':str})
 
     for email_obj in get_job_input_data():
         try:
-            dict_input = {x.split('=')[0]:x.split('=')[1] for x in re.compile('[\S ]*=[\S ]*').findall(email_obj['content'])}
+            dict_input = {x.split('=')[0]:str(x.split('=')[1]) for x in re.compile('[\S ]*=[\S ]*').findall(email_obj['content'])}
+            try:
+                if dict_input['cc_email'] != '':
+                    dict_input['cc_email'] += '@dilfo.com'
+            except KeyError:
+                pass
             dict_input.update({"receiver_email": re.compile('<?(\S+@\S+\.\w+)>?').findall(email_obj["sender"])[0].lower()})
             df = df.append(dict_input, ignore_index=True)
         except IndexError:
             print(f'Could not process e-mail from {email_obj["sender"]}')
 
-    df = df.dropna(thresh=7).drop_duplicates(subset=["address", "title", "owner"])
-    df.to_csv(file_path, float_format='string', index=False)
+    df = df.dropna(thresh=7).drop_duplicates(subset=["job_number"], keep='last')
+    df.to_csv(file_path, index=False)
