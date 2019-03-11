@@ -29,7 +29,7 @@ def log_user_input():
         server = imaplib.IMAP4_SSL(imap_ssl_host, imap_ssl_port)
         server.login(username, password)
         server.select('INBOX')
-        type, data = server.search(None, 'ALL')  # UNSEEN or ALL
+        type, data = server.search(None, 'UNSEEN')  # UNSEEN or ALL
         mail_ids = data[0]
         id_list = mail_ids.split()
         results = []
