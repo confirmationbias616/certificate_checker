@@ -7,10 +7,18 @@
     font-family:"arial";
   }
   h2 {
-    font-family: "arial"; color:darkgreen;
+    font-family: "arial"; 
+    color:darkgreen;
   }
   h4 {
     font-family: "arial";
+  }
+  p {
+    font-family: "arial";
+    font-size: 80%;
+    color:darkgreen;
+    font-weight:bold;
+    padding-left: 1%;
   }
   input[type=submit]{
     font-family: "arial";
@@ -61,10 +69,10 @@
 
 
 <body>
-<h2 text-align:center">
+<h2>
   Daily Commercial News
 </h2>
-<h2 text-align:center">
+<h2>
   Certificate of Completion - Notification Service
 </h2>
 <h4>
@@ -72,10 +80,11 @@
   by filling out the form below, hitting the "Submit" button and sending the pop-up e-mail.
 </h4>
 <form action="mailto:dilfo.hb.release@gmail.com?subject=DO NOT MODIFY MESSAGE BELOW - JUST HIT `SEND`" method="post" enctype="text/plain">
-  <input type="submit" value="Submit" title="Generates a pre-populated e-mail draft from your default client (typically, Outlook).
+  <input id="submit" type="submit" value="Submit" onclick="show_hint()" title="Generates a pre-populated e-mail draft from your default client (typically, Outlook).
   Just click send when this e-mail draft pops up and your entry will automatically be added to the project watchlist.">
-  <input type="reset" value="Reset" title="Clears all fields so you can start from scratch or get started a new entry once previous entry has been submitted.">
-  <br><br>
+  <input id="reset" type="reset" value="Reset" onclick="hide_hint()" title="Clears all fields so you can start from scratch or get started a new entry once previous entry has been submitted.">
+  <p id="hint"></p>
+  <br>
   <fieldset>
     <legend>Project Info</legend>
     Dilfo Job #<br>
