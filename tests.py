@@ -89,6 +89,7 @@ class TestWrangleFuncs(unittest.TestCase):
             ("srmech", "sr"),
             ("G&L Insulation", "g&l"),
             ("8906785 Canada Inc. O/A R.E. Hein Construction (Ontario)", "rehein"),
+            ('PCL Constructors Canada Inc. for GAL Power Systems', 'pcl')
         )
         @unpack
         def test_clean_company_name(self, input_string, desired_string):

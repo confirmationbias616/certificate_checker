@@ -65,12 +65,16 @@ def clean_company_name(raw):
     if raw == " ":
         return ""
     name = unidecode.unidecode(raw)
-    name = cleanco(name).clean_name()
-    name = name.lower()
     try:
-        name = re.findall('o/a (.*)', name)[0]
+        name = re.findall('o/a (.*)', name, flags=re.I)[0]
     except IndexError:
         pass
+    try:
+        name = re.findall('(.*) for ', name, flags=re.I)[0]
+    except IndexError:
+        pass
+    name = cleanco(name).clean_name()
+    name = name.lower()
     for stopword in [
         "of", 
         "d'",
