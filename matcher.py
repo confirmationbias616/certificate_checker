@@ -10,7 +10,6 @@ def match(df_dilfo=False, df_web=False, test=False, threshold=0.9):
 		df_dilfo = pd.read_csv('./data/clean_dilfo_certs.csv')
 	if not isinstance(df_web, pd.DataFrame):
 		df_web = pd.read_csv(f'./data/clean_web_certs_{datetime.datetime.now().date()}.csv')
-	match_count = 0
 	for i in range(len(df_dilfo)):
 		print(f"searching for potential match for project #{df_dilfo.iloc[i].job_number}...")
 		def attr_score(row, i, attr):
@@ -39,7 +38,6 @@ def match(df_dilfo=False, df_web=False, test=False, threshold=0.9):
 				f"\n\tgetting ready to send notification..."
 			)
 			communicate(ranked.iloc[0], df_dilfo.iloc[i], test=test)
-			match_count += 1
 		else:
 			print("\t-> nothing found.")
 			return np.nan
