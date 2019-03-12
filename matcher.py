@@ -40,8 +40,10 @@ def match(df_dilfo=False, df_web=False, test=False, threshold=0.9):
 			communicate(ranked.iloc[0], df_dilfo.iloc[i], test=test)
 		else:
 			print("\t-> nothing found.")
-			return np.nan
-	return ranked.index[0]
+			if test:
+				return np.nan
+	if test:
+		return ranked.index[0]
 
 if __name__=="__main__":
 	match()
