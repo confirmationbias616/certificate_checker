@@ -154,9 +154,13 @@ class IntegrationTests(unittest.TestCase):
         def test_true_positives(self):
             test_df_dilfo = pd.read_csv('./data/test_raw_dilfo_certs.csv')
             test_web_df = scrape(ref=test_df_dilfo)
-            test_df_dilfo, test_web_df = wrangle(ref=test_df_dilfo), wrangle(ref=test_web_df)
-            match_count = match(test_df_dilfo, test_web_df, threshold=0.1, test=True)
-            self.assertEqual(len(test_df_dilfo), match_count)
+            for _, test_row_dilfo in test_df_dilfo.iterrows():
+                test_row_dilfo = test_row_dilfo.to_frame().transpose()  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
+                test_row_dilfo, test_web_df = wrangle(ref=test_row_dilfo), wrangle(ref=test_web_df)
+                match_index = match(test_row_dilfo, test_web_df, threshold=0.55, test=True)
+                print(test_row_dilfo.index[0])
+                print(match_index)
+                self.assertEqual(test_row_dilfo.index[0], match_index)
 
 
 

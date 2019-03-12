@@ -34,13 +34,16 @@ def match(df_dilfo=False, df_web=False, test=False, threshold=0.9):
 		if top_score > threshold:
 			print(
 				f"\t-> Found a match with score of {top_score}!"
+				f"\t-> Dilfo job details: {df_dilfo.iloc[i]}"
+				f"\t-> web job details: {ranked.iloc[0]}"
 				f"\n\tgetting ready to send notification..."
 			)
 			communicate(ranked.iloc[0], df_dilfo.iloc[i], test=test)
 			match_count += 1
 		else:
 			print("\t-> nothing found.")
-	return match_count
+			return np.nan
+	return ranked.index[0]
 
 if __name__=="__main__":
 	match()
