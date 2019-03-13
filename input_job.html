@@ -101,21 +101,25 @@ function hide_hint() {
   <br>
   <fieldset>
     <legend>Project Info</legend>
-    Dilfo Job #<br>
-    <input type="text" name="job_number" size="6" placeholder="2567" pattern="2\d{3}" title="4-digit Dilfo number (2###)" required autofocus>
-    <br><br>
-    Project Title<br>
-    <input type="text" name="title" size="40" placeholder="ABC Tower D - Disruptek Office Fit-Up" required>
-    <br><br>
+    <div class="required">
+      Dilfo Job #<br>
+      <input type="text" name="job_number" size="6" placeholder="2567" pattern="2\d{3}" title="4-digit Dilfo number (2###)" required autofocus>
+    </div><br>
+    <div class="required">
+      Project Title<br>
+      <input type="text" name="title" size="40" placeholder="ABC Tower D - Disruptek Office Fit-Up" required>
+    </div><br>
     City<br>
     <input type="text" name="city" size="12" placeholder="Ottawa">
     <br><br>
-    Address<br>
-    <input type="text" name="address" size="20" placeholder="123 Fake Street" required>
-    <br><br>
-    General Contractor<br>
-    <input type="text" name="contractor" size="30" placeholder="MegaCon Builders" required>
-    <br><br>
+    <div class="required">
+      Address<br>
+      <input type="text" name="address" size="20" placeholder="123 Fake Street" required>
+    </div><br>
+    <div class="required">
+      General Contractor<br>
+      <input type="text" name="contractor" size="30" placeholder="MegaCon Builders" required>
+    </div><br>
     Consultant<br>
     <input type="text" name="engineer" size="30" placeholder="Superior Associates Limited">
     <br><br>
@@ -133,7 +137,7 @@ function hide_hint() {
     <br><br>
     CC any notifications to:<br>
     <input type="text" name="cc_email" size="14" pattern="[\w\.!@]*" title="Must be a valid email dilfo address (typically first_name.last_name@dilfo.com)" placeholder="Joe.Bob">@dilfo.com
-  </fieldset>  
+  </fieldset> 
 </form>
 </body>
 </html>
