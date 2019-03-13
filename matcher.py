@@ -5,7 +5,7 @@ import numpy as np
 from communicator import communicate
 
 
-def match(df_dilfo=False, df_web=False, test=False, threshold=0.9):
+def match(df_dilfo=False, df_web=False, test=False, min_score_thresh=0.6):
 	if not isinstance(df_dilfo, pd.DataFrame):
 		df_dilfo = pd.read_csv('./data/clean_dilfo_certs.csv')
 	if not isinstance(df_web, pd.DataFrame):
@@ -30,7 +30,7 @@ def match(df_dilfo=False, df_web=False, test=False, threshold=0.9):
 		df_web['total_score'] = df_web.apply(lambda row: compile_score(row), axis=1)
 		ranked = df_web.sort_values('total_score', ascending=False)
 		top_score = ranked.iloc[0]['total_score']
-		if top_score > threshold:
+		if top_score > min_score_thresh:
 			print(
 				f"\t-> Found a match with score of {top_score}!"
 				f"\t-> Dilfo job details: {df_dilfo.iloc[i]}"
