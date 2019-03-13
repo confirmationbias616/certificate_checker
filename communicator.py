@@ -12,7 +12,10 @@ def communicate(web_row, dilfo_row, test=False):
 		print('given user e-mail address has not been white listed (from dilfo.com '\
 			'domain or from Alex Roy address)')
 		return 1
-	cc = dilfo_row.cc_email + '@dilfo.com' if dilfo_row.cc_email not in ['',' '] else ''
+	try:
+		cc = dilfo_row.cc_email + '@dilfo.com' if dilfo_row.cc_email not in ['',' '] else ''
+	except (AttributeError, TypeError):
+		cc = ''
 
 	url = 'https://canada.constructconnect.com/dcn/certificates-and-notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor=&date=past_7&date_from=&date_to=#results'
 
