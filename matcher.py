@@ -41,9 +41,9 @@ def match(df_dilfo=False, df_web=False, test=False, min_score_thresh=0.6):
 		else:
 			print("\t-> nothing found.")
 			if test:
-				return np.nan
+				return ranked.drop(ranked.index)  # short-circuit out of loop of best match is not good enough
 	if test:
-		return ranked.index[0]
+		return ranked
 
 if __name__=="__main__":
 	match()

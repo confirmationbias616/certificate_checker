@@ -1,5 +1,6 @@
 import unittest
 import pandas as pd
+import numpy as np
 import datetime
 from ddt import ddt, data, unpack
 from scraper import scrape
@@ -151,17 +152,32 @@ class IntegrationTests(unittest.TestCase):
             dilfo_row = pd.read_csv('./data/raw_dilfo_certs.csv').iloc[0]
             communicate(web_row, dilfo_row, test=True)
 
-        def test_true_positives(self):
+        def test_truth_table(self):
+            min_score_thresh = 0.59
+            false_pos_thresh = 0
             test_df_dilfo = pd.read_csv('./data/test_raw_dilfo_certs.csv')
             test_web_df = scrape(ref=test_df_dilfo)
             for _, test_row_dilfo in test_df_dilfo.iterrows():
                 test_row_dilfo = test_row_dilfo.to_frame().transpose()  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
-                test_row_dilfo, test_web_df = wrangle(ref=test_row_dilfo), wrangle(ref=test_web_df)
-                match_index = match(test_row_dilfo, test_web_df, threshold=0.55, test=True)
-                print(test_row_dilfo.index[0])
-                print(match_index)
-                self.assertEqual(test_row_dilfo.index[0], match_index)
-
+                test_row_dilfo, test_web_df = wrangle(
+                    ref=test_row_dilfo), wrangle(ref=test_web_df)
+                ranked = match(test_row_dilfo, test_web_df,
+                    min_score_thresh=min_score_thresh, test=True)
+                truth_index = test_row_dilfo.index[0]
+                match_index = ranked.index[0] if len(ranked) else np.nan
+                matches_above_thresh = ranked[ranked.total_score > min_score_thresh]
+                print(f'actual index: {truth_index}')
+                print(f'web indices above thresh: {list(matches_above_thresh.index)}')
+                self.assertEqual(truth_index, match_index, msg=(
+                    f'match() returned index {match_index} but should have returned '
+                    f'{truth_index} instead.'
+                    ))
+                self.assertTrue(len(matches_above_thresh) <= false_pos_thresh + 1, msg=(
+                    f'match() returned {len(matches_above_thresh)} results, '
+                    f'meaning {len(matches_above_thresh) - 1} false positive(s), which is '
+                    f'over the threshold of {false_pos_thresh} set in the function '
+                    f'parameters.'
+                    ))
 
 
 if __name__ == '__main__':
