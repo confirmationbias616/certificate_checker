@@ -7,6 +7,12 @@ def communicate(web_row, dilfo_row, test=False):
 	sender_email = "dilfo.hb.release"
 
 	receiver_email = dilfo_row.receiver_email
+	if (not receiver_email.endswith('@dilfo.com')) and (receiver_email not in[
+		'alex.roy616@gmail.com', 'alex.roy616@icloud.com']):
+		print('given user e-mail address has not been white listed (from dilfo.com '\
+			'domain or from Alex Roy address)')
+		return 1
+	cc = dilfo_row.cc_email + '@dilfo.com' if dilfo_row.cc_email not in ['',' '] else ''
 
 	url = 'https://canada.constructconnect.com/dcn/certificates-and-notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor=&date=past_7&date_from=&date_to=#results'
 
@@ -17,6 +23,8 @@ def communicate(web_row, dilfo_row, test=False):
 		due_date = lambda delay: pud_date + datetime.timedelta(days=delay)
 		
 		message = (
+		    f"CC: {cc}"
+		    f"\n"
 		    f"Subject: Alert for Holdback Release on Dilfo Project "
 		    f"#{dilfo_row.job_number} - {dilfo_row.title}"
 		    f"\n\n"
@@ -49,7 +57,7 @@ def communicate(web_row, dilfo_row, test=False):
 					password = file.read()
 				with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
 				    server.login(sender_email, password)
-				    server.sendmail(sender_email, receiver_email, message)
+				    server.sendmail(sender_email, [receiver_email, cc], message)
 				print(f"Sccessfully sent an email to {receiver_email}")
 			except FileNotFoundError:
 				print("password not available -> could not send e-mail")
