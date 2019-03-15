@@ -21,6 +21,8 @@ def scrape(start='', finish='', limit=False, test=False):
 
     number_of_matches = int(re.compile('\d\d*').findall(
         (soup.find('h4', {'class':'search-total h-normalize'}).get_text()))[0])
+    if int(number_of_matches) == 0:
+        return
 
     def get_details(entry):
         url = 'https://canada.constructconnect.com' + entry.find("a")["href"]
@@ -87,13 +89,8 @@ def scrape(start='', finish='', limit=False, test=False):
     df_web.astype('str').to_csv(f'./data/raw_web_certs_{start}_to_{finish}.csv', index=False)
     return df_web
 
-#specify dates to be scraped down here (could make this into CLI later!)
-scrape(start='2011-09-01', finish='2011-12-31')
-scrape(start='2011-05-01', finish='2011-08-31')
-scrape(start='2011-01-01', finish='2011-04-30')
-scrape(start='2010-09-01', finish='2010-12-31')
-scrape(start='2010-05-01', finish='2010-08-31')
-scrape(start='2010-01-01', finish='2010-04-30')
-scrape(start='2009-09-01', finish='2009-12-31')
-scrape(start='2009-05-01', finish='2009-08-31')
-scrape(start='2009-01-01', finish='2009-04-30')
+
+#iterate through the years starting with 2001 because that's the first recorded year
+for y in range(2001, datetime.datetime.now().year + 1):
+    for m, d in map([1, 5, 9], [30, 31, 31]):  # break year in trimestres to avoid errors
+        scrape(start=f'{y}-{m.zfill(2)}-01', finish=f'{y}-{(m+3).zfill(2)}-{d}')
