@@ -169,6 +169,7 @@ class IntegrationTests(unittest.TestCase):
                 ref=test_row_dilfo), wrangle(ref=test_web_df)
             ranked = match(test_row_dilfo, test_web_df,
                 min_score_thresh=min_score_thresh, test=True)
+            ranked.to_csv('./Data/ranked_reults.csv', index=False)
             truth_index = test_row_dilfo.index[0]
             match_index = ranked.index[0] if len(ranked) else np.nan
             matches_above_thresh = ranked[ranked.total_score > min_score_thresh]
