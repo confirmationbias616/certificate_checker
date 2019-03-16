@@ -70,6 +70,10 @@ def clean_company_name(raw):
     except IndexError:
         pass
     try:
+        name = re.findall('c/o (.*)', name, flags=re.I)[0]
+    except IndexError:
+        pass
+    try:
         name = re.findall('(.*) for ', name, flags=re.I)[0]
     except IndexError:
         pass
