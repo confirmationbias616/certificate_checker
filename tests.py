@@ -118,8 +118,14 @@ class TestWrangleFuncs(unittest.TestCase):
         ("apt. 8, 1230 marenger street", "1230", "marenger"),
         ("8-1230 marenger street, apt. 8, ", "1230", "marenger"),
         ("1230 apt. 8, marenger street", "1230", "marenger"),
-        ("8-1230, apt. 8, marenger street", "", ""),
-        ("1010 talbot st. unit #1", "1010", "talbot")
+        ("1010 talbot st. unit #1", "1010", "talbot"),
+        ("6250 st albans court", "6250", "albans"),
+        ("6250 saint albans court", "6250", "albans"),
+        ("6250 st. albans", "6250", "albans"),
+        ("6250 st-albans CRT", "6250", "albans"),
+        ("University of Ottawa, Faculty of Medicine and Faculty of Health Sciences, Roger Guindon Hall, 451 Smyth Road, Ottawa, Ontario K1H 8L1", "451", "smyth"),
+        ("145 Jean-Jacques Lussier", "145", "jean-jacques"),
+        ("Edwardsburgh/Cardinal", "", ""),
     )
     @data(*address_test_data)
     @unpack
