@@ -143,12 +143,10 @@ def get_acronyms(raw):
 def get_street_number(raw):
     if raw == " ":
         return ""
-    raw = raw.lower()
-    if any([raw.startswith(x) for x in ["apt", "unit", "suite"]]):
-    	raw = raw.split(",")[1].lstrip(" ")
-    elif "-" in raw[:3]:
-    	raw = raw.split("-")[1]
-    number = raw.split(' ')[0]
+    try:
+        number = re.findall(' ?(\d+) \w', raw)[0]
+    except IndexError:
+        return ""
     try:
         int(number)
         return number
@@ -160,17 +158,28 @@ def get_street_name(raw):
         return ""
     raw = raw.lower()
     raw = unidecode.unidecode(raw)
-    if any([raw.startswith(x) for x in ["apt", "unit", "suite"]]):
-    	raw = raw.split(",")[1].lstrip(" ")
-    elif "," in raw and any([x in raw.split(",")[0] for x in ["apt", "unit", "suite"]]):
-        raw = raw.split(",")[1]
     try:
-        name = raw.split(' ')[1]
+        num = re.findall(' ?(\d+) \w', raw)[0]
     except IndexError:
         return ""
-    for unit_word in ["apt", "unit", "suite"]:
-    	name = name.replace(unit_word, "")
-    if name.isalpha():
+    rest = re.findall(f'{num} (.*)', raw)[0]
+    if any([rest.startswith(x) for x in [
+        "apt ",
+        "apt. ",
+        "apartment ", 
+        "unit ", 
+        "suite "]]):
+        rest = rest.split(",")[1].lstrip(" ")
+    for saint_word in ['st ', 'st. ', 'saint ', 'st-', 'saint-']:
+        if rest.startswith(saint_word):
+            rest = rest.replace(saint_word,'')
+            break
+    try:
+        name = rest.split(' ')[0]
+    except IndexError:
+        pass
+
+    if name.isalpha() or '-' in name:
     	return name
     else:
     	return ""
