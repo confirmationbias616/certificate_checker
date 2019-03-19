@@ -3,6 +3,8 @@
 <head>
 <style>
   .required:after { content:" *"; }
+  .hidden{display:none;}
+  .unhidden{display:block;}
   body {
     background-color:white;
     font-family:"arial";
@@ -79,6 +81,14 @@ function hide_hint() {
   document.getElementById("reset").style.color = reset_button_color;
   document.getElementById("reset").style.border = reset_button_border;
 }
+function show_dev() {
+  var r = confirm("WARNING: Dev options should not be used under normal circumstances. Only press `OK` if you have authorization to do so.");
+  if (r == true) {
+      document.getElementById("dev_field").className = 'unhidden';
+      document.getElementById("dev_button").className = 'hidden';
+      document.getElementById("meta_field").className = 'hidden';
+  }
+}
 </script>
 </head>
 
@@ -127,7 +137,7 @@ function hide_hint() {
     Owner<br>
     <input type="text" name="owner" size="30" placeholder="ASAP Properties Inc.">
   </fieldset>
-  <fieldset>
+  <fieldset class="unhidden" id="meta_field">
     <legend>Meta</legend>
     How confident are you about the accuracy of project info you entered?<br>
     <select name="quality" size=1>
@@ -138,6 +148,13 @@ function hide_hint() {
     <br><br>
     CC any notifications to:<br>
     <input type="text" name="cc_email" size="14" pattern="[^@^ ^'^\x22]*" title="Must be a valid email dilfo address (typically first_name.last_name@dilfo.com)" placeholder="Joe.Bob">@dilfo.com
+  </fieldset>
+  <button class="unhidden" id="dev_button" type="button" title="Do not click unless you know why you're clicking it!" onclick="show_dev();">dev options</button>
+  <fieldset class="hidden" id="dev_field">
+    <legend>Dev</legend>
+    Link to matching DCN certification
+    <input type="text" name="link_to_cert" placeholder="DCN Link"><br>
+    <input type="checkbox" name="test_entry" value="yes">Divert entry to test log?<br>
   </fieldset> 
 </form>
 </body>
