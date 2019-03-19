@@ -40,10 +40,8 @@ def log_user_input():
         server.logout()
         return results
 
-    file_path = './data/raw_dilfo_certs.csv'
-    df = pd.read_csv(file_path, dtype={'job_number':str, 'quality':str})
-
     for email_obj in get_job_input_data():
+        file_path = './data/{}raw_dilfo_certs.csv'
         try:
             dict_input = {x.split('=')[0]:str(x.split('=')[1]) for x in re.compile('[\S ]*=[\S ]*').findall(email_obj['content'])}
             try:
@@ -52,9 +50,14 @@ def log_user_input():
             except KeyError:
                 pass
             dict_input.update({"receiver_email": re.compile('<?(\S+@\S+\.\w+)>?').findall(email_obj["sender"])[0].lower()})
+            try:
+                file_path = file_path.format('test_') if dict_input['test_entry'] == 'yes' else file_path.format('')
+            except KeyError:
+                file_path = file_path.format('')
+            df = pd.read_csv(file_path, dtype={'job_number':str, 'quality':str})
             df = df.append(dict_input, ignore_index=True)
         except IndexError:
             print(f'Could not process e-mail from {email_obj["sender"]}')
 
-    df = df.dropna(thresh=7).drop_duplicates(subset=["job_number"], keep='last')
-    df.to_csv(file_path, index=False)
+        df = df.dropna(thresh=7).drop_duplicates(subset=["job_number"], keep='last')
+        df.to_csv(file_path, index=False)
