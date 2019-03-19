@@ -16,6 +16,7 @@ def communicate(web_row, dilfo_row, test=False):
 		cc = dilfo_row.cc_email + '@dilfo.com' if dilfo_row.cc_email not in ['',' '] else ''
 	except (AttributeError, TypeError):
 		cc = ''
+	cc_phrase = f' You also chose to copy {cc}.' if cc != '' else ''
 
 	url = 'https://canada.constructconnect.com/dcn/certificates-and-notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor=&date=past_7&date_from=&date_to=#results'
 
@@ -26,6 +27,8 @@ def communicate(web_row, dilfo_row, test=False):
 		due_date = lambda delay: pud_date + datetime.timedelta(days=delay)
 		
 		message = (
+		    f"From: Dilfo HBR Bot"
+		    f"\n"
 		    f"CC: {cc}"
 		    f"\n"
 		    f"Subject: Alert for Holdback Release on Dilfo Project "
@@ -33,24 +36,24 @@ def communicate(web_row, dilfo_row, test=False):
 		    f"\n\n"
 		    f"Hi {receiver_email.split('.')[0].title()},"
 		    f"\n"
-		    f"You're receiving this e-mail notification because either you or another "
-		    f"Dilfo employee added the project #{dilfo_row.job_number} - "
-		    f"{dilfo_row.title} to the watchlist of upcoming holdback releases."
+		    f"You're receiving this e-mail notification because you added the project "
+		    f"#{dilfo_row.job_number} - {dilfo_row.title} to the watchlist of upcoming "
+		    f"holdback releases.{cc_phrase}"
 		    f"\n"
-		    f"Since this project's certificate was just recently published this past "
-		    f"{datetime.datetime.strftime(pud_date,'%A')} on "
-		    f"{datetime.datetime.strftime(pud_date,'%B %e, %Y')}, a valid holdback "
-		    f"release invoice could be submitted as of:"
+		    f"Before going any further, please follow the link below to make sure the "
+		    f"algorithm correctly matched the project in question:\n{web_row.cert_url}"
+		    f"\n"
+		    f"If it's the right project, then the certificate was just "
+		    f"published this past {datetime.datetime.strftime(pud_date,'%A')} "
+		    f"on {datetime.datetime.strftime(pud_date,'%B %e, %Y')}. This means a "
+		    f"valid holdback release invoice could be submitted as of:"
 		    f"\n1.\t{datetime.datetime.strftime(due_date(45),'%B %e, %Y')} "
 		    f"if the contract was signed before October 1, 2019 or;"
 		    f"\n2.\t{datetime.datetime.strftime(due_date(60),'%B %e, %Y')} "
 		    f"if the contract was signed since then."
 		    f"\n"
-		    f"Follow link posted by the Daily Commercial News for more details:\n"
-		    f"{web_row.cert_url}"
-		    f"\n"
 		    f"Please be aware this is a fully automated message. "
-		    f"The info contained here could be erroneous."
+		    f"The info presented above could be erroneous."
 		)
 
 		if not test:
