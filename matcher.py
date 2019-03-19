@@ -26,7 +26,8 @@ def match(df_dilfo=False, df_web=False, test=False, min_score_thresh=0.6):
 		    scores = row[[f'{attr}_score' for attr in scoreable_attrs]]
 		    scores = [x/100 for x in scores if type(x)==int]
 		    countable_attrs = len([x for x in scores if x > 0])
-		    return sum(scores)/countable_attrs
+		    total_score = sum(scores)/countable_attrs if countable_attrs > 2 else 0
+		    return total_score
 		df_web['total_score'] = df_web.apply(lambda row: compile_score(row), axis=1)
 		ranked = df_web.sort_values('total_score', ascending=False)
 		top_score = ranked.iloc[0]['total_score']
