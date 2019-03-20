@@ -5,7 +5,7 @@ import numpy as np
 from communicator import communicate
 
 
-def match(df_dilfo=False, df_web=False, test=False, min_score_thresh=0.6):
+def match(df_dilfo=False, df_web=False, test=False, min_score_thresh=0.66):
 	if not isinstance(df_dilfo, pd.DataFrame):
 		df_dilfo = pd.read_csv('./data/clean_dilfo_certs.csv')
 	if not isinstance(df_web, pd.DataFrame):
