@@ -170,8 +170,8 @@ class IntegrationTests(unittest.TestCase):
             ranked = match(test_row_dilfo, test_web_df,
                 min_score_thresh=min_score_thresh, test=True)
             ranked.to_csv('./data/ranked_reults.csv', index=False)
-            truth_index = test_row_dilfo.index[0] if len(ranked) else np.nan
-            match_index = ranked.index[0] if len(ranked) else np.nan
+            truth_index = test_row_dilfo.index[0] if len(ranked) else -1
+            match_index = ranked.index[0] if len(ranked) else -1
             matches_above_thresh = ranked[ranked.total_score > min_score_thresh]
             print(f'actual index: {truth_index}')
             print(f'web indices above thresh: {list(matches_above_thresh.index)}')
