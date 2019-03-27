@@ -163,13 +163,13 @@ class IntegrationTests(unittest.TestCase):
         false_pos_thresh = 0
         test_df_dilfo = pd.read_csv('./data/test_raw_dilfo_certs.csv')
         test_web_df = scrape(ref=test_df_dilfo)
-        for _, test_row_dilfo in test_df_dilfo.iterrows():
+        for i, test_row_dilfo in test_df_dilfo.iterrows():
             test_row_dilfo = test_row_dilfo.to_frame().transpose()  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
             test_row_dilfo, test_web_df = wrangle(
                 ref=test_row_dilfo), wrangle(ref=test_web_df)
             ranked = match(test_row_dilfo, test_web_df,
                 min_score_thresh=min_score_thresh, test=True)
-            ranked.to_csv('./data/ranked_reults.csv', index=False)
+            ranked.to_csv(f'./data/ranked_results_{i}.csv', index=False)
             truth_index = test_row_dilfo.index[0] if len(ranked) else -1
             match_index = ranked.index[0] if len(ranked) else -1
             matches_above_thresh = ranked[ranked.total_score > min_score_thresh]
@@ -185,6 +185,12 @@ class IntegrationTests(unittest.TestCase):
                 f'over the threshold of {false_pos_thresh} set in the function '
                 f'parameters.'
                 ))
+            try:
+                ranked_master = ranked_master.append(ranked)
+            except NameError:
+                ranked_master = ranked
+        ranked_master.to_csv(f'./data/ranked_master_results.csv', index=False)
+
 
 
 if __name__ == '__main__':
