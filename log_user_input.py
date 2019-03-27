@@ -61,3 +61,7 @@ def log_user_input():
 
         df = df.dropna(thresh=7).drop_duplicates(subset=["job_number"], keep='last')
         df.to_csv(file_path, index=False)
+
+if __name__ == '__main__':
+    log_user_input()
+
