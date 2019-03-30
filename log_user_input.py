@@ -42,7 +42,6 @@ def log_user_input():
         return results
 
     for email_obj in get_job_input_data():
-        print(email_obj)
         file_path = './data/{}raw_dilfo_certs.csv'
         try:
             dict_input = {
