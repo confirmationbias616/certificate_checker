@@ -5,6 +5,7 @@ import json
 import pandas as pd
 import numpy as np
 import re
+from urllib.parse import unquote
 
 
 def log_user_input():    
@@ -41,9 +42,11 @@ def log_user_input():
         return results
 
     for email_obj in get_job_input_data():
+        print(email_obj)
         file_path = './data/{}raw_dilfo_certs.csv'
         try:
-            dict_input = {x.split('=')[0]:str(x.split('=')[1]) for x in re.compile('[\S ]*=[\S ]*').findall(email_obj['content'])}
+            dict_input = {
+                unquote(x.split('=')[0]):str(unquote(x.split('=')[1])).replace('+', ' ') for x in email_obj['content'].split('&')}            
             try:
                 if dict_input['cc_email'] != '':
                     dict_input['cc_email'] += '@dilfo.com'
@@ -51,7 +54,8 @@ def log_user_input():
                 pass
             dict_input.update({"receiver_email": re.compile('<?(\S+@\S+\.\w+)>?').findall(email_obj["sender"])[0].lower()})
             try:
-                file_path = file_path.format('test_') if dict_input['test_entry'] == 'yes' else file_path.format('')
+                file_path = file_path.format('test_') if 'yes' in dict_input['test_entry'] else file_path.format('')
+                print(file_path)
             except KeyError:
                 file_path = file_path.format('')
             df = pd.read_csv(file_path, dtype={'job_number':str, 'quality':str})
