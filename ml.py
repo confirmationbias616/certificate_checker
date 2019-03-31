@@ -11,6 +11,10 @@ def save_model(model):
     with open("./rf_model.pkl", "wb") as output:
         pickle.dump(model, output)
 
+def load_model():
+    with open("/Users/Alex/Coding/certificate_checker/rf_model.pkl", "rb") as input_file:
+        return pickle.load(input_file)
+
 def train_model():
     df = pd.read_csv('~/Coding/certificate_checker/data/train_set.csv')
     X = df[[x for x in df.columns if x.endswith('_score')]]# and x not in ['street_number_pr_score', 'city_score', 'owner_score', 'city_pr_score', 'title_length']]]# and x != 'total_score']]
