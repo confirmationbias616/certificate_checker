@@ -12,11 +12,11 @@ def save_model(model):
         pickle.dump(model, output)
 
 def load_model():
-    with open("/Users/Alex/Coding/certificate_checker/rf_model.pkl", "rb") as input_file:
+    with open("./rf_model.pkl", "rb") as input_file:
         return pickle.load(input_file)
 
 def train_model():
-    df = pd.read_csv('~/Coding/certificate_checker/data/train_set.csv')
+    df = pd.read_csv('./data/train_set.csv')
     X = df[[x for x in df.columns if x.endswith('_score')]]
     y = df[['ground_truth']]
     clf = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)
