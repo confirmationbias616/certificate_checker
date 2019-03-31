@@ -7,7 +7,8 @@ from scraper import scrape
 from wrangler import clean_job_number, clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title, wrangle
 from matcher import match
 from communicator import communicate
-from ml import evaluate
+from ml import train_model, evaluate
+from build_train_set import build_train_set
 
 
 @ddt
@@ -158,6 +159,11 @@ class IntegrationTests(unittest.TestCase):
         web_row = web_df.iloc[0]
         dilfo_row = pd.read_csv('./data/raw_dilfo_certs.csv').iloc[0]
         communicate(web_row, dilfo_row, test=True)
+    
+    #Right now just testing that the code doesn't crash but we need some assert statements here as well!
+    def test_ml_train(self):
+        build_train_set()
+        train_model()
 
     def test_truth_table(self):
         min_score_thresh = 0
