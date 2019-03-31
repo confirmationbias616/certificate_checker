@@ -53,5 +53,22 @@ def train_model():
     save_model(clf)
     return rc_cum, pr_cum, f1_cum
 
+def evaluate(sample):
+    clf = load_model()
+    if type(sample) == str:
+        match = clf.predict(np.array(sample).reshape(1, -1))
+        prob = clf.predict_proba(np.array(sample).reshape(1, -1))[0]
+        string = f"{'yes' if match else 'no'} by a probability of " \
+            f"{int(prob[1]*100) if match else int(prob[0]*100)}%"
+        return match, prob, string
+    elif type(sample) == pd.DataFrame and len(sample) > 1:
+        X = sample[[x for x in sample.columns if x.endswith('_score')]]
+        pred = clf.predict(X)
+        prob = clf.predict_proba(X)
+        results = pd.DataFrame({'total_score':X.total_score, 'prob':prob[:,1], 'pred':pred})
+        return results
+    else:
+        raise TypeError (f"evaluate did not receive propper input. Type received: {type(sample)}")
+
 if __name__ == '__main__':
     train_model()
