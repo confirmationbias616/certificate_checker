@@ -17,7 +17,7 @@ def load_model():
 
 def train_model():
     df = pd.read_csv('~/Coding/certificate_checker/data/train_set.csv')
-    X = df[[x for x in df.columns if x.endswith('_score')]]# and x not in ['street_number_pr_score', 'city_score', 'owner_score', 'city_pr_score', 'title_length']]]# and x != 'total_score']]
+    X = df[[x for x in df.columns if x.endswith('_score')]]
     y = df[['ground_truth']]
     clf = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)
     sm = SMOTE(random_state=42, ratio = 1)
