@@ -4,8 +4,7 @@ from log_user_input import log_user_input
 from scraper import scrape
 from wrangler import wrangle
 from matcher import match
-from build_train_set import build_train_set
-from ml import train_model
+from ml import build_train_set, train_model
 
 log_user_input()
 try:
