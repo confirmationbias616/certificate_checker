@@ -7,6 +7,7 @@ from scraper import scrape
 from wrangler import clean_job_number, clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title, wrangle
 from matcher import match
 from communicator import communicate
+from ml import evaluate
 
 
 @ddt
@@ -170,26 +171,27 @@ class IntegrationTests(unittest.TestCase):
             ranked = match(test_row_dilfo, test_web_df,
                 min_score_thresh=min_score_thresh, test=True)
             ranked.to_csv(f'./data/ranked_results_{i}.csv', index=False)
-            truth_index = test_row_dilfo.index[0] if len(ranked) else -1
-            match_index = ranked.index[0] if len(ranked) else -1
-            matches_above_thresh = ranked[ranked.total_score > min_score_thresh]
-            print(f'actual index: {truth_index}')
-            print(f'web indices above thresh: {list(matches_above_thresh.index)}')
-            self.assertEqual(truth_index, match_index, msg=(
-                f'match() returned index {match_index} but should have returned '
-                f'{truth_index} instead.'
+            results = evaluate(ranked)
+            results_match_only = results[results.pred==1]
+            truth_index = test_row_dilfo.index[0] if len(results_match_only) else -1
+            print(results_match_only)
+            print(truth_index)
+            self.assertTrue(truth_index in list(results_match_only.index), msg=(
+                f'match() returned index {results_match_only.index} which does not include actual '
+                f'truth index ({truth_index}).'
                 ))
-            self.assertTrue(len(matches_above_thresh) <= false_pos_thresh + 1, msg=(
-                f'match() returned {len(matches_above_thresh)} results, '
-                f'meaning {len(matches_above_thresh) - 1} false positive(s), which is '
+            self.assertTrue(len(results_match_only) <= false_pos_thresh + 1, msg=(
+                f'match() returned {len(results_match_only)} results, '
+                f'meaning {len(results_match_only) - 1} false positive(s), which is '
                 f'over the threshold of {false_pos_thresh} set in the function '
                 f'parameters.'
                 ))
+
             try:
-                ranked_master = ranked_master.append(ranked)
+                results_master = results_master.append(ranked)
             except NameError:
-                ranked_master = ranked
-        ranked_master.to_csv(f'./data/ranked_master_results.csv', index=False)
+                results_master = results
+        results_master.to_csv(f'./data/results_master.csv', index=False)
 
 
 
