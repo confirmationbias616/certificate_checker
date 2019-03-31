@@ -159,15 +159,12 @@ class IntegrationTests(unittest.TestCase):
         web_row = web_df.iloc[0]
         dilfo_row = pd.read_csv('./data/raw_dilfo_certs.csv').iloc[0]
         communicate(web_row, dilfo_row, test=True)
-    
-    #Right now just testing that the code doesn't crash but we need some assert statements here as well!
-    def test_ml_train(self):
-        build_train_set()
-        train_model()
 
     def test_truth_table(self):
         min_score_thresh = 0
         false_pos_thresh = 1
+        build_train_set()
+        train_model()
         test_df_dilfo = pd.read_csv('./data/test_raw_dilfo_certs.csv')
         test_web_df = scrape(ref=test_df_dilfo)
         for i, test_row_dilfo in test_df_dilfo.iterrows():
