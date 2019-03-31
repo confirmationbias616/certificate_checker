@@ -22,7 +22,6 @@ def train_model():
     clf = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)
     sm = SMOTE(random_state=42, ratio = 1)
     kf = KFold(n_splits=3, shuffle=True, random_state=41)
-
     rc_cum, pr_cum, f1_cum = [], [], []
     for train_index, test_index in kf.split(X):
         X_train, X_test = X.values[train_index], X.values[test_index]
@@ -49,11 +48,9 @@ def train_model():
     print(f'average recall: {sum(rc_cum)/len(rc_cum)}')
     print(f'average precision: {sum(pr_cum)/len(pr_cum)}')
     print(f'avergae f1 score: {sum(f1_cum)/len(f1_cum)}')
-
     X_smo, y_smo = sm.fit_sample(X, y)
     clf.fit(X_smo, y_smo)
     save_model(clf)
-
     return rc_cum, pr_cum, f1_cum
 
 if __name__ == '__main__':
