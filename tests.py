@@ -167,7 +167,7 @@ class IntegrationTests(unittest.TestCase):
 
     def test_truth_table(self):
         min_score_thresh = 0
-        false_pos_thresh = 0
+        false_pos_thresh = 1
         test_df_dilfo = pd.read_csv('./data/test_raw_dilfo_certs.csv')
         test_web_df = scrape(ref=test_df_dilfo)
         for i, test_row_dilfo in test_df_dilfo.iterrows():
