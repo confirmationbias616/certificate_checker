@@ -42,12 +42,12 @@ def log_user_input():
         server = imaplib.IMAP4_SSL(imap_ssl_host, imap_ssl_port)
         server.login(username, password)
         server.select('INBOX')
-        type, data = server.search(None, 'UNSEEN')  # UNSEEN or ALL
+        _, data = server.search(None, 'UNSEEN')  # UNSEEN or ALL
         mail_ids = data[0]
         id_list = mail_ids.split()
         results = []
         for i in id_list:
-            typ, data = server.fetch(i, '(RFC822)')
+            _, data = server.fetch(i, '(RFC822)')
             sender, content = parse_email(data)
             results.append({"sender": sender, "content": content})
         server.logout()
