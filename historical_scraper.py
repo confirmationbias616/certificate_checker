@@ -7,6 +7,7 @@ import numpy as np
 import argparse
 import progressbar
 
+
 def scrape(start='', finish='', limit=False, test=False):
 
     try:
@@ -91,6 +92,9 @@ def scrape(start='', finish='', limit=False, test=False):
             }
         )
 
+        # make date into actual datetime object
+        df_web['pub_date'] = df_web.pub_date.apply(
+            lambda x: re.findall('\d{4}-\d{2}-\d{2}', x)[0])
         df_web.astype('str').to_csv(f'./data/raw_web_certs_{start}_to_{finish}.csv', index=False)
         return df_web
 

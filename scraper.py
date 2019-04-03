@@ -7,7 +7,19 @@ import numpy as np
 import argparse
 import progressbar
 from time import sleep
+import sqlite3
+from sqlite3 import Error
 
+
+database = 'cert_db'
+
+def create_connection(db_file):
+    try:
+        conn = sqlite3.connect(db_file)
+        return conn
+    except Error as e:
+        print(e)
+    return None
 
 def scrape(limit=False, test=False, ref=False):
 
@@ -87,10 +99,14 @@ def scrape(limit=False, test=False, ref=False):
             "cert_url": cert_url,
         }
     )
+    # make date into actual datetime object
+    df_web['pub_date'] = df_web.pub_date.apply(
+            lambda x: re.findall('\d{4}-\d{2}-\d{2}', x)[0])
 
     if not test and not isinstance(ref, pd.DataFrame):
-        df_web.astype('str').to_csv(
-            f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv', index=False)
+        conn = create_connection(database)
+        with conn:
+            df_web.to_sql('dilfo_matched', conn, if_exists='append')
     else:
         return df_web
 

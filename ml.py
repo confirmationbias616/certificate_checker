@@ -8,7 +8,19 @@ import pickle
 from scraper import scrape
 from wrangler import wrangle
 from matcher import match
+import sqlite3
+from sqlite3 import Error
 
+
+database = 'cert_db'
+
+def create_connection(db_file):
+    try:
+        conn = sqlite3.connect(db_file)
+        return conn
+    except Error as e:
+        print(e)
+    return None
 
 def save_model(model):
     with open("./rf_model.pkl", "wb") as output:
@@ -19,14 +31,22 @@ def load_model():
         return pickle.load(input_file)
 
 def build_train_set():
-    test_df_dilfo = pd.read_csv('./data/test_raw_dilfo_certs.csv')
-    test_web_df = scrape(ref=test_df_dilfo)
-    test_web_df = wrangle(ref=test_web_df)
-    rand_web_df = pd.read_csv('./data/raw_web_certs_2011-01-01_to_2011-04-30.csv')
-    rand_web_df = wrangle(ref=rand_web_df)
+    conn = create_connection(database)
+    match_query = "SELECT * FROM dilfo_matched"
+    with conn:
+        test_df_dilfo = pd.read_sql(match_query, conn).drop('index', axis=1)
+    test_web_df = scrape(test_df_dilfo)
+    test_web_df = wrangle(test_web_df)
+    start_date = '2011-01-01'
+    end_date = '2011-04-30'
+    hist_query = "SELECT * FROM hist_certs WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
+    conn = create_connection(database)
+    with conn:
+        rand_web_df = pd.read_sql(hist_query, conn, params=[start, end]).drop('index', axis=1)
+    rand_web_df = wrangle(rand_web_df)
     for i, test_row_dilfo in test_df_dilfo.iterrows():
         test_row_dilfo = test_row_dilfo.to_frame().transpose()  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
-        test_row_dilfo = wrangle(ref=test_row_dilfo)
+        test_row_dilfo = wrangle(test_row_dilfo)
         rand_web_df = rand_web_df.sample(n=len(test_df_dilfo), random_state=i)
         close_matches = match(test_row_dilfo, test_web_df,
             min_score_thresh=0, test=True)

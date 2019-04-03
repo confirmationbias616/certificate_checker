@@ -151,12 +151,25 @@ class TestWrangleFuncs(unittest.TestCase):
 @ddt
 class IntegrationTests(unittest.TestCase):
 
+    database = 'cert_db'
+
+    def create_connection(db_file):
+        try:
+            conn = sqlite3.connect(db_file)
+            return conn
+        except Error as e:
+            print(e)
+        return None
+
     def test_scarpe_to_communicate(self):
         test_limit = 3
         web_df = scrape(limit=test_limit, test=True)
         self.assertEqual(len(web_df), test_limit)
         web_row = web_df.iloc[0]
-        dilfo_row = pd.read_csv('./data/raw_dilfo_certs.csv').iloc[0]
+        conn = create_connection(database)
+        match_first_query = "SELECT * FROM dilfo_open LIMIT 1"
+        with conn:
+            dilfo_row = pd.read_sql(match_query, conn).drop('index', axis=1)
         communicate(web_row, dilfo_row, test=True)
 
     def test_truth_table(self):
@@ -164,12 +177,14 @@ class IntegrationTests(unittest.TestCase):
         false_pos_thresh = 1
         build_train_set()
         train_model()
-        test_df_dilfo = pd.read_csv('./data/test_raw_dilfo_certs.csv')
+        conn = create_connection(database)
+        match_query = "SELECT * FROM dilfo_match"
+        with conn:
+            test_df_dilfo = pd.read_sql(match_query, conn).drop('index', axis=1)
         test_web_df = scrape(ref=test_df_dilfo)
         for i, test_row_dilfo in test_df_dilfo.iterrows():
             test_row_dilfo = test_row_dilfo.to_frame().transpose()  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
-            test_row_dilfo, test_web_df = wrangle(
-                ref=test_row_dilfo), wrangle(ref=test_web_df)
+            test_row_dilfo, test_web_df = wrangle(test_row_dilfo), wrangle(test_web_df)
             ranked = match(test_row_dilfo, test_web_df,
                 min_score_thresh=min_score_thresh, test=True)
             ranked.to_csv(f'./data/ranked_results_{i}.csv', index=False)

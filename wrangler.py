@@ -190,7 +190,7 @@ def clean_title(raw):
     title = raw
     return title
 
-def wrangle(ref=False, filenames=['./data/raw_dilfo_certs.csv', f'./data/raw_web_certs_{datetime.datetime.now().date()}.csv']):
+def wrangle(df):
     def wrangle_coord(df):
         clean_ops = {
         'job_number': clean_job_number,
@@ -215,13 +215,6 @@ def wrangle(ref=False, filenames=['./data/raw_dilfo_certs.csv', f'./data/raw_web
             df[f'{attr}_acronyms'] = df[attr].apply(get_acronyms)
         return df
     if isinstance(ref, pd.DataFrame):
-        return wrangle_coord(ref)
+        return wrangle_coord(df)
     else:
-        for filename in filenames:
-            df = pd.read_csv(filename, dtype={x:"str" for x in ["job_number", "pub_date", "address", "title", "owner", "contractor", "engineer"]})
-            df = df.fillna(" ")
-            wrangle_coord(df)
-            df.to_csv(filename.replace("raw","clean"), index=False)
-
-if __name__=="__main__":
-    wrangle()
+        raise Exception('Need to pass in a DataFrame!')
