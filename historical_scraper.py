@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import argparse
 import progressbar
+from time import sleep
 
 
 def scrape(start='', finish='', limit=False, test=False):
