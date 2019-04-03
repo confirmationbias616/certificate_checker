@@ -214,7 +214,7 @@ def wrangle(df):
         for attr in ["title","owner","contractor"]:
             df[f'{attr}_acronyms'] = df[attr].apply(get_acronyms)
         return df
-    if isinstance(ref, pd.DataFrame):
+    if isinstance(df, pd.DataFrame):
         return wrangle_coord(df)
     else:
         raise Exception('Need to pass in a DataFrame!')
