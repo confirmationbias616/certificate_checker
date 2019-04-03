@@ -22,8 +22,8 @@ def match(df_dilfo=False, df_web=False, test=False, min_score_thresh=0.66):
 	if not isinstance(df_dilfo, pd.DataFrame):  # df_dilfo == False
 		open_query = "SELECT * FROM dilfo_open"
 		conn = create_connection(database)
-        with conn:
-            df_dilfo = pd.read_sql(open_query, conn).drop('index', axis=1)
+		with conn:
+			df_dilfo = pd.read_sql(open_query, conn).drop('index', axis=1)
 		df_dilfo = wrangle(df_dilfo)
 	if not isinstance(df_web, pd.DataFrame):  # df_web == False
 		7_days_ago = (datetime.datetime.now()-datetime.timedelta(7)).date()
