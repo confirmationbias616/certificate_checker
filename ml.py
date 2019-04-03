@@ -35,7 +35,7 @@ def build_train_set():
     match_query = "SELECT * FROM dilfo_matched"
     with conn:
         test_df_dilfo = pd.read_sql(match_query, conn).drop('index', axis=1)
-    test_web_df = scrape(test_df_dilfo)
+    test_web_df = scrape(ref=test_df_dilfo)
     test_web_df = wrangle(test_web_df)
     start_date = '2011-01-01'
     end_date = '2011-04-30'
