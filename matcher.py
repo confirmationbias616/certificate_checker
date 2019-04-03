@@ -26,11 +26,11 @@ def match(df_dilfo=False, df_web=False, test=False, min_score_thresh=0.66):
 			df_dilfo = pd.read_sql(open_query, conn).drop('index', axis=1)
 		df_dilfo = wrangle(df_dilfo)
 	if not isinstance(df_web, pd.DataFrame):  # df_web == False
-		7_days_ago = (datetime.datetime.now()-datetime.timedelta(7)).date()
+		week_ago = (datetime.datetime.now()-datetime.timedelta(7)).date()
 		hist_query = "SELECT * FROM hist_certs WHERE pub_date>=? ORDER BY pub_date"
 		conn = create_connection(database)
-        with conn:
-			df_web = pd.read_sql(hist_query, conn, params=[7_days_ago]).drop('index', axis=1)
+		with conn:
+			df_web = pd.read_sql(hist_query, conn, params=[week_ago]).drop('index', axis=1)
 		df_web = wrangle(df_web)
 	for i in range(len(df_dilfo)):
 		print(f"searching for potential match for project #{df_dilfo.iloc[i].job_number}...")
