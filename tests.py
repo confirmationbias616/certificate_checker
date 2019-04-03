@@ -8,6 +8,8 @@ from wrangler import clean_job_number, clean_pub_date, clean_city, clean_company
 from matcher import match
 from communicator import communicate
 from ml import build_train_set, train_model, evaluate
+import sqlite3
+from sqlite3 import Error
 
 
 @ddt
@@ -151,17 +153,18 @@ class TestWrangleFuncs(unittest.TestCase):
 @ddt
 class IntegrationTests(unittest.TestCase):
 
-    database = 'cert_db'
-
-    def create_connection(db_file):
-        try:
-            conn = sqlite3.connect(db_file)
-            return conn
-        except Error as e:
-            print(e)
-        return None
-
     def test_scarpe_to_communicate(self):
+            
+        database = 'cert_db'
+
+        def create_connection(db_file):
+            try:
+                conn = sqlite3.connect(db_file)
+                return conn
+            except Error as e:
+                print(e)
+            return None
+
         test_limit = 3
         web_df = scrape(limit=test_limit, test=True)
         self.assertEqual(len(web_df), test_limit)
@@ -169,10 +172,21 @@ class IntegrationTests(unittest.TestCase):
         conn = create_connection(database)
         match_first_query = "SELECT * FROM dilfo_open LIMIT 1"
         with conn:
-            dilfo_row = pd.read_sql(match_query, conn).drop('index', axis=1)
+            dilfo_row = pd.read_sql(match_first_query, conn).drop('index', axis=1)
         communicate(web_row, dilfo_row, test=True)
 
     def test_truth_table(self):
+                    
+        database = 'cert_db'
+
+        def create_connection(db_file):
+            try:
+                conn = sqlite3.connect(db_file)
+                return conn
+            except Error as e:
+                print(e)
+            return None
+
         min_score_thresh = 0
         false_pos_thresh = 1
         build_train_set()
