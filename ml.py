@@ -42,7 +42,7 @@ def build_train_set():
     hist_query = "SELECT * FROM hist_certs WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
     conn = create_connection(database)
     with conn:
-        rand_web_df = pd.read_sql(hist_query, conn, params=[start, end]).drop('index', axis=1)
+        rand_web_df = pd.read_sql(hist_query, conn, params=[start_date, end_date]).drop('index', axis=1)
     rand_web_df = wrangle(rand_web_df)
     for i, test_row_dilfo in test_df_dilfo.iterrows():
         test_row_dilfo = test_row_dilfo.to_frame().transpose()  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
