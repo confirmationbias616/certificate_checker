@@ -71,22 +71,21 @@ def scrape(limit=False, test=False, ref=False):
         }
         for key in list(lookup.keys()):
             lookup[key].append(company_results.get(key, np.nan))
-    print(f'\nscraping all of {number_of_matches} new certificates for this week...')
-    bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
-        widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-    bar.start()
     if isinstance(ref, pd.DataFrame):
         for link in ref.link_to_cert:
             get_details(link)
     else:
+        print(f'\nscraping all of {number_of_matches} new certificates for this week...')
+        bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
+            widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+        bar.start()
         for i, entry in enumerate(soup.find_all("article", {"class":"cards-item"}), 1):
             get_details(entry)
             if limit and (i >= limit):
                 print("limit reached - breaking out of loop.")
                 break
             bar.update(i+1)
-        bar.finish()
-    print("saving to df_web dataframe.")        
+        bar.finish()      
     df_web = pd.DataFrame(
         data={
             "pub_date": pub_date,
