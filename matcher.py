@@ -2,8 +2,10 @@ from fuzzywuzzy import fuzz
 import pandas as pd
 import datetime
 import numpy as np
+from sklearn.ensemble import RandomForestClassifier
 from wrangler import wrangle
 from communicator import communicate
+import pickle
 import sqlite3
 from sqlite3 import Error
 
@@ -17,6 +19,26 @@ def create_connection(db_file):
     except Error as e:
         print(e)
     return None
+
+def load_model():
+    with open("./rf_model.pkl", "rb") as input_file:
+        return pickle.load(input_file)
+
+def load_feature_list():
+    with open("./rf_features.pkl", "rb") as input_file:
+        return pickle.load(input_file)
+
+def predict_match(sample):
+	clf = load_model()
+	cols = load_feature_list()
+	match = clf.predict(sample[cols].values.reshape(1, -1))[0]
+	return match
+
+def predict_prob(sample):
+    clf = load_model()
+    cols = load_feature_list()
+    prob = clf.predict_proba(sample[cols].values.reshape(1, -1))[0][1]
+    return prob
 
 def match(df_dilfo=False, df_web=False, test=False, min_score_thresh=0.66):
 	if not isinstance(df_dilfo, pd.DataFrame):  # df_dilfo == False
@@ -57,22 +79,29 @@ def match(df_dilfo=False, df_web=False, test=False, min_score_thresh=0.66):
 		    total_score = sum(scores)/countable_attrs if countable_attrs > 2 else 0
 		    return total_score
 		df_web['total_score'] = df_web.apply(lambda row: compile_score(row), axis=1)
-		ranked = df_web.sort_values('total_score', ascending=False)
-		top_score = ranked.iloc[0]['total_score']
-		if top_score > min_score_thresh:
-			print(
-				f"\t-> Found a match with score of {top_score}!"
-				f"\t-> Dilfo job details: {df_dilfo.iloc[i]}"
-				f"\t-> web job details: {ranked.iloc[0]}"
-				f"\n\tgetting ready to send notification..."
-			)
-			communicate(ranked.iloc[0], df_dilfo.iloc[i], test=test)
-		else:
-			print("\t-> nothing found.")
-			if test:
-				return ranked.drop(ranked.index)  # short-circuit out of loop of best match is not good enough
+		results = df_web.copy()
+		# LOGICAL BREAK IN FUNCTION? TIME TO SPLIT FUNC INTO 2?!?!?!
+		results['pred_match'] = results.apply(lambda row: predict_match(row), axis=1)
+		results['pred_prob'] = results.apply(lambda row: predict_prob(row), axis=1)
+		results = results.sort_values('pred_prob', ascending=False)
+		matches = results[results.pred_match==1]
+		msg = 	"\t-> Found {} match with probability of {}!" +\
+				"\t-> Dilfo job details: {}" +\
+				"\t-> web job details: {}"
+		try:
+			top = matches.iloc[0]
+			print(msg.format('a', top.pred_prob, df_dilfo.iloc[i], top))
+			print("\tgetting ready to send notification...")
+			communicate(top, df_dilfo.iloc[i], test=test)
+			if len(matches) > 1:
+				for _, row in matches[1:].iterrows():
+					print(msg.format('another possible', row['pred_prob'], df_dilfo.iloc[i], row))
+			else:
+				print('no secondary matches found')
+		except IndexError:
+			print('no matches found')
 	if test:
-		return ranked
+		return results
 
 if __name__=="__main__":
 	match()
