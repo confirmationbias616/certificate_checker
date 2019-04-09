@@ -2,6 +2,8 @@ import pandas as pd
 import datetime
 from wrangler import wrangle
 from communicator import communicate
+from scorer import compile_score, attr_score
+from matcher_build import match_build
 import pickle
 import sqlite3
 from sqlite3 import Error
@@ -37,7 +39,7 @@ def predict_prob(sample):
     prob = clf.predict_proba(sample[cols].values.reshape(1, -1))[0][1]
     return prob
 
-def match(df_dilfo=False, df_web=False, test=False, min_score_thresh=0.66):
+def match(df_dilfo=False, df_web=False, test=False):
 	if not isinstance(df_dilfo, pd.DataFrame):  # df_dilfo == False
 		open_query = "SELECT * FROM dilfo_open"
 		conn = create_connection(database)
@@ -51,48 +53,25 @@ def match(df_dilfo=False, df_web=False, test=False, min_score_thresh=0.66):
 		with conn:
 			df_web = pd.read_sql(hist_query, conn, params=[week_ago]).drop('index', axis=1)
 		df_web = wrangle(df_web)
-	for i in range(len(df_dilfo)):
-		print(f"searching for potential match for project #{df_dilfo.iloc[i].job_number}...")
-		def attr_score(row, i, attr, seg='full'):
-			if row in ["", " ", "NaN", "nan", np.nan]:  # should not be comparing empty fields because empty vs empty is an exact match!
-				return 0
-			try:
-				if seg=='full':
-					return fuzz.ratio(row, df_dilfo.iloc[i][attr])
-				else:
-					return fuzz.partial_ratio(row, df_dilfo.iloc[i][attr])
-			except TypeError:
-				return 0
-		scoreable_attrs = ['contractor', 'street_name', 'street_number', 'title', 'city', 'owner']
-		for attr in scoreable_attrs:
-				df_web[f'{attr}_score'] = df_web[attr].apply(
-					lambda row: attr_score(row, i, attr, seg='full'))
-				df_web[f'{attr}_pr_score'] = df_web[attr].apply(
-					lambda row: attr_score(row, i, attr, seg='partial'))
-		def compile_score(row):
-		    scores = row[[f'{attr}_score' for attr in scoreable_attrs]]
-		    scores = [x/100 for x in scores if type(x)==int]
-		    countable_attrs = len([x for x in scores if x > 0])
-		    total_score = sum(scores)/countable_attrs if countable_attrs > 2 else 0
-		    return total_score
-		df_web['total_score'] = df_web.apply(lambda row: compile_score(row), axis=1)
-		results = df_web.copy()
+	for _, dilfo_row in df_dilfo.iterrows():
+		results = match_build(dilfo_row.to_frame().transpose(), df_web)  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
 		# LOGICAL BREAK IN FUNCTION? TIME TO SPLIT FUNC INTO 2?!?!?!
+		print(f"searching for potential match for project #{dilfo_row['job_number']}...")
 		results['pred_match'] = results.apply(lambda row: predict_match(row), axis=1)
 		results['pred_prob'] = results.apply(lambda row: predict_prob(row), axis=1)
 		results = results.sort_values('pred_prob', ascending=False)
 		matches = results[results.pred_match==1]
-		msg = 	"\t-> Found {} match with probability of {}!" +\
-				"\t-> Dilfo job details: {}" +\
-				"\t-> web job details: {}"
+		msg = 	"\n-> Found {} match with probability of {}!" +\
+				"-> Dilfo job details:\n{}" +\
+				"-> web job details:\n{}"
 		try:
 			top = matches.iloc[0]
-			print(msg.format('a', top.pred_prob, df_dilfo.iloc[i], top))
+			print(msg.format('a', top.pred_prob, dilfo_row, top))
 			print("\tgetting ready to send notification...")
-			communicate(top, df_dilfo.iloc[i], test=test)
+			communicate(top, dilfo_row, test=test)
 			if len(matches) > 1:
 				for _, row in matches[1:].iterrows():
-					print(msg.format('another possible', row['pred_prob'], df_dilfo.iloc[i], row))
+					print(msg.format('another possible', row['pred_prob'], dilfo_row, row))
 			else:
 				print('no secondary matches found')
 		except IndexError:

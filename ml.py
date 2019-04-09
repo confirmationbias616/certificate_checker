@@ -53,8 +53,7 @@ def build_train_set():
     rand_web_df = wrangle(rand_web_df)
     
     for i, test_row_dilfo in test_df_dilfo.iterrows():
-        test_row_dilfo = test_row_dilfo.to_frame().transpose()  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
-        test_row_dilfo = wrangle(test_row_dilfo)
+        test_row_dilfo = wrangle(test_row_dilfo.to_frame().transpose())  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
         rand_web_df = rand_web_df.sample(n=len(test_df_dilfo), random_state=i)
         close_matches = match_build(test_row_dilfo, test_web_df)
         random_matches = match_build(test_row_dilfo, rand_web_df)
