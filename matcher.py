@@ -1,8 +1,5 @@
-from fuzzywuzzy import fuzz
 import pandas as pd
 import datetime
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
 from wrangler import wrangle
 from communicator import communicate
 import pickle

@@ -1,6 +1,3 @@
-from fuzzywuzzy import fuzz
-import pandas as pd
-import numpy as np
 
 
 def match_build(df_dilfo=False, df_web=False):
