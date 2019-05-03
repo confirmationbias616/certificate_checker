@@ -7,4 +7,4 @@ log_user_input()
 scrape()
 build_train_set()
 train_model()
-match()
+match()  #test=True to mute sending of e-mails
