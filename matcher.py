@@ -41,6 +41,9 @@ def match(df_dilfo=False, df_web=False, test=False):
 		conn = create_connection()
 		with conn:
 			df_web = pd.read_sql(hist_query, conn, params=[week_ago]).drop('index', axis=1)
+		if len(df_web) == 0:  # SQL query retunred nothing so no point of going any further
+			print("Nothing has been collected from Daily commercial News in the past week. Breaking out of match function.")
+			return 0
 	df_web = wrangle(df_web)
 	for _, dilfo_row in df_dilfo.iterrows():
 		results = match_build(dilfo_row.to_frame().transpose(), df_web)  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
