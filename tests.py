@@ -8,8 +8,7 @@ from wrangler import clean_job_number, clean_pub_date, clean_city, clean_company
 from matcher import match
 from communicator import communicate
 from ml import build_train_set, train_model, evaluate
-import sqlite3
-from sqlite3 import Error
+from db_tools import create_connection
 
 
 @ddt
