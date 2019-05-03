@@ -9,19 +9,7 @@ from scraper import scrape
 from wrangler import wrangle
 from matcher import match
 from matcher_build import match_build
-import sqlite3
-from sqlite3 import Error
-
-
-database = 'cert_db'
-
-def create_connection(db_file):
-    try:
-        conn = sqlite3.connect(db_file)
-        return conn
-    except Error as e:
-        print(e)
-    return None
+from db_tools import create_connection
 
 def save_model(model):
     with open("./rf_model.pkl", "wb") as output:
@@ -36,7 +24,7 @@ def load_model():
         return pickle.load(input_file)
 
 def build_train_set():
-    conn = create_connection(database)
+    conn = create_connection()
     match_query = "SELECT * FROM dilfo_matched"
     with conn:
         test_df_dilfo = pd.read_sql(match_query, conn).drop('index', axis=1)
@@ -47,7 +35,7 @@ def build_train_set():
     start_date = '2011-01-01'
     end_date = '2011-04-30'
     hist_query = "SELECT * FROM hist_certs WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
-    conn = create_connection(database)
+    conn = create_connection()
     with conn:
         rand_web_df = pd.read_sql(hist_query, conn, params=[start_date, end_date]).drop('index', axis=1)
     rand_web_df = wrangle(rand_web_df)

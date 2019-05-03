@@ -6,19 +6,7 @@ import pandas as pd
 import numpy as np
 import re
 from urllib.parse import unquote
-import sqlite3
-from sqlite3 import Error
-
-
-database = 'cert_db'
-
-def create_connection(db_file):
-    try:
-        conn = sqlite3.connect(db_file)
-        return conn
-    except Error as e:
-        print(e)
-    return None
+from db_tools import create_connection
 
 def log_user_input():    
     imap_ssl_host = 'imap.gmail.com'
@@ -68,7 +56,7 @@ def log_user_input():
                 table = 'dilfo_matched' if 'yes' in dict_input['test_entry'] else table
             except KeyError:
                 table = table
-            conn = create_connection(database)
+            conn = create_connection()
             with conn:
                 df = pd.read_sql(f"SELECT * FROM {table}", conn).drop('index', axis=1)
                 df = df.append(dict_input, ignore_index=True)

@@ -154,44 +154,24 @@ class TestWrangleFuncs(unittest.TestCase):
 class IntegrationTests(unittest.TestCase):
 
     def test_scarpe_to_communicate(self):
-            
-        database = 'cert_db'
-
-        def create_connection(db_file):
-            try:
-                conn = sqlite3.connect(db_file)
-                return conn
-            except Error as e:
-                print(e)
-            return None
 
         test_limit = 3
         web_df = scrape(limit=test_limit, test=True)
         self.assertEqual(len(web_df), test_limit)
         web_row = web_df.iloc[0]
-        conn = create_connection(database)
+        conn = create_connection()
         match_first_query = "SELECT * FROM dilfo_open LIMIT 1"
         with conn:
             dilfo_row = pd.read_sql(match_first_query, conn).drop('index', axis=1).iloc[0]
         communicate(web_row, dilfo_row, test=True)
 
     def test_truth_table(self):
-                    
-        database = 'cert_db'
-
-        def create_connection(db_file):
-            try:
-                conn = sqlite3.connect(db_file)
-                return conn
-            except Error as e:
-                print(e)
-            return None
 
         min_score_thresh = 0
         false_pos_thresh = 1
         build_train_set()
         train_model()
-        conn = create_connection(database)
+        conn = create_connection()
         match_query = "SELECT * FROM dilfo_matched"
         with conn:
             test_df_dilfo = pd.read_sql(match_query, conn).drop('index', axis=1)

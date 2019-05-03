@@ -7,19 +7,8 @@ import numpy as np
 import argparse
 import progressbar
 from time import sleep
-import sqlite3
-from sqlite3 import Error
+from db_tools import create_connection
 
-
-database = 'cert_db'
-
-def create_connection(db_file):
-    try:
-        conn = sqlite3.connect(db_file)
-        return conn
-    except Error as e:
-        print(e)
-    return None
 
 def scrape(limit=False, test=False, ref=False):
 
@@ -103,7 +92,7 @@ def scrape(limit=False, test=False, ref=False):
             lambda x: re.findall('\d{4}-\d{2}-\d{2}', x)[0])
 
     if not test and not isinstance(ref, pd.DataFrame):
-        conn = create_connection(database)
+        conn = create_connection()
         with conn:
             df_web.to_sql('hist_certs', conn, if_exists='append')
     else:
