@@ -6,6 +6,7 @@ from scorer import compile_score, attr_score
 from matcher_build import match_build
 import pickle
 from db_tools import create_connection
+import re
 
 
 def load_model():
@@ -28,7 +29,7 @@ def predict_prob(sample):
     prob = clf.predict_proba(sample[cols].values.reshape(1, -1))[0][1]
     return prob
 
-def match(df_dilfo=False, df_web=False, test=False):
+def match(df_dilfo=False, df_web=False, test=False, since='week_ago'):
 	if not isinstance(df_dilfo, pd.DataFrame):  # df_dilfo == False
 		open_query = "SELECT * FROM dilfo_open"
 		conn = create_connection()
@@ -36,11 +37,16 @@ def match(df_dilfo=False, df_web=False, test=False):
 			df_dilfo = pd.read_sql(open_query, conn).drop('index', axis=1)
 	df_dilfo = wrangle(df_dilfo)
 	if not isinstance(df_web, pd.DataFrame):  # df_web == False
-		week_ago = (datetime.datetime.now()-datetime.timedelta(7)).date()
+		if since == 'week_ago':
+			since = (datetime.datetime.now()-datetime.timedelta(7)).date()
+		else:
+			valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
+			if not valid_since_date:
+				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
 		hist_query = "SELECT * FROM hist_certs WHERE pub_date>=? ORDER BY pub_date"
 		conn = create_connection()
 		with conn:
-			df_web = pd.read_sql(hist_query, conn, params=[week_ago]).drop('index', axis=1)
+			df_web = pd.read_sql(hist_query, conn, params=[since]).drop('index', axis=1)
 		if len(df_web) == 0:  # SQL query retunred nothing so no point of going any further
 			print("Nothing has been collected from Daily commercial News in the past week. Breaking out of match function.")
 			return 0
