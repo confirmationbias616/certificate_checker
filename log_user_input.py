@@ -56,8 +56,7 @@ def log_user_input():
                 table = 'dilfo_matched' if 'yes' in dict_input['test_entry'] else table
             except KeyError:
                 table = table
-            conn = create_connection()
-            with conn:
+            with create_connection() as conn:
                 df = pd.read_sql(f"SELECT * FROM {table}", conn).drop('index', axis=1)
                 df = df.append(dict_input, ignore_index=True)
                 df = df.dropna(thresh=7).drop_duplicates(subset=["job_number"], keep='last')

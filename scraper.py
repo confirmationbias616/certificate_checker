@@ -21,8 +21,7 @@ def scrape(limit=False, test=False, ref=False, since='week_ago'):
         date_param_url = "&date=past_7&date_from=&date_to=#results"
     elif since == 'last_record':
         hist_query = "SELECT pub_date FROM hist_certs ORDER BY pub_date DESC LIMIT 1"
-        conn = create_connection()
-        with conn:
+        with create_connection() as conn:
             last_date = conn.cursor().execute(hist_query).fetchone()[0]
             ld_year = int(last_date[:4])
             ld_month = int(last_date[5:7])
@@ -107,8 +106,7 @@ def scrape(limit=False, test=False, ref=False, since='week_ago'):
             lambda x: re.findall('\d{4}-\d{2}-\d{2}', x)[0])
 
     if not test and not isinstance(ref, pd.DataFrame):
-        conn = create_connection()
-        with conn:
+        with create_connection() as conn:
             df_web.to_sql('hist_certs', conn, if_exists='append')
     else:
         return df_web

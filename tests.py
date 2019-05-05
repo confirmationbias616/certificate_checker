@@ -158,9 +158,8 @@ class IntegrationTests(unittest.TestCase):
         web_df = scrape(limit=test_limit, test=True)
         self.assertEqual(len(web_df), test_limit)
         web_row = web_df.iloc[0]
-        conn = create_connection()
         match_first_query = "SELECT * FROM dilfo_open LIMIT 1"
-        with conn:
+        with create_connection() as conn:
             dilfo_row = pd.read_sql(match_first_query, conn).drop('index', axis=1).iloc[0]
         communicate(web_row, dilfo_row, test=True)
 
@@ -170,9 +169,8 @@ class IntegrationTests(unittest.TestCase):
         false_pos_thresh = 1
         build_train_set()
         train_model()
-        conn = create_connection()
         match_query = "SELECT * FROM dilfo_matched"
-        with conn:
+        with create_connection() as conn:
             test_df_dilfo = pd.read_sql(match_query, conn).drop('index', axis=1)
         test_web_df = scrape(ref=test_df_dilfo)
         results = match(df_dilfo=test_df_dilfo, df_web=test_web_df, test=True)

@@ -24,9 +24,8 @@ def load_model():
         return pickle.load(input_file)
 
 def build_train_set():
-    conn = create_connection()
     match_query = "SELECT * FROM dilfo_matched"
-    with conn:
+    with create_connection() as conn:
         test_df_dilfo = pd.read_sql(match_query, conn).drop('index', axis=1)
     test_web_df = scrape(ref=test_df_dilfo)
     test_web_df = wrangle(test_web_df)
@@ -35,8 +34,7 @@ def build_train_set():
     start_date = '2011-01-01'
     end_date = '2011-04-30'
     hist_query = "SELECT * FROM hist_certs WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
-    conn = create_connection()
-    with conn:
+    with create_connection() as conn:
         rand_web_df = pd.read_sql(hist_query, conn, params=[start_date, end_date]).drop('index', axis=1)
     rand_web_df = wrangle(rand_web_df)
     
