@@ -10,16 +10,31 @@ from time import sleep
 from db_tools import create_connection
 
 
-def scrape(limit=False, test=False, ref=False):
+def scrape(limit=False, test=False, ref=False, since='week_ago'):
 
     pub_date, city, address, title, owner, contractor, engineer, cert_url = [
         [] for _ in range(8)]
-
-    search_url = 'https://canada.constructconnect.com/dcn/certificates-and-notices\
-    ?perpage=1000&phrase=&sort=publish_date&owner=&contractor=&date=past_7&\
-    date_from=&date_to=#results'
-
-    response = requests.get(search_url)
+    now = datetime.datetime.now().date()
+    base_url = "https://canada.constructconnect.com/dcn/certificates-and-notices\
+            ?perpage=1000&phrase=&sort=publish_date&owner=&contractor="
+    if since == 'week_ago':
+        date_param_url = "&date=past_7&date_from=&date_to=#results"
+    elif since == 'last_record':
+        hist_query = "SELECT pub_date FROM hist_certs ORDER BY pub_date DESC LIMIT 1"
+        conn = create_connection()
+        with conn:
+            last_date = conn.cursor().execute(hist_query).fetchone()[0]
+            ld_year = int(last_date[:4])
+            ld_month = int(last_date[5:7])
+            ld_day = int(last_date[8:])
+            since = (datetime.datetime(ld_year, ld_month, ld_day) + datetime.timedelta(1)).date()
+        date_param_url = f'&date=custom&date_from={since}&date_to={now}#results'
+    else:
+        valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
+        if not valid_since_date:
+            raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
+        date_param_url = f'&date=custom&date_from={since}&date_to={now}#results'
+    response = requests.get(base_url + date_param_url)
     html = response.content
     soup = BeautifulSoup(html, "html.parser")
 
@@ -64,7 +79,7 @@ def scrape(limit=False, test=False, ref=False):
         for link in ref.link_to_cert:
             get_details(link)
     else:
-        print(f'\nscraping all of {number_of_matches} new certificates for this week...')
+        print(f'\nscraping all of {number_of_matches} new certificates since {since}...')
         bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
             widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
         bar.start()
