@@ -10,6 +10,9 @@ from communicator import communicate
 from ml import build_train_set, train_model, evaluate
 from db_tools import create_connection
 
+# the import statement below runs some code automatically
+import test.test_setup.py
+
 
 @ddt
 class TestWrangleFuncs(unittest.TestCase):
