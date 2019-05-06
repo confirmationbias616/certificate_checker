@@ -16,6 +16,9 @@ def setUpModule():
     # the import statement below runs some code automatically
     from test import test_setup
  
+def tearDownModule():
+    os.remove('test_cert_db')
+    
 @ddt
 class TestWrangleFuncs(unittest.TestCase):
 
