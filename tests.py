@@ -9,11 +9,13 @@ from matcher import match
 from communicator import communicate
 from ml import build_train_set, train_model, evaluate
 from db_tools import create_connection
-
-# the import statement below runs some code automatically
-from test import test_setup
+import os
 
 
+def setUpModule():
+    # the import statement below runs some code automatically
+    from test import test_setup
+ 
 @ddt
 class TestWrangleFuncs(unittest.TestCase):
 
