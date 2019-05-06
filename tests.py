@@ -163,7 +163,7 @@ class IntegrationTests(unittest.TestCase):
         web_row = web_df.iloc[0]
         match_first_query = "SELECT * FROM dilfo_open LIMIT 1"
         with create_connection() as conn:
-            dilfo_row = pd.read_sql(match_first_query, conn).drop('index', axis=1).iloc[0]
+            dilfo_row = pd.read_sql(match_first_query, conn).iloc[0]
         communicate(web_row, dilfo_row, test=True)
 
     def test_truth_table(self):
@@ -174,7 +174,7 @@ class IntegrationTests(unittest.TestCase):
         train_model()
         match_query = "SELECT * FROM dilfo_matched"
         with create_connection() as conn:
-            test_df_dilfo = pd.read_sql(match_query, conn).drop('index', axis=1)
+            test_df_dilfo = pd.read_sql(match_query, conn)
         test_web_df = scrape(ref=test_df_dilfo)
         results = match(df_dilfo=test_df_dilfo, df_web=test_web_df, test=True)
         print(results)

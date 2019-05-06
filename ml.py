@@ -26,7 +26,7 @@ def load_model():
 def build_train_set():
     match_query = "SELECT * FROM dilfo_matched"
     with create_connection() as conn:
-        test_df_dilfo = pd.read_sql(match_query, conn).drop('index', axis=1)
+        test_df_dilfo = pd.read_sql(match_query, conn)
     test_web_df = scrape(ref=test_df_dilfo)
     test_web_df = wrangle(test_web_df)
     
@@ -35,7 +35,7 @@ def build_train_set():
     end_date = '2011-04-30'
     hist_query = "SELECT * FROM hist_certs WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
     with create_connection() as conn:
-        rand_web_df = pd.read_sql(hist_query, conn, params=[start_date, end_date]).drop('index', axis=1)
+        rand_web_df = pd.read_sql(hist_query, conn, params=[start_date, end_date])
     rand_web_df = wrangle(rand_web_df)
     
     for i, test_row_dilfo in test_df_dilfo.iterrows():
