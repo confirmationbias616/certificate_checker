@@ -157,8 +157,16 @@ class TestWrangleFuncs(unittest.TestCase):
 @ddt
 class IntegrationTests(unittest.TestCase):
 
+    def setUp(self):
+        os.rename('cert_db', 'temp_cert_db')
+        os.rename('test_cert_db', 'cert_db')
+    
+    def tearDown(self):
+        os.rename('cert_db', 'test_cert_db')
+        os.rename('temp_cert_db', 'cert_db')
+        
+    
     def test_scarpe_to_communicate(self):
-
         test_limit = 3
         web_df = scrape(limit=test_limit, test=True)
         self.assertEqual(len(web_df), test_limit)
