@@ -15,9 +15,17 @@ import os
 def setUpModule():
     # the import statement below runs some code automatically
     from test import test_setup
+    try:  # if not running on CI build
+        os.rename('cert_db', 'temp_cert_db')
+    except:  # if running on CI build
+        pass
+    os.rename('test_cert_db', 'cert_db')
  
 def tearDownModule():
-    os.remove('test_cert_db')
+    try:  # if not running on CircleCI
+        os.rename('temp_cert_db', 'cert_db')
+    except:  # if running on CircleCI
+        pass
     
 @ddt
 class TestWrangleFuncs(unittest.TestCase):
@@ -159,16 +167,7 @@ class TestWrangleFuncs(unittest.TestCase):
 
 @ddt
 class IntegrationTests(unittest.TestCase):
-
-    def setUp(self):
-        os.rename('cert_db', 'temp_cert_db')
-        os.rename('test_cert_db', 'cert_db')
-    
-    def tearDown(self):
-        os.rename('cert_db', 'test_cert_db')
-        os.rename('temp_cert_db', 'cert_db')
         
-    
     def test_scarpe_to_communicate(self):
         test_limit = 3
         web_df = scrape(limit=test_limit, test=True)
