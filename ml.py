@@ -8,30 +8,41 @@ import pickle
 from scraper import scrape
 from wrangler import wrangle
 from matcher import match
-
+from matcher_build import match_build
+from db_tools import create_connection
 
 def save_model(model):
     with open("./rf_model.pkl", "wb") as output:
         pickle.dump(model, output)
+
+def save_feature_list(columns):
+    with open("./rf_features.pkl", "wb") as output:
+        pickle.dump(columns, output)
 
 def load_model():
     with open("./rf_model.pkl", "rb") as input_file:
         return pickle.load(input_file)
 
 def build_train_set():
-    test_df_dilfo = pd.read_csv('./data/test_raw_dilfo_certs.csv')
+    match_query = "SELECT * FROM dilfo_matched"
+    with create_connection() as conn:
+        test_df_dilfo = pd.read_sql(match_query, conn)
     test_web_df = scrape(ref=test_df_dilfo)
-    test_web_df = wrangle(ref=test_web_df)
-    rand_web_df = pd.read_csv('./data/raw_web_certs_2011-01-01_to_2011-04-30.csv')
-    rand_web_df = wrangle(ref=rand_web_df)
+    test_web_df = wrangle(test_web_df)
+    
+    # Get some certificates that are definitely not matches provide some false matches to train from
+    start_date = '2011-01-01'
+    end_date = '2011-04-30'
+    hist_query = "SELECT * FROM hist_certs WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
+    with create_connection() as conn:
+        rand_web_df = pd.read_sql(hist_query, conn, params=[start_date, end_date])
+    rand_web_df = wrangle(rand_web_df)
+    
     for i, test_row_dilfo in test_df_dilfo.iterrows():
-        test_row_dilfo = test_row_dilfo.to_frame().transpose()  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
-        test_row_dilfo = wrangle(ref=test_row_dilfo)
+        test_row_dilfo = wrangle(test_row_dilfo.to_frame().transpose())  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
         rand_web_df = rand_web_df.sample(n=len(test_df_dilfo), random_state=i)
-        close_matches = match(test_row_dilfo, test_web_df,
-            min_score_thresh=0, test=True)
-        random_matches = match(test_row_dilfo, rand_web_df,
-            min_score_thresh=0, test=True)
+        close_matches = match_build(test_row_dilfo, test_web_df)
+        random_matches = match_build(test_row_dilfo, rand_web_df)
         matches = close_matches.append(random_matches)
         matches['ground_truth'] = matches.cert_url.apply(
             lambda x: 1 if x == test_row_dilfo.link_to_cert.iloc[0] else 0)
@@ -47,6 +58,7 @@ def build_train_set():
 def train_model():
     df = pd.read_csv('./data/train_set.csv')
     X = df[[x for x in df.columns if x.endswith('_score')]]
+    save_feature_list(X.columns)
     y = df[['ground_truth']]
     clf = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)
     sm = SMOTE(random_state=42, ratio = 1)

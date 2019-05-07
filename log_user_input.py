@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import re
 from urllib.parse import unquote
-
+from db_tools import create_connection
 
 def log_user_input():    
     imap_ssl_host = 'imap.gmail.com'
@@ -30,19 +30,19 @@ def log_user_input():
         server = imaplib.IMAP4_SSL(imap_ssl_host, imap_ssl_port)
         server.login(username, password)
         server.select('INBOX')
-        type, data = server.search(None, 'UNSEEN')  # UNSEEN or ALL
+        _, data = server.search(None, 'UNSEEN')  # UNSEEN or ALL
         mail_ids = data[0]
         id_list = mail_ids.split()
         results = []
         for i in id_list:
-            typ, data = server.fetch(i, '(RFC822)')
+            _, data = server.fetch(i, '(RFC822)')
             sender, content = parse_email(data)
             results.append({"sender": sender, "content": content})
         server.logout()
         return results
 
     for email_obj in get_job_input_data():
-        file_path = './data/{}raw_dilfo_certs.csv'
+        table = 'dilfo_open'  # by defualt, log new entries in the open table
         try:
             dict_input = {
                 unquote(x.split('=')[0]):str(unquote(x.split('=')[1])).replace('+', ' ') for x in email_obj['content'].split('&')}            
@@ -52,18 +52,18 @@ def log_user_input():
             except KeyError:
                 pass
             dict_input.update({"receiver_email": re.compile('<?(\S+@\S+\.\w+)>?').findall(email_obj["sender"])[0].lower()})
-            try:
-                file_path = file_path.format('test_') if 'yes' in dict_input['test_entry'] else file_path.format('')
-                print(file_path)
+            try:  # if entry was indicated as being a test_entry by form filler
+                table = 'dilfo_matched' if 'yes' in dict_input['test_entry'] else table
             except KeyError:
-                file_path = file_path.format('')
-            df = pd.read_csv(file_path, dtype={'job_number':str, 'quality':str})
-            df = df.append(dict_input, ignore_index=True)
+                table = table
+            with create_connection() as conn:
+                df = pd.read_sql(f"SELECT * FROM {table}", conn).drop('index', axis=1)
+                df = df.append(dict_input, ignore_index=True)
+                df = df.dropna(thresh=7).drop_duplicates(subset=["job_number"], keep='last')
+                df.to_sql(table, conn, if_exists='replace')  # we're replacing here instead of appending because of the 2 previous lines
         except IndexError:
             print(f'Could not process e-mail from {email_obj["sender"]}')
 
-        df = df.dropna(thresh=7).drop_duplicates(subset=["job_number"], keep='last')
-        df.to_csv(file_path, index=False)
 
 if __name__ == '__main__':
     log_user_input()

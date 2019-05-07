@@ -8,8 +8,25 @@ from wrangler import clean_job_number, clean_pub_date, clean_city, clean_company
 from matcher import match
 from communicator import communicate
 from ml import build_train_set, train_model, evaluate
+from db_tools import create_connection
+import os
 
 
+def setUpModule():
+    # the import statement below runs some code automatically
+    from test import test_setup
+    try:  # if not running on CI build
+        os.rename('cert_db', 'temp_cert_db')
+    except:  # if running on CI build
+        pass
+    os.rename('test_cert_db', 'cert_db')
+ 
+def tearDownModule():
+    try:  # if not running on CircleCI
+        os.rename('temp_cert_db', 'cert_db')
+    except:  # if running on CircleCI
+        pass
+    
 @ddt
 class TestWrangleFuncs(unittest.TestCase):
 
@@ -150,52 +167,47 @@ class TestWrangleFuncs(unittest.TestCase):
 
 @ddt
 class IntegrationTests(unittest.TestCase):
-
+        
     def test_scarpe_to_communicate(self):
         test_limit = 3
         web_df = scrape(limit=test_limit, test=True)
         self.assertEqual(len(web_df), test_limit)
         web_row = web_df.iloc[0]
-        dilfo_row = pd.read_csv('./data/raw_dilfo_certs.csv').iloc[0]
+        match_first_query = "SELECT * FROM dilfo_open LIMIT 1"
+        with create_connection() as conn:
+            dilfo_row = pd.read_sql(match_first_query, conn).iloc[0]
         communicate(web_row, dilfo_row, test=True)
 
     def test_truth_table(self):
+
         min_score_thresh = 0
         false_pos_thresh = 1
         build_train_set()
         train_model()
-        test_df_dilfo = pd.read_csv('./data/test_raw_dilfo_certs.csv')
+        match_query = "SELECT * FROM dilfo_matched"
+        with create_connection() as conn:
+            test_df_dilfo = pd.read_sql(match_query, conn)
         test_web_df = scrape(ref=test_df_dilfo)
-        for i, test_row_dilfo in test_df_dilfo.iterrows():
-            test_row_dilfo = test_row_dilfo.to_frame().transpose()  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
-            test_row_dilfo, test_web_df = wrangle(
-                ref=test_row_dilfo), wrangle(ref=test_web_df)
-            ranked = match(test_row_dilfo, test_web_df,
-                min_score_thresh=min_score_thresh, test=True)
-            ranked.to_csv(f'./data/ranked_results_{i}.csv', index=False)
-            results = evaluate(ranked)
-            results_match_only = results[results.pred==1]
-            truth_index = test_row_dilfo.index[0] if len(results_match_only) else -1
-            print(results_match_only)
-            print(truth_index)
-            self.assertTrue(truth_index in list(results_match_only.index), msg=(
-                f'match() returned index {results_match_only.index} which does not include actual '
-                f'truth index ({truth_index}).'
-                ))
-            self.assertTrue(len(results_match_only) <= false_pos_thresh + 1, msg=(
-                f'match() returned {len(results_match_only)} results, '
-                f'meaning {len(results_match_only) - 1} false positive(s), which is '
-                f'over the threshold of {false_pos_thresh} set in the function '
-                f'parameters.'
-                ))
-
-            try:
-                results_master = results_master.append(ranked)
-            except NameError:
-                results_master = results
-        results_master.to_csv(f'./data/results_master.csv', index=False)
-
-
+        results = match(df_dilfo=test_df_dilfo, df_web=test_web_df, test=True)
+        print(results)
+        # ranked = match(test_row_dilfo, test_web_df,
+        #     min_score_thresh=min_score_thresh, test=True)
+        # ranked.to_csv(f'./data/ranked_results_{i}.csv', index=False)
+        # results = evaluate(ranked)
+        # results_match_only = results[results.pred==1]
+        # truth_index = test_row_dilfo.index[0] if len(results_match_only) else -1
+        # print(results_match_only)
+        # print(truth_index)
+        # self.assertTrue(truth_index in list(results_match_only.index), msg=(
+        #     f'match() returned index {results_match_only.index} which does not include actual '
+        #     f'truth index ({truth_index}).'
+        #     ))
+        # self.assertTrue(len(results_match_only) <= false_pos_thresh + 1, msg=(
+        #     f'match() returned {len(results_match_only)} results, '
+        #     f'meaning {len(results_match_only) - 1} false positive(s), which is '
+        #     f'over the threshold of {false_pos_thresh} set in the function '
+        #     f'parameters.'
+        #     ))
 
 if __name__ == '__main__':
         unittest.main(verbosity=2)

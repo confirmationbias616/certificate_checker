@@ -1,56 +1,84 @@
-from fuzzywuzzy import fuzz
 import pandas as pd
 import datetime
-import numpy as np
+from wrangler import wrangle
 from communicator import communicate
+from scorer import compile_score, attr_score
+from matcher_build import match_build
+import pickle
+from db_tools import create_connection
+import re
 
 
-def match(df_dilfo=False, df_web=False, test=False, min_score_thresh=0.66):
-	if not isinstance(df_dilfo, pd.DataFrame):
-		df_dilfo = pd.read_csv('./data/clean_dilfo_certs.csv')
-	if not isinstance(df_web, pd.DataFrame):
-		df_web = pd.read_csv(f'./data/clean_web_certs_{datetime.datetime.now().date()}.csv')
-	for i in range(len(df_dilfo)):
-		print(f"searching for potential match for project #{df_dilfo.iloc[i].job_number}...")
-		def attr_score(row, i, attr, seg='full'):
-			if row in ["", " ", "NaN", "nan", np.nan]:  # should not be comparing empty fields because empty vs empty is an exact match!
-				return 0
-			try:
-				if seg=='full':
-					return fuzz.ratio(row, df_dilfo.iloc[i][attr])
-				else:
-					return fuzz.partial_ratio(row, df_dilfo.iloc[i][attr])
-			except TypeError:
-				return 0
-		scoreable_attrs = ['contractor', 'street_name', 'street_number', 'title', 'city', 'owner']
-		for attr in scoreable_attrs:
-				df_web[f'{attr}_score'] = df_web[attr].apply(
-					lambda row: attr_score(row, i, attr, seg='full'))
-				df_web[f'{attr}_pr_score'] = df_web[attr].apply(
-					lambda row: attr_score(row, i, attr, seg='partial'))
-		def compile_score(row):
-		    scores = row[[f'{attr}_score' for attr in scoreable_attrs]]
-		    scores = [x/100 for x in scores if type(x)==int]
-		    countable_attrs = len([x for x in scores if x > 0])
-		    total_score = sum(scores)/countable_attrs if countable_attrs > 2 else 0
-		    return total_score
-		df_web['total_score'] = df_web.apply(lambda row: compile_score(row), axis=1)
-		ranked = df_web.sort_values('total_score', ascending=False)
-		top_score = ranked.iloc[0]['total_score']
-		if top_score > min_score_thresh:
-			print(
-				f"\t-> Found a match with score of {top_score}!"
-				f"\t-> Dilfo job details: {df_dilfo.iloc[i]}"
-				f"\t-> web job details: {ranked.iloc[0]}"
-				f"\n\tgetting ready to send notification..."
-			)
-			communicate(ranked.iloc[0], df_dilfo.iloc[i], test=test)
+def load_model():
+    with open("./rf_model.pkl", "rb") as input_file:
+        return pickle.load(input_file)
+
+def load_feature_list():
+    with open("./rf_features.pkl", "rb") as input_file:
+        return pickle.load(input_file)
+
+def predict_match(sample):
+	clf = load_model()
+	cols = load_feature_list()
+	match = clf.predict(sample[cols].values.reshape(1, -1))[0]
+	return match
+
+def predict_prob(sample):
+    clf = load_model()
+    cols = load_feature_list()
+    prob = clf.predict_proba(sample[cols].values.reshape(1, -1))[0][1]
+    return prob
+
+def match(df_dilfo=False, df_web=False, test=False, since='week_ago'):
+	if not isinstance(df_dilfo, pd.DataFrame):  # df_dilfo == False
+		open_query = "SELECT * FROM dilfo_open"
+		with create_connection() as conn:
+			df_dilfo = pd.read_sql(open_query, conn).drop('index', axis=1)
+	df_dilfo = wrangle(df_dilfo)
+	if not isinstance(df_web, pd.DataFrame):  # df_web == False
+		if since == 'week_ago':
+			since = (datetime.datetime.now()-datetime.timedelta(7)).date()
 		else:
-			print("\t-> nothing found.")
-			if test:
-				return ranked.drop(ranked.index)  # short-circuit out of loop of best match is not good enough
+			valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
+			if not valid_since_date:
+				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
+		hist_query = "SELECT * FROM hist_certs WHERE pub_date>=? ORDER BY pub_date"
+		with create_connection() as conn:
+			df_web = pd.read_sql(hist_query, conn, params=[since]).drop('index', axis=1)
+		if len(df_web) == 0:  # SQL query retunred nothing so no point of going any further
+			print("Nothing has been collected from Daily commercial News in the past week. Breaking out of match function.")
+			return 0
+	df_web = wrangle(df_web)
+	for _, dilfo_row in df_dilfo.iterrows():
+		results = match_build(dilfo_row.to_frame().transpose(), df_web)  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
+		# LOGICAL BREAK IN FUNCTION? TIME TO SPLIT FUNC INTO 2?!?!?!
+		print(f"searching for potential match for project #{dilfo_row['job_number']}...")
+		results['pred_match'] = results.apply(lambda row: predict_match(row), axis=1)
+		results['pred_prob'] = results.apply(lambda row: predict_prob(row), axis=1)
+		results = results.sort_values('pred_prob', ascending=False)
+		matches = results[results.pred_match==1]
+		msg = 	"\n-> Found {} match with probability of {}!" +\
+				"-> Dilfo job details:\n{}" +\
+				"-> web job details:\n{}"
+		try:
+			top = matches.iloc[0]
+			print(msg.format('a', top.pred_prob, dilfo_row, top))
+			print("\tgetting ready to send notification...")
+			communicate(top, dilfo_row, test=test)
+			if len(matches) > 1:
+				for _, row in matches[1:].iterrows():
+					print(msg.format('another possible', row['pred_prob'], dilfo_row, row))
+			else:
+				print('no secondary matches found')
+		except IndexError:
+			print('no matches found')
+		try:
+			results_master = results_master.append(results)
+		except NameError:
+			results_master = results
+
 	if test:
-		return ranked
+		return results_master
 
 if __name__=="__main__":
 	match()
