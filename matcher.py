@@ -56,7 +56,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='week_ago'):
 		results['pred_match'] = results.apply(lambda row: predict_match(row), axis=1)
 		results['pred_prob'] = results.apply(lambda row: predict_prob(row), axis=1)
 		results = results.sort_values('pred_prob', ascending=False)
-		matches = results[results.pred_match==1]
+		matches = results[results.pred_prob>=0.5]
 		msg = 	"\n-> Found {} match with probability of {}!" +\
 				"-> Dilfo job details:\n{}" +\
 				"-> web job details:\n{}"
