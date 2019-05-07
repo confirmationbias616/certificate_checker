@@ -1,5 +1,10 @@
 cert_env
+cert_db
+
 .password.txt
+
+# ignore all pickles
+*.pkl
 
 # Ignore all data
 data/*
