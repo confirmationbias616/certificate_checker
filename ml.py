@@ -77,7 +77,7 @@ def train_model():
         rc = len(results[(results.truth==1)&(results.prob>=prob_trhesh)]) / len(results[results.truth==1])
         pr = len(results[(results.truth==1)&(results.prob>=prob_trhesh)]) / len(results[results.prob>=prob_trhesh])
         f1 = f1_score(y_test, pred)
-        print(results[(results.truth==1)|(results.pred==1)|(results.total_score>0.6)|(results.prob>0.3)].sort_values(['total_score'], ascending=False))
+        print(results[(results.truth==1)|(results.prob=1)|(results.total_score>0.6)|(results.prob>0.3)].sort_values(['total_score'], ascending=False))
         print(f'number of truthes to learn from: {len([x for x in y_train if x==1])} out of {len(y_train)}')
         print(f'number of tests: {len(results[results.truth==1])}')
         print(pd.DataFrame({'feat':X.columns, 'imp':clf.feature_importances_}).sort_values('imp', ascending=False))
