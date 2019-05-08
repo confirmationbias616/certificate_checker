@@ -57,7 +57,7 @@ def log_user_input():
             except KeyError:
                 table = table
             with create_connection() as conn:
-                df = pd.read_sql(f"SELECT * FROM {table}", conn).drop('index', axis=1)
+                df = pd.read_sql(f"SELECT * FROM {table}", conn)
                 df = df.append(dict_input, ignore_index=True)
                 df = df.dropna(thresh=7).drop_duplicates(subset=["job_number"], keep='last')
                 df.to_sql(table, conn, if_exists='replace')  # we're replacing here instead of appending because of the 2 previous lines
