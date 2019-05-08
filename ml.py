@@ -71,7 +71,7 @@ def train_model():
         clf.fit(X_train_smo, y_train_smo)
         prob = clf.predict_proba(X_test)
         prob_thresh = 0.33
-        pred = [1 if x >= prob_thresh else 0 for x in clf.predict_proba(X_test).tolist()]
+        pred = [1 if x >= prob_thresh else 0 for x in clf.predict_proba(X_test)[:,1]]
         y_test = y_test.reshape(y_test.shape[0],) # shitty little workaround required due to pandas -> numpy  conversion
         results = pd.DataFrame({'truth':y_test, 'total_score':X_test[:,-1], 'prob':prob[:,1], 'pred':pred})
         rc = len(results[(results.truth==1)&(results.pred==1)]) / len(results[results.truth==1])
