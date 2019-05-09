@@ -85,7 +85,8 @@ class TestWrangleFuncs(unittest.TestCase):
         ("Regional Municipality of Windsor", "windsor"),
         ("Niagara Region, City of St. Catharines, Canada", "st.catharine"),
         ("York Region, Town of Markham", "markham"),
-        ("Town of Wasaga Beach", "wasagabeach")
+        ("Town of Wasaga Beach", "wasagabeach"),
+        ("Ottawa-Carleton", "ottawa")
     )
     @unpack
     def test_clean_city(self, input_string, desired_string):

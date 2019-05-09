@@ -59,6 +59,8 @@ def clean_city(raw):
         city = city.strip("ontario")
     city = "".join([x.rstrip("'s") for x in city.split(" ")])
     city = city.replace("/","&")
+    if city == 'ottawacarleton':
+        city = 'ottawa'
     return city
 
 def clean_company_name(raw):
