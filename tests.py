@@ -211,4 +211,9 @@ class IntegrationTests(unittest.TestCase):
         #     ))
 
 if __name__ == '__main__':
-        unittest.main(verbosity=2)
+    try:
+        os.rename('test_cert_db', 'cert_db')
+    except:
+        print('__init__.py ran... all good!')
+        pass
+    unittest.main(verbosity=2)
