@@ -33,7 +33,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='week_ago'):
 	if not isinstance(df_dilfo, pd.DataFrame):  # df_dilfo == False
 		open_query = "SELECT * FROM dilfo_open"
 		with create_connection() as conn:
-			df_dilfo = pd.read_sql(open_query, conn).drop('index', axis=1)
+			df_dilfo = pd.read_sql(open_query, conn)
 	df_dilfo = wrangle(df_dilfo)
 	if not isinstance(df_web, pd.DataFrame):  # df_web == False
 		if since == 'week_ago':
@@ -44,7 +44,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='week_ago'):
 				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
 		hist_query = "SELECT * FROM hist_certs WHERE pub_date>=? ORDER BY pub_date"
 		with create_connection() as conn:
-			df_web = pd.read_sql(hist_query, conn, params=[since]).drop('index', axis=1)
+			df_web = pd.read_sql(hist_query, conn, params=[since])
 		if len(df_web) == 0:  # SQL query retunred nothing so no point of going any further
 			print("Nothing has been collected from Daily commercial News in the past week. Breaking out of match function.")
 			return 0

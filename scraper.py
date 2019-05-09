@@ -107,7 +107,7 @@ def scrape(limit=False, test=False, ref=False, since='week_ago'):
 
     if not test and not isinstance(ref, pd.DataFrame):
         with create_connection() as conn:
-            df_web.to_sql('hist_certs', conn, if_exists='append')
+            df_web.to_sql('hist_certs', conn, if_exists='append', index=False)
     else:
         return df_web
 
