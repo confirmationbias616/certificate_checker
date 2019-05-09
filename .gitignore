@@ -1,5 +1,6 @@
 cert_env
 cert_db
+temp_cert_db
 
 .password.txt
 
