@@ -8,9 +8,21 @@ import argparse
 import progressbar
 from time import sleep
 from db_tools import create_connection
+import sys
+import logging
 
 
 def scrape(limit=False, test=False, ref=False, since='week_ago'):
+logger = logging.getLogger(__name__)
+log_handler = logging.StreamHandler(sys.stdout)
+log_handler.setFormatter(
+    logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s - line %(lineno)d"
+    )
+)
+logger.addHandler(log_handler)
+logger.setLevel(logging.INFO)
+
 
     pub_date, city, address, title, owner, contractor, engineer, cert_url = [
         [] for _ in range(8)]
@@ -36,12 +48,10 @@ def scrape(limit=False, test=False, ref=False, since='week_ago'):
     response = requests.get(base_url + date_param_url)
     html = response.content
     soup = BeautifulSoup(html, "html.parser")
-
     number_of_matches = int(re.compile('\d\d*').findall(
         (soup.find('h4', {'class':'search-total h-normalize'}).get_text()))[0])
 
     def get_details(entry):
-            
         if isinstance(ref, pd.DataFrame):
             url = entry
         else:
@@ -75,17 +85,18 @@ def scrape(limit=False, test=False, ref=False, since='week_ago'):
         for key in list(lookup.keys()):
             lookup[key].append(company_results.get(key, np.nan))
     if isinstance(ref, pd.DataFrame):
+        logger.info(f"fetching DCN certificate info for previously matched projects...")
         for link in ref.link_to_cert:
             get_details(link)
     else:
-        print(f'\nscraping all of {number_of_matches} new certificates since {since}...')
+        logger.info(f"scraping all of {number_of_matches} new certificates since {since}...")
         bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
             widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
         bar.start()
         for i, entry in enumerate(soup.find_all("article", {"class":"cards-item"}), 1):
             get_details(entry)
             if limit and (i >= limit):
-                print("limit reached - breaking out of loop.")
+                logger.info("limit reached - breaking out of loop.")
                 break
             bar.update(i+1)
         bar.finish()      

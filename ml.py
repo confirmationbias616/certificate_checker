@@ -10,20 +10,37 @@ from wrangler import wrangle
 from matcher import match
 from matcher_build import match_build
 from db_tools import create_connection
+import sys
+import logging
+
+
+logger = logging.getLogger(__name__)
+log_handler = logging.StreamHandler(sys.stdout)
+log_handler.setFormatter(
+    logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s - line %(lineno)d"
+    )
+)
+logger.addHandler(log_handler)
+logger.setLevel(logging.INFO)
 
 def save_model(model):
+    logger.info("saving random forest classifier")
     with open("./rf_model.pkl", "wb") as output:
         pickle.dump(model, output)
 
 def save_feature_list(columns):
+    logger.info("saving list of features for random forest classifier")
     with open("./rf_features.pkl", "wb") as output:
         pickle.dump(columns, output)
 
 def load_model():
+    logger.info("loading random forest classifier")
     with open("./rf_model.pkl", "rb") as input_file:
         return pickle.load(input_file)
 
 def build_train_set():
+    logger.info("building dataset for training random forest classifier")
     match_query = "SELECT * FROM dilfo_matched"
     with create_connection() as conn:
         test_df_dilfo = pd.read_sql(match_query, conn)
@@ -56,6 +73,7 @@ def build_train_set():
     all_matches.to_csv(f'./train_set.csv', index=False)
 
 def train_model():
+    logger.info("training random forest classifier")
     df = pd.read_csv('./train_set.csv')
     X = df[[x for x in df.columns if x.endswith('_score')]]
     save_feature_list(X.columns)
@@ -65,6 +83,7 @@ def train_model():
     kf = KFold(n_splits=3, shuffle=True, random_state=41)
     rc_cum, pr_cum, f1_cum = [], [], []
     for train_index, test_index in kf.split(X):
+        logger.info(f"K-Split #{split_no}...")
         X_train, X_test = X.values[train_index], X.values[test_index]
         y_train, y_test = y.values[train_index], y.values[test_index]
         X_train_smo, y_train_smo = sm.fit_sample(X_train, y_train)
@@ -77,19 +96,22 @@ def train_model():
         rc = len(results[(results.truth==1)&(results.pred==1)]) / len(results[results.truth==1])
         pr = len(results[(results.truth==1)&(results.pred==1)]) / len(results[results.pred==1])
         f1 = f1_score(y_test, pred)
-        print(results[(results.truth==1)|(results.pred==1)|(results.total_score>0.6)|(results.prob>0.3)].sort_values(['total_score'], ascending=False))
-        print(f'number of truthes to learn from: {len([x for x in y_train if x==1])} out of {len(y_train)}')
-        print(f'number of tests: {len(results[results.truth==1])}')
-        print(pd.DataFrame({'feat':X.columns, 'imp':clf.feature_importances_}).sort_values('imp', ascending=False))
-        print(f'recall: {rc}')
-        print(f'precision: {pr}')
-        print(f'f1 score: {f1}\n\n')
+        show_res = results[(results.truth==1)|(results.pred==1)|(results.total_score>0.6)|(results.prob>0.3)].sort_values(['total_score'], ascending=False)
+        logger.debug("\nshow_res\n")
+        logger.info(f'number of truthes to learn from: {len([x for x in y_train if x==1])} out of {len(y_train)}')
+        logger.info(f'number of tests: {len(results[results.truth==1])}')
+        feat_imp = pd.DataFrame({'feat':X.columns, 'imp':clf.feature_importances_}).sort_values('imp', ascending=False)
+        logger.debug(f"\nfeat_imp\n")
+        logger.info(f'top feature is `{feat_imp.iloc[0].feat}` with factor of {round(feat_imp.iloc[0].imp, 3)}')
+        logger.info(f'recall: {round(rc, 3)}')
+        logger.info(f'precision: {round(pr, 3)}')
+        logger.info(f'f1 score: {round(f1, 3)}')
         rc_cum.append(rc)
         pr_cum.append(pr)
         f1_cum.append(f1)
-    print(f'average recall: {sum(rc_cum)/len(rc_cum)}')
-    print(f'average precision: {sum(pr_cum)/len(pr_cum)}')
-    print(f'avergae f1 score: {sum(f1_cum)/len(f1_cum)}')
+    logger.info(f'average recall: {round(sum(rc_cum)/len(rc_cum), 3)}')
+    logger.info(f'average precision: {round(sum(pr_cum)/len(pr_cum), 3)}')
+    logger.info(f'avergae f1 score: {round(sum(f1_cum)/len(f1_cum), 3)}')
     X_smo, y_smo = sm.fit_sample(X, y)
     clf.fit(X_smo, y_smo)
     save_model(clf)

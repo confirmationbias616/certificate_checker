@@ -8,6 +8,21 @@ import re
 from urllib.parse import unquote
 from db_tools import create_connection
 
+import sys
+import logging
+logger = logging.getLogger(__name__)
+
+
+log_handler = logging.StreamHandler(sys.stdout)
+log_handler.setFormatter(
+    logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s - line %(lineno)d"
+    )
+)
+logger.addHandler(log_handler)
+logger.setLevel(logging.INFO)
+
+
 def log_user_input():    
     imap_ssl_host = 'imap.gmail.com'
     imap_ssl_port = 993
@@ -15,6 +30,7 @@ def log_user_input():
     with open(".password.txt") as file: 
         password = file.read()
     def get_job_input_data():
+        logger.info('scanning inbox and fetching new email...')
         def parse_email(data):
             for response_part in data:
                 if isinstance(response_part, tuple):
@@ -33,9 +49,12 @@ def log_user_input():
         _, data = server.search(None, 'UNSEEN')  # UNSEEN or ALL
         mail_ids = data[0]
         id_list = mail_ids.split()
+        if len(id_list) == 0:
+            logger.info(f'no new e-mails to process')
         results = []
         for i in id_list:
             _, data = server.fetch(i, '(RFC822)')
+            logger.info(f'parsing new email {int(i)} of {len(id_list)}')
             sender, content = parse_email(data)
             results.append({"sender": sender, "content": content})
         server.logout()
@@ -61,8 +80,9 @@ def log_user_input():
                 df = df.append(dict_input, ignore_index=True)
                 df = df.dropna(thresh=7).drop_duplicates(subset=["job_number"], keep='last')
                 df.to_sql(table, conn, if_exists='replace', index=False)  # we're replacing here instead of appending because of the 2 previous lines
+            logger.info(f"saved job {dict_input['job_number']} in table `{table}`")
         except IndexError:
-            print(f'Could not process e-mail from {email_obj["sender"]}')
+            logger.info(f'Could not process e-mail from {email_obj["sender"]}')
 
 
 if __name__ == '__main__':

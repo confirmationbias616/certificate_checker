@@ -7,7 +7,19 @@ from matcher_build import match_build
 import pickle
 from db_tools import create_connection
 import re
+import sys
+import logging
 
+
+logger = logging.getLogger(__name__)
+log_handler = logging.StreamHandler(sys.stdout)
+log_handler.setFormatter(
+    logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s - line %(lineno)d"
+    )
+)
+logger.addHandler(log_handler)
+logger.setLevel(logging.INFO)
 
 def load_model():
     with open("./rf_model.pkl", "rb") as input_file:
@@ -30,6 +42,7 @@ def predict_prob(sample):
     return prob
 
 def match(df_dilfo=False, df_web=False, test=False, since='week_ago'):
+	logger.info('matching...')
 	if not isinstance(df_dilfo, pd.DataFrame):  # df_dilfo == False
 		open_query = "SELECT * FROM dilfo_open"
 		with create_connection() as conn:
@@ -46,32 +59,31 @@ def match(df_dilfo=False, df_web=False, test=False, since='week_ago'):
 		with create_connection() as conn:
 			df_web = pd.read_sql(hist_query, conn, params=[since])
 		if len(df_web) == 0:  # SQL query retunred nothing so no point of going any further
-			print("Nothing has been collected from Daily commercial News in the past week. Breaking out of match function.")
+			logger.info(f"Nothing has been collected from Daily Commercial News since {since}. Breaking out of match function.")
 			return 0
 	df_web = wrangle(df_web)
 	for _, dilfo_row in df_dilfo.iterrows():
 		results = match_build(dilfo_row.to_frame().transpose(), df_web)  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
-		# LOGICAL BREAK IN FUNCTION? TIME TO SPLIT FUNC INTO 2?!?!?!
-		print(f"searching for potential match for project #{dilfo_row['job_number']}...")
-		results['pred_match'] = results.apply(lambda row: predict_match(row), axis=1)
+		logger.info(f"searching for potential match for project #{dilfo_row['job_number']}...")
 		results['pred_prob'] = results.apply(lambda row: predict_prob(row), axis=1)
 		results = results.sort_values('pred_prob', ascending=False)
 		matches = results[results.pred_prob>=0.5]
+		logger.info(results.head(5))
 		msg = 	"\n-> Found {} match with probability of {}!" +\
 				"-> Dilfo job details:\n{}" +\
 				"-> web job details:\n{}"
 		try:
 			top = matches.iloc[0]
-			print(msg.format('a', top.pred_prob, dilfo_row, top))
-			print("\tgetting ready to send notification...")
+			logger.info(msg.format('a', top.pred_prob, dilfo_row, top))
+			logger.info("\tgetting ready to send notification...")
 			communicate(top, dilfo_row, test=test)
 			if len(matches) > 1:
 				for _, row in matches[1:].iterrows():
-					print(msg.format('another possible', row['pred_prob'], dilfo_row, row))
+					logger.info(msg.format('another possible', row['pred_prob'], dilfo_row, row))
 			else:
-				print('no secondary matches found')
+				logger.info('no secondary matches found')
 		except IndexError:
-			print('no matches found')
+			logger.info('no matches found')
 		try:
 			results_master = results_master.append(results)
 		except NameError:

@@ -1,5 +1,18 @@
 import smtplib, ssl
 import datetime
+import sys
+import logging
+
+
+logger = logging.getLogger(__name__)
+log_handler = logging.StreamHandler(sys.stdout)
+log_handler.setFormatter(
+    logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s - line %(lineno)d"
+    )
+)
+logger.addHandler(log_handler)
+logger.setLevel(logging.INFO)
 
 def communicate(web_row, dilfo_row, test=False):
 	port = 465 # for SSL
@@ -9,7 +22,7 @@ def communicate(web_row, dilfo_row, test=False):
 	receiver_email = dilfo_row.receiver_email
 	if (not receiver_email.endswith('@dilfo.com')) and (receiver_email not in[
 		'alex.roy616@gmail.com', 'alex.roy616@icloud.com']):
-		print('given user e-mail address has not been white listed (from dilfo.com '\
+		logger.info('given user e-mail address has not been white listed (from dilfo.com '\
 			'domain or from Alex Roy address)')
 		return 1
 	try:
@@ -63,11 +76,8 @@ def communicate(web_row, dilfo_row, test=False):
 				with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
 				    server.login(sender_email, password)
 				    server.sendmail(sender_email, [receiver_email, cc], message)
-				print(f"Successfully sent an email to {receiver_email}")
+				logger.info(f"Successfully sent an email to {receiver_email}")
 			except FileNotFoundError:
-				print("password not available -> could not send e-mail")
-		else:
-			print("for testing purposes only, let's see that e-mail draft:\n\n")
-			print(message)
+				logger.info("password not available -> could not send e-mail")
 
 	send_email()
