@@ -181,13 +181,15 @@ class IntegrationTests(unittest.TestCase):
 
     def test_truth_table(self):
 
+        prob_thresh = 0.65
+        
         build_train_set()
-        train_model()
+        train_model(prob_thresh=prob_thresh)
         match_query = "SELECT * FROM dilfo_matched"
         with create_connection() as conn:
             test_df_dilfo = pd.read_sql(match_query, conn)
         test_web_df = scrape(ref=test_df_dilfo)
-        results = match(df_dilfo=test_df_dilfo, df_web=test_web_df, test=True)
+        results = match(df_dilfo=test_df_dilfo, df_web=test_web_df, test=True, prob_thresh=prob_thresh)
         
         # confrim 100% recall with below assert
         qty_actual_matches = int(len(results)**0.5)
