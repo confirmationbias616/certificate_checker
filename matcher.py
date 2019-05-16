@@ -51,6 +51,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 	if not isinstance(df_web, pd.DataFrame):  # df_web == False
 		if since == 'day_ago':
 			since = (datetime.datetime.now()-datetime.timedelta(1)).date()
+		elif since == 'week_ago':
 			since = (datetime.datetime.now()-datetime.timedelta(7)).date()
 		else:
 			valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
