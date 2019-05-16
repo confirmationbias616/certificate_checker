@@ -72,7 +72,7 @@ def build_train_set():
 
     all_matches.to_csv(f'./train_set.csv', index=False)
 
-def train_model():
+def train_model(prob_thresh=0.65):
     logger.info("training random forest classifier")
     df = pd.read_csv('./train_set.csv')
     X = df[[x for x in df.columns if x.endswith('_score')]]
@@ -89,7 +89,6 @@ def train_model():
         X_train_smo, y_train_smo = sm.fit_sample(X_train, y_train)
         clf.fit(X_train_smo, y_train_smo)
         prob = clf.predict_proba(X_test)
-        prob_thresh = 0.33
         pred = [1 if x >= prob_thresh else 0 for x in clf.predict_proba(X_test)[:,1]]
         y_test = y_test.reshape(y_test.shape[0],) # shitty little workaround required due to pandas -> numpy  conversion
         results = pd.DataFrame({'truth':y_test, 'total_score':X_test[:,-1], 'prob':prob[:,1], 'pred':pred})
