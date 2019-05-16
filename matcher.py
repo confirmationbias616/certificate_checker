@@ -75,7 +75,6 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 		logger.info(f"searching for potential match for project #{dilfo_row['job_number']}...")
 		results['pred_prob'] = results.apply(lambda row: predict_prob(row), axis=1)
 		results['pred_match'] = results.pred_prob.apply(lambda prob: predict_match(prob, prob_thresh))
-		non_sorted_results = results.copy()
 		results = results.sort_values('pred_prob', ascending=False)
 		logger.info(results.head(5))
 		matches = results[results.pred_prob>=0.6]
@@ -95,9 +94,9 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 		except IndexError:
 			logger.info('no matches found')
 		try:
-			results_master = results_master.append(non_sorted_results)
+			results_master = results_master.append(results)
 		except NameError:
-			results_master = non_sorted_results
+			results_master = results
 
 	if test:
 		return results_master
