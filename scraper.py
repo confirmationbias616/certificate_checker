@@ -12,7 +12,6 @@ import sys
 import logging
 
 
-def scrape(limit=False, test=False, ref=False, since='week_ago'):
 logger = logging.getLogger(__name__)
 log_handler = logging.StreamHandler(sys.stdout)
 log_handler.setFormatter(
@@ -23,6 +22,7 @@ log_handler.setFormatter(
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
+def scrape(limit=False, test=False, ref=False, since='last_record'):
 
     pub_date, city, address, title, owner, contractor, engineer, cert_url = [
         [] for _ in range(8)]
