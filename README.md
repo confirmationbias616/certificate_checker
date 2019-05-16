@@ -23,7 +23,7 @@ Automatically scrapes the Daily Commercial News for Certificates of Substantial 
 :crystal_ball::arrow_right::ballot_box_with_check: Some highly unpredictable amount of time passes while the GC and Owner work on closing out the project and issuing an official certificate of substantial completion.
 
 
-***:warning::arrow_right::date: This service notifies you of substantial completion certificate and advises you on valid date to release your holdback***
+***:warning::arrow_right::date: This service notifies you of substantial completion certificate and advises you on valid date to release your holdback.***
 
 
-***:date::arrow_right::moneybag::arrow_right::tada: You get paid for your hard-earned 10% holdback as soon as humanly possible. Relationship with the GC remains positive. No tax hits as a result of premature invoicing***
+***:date::arrow_right::moneybag::arrow_right::tada: You get paid for your hard-earned 10% holdback as soon as humanly possible. Relationship with the GC remains positive. No tax hits as a result of premature invoicing.***
