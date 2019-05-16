@@ -7,7 +7,7 @@
 Automatically scrapes the Daily Commercial News for Certificates of Substantial Completion being posted by general contractors of Ontario, checks for possible matches with your own list of projects, and helps you stay on top of your holdback releases. 
 
 ---
-### Holdback Release Workflow Typically Seen in our Industry
+### Holdback Release Workflow ***Typically Seen in our Industry***
 :construction::arrow_right::office: Your work on site is almost done and the construction projects starts wrapping up.
 
 
@@ -16,7 +16,7 @@ Automatically scrapes the Daily Commercial News for Certificates of Substantial 
 ***:crystal_ball::arrow_right::rage1::no_entry::rage2::loop::arrow_right::arrow_right::arrow_right::moneybag: You eventually get paid for your hard-earned 10% holdback after having to repeatedly bug the GC and/or invoice prematurely and take a tax hit.***
 
 ---
-### Holdback Release Workflow Using this Service
+### Holdback Release Workflow ***Using this Service***
 :construction::arrow_right::office: Your work on site is almost done and the construction projects starts wrapping up.
 
 
