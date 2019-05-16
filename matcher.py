@@ -95,9 +95,9 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 		except IndexError:
 			logger.info('no matches found')
 		try:
-			results_master = results_master.append(results)
+			results_master = results_master.append(non_sorted_results)
 		except NameError:
-			results_master = results
+			results_master = non_sorted_results
 
 	if test:
 		return results_master
