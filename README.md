@@ -15,7 +15,7 @@ Automatically scrapes the Daily Commercial News for Certificates of Substantial 
 
 ***:crystal_ball::arrow_right::rage1::no_entry::rage2::loop::arrow_right::arrow_right::arrow_right::moneybag: You get paid for your hard-earned 10% holdback after having to repeatedly bug the GC repeatedly and/or invoice prematurely and take a tax hit***
 
-
+---
 ### Holdback Release Workflow Using this Service
 :construction::arrow_right::office: Your work on site is almost done and the construction projects starts wrapping up
 
