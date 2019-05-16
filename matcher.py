@@ -41,7 +41,7 @@ def predict_prob(sample):
     prob = clf.predict_proba(sample[cols].values.reshape(1, -1))[0][1]
     return prob
 
-def match(df_dilfo=False, df_web=False, test=False, since='week_ago'):
+def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now', prob_thresh=0.65):
 	logger.info('matching...')
 	if not isinstance(df_dilfo, pd.DataFrame):  # df_dilfo == False
 		open_query = "SELECT * FROM dilfo_open"
@@ -49,15 +49,22 @@ def match(df_dilfo=False, df_web=False, test=False, since='week_ago'):
 			df_dilfo = pd.read_sql(open_query, conn)
 	df_dilfo = wrangle(df_dilfo)
 	if not isinstance(df_web, pd.DataFrame):  # df_web == False
-		if since == 'week_ago':
+		if since == 'day_ago':
+			since = (datetime.datetime.now()-datetime.timedelta(1)).date()
 			since = (datetime.datetime.now()-datetime.timedelta(7)).date()
 		else:
 			valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
 			if not valid_since_date:
 				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
-		hist_query = "SELECT * FROM hist_certs WHERE pub_date>=? ORDER BY pub_date"
+		if until == 'now':
+			now = (datetime.datetime.now())
+		else:
+			valid_until_date = re.search("\d{4}-\d{2}-\d{2}", since)
+			if not valid_until_date:
+				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
+		hist_query = "SELECT * FROM hist_certs WHERE pub_date>=? AND pub_date<=? ORDER BY pub_date"
 		with create_connection() as conn:
-			df_web = pd.read_sql(hist_query, conn, params=[since])
+			df_web = pd.read_sql(hist_query, conn, params=[since, until])
 		if len(df_web) == 0:  # SQL query retunred nothing so no point of going any further
 			logger.info(f"Nothing has been collected from Daily Commercial News since {since}. Breaking out of match function.")
 			return 0
