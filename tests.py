@@ -188,6 +188,15 @@ class IntegrationTests(unittest.TestCase):
             test_df_dilfo = pd.read_sql(match_query, conn)
         test_web_df = scrape(ref=test_df_dilfo)
         results = match(df_dilfo=test_df_dilfo, df_web=test_web_df, test=True)
+        
+        # confrim 100% recall with below assert
+        qty_actual_matches = int(len(results)**0.5)
+        qty_found_matches = results[results.pred_match == 1].title.nunique()
+        self.assertTrue(qty_found_matches == qty_actual_matches, msg=f"qty_found_matches({qty_found_matches}) not equal qty_actual_matches({qty_actual_matches})")
+        
+        # make sure not more than 10% false positives with below assert
+        false_positives = len(results[results.pred_match == 1]) - qty_found_matches
+        self.assertTrue(false_positives <= round(qty_actual_matches*0.1,1), msg=f"found too many false positives ({false_positives}) out of total test projects ({qty_actual_matches})")
 
 if __name__ == '__main__':
     try:
