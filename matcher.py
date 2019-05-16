@@ -29,17 +29,17 @@ def load_feature_list():
     with open("./rf_features.pkl", "rb") as input_file:
         return pickle.load(input_file)
 
-def predict_match(sample):
-	clf = load_model()
-	cols = load_feature_list()
-	match = clf.predict(sample[cols].values.reshape(1, -1))[0]
-	return match
-
 def predict_prob(sample):
     clf = load_model()
     cols = load_feature_list()
     prob = clf.predict_proba(sample[cols].values.reshape(1, -1))[0][1]
     return prob
+
+def predict_match(prob, prob_thresh):
+	if prob >= prob_thresh:
+		return 1
+	else:
+		return 0
 
 def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now', prob_thresh=0.65):
 	logger.info('matching...')
@@ -73,9 +73,11 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 		results = match_build(dilfo_row.to_frame().transpose(), df_web)  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
 		logger.info(f"searching for potential match for project #{dilfo_row['job_number']}...")
 		results['pred_prob'] = results.apply(lambda row: predict_prob(row), axis=1)
+		results['pred_match'] = results.pred_prob.apply(lambda prob: predict_match(prob, prob_thresh))
+		non_sorted_results = results.copy()
 		results = results.sort_values('pred_prob', ascending=False)
-		matches = results[results.pred_prob>=0.5]
 		logger.info(results.head(5))
+		matches = results[results.pred_prob>=0.6]
 		msg = 	"\n-> Found {} match with probability of {}!" +\
 				"-> Dilfo job details:\n{}" +\
 				"-> web job details:\n{}"
