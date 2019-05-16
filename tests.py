@@ -181,8 +181,6 @@ class IntegrationTests(unittest.TestCase):
 
     def test_truth_table(self):
 
-        min_score_thresh = 0
-        false_pos_thresh = 1
         build_train_set()
         train_model()
         match_query = "SELECT * FROM dilfo_matched"
@@ -190,25 +188,6 @@ class IntegrationTests(unittest.TestCase):
             test_df_dilfo = pd.read_sql(match_query, conn)
         test_web_df = scrape(ref=test_df_dilfo)
         results = match(df_dilfo=test_df_dilfo, df_web=test_web_df, test=True)
-        print(results)
-        # ranked = match(test_row_dilfo, test_web_df,
-        #     min_score_thresh=min_score_thresh, test=True)
-        # ranked.to_csv(f'./data/ranked_results_{i}.csv', index=False)
-        # results = evaluate(ranked)
-        # results_match_only = results[results.pred==1]
-        # truth_index = test_row_dilfo.index[0] if len(results_match_only) else -1
-        # print(results_match_only)
-        # print(truth_index)
-        # self.assertTrue(truth_index in list(results_match_only.index), msg=(
-        #     f'match() returned index {results_match_only.index} which does not include actual '
-        #     f'truth index ({truth_index}).'
-        #     ))
-        # self.assertTrue(len(results_match_only) <= false_pos_thresh + 1, msg=(
-        #     f'match() returned {len(results_match_only)} results, '
-        #     f'meaning {len(results_match_only) - 1} false positive(s), which is '
-        #     f'over the threshold of {false_pos_thresh} set in the function '
-        #     f'parameters.'
-        #     ))
 
 if __name__ == '__main__':
     try:
