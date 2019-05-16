@@ -82,7 +82,9 @@ def train_model(prob_thresh=0.65):
     sm = SMOTE(random_state=42, ratio = 1)
     kf = KFold(n_splits=3, shuffle=True, random_state=41)
     rc_cum, pr_cum, f1_cum = [], [], []
+    split_no = 0
     for train_index, test_index in kf.split(X):
+        split_no +=1
         logger.info(f"K-Split #{split_no}...")
         X_train, X_test = X.values[train_index], X.values[test_index]
         y_train, y_test = y.values[train_index], y.values[test_index]
