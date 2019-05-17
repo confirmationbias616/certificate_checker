@@ -7,7 +7,7 @@ from scraper import scrape
 from wrangler import clean_job_number, clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title, wrangle
 from matcher import match
 from communicator import communicate
-from ml import build_train_set, train_model, evaluate
+from ml import build_train_set, train_model
 from db_tools import create_connection
 import os
 
