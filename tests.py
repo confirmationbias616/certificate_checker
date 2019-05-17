@@ -15,17 +15,19 @@ import os
 def setUpModule():
     # the import statement below runs some code automatically
     from test import test_setup
-    try:  # if not running on CI build
-        os.rename('cert_db', 'temp_cert_db')
-    except:  # if running on CI build
-        pass
-    os.rename('test_cert_db', 'cert_db')
+    for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+        try:  # if not running on CI build
+            os.rename(filename, 'temp_'+filename)
+        except:  # if running on CI build
+            os.rename('test_'+filename, filename)
  
 def tearDownModule():
-    try:  # if not running on CircleCI
-        os.rename('temp_cert_db', 'cert_db')
-    except:  # if running on CircleCI
-        pass
+    for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+        try:  # if not running on CI build
+            os.rename('temp_'+filename, filename)
+        except:  # if running on CI build
+            pass
+    
     
 @ddt
 class TestWrangleFuncs(unittest.TestCase):
@@ -201,8 +203,9 @@ class IntegrationTests(unittest.TestCase):
         self.assertTrue(false_positives <= round(qty_actual_matches*0.1,1), msg=f"found too many false positives ({false_positives}) out of total test projects ({qty_actual_matches})")
 
 if __name__ == '__main__':
-    try:
-        os.rename('temp_cert_db', 'cert_db')
-    except:
-        pass
+    for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+        try:
+            os.rename('temp_'+filename, filename)
+        except:
+            pass
     unittest.main(verbosity=2)
