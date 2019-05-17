@@ -1,6 +1,8 @@
 cert_env
 cert_db
 temp_cert_db
+test_cert_db
+train_set.csv
 
 .password.txt
 
