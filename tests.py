@@ -20,7 +20,7 @@ def setUpModule():
             os.rename(filename, 'temp_'+filename)
         except:  # if running on CI build
             pass
-     for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+    for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
         try:  # if not running on CI build           
             os.rename('test_'+filename, filename)
         except:  # if running on CI build
