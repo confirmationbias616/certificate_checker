@@ -70,6 +70,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 			logger.info(f"Nothing has been collected from Daily Commercial News since {since}. Breaking out of match function.")
 			return 0
 	df_web = wrangle(df_web)
+	comm_count = 0
 	for _, dilfo_row in df_dilfo.iterrows():
 		results = match_build(dilfo_row.to_frame().transpose(), df_web)  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
 		logger.info(f"searching for potential match for project #{dilfo_row['job_number']}...")
@@ -86,6 +87,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 			logger.info(msg.format('a', top.pred_prob, dilfo_row, top))
 			logger.info("\tgetting ready to send notification...")
 			communicate(top, dilfo_row, test=test)
+			comm_count += 1
 			if len(matches) > 1:
 				for _, row in matches[1:].iterrows():
 					logger.info(msg.format('another possible', row['pred_prob'], dilfo_row, row))
@@ -97,7 +99,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 			results_master = results_master.append(results)
 		except NameError:
 			results_master = results
-
+	logger.info(f"Done looping through {len(df_dilfo)} open projects. Sent {comm_count} e-mails to communicate matches as a result.")
 	if test:
 		return results_master
 
