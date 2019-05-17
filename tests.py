@@ -205,6 +205,34 @@ class IntegrationTests(unittest.TestCase):
         false_positives = len(results[results.pred_match == 1]) - qty_found_matches
         self.assertTrue(false_positives <= round(qty_actual_matches*0.1,1), msg=f"found too many false positives ({false_positives}) out of total test projects ({qty_actual_matches})")
 
+        # test single sample
+        sample_dilfo = pd.DataFrame({
+            'job_number':'2387',
+            'city':'Ottawa',
+            'address':'2562 Del Zotto Ave., Ottawa, Ontario',
+            'title':'DWS Building Expansion',
+            'owner':'Douglas Stalker',
+            'contractor':'GNC',
+            'engineer':'Goodkey',
+            'receiver_email':'alex.roy@dilfo.com',
+            'cc_email':'2',
+            'quality':None,
+            'link_to_cert':None,
+            'test_entry':None,
+            }, index=range(1))
+        sample_web = pd.DataFrame({
+            'pub_date':'2019-03-06',
+            'city':'Ottawa-Carleton',
+            'address':'2562 Del Zotto Avenue, Gloucester, Ontario',
+            'title':'Construct a 1 storey storage addition to a 2 storey office/industrial building',
+            'owner':'Doug Stalker, DWS Roofing',
+            'contractor':'GNC Constructors Inc.',
+            'engineer':None,
+            'cert_url':'https://canada.constructconnect.com/dcn/certificates-and-notices/B0046A36-3F1C-11E9-9A87-005056AA6F02',
+            }, index=range(1))
+        is_match, prob = match(df_dilfo=sample_dilfo, df_web=sample_web, test=True)[['pred_match','pred_prob']]
+        self.assertTrue(is_match, msg=f"Project #{sample_dilfo.job_number} did not match successfully. Match probability returned was {prob}.") 
+
 if __name__ == '__main__':
     for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
         try:
