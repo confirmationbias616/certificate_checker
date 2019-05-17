@@ -11,28 +11,6 @@ from ml import build_train_set, train_model
 from db_tools import create_connection
 import os
 
-
-def setUpModule():
-    # the import statement below runs some code automatically
-    from test import test_setup
-    for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
-        try:  # if not running on CI build
-            os.rename(filename, 'temp_'+filename)
-        except:  # if running on CI build
-            pass
-    for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
-        try:  # if not running on CI build           
-            os.rename('test_'+filename, filename)
-        except:  # if running on CI build
-            pass
- 
-def tearDownModule():
-    for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
-        try:  # if not running on CI build
-            os.rename('temp_'+filename, filename)
-        except:  # if running on CI build
-            pass
-    
     
 @ddt
 class TestWrangleFuncs(unittest.TestCase):
@@ -173,9 +151,29 @@ class TestWrangleFuncs(unittest.TestCase):
         output_string = clean_title(input_string)
         self.assertEqual(desired_string, output_string)
 
-@ddt
+
 class IntegrationTests(unittest.TestCase):
-        
+    def setUpClass():
+        # the import statement below runs some code automatically
+        from test import test_setup
+        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+            try:  # if not running on CI build
+                os.rename(filename, 'temp_'+filename)
+            except:  # if running on CI build
+                pass
+        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+            try:  # if not running on CI build           
+                os.rename('test_'+filename, filename)
+            except:  # if running on CI build
+                pass
+    
+    def tearDownClass():
+        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+            try:  # if not running on CI build
+                os.rename('temp_'+filename, filename)
+            except:  # if running on CI build
+                pass
+
     def test_scarpe_to_communicate(self):
         test_limit = 3
         web_df = scrape(limit=test_limit, test=True)
