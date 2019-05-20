@@ -31,8 +31,6 @@ def communicate(web_row, dilfo_row, test=False):
 		cc = ''
 	cc_phrase = f' You also chose to copy {cc}.' if cc != '' else ''
 
-	url = 'https://canada.constructconnect.com/dcn/certificates-and-notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor=&date=past_7&date_from=&date_to=#results'
-
 	def send_email():
 		
 		pud_date = datetime.datetime(
