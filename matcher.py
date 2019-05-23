@@ -78,23 +78,11 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 		results['pred_match'] = results.pred_prob.apply(lambda prob: predict_match(prob, prob_thresh))
 		results = results.sort_values('pred_prob', ascending=False)
 		logger.info(results.head(5))
-		matches = results[results.pred_prob>=prob_thresh]
-		msg = 	"\n-> Found {} match with probability of {}!" +\
-				"-> Dilfo job details:\n{}" +\
-				"-> web job details:\n{}"
-		try:
-			top = matches.iloc[0]
-			logger.info(msg.format('a', top.pred_prob, dilfo_row, top))
-			logger.info("\tgetting ready to send notification...")
-			communicate(top, dilfo_row, test=test)
-			comm_count += 1
-			if len(matches) > 1:
-				for _, row in matches[1:].iterrows():
-					logger.info(msg.format('another possible', row['pred_prob'], dilfo_row, row))
-			else:
-				logger.info('no secondary matches found')
-		except IndexError:
-			logger.info('no matches found')
+		matches = results[results.pred_match==1]
+		logger.info(f"found {len(matches)} match{'' if len(matches)==1 else 'es'}!")
+		logger.info("getting ready to send notification...")
+		communicate(matches, dilfo_row, test=test)
+		comm_count += 1
 		try:
 			results_master = results_master.append(results)
 		except NameError:
