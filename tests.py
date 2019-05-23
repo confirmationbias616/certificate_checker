@@ -215,8 +215,8 @@ class IntegrationTests(unittest.TestCase):
             'contractor':'GNC',
             'engineer':'Goodkey',
             'receiver_email':'alex.roy@dilfo.com',
-            'cc_email':'2',
-            'quality':None,
+            'cc_email':'',
+            'quality':'2',
             'link_to_cert':None,
             'test_entry':None,
             }, index=range(1))
