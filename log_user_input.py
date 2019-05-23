@@ -36,13 +36,14 @@ def log_user_input():
                 if isinstance(response_part, tuple):
                     msg = email.message_from_string(response_part[1].decode('UTF-8'))
                     sender = msg['from']
+                    subject = msg['subject']
                     for part in msg.walk():
                         if part.get_content_type() == 'text/plain':
                             content = part.get_payload(None, True).decode('UTF-8')
                             break
                         else:
                             content = ''
-                    return sender, content
+                    return sender, subject, content
         server = imaplib.IMAP4_SSL(imap_ssl_host, imap_ssl_port)
         server.login(username, password)
         server.select('INBOX')
@@ -55,8 +56,8 @@ def log_user_input():
         for i in id_list:
             _, data = server.fetch(i, '(RFC822)')
             logger.info(f'parsing new email {int(i)} of {len(id_list)}')
-            sender, content = parse_email(data)
-            results.append({"sender": sender, "content": content})
+            sender, subject, content = parse_email(data)
+            results.append({"sender": sender, "subject": subject, "content": content})
         server.logout()
         return results
 
