@@ -26,7 +26,6 @@ def communicate(web_df, dilfo_row, test=False):
 			'domain or from Alex Roy address)')
 		return 1
 	cc_email = dilfo_row.cc_email
-	print(cc_email)
 	if cc_email:
 		if cc_email.endswith('@dilfo.com') or (cc_email in[
 			'alex.roy616@gmail.com', 'alex.roy616@icloud.com']):
