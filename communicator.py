@@ -61,7 +61,7 @@ def communicate(web_df, dilfo_row, test=False):
 		if len(web_df) == 1:
 			enum_msg = (
 				f"Before going any further, please follow the link below to make sure the "
-		    	f"algorithm correctly matched the project in question:\n{web_row.cert_url}\n"
+		    	f"algorithm correctly matched the project in question:\n{web_df.cert_url}\n"
 			)
 		else:
 			enum_msg = "More than one possible match came up. Please check out each one to see if it's the right one.\n"
