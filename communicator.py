@@ -26,12 +26,12 @@ def communicate(web_df, dilfo_row, test=False):
 			'domain or from Alex Roy address)')
 		return 1
 	cc_email = dilfo_row.cc_email
+	cc_phrase = ''
 	if cc_email:
 		if cc_email.endswith('@dilfo.com') or (cc_email in[
 			'alex.roy616@gmail.com', 'alex.roy616@icloud.com']):
 			cc_phrase = f" You also chose to copy {' '.join([name.capitalize() for name in cc_email.strip('@dilfo.com').split('.')])}."
 		else:
-			cc_phrase = ''
 			logger.info('given user e-mail address for cc has not been white listed (from dilfo.com '\
 				'domain or from Alex Roy address)')
 			cc_email = ''
