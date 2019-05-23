@@ -25,11 +25,18 @@ def communicate(web_row, dilfo_row, test=False):
 		logger.info('given user e-mail address has not been white listed (from dilfo.com '\
 			'domain or from Alex Roy address)')
 		return 1
-	try:
-		cc = dilfo_row.cc_email + '@dilfo.com' if dilfo_row.cc_email not in ['',' '] else ''
-	except (AttributeError, TypeError):
-		cc = ''
-	cc_phrase = f' You also chose to copy {cc}.' if cc != '' else ''
+	cc_email = dilfo_row.cc_email
+	print(cc_email)
+	if cc_email:
+		if cc_email.endswith('@dilfo.com') or (cc_email in[
+			'alex.roy616@gmail.com', 'alex.roy616@icloud.com']):
+			cc_phrase = f" You also chose to copy {' '.join([name.capitalize() for name in cc_email.strip('@dilfo.com').split('.')])}."
+		else:
+			cc_phrase = ''
+			logger.info('given user e-mail address for cc has not been white listed (from dilfo.com '\
+				'domain or from Alex Roy address)')
+			cc_email = ''
+			
 
 	def send_email():
 		
@@ -40,7 +47,9 @@ def communicate(web_row, dilfo_row, test=False):
 		message = (
 		    f"From: Dilfo HBR Bot"
 		    f"\n"
-		    f"CC: {cc}"
+		    f"To: {receiver_email}"
+			f"\n"
+		    f"CC: {cc_email}"
 		    f"\n"
 		    f"Subject: #{dilfo_row.job_number} - Upcoming Holdback Release"
 		    f"\n\n"
@@ -73,7 +82,7 @@ def communicate(web_row, dilfo_row, test=False):
 					password = file.read()
 				with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
 				    server.login(sender_email, password)
-				    server.sendmail(sender_email, [receiver_email, cc], message)
+				    server.sendmail(sender_email, [receiver_email, cc_email], message)
 				logger.info(f"Successfully sent an email to {receiver_email}")
 			except FileNotFoundError:
 				logger.info("password not available -> could not send e-mail")
