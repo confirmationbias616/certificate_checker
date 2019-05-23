@@ -178,7 +178,6 @@ class IntegrationTests(unittest.TestCase):
         test_limit = 3
         web_df = scrape(limit=test_limit, test=True)
         self.assertEqual(len(web_df), test_limit)
-        web_row = web_df.iloc[0]
         match_first_query = "SELECT * FROM dilfo_open LIMIT 1"
         with create_connection() as conn:
             dilfo_row = pd.read_sql(match_first_query, conn).iloc[0]
