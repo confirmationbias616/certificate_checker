@@ -182,7 +182,7 @@ class IntegrationTests(unittest.TestCase):
         match_first_query = "SELECT * FROM dilfo_open LIMIT 1"
         with create_connection() as conn:
             dilfo_row = pd.read_sql(match_first_query, conn).iloc[0]
-        communicate(web_row, dilfo_row, test=True)
+        communicate(web_df, dilfo_row, test=True)  # This will not return legit matches.
 
     def test_truth_table(self):
 
