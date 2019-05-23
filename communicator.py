@@ -39,7 +39,6 @@ def communicate(web_row, dilfo_row, test=False):
 			
 
 	def send_email():
-		
 		pud_date = datetime.datetime(
 				*[int(web_row.pub_date.split('-')[x]) for x in range(3)]).date()
 		due_date = lambda delay: pud_date + datetime.timedelta(days=delay)
@@ -54,7 +53,7 @@ def communicate(web_row, dilfo_row, test=False):
 		    f"Subject: #{dilfo_row.job_number} - Upcoming Holdback Release"
 		    f"\n\n"
 		    f"Hi {receiver_email.split('.')[0].title()},"
-		    f"\n"
+		    f"\n\n"
 		    f"You're receiving this e-mail notification because you added the project "
 		    f"#{dilfo_row.job_number} - {dilfo_row.title} to the watchlist of upcoming "
 		    f"holdback releases.{cc_phrase}"
