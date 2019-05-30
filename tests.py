@@ -178,7 +178,7 @@ class IntegrationTests(unittest.TestCase):
         test_limit = 3
         web_df = scrape(limit=test_limit, test=True)
         self.assertEqual(len(web_df), test_limit)
-        match_first_query = "SELECT * FROM dilfo_open LIMIT 1"
+        match_first_query = "SELECT * FROM df_dilfo WHERE closed=0 LIMIT 1"
         with create_connection() as conn:
             dilfo_row = pd.read_sql(match_first_query, conn).iloc[0]
         communicate(web_df, dilfo_row, test=True)  # This will not return legit matches.
@@ -189,7 +189,31 @@ class IntegrationTests(unittest.TestCase):
         
         build_train_set()
         train_model(prob_thresh=prob_thresh)
-        match_query = "SELECT * FROM dilfo_matched"
+        match_query = """
+                        SELECT 
+                            df_dilfo.job_number,
+                            df_dilfo.city,
+                            df_dilfo.address,
+                            df_dilfo.title,
+                            df_dilfo.owner,
+                            df_dilfo.contractor,
+                            df_dilfo.engineer,
+                            df_dilfo.receiver_email,
+                            df_dilfo.cc_email,
+                            df_dilfo.quality,
+                            df_matched.dcn_key,
+                            df_matched.ground_truth
+                        FROM 
+                            df_dilfo 
+                        LEFT JOIN 
+                            df_matched
+                        ON 
+                            df_dilfo.job_number=df_matched.job_number
+                        WHERE 
+                            df_dilfo.closed=1
+                        AND
+                            df_matched.ground_truth=1
+                    """
         with create_connection() as conn:
             test_df_dilfo = pd.read_sql(match_query, conn)
         test_web_df = scrape(ref=test_df_dilfo)
@@ -216,8 +240,7 @@ class IntegrationTests(unittest.TestCase):
             'receiver_email':'alex.roy@dilfo.com',
             'cc_email':'',
             'quality':'2',
-            'link_to_cert':None,
-            'test_entry':None,
+            'closed':'0',
             }, index=range(1))
         sample_web = pd.DataFrame({
             'pub_date':'2019-03-06',
@@ -227,7 +250,7 @@ class IntegrationTests(unittest.TestCase):
             'owner':'Doug Stalker, DWS Roofing',
             'contractor':'GNC Constructors Inc.',
             'engineer':None,
-            'cert_url':'https://canada.constructconnect.com/dcn/certificates-and-notices/B0046A36-3F1C-11E9-9A87-005056AA6F02',
+            'dcn_key':'B0046A36-3F1C-11E9-9A87-005056AA6F02',
             }, index=range(1))
         is_match, prob = match(df_dilfo=sample_dilfo, df_web=sample_web, test=True).iloc[0][['pred_match','pred_prob']]
         self.assertTrue(is_match, msg=f"Project #{sample_dilfo.job_number} did not match successfully. Match probability returned was {prob}.") 

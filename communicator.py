@@ -18,6 +18,7 @@ def communicate(web_df, dilfo_row, test=False):
 	port = 465 # for SSL
 	smtp_server = "smtp.gmail.com"
 	sender_email = "dilfo.hb.release"
+	lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
 
 	receiver_email = dilfo_row.receiver_email
 	if (not receiver_email.endswith('@dilfo.com')) and (receiver_email not in[
@@ -61,12 +62,12 @@ def communicate(web_df, dilfo_row, test=False):
 		if len(web_df) == 1:
 			enum_msg = (
 				f"Before going any further, please follow the link below to make sure the "
-		    	f"algorithm correctly matched the project in question:\n{web_df.cert_url}\n"
+		    	f"algorithm correctly matched the project in question:\n{lookup_url}/{web_df.dcn_key.iloc[0]}\n"
 			)
 		else:
 			enum_msg = "More than one possible match came up. Please check out each one to see if it's the right one.\n"
-			for i, link in enumerate(web_df.cert_url):
-				enum_msg += f'\tlink #{i+1}:\t{link}\n'
+			for i, dcn_key in enumerate(web_df.dcn_key,1):
+				enum_msg += f'\tlink #{i}:\t{lookup_url}{dcn_key}\n'
 		timing_msg = (
 		    f"If it's the right project, then the certificate was just "
 		    f"published this past {datetime.datetime.strftime(pub_date,'%A')} "

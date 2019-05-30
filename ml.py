@@ -41,7 +41,31 @@ def load_model():
 
 def build_train_set():
     logger.info("building dataset for training random forest classifier")
-    match_query = "SELECT * FROM dilfo_matched"
+    match_query = """
+                        SELECT 
+                            df_dilfo.job_number,
+                            df_dilfo.city,
+                            df_dilfo.address,
+                            df_dilfo.title,
+                            df_dilfo.owner,
+                            df_dilfo.contractor,
+                            df_dilfo.engineer,
+                            df_dilfo.receiver_email,
+                            df_dilfo.cc_email,
+                            df_dilfo.quality,
+                            df_matched.dcn_key,
+                            df_matched.ground_truth
+                        FROM 
+                            df_dilfo 
+                        LEFT JOIN 
+                            df_matched
+                        ON 
+                            df_dilfo.job_number=df_matched.job_number
+                        WHERE 
+                            df_dilfo.closed=1
+                        AND 
+                            df_matched.ground_truth=1
+                    """
     with create_connection() as conn:
         test_df_dilfo = pd.read_sql(match_query, conn)
     test_web_df = scrape(ref=test_df_dilfo)
@@ -50,7 +74,7 @@ def build_train_set():
     # Get some certificates that are definitely not matches provide some false matches to train from
     start_date = '2011-01-01'
     end_date = '2011-04-30'
-    hist_query = "SELECT * FROM hist_certs WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
+    hist_query = "SELECT * FROM df_hist WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
     with create_connection() as conn:
         rand_web_df = pd.read_sql(hist_query, conn, params=[start_date, end_date])
     rand_web_df = wrangle(rand_web_df)
@@ -61,15 +85,14 @@ def build_train_set():
         close_matches = match_build(test_row_dilfo, test_web_df)
         random_matches = match_build(test_row_dilfo, rand_web_df)
         matches = close_matches.append(random_matches)
-        matches['ground_truth'] = matches.cert_url.apply(
-            lambda x: 1 if x == test_row_dilfo.link_to_cert.iloc[0] else 0)
+        matches['ground_truth'] = matches.dcn_key.apply(
+            lambda x: 1 if x == test_row_dilfo.dcn_key.iloc[0] else 0)
         matches['dilfo_job_number'] = test_row_dilfo.job_number.iloc[0]
         matches['title_length'] = matches.title.apply(len)
         try:
             all_matches = all_matches.append(matches)
         except NameError:
             all_matches = matches
-
     all_matches.to_csv(f'./train_set.csv', index=False)
 
 def train_model(prob_thresh=0.65):

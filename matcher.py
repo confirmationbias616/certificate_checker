@@ -44,7 +44,7 @@ def predict_match(prob, prob_thresh):
 def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now', prob_thresh=0.65):
 	logger.info('matching...')
 	if not isinstance(df_dilfo, pd.DataFrame):  # df_dilfo == False
-		open_query = "SELECT * FROM dilfo_open"
+		open_query = "SELECT * FROM df_dilfo WHERE closed=0"
 		with create_connection() as conn:
 			df_dilfo = pd.read_sql(open_query, conn)
 	df_dilfo = wrangle(df_dilfo)
@@ -63,7 +63,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 			valid_until_date = re.search("\d{4}-\d{2}-\d{2}", since)
 			if not valid_until_date:
 				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
-		hist_query = "SELECT * FROM hist_certs WHERE pub_date>=? AND pub_date<=? ORDER BY pub_date"
+		hist_query = "SELECT * FROM df_hist WHERE pub_date>=? AND pub_date<=? ORDER BY pub_date"
 		with create_connection() as conn:
 			df_web = pd.read_sql(hist_query, conn, params=[since, until])
 		if len(df_web) == 0:  # SQL query retunred nothing so no point of going any further
@@ -79,10 +79,13 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 		results = results.sort_values('pred_prob', ascending=False)
 		logger.info(results.head(5))
 		matches = results[results.pred_match==1]
-		logger.info(f"found {len(matches)} match{'' if len(matches)==1 else 'es'}!")
-		logger.info("getting ready to send notification...")
-		communicate(matches, dilfo_row, test=test)
-		comm_count += 1
+		if len(matches) > 0:
+			logger.info(f"found {len(matches)} match{'' if len(matches)==1 else 'es'}!")
+			logger.info("getting ready to send notification...")
+			communicate(matches, dilfo_row, test=test)
+			comm_count += 1
+		else:
+			logger.info(f"didn't find any matches")
 		try:
 			results_master = results_master.append(results)
 		except NameError:
