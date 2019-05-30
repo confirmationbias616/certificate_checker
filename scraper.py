@@ -124,7 +124,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
 
 
 if __name__=="__main__":
-    parser = argparse.ArgumentParser(description="scrapes DCM website and returns \
+    parser = argparse.ArgumentParser(description="scrapes DCN website and returns \
         certificates in the form of a pandas dataframe")
     parser.add_argument(
         "-l", "--limit",
