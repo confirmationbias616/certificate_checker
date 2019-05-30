@@ -38,9 +38,9 @@ def communicate(web_df, dilfo_row, test=False):
 			
 
 	def send_email():
-		pud_date = datetime.datetime(
+		pub_date = datetime.datetime(
 				*[int(web_df.iloc[0].pub_date.split('-')[x]) for x in range(3)]).date()
-		due_date = lambda delay: pud_date + datetime.timedelta(days=delay)
+		due_date = lambda delay: pub_date + datetime.timedelta(days=delay)
 		
 		intro_msg = (
 		    f"From: Dilfo HBR Bot"
@@ -69,8 +69,8 @@ def communicate(web_df, dilfo_row, test=False):
 				enum_msg += f'\tlink #{i+1}:\t{link}\n'
 		timing_msg = (
 		    f"If it's the right project, then the certificate was just "
-		    f"published this past {datetime.datetime.strftime(pud_date,'%A')} "
-		    f"on {datetime.datetime.strftime(pud_date,'%B %e, %Y')}. This means a "
+		    f"published this past {datetime.datetime.strftime(pub_date,'%A')} "
+		    f"on {datetime.datetime.strftime(pub_date,'%B %e, %Y')}. This means a "
 		    f"valid holdback release invoice could be submitted as of:"
 		    f"\nA)\t{datetime.datetime.strftime(due_date(45),'%B %e, %Y')} "
 		    f"if the contract was signed before October 1, 2019 or;"
