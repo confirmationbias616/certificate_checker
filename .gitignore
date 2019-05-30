@@ -10,6 +10,7 @@ train_set.csv
 *.pkl
 
 # Ignore all data
+Launchd/
 data/*
 # But not these files...
 !data/raw_dilfo_certs.csv
