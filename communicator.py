@@ -27,11 +27,10 @@ def communicate(web_df, dilfo_row, test=False):
 			'domain or from Alex Roy address)')
 		return 1
 	cc_email = dilfo_row.cc_email
-	cc_phrase = ''
 	if cc_email:
 		if cc_email.endswith('@dilfo.com') or (cc_email in[
 			'alex.roy616@gmail.com', 'alex.roy616@icloud.com']):
-			cc_phrase = f" You also chose to copy {' '.join([name.capitalize() for name in cc_email.strip('@dilfo.com').split('.')])}."
+			pass
 		else:
 			logger.info('given user e-mail address for cc has not been white listed (from dilfo.com '\
 				'domain or from Alex Roy address)')
@@ -56,7 +55,7 @@ def communicate(web_df, dilfo_row, test=False):
 		    f"\n\n"
 		    f"You're receiving this e-mail notification because you added the project "
 		    f"#{dilfo_row.job_number} - {dilfo_row.title} to the watchlist of upcoming "
-		    f"holdback releases.{cc_phrase}"
+		    f"holdback releases."
 		    f"\n"
 		)
 		if len(web_df) == 1:
@@ -88,6 +87,8 @@ def communicate(web_df, dilfo_row, test=False):
 				"You can help improve the matching algorithms by replying to "
 				"this e-mail with a simple `1` or `0` to confirm whether or "
 				"not the linked certificate represents the project in question."
+				"Whether you were the main receiver or just in CC, your"
+				"feedback is greatly apreciated."
 				"\n"
 			)
 		else:
