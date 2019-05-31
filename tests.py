@@ -224,7 +224,7 @@ class IntegrationTests(unittest.TestCase):
         qty_found_matches = results[results.pred_match == 1].title.nunique()
         self.assertTrue(qty_found_matches == qty_actual_matches, msg=f"qty_found_matches({qty_found_matches}) not equal qty_actual_matches({qty_actual_matches})")
         
-        # make sure not more than 10% false positives with below assert
+        # make sure not more than 25% false positives with below assert
         false_positives = len(results[results.pred_match == 1]) - qty_found_matches
         self.assertTrue(false_positives <= round(qty_actual_matches*0.25,1), msg=f"found too many false positives ({false_positives}) out of total test projects ({qty_actual_matches})")
 
