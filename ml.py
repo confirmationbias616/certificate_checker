@@ -66,11 +66,12 @@ def build_train_set():
                         AND 
                             df_matched.ground_truth=1
                     """
+
     with create_connection() as conn:
         test_df_dilfo = pd.read_sql(match_query, conn)
     test_web_df = scrape(ref=test_df_dilfo)
     test_web_df = wrangle(test_web_df)
-    
+
     # Get some certificates that are definitely not matches provide some false matches to train from
     start_date = '2011-01-01'
     end_date = '2011-04-30'
@@ -78,7 +79,7 @@ def build_train_set():
     with create_connection() as conn:
         rand_web_df = pd.read_sql(hist_query, conn, params=[start_date, end_date])
     rand_web_df = wrangle(rand_web_df)
-    
+
     for i, test_row_dilfo in test_df_dilfo.iterrows():
         test_row_dilfo = wrangle(test_row_dilfo.to_frame().transpose())  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
         rand_web_df = rand_web_df.sample(n=len(test_df_dilfo), random_state=i)
