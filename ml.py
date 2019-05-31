@@ -95,7 +95,6 @@ def build_train_set():
         except NameError:
             all_matches = matches
     all_matches.to_csv(f'./train_set.csv', index=False)
-
 def train_model(prob_thresh=0.65):
     logger.info("training random forest classifier")
     df = pd.read_csv('./train_set.csv')
@@ -121,8 +120,6 @@ def train_model(prob_thresh=0.65):
         rc = len(results[(results.truth==1)&(results.pred==1)]) / len(results[results.truth==1])
         pr = len(results[(results.truth==1)&(results.pred==1)]) / len(results[results.pred==1])
         f1 = f1_score(y_test, pred)
-        show_res = results[(results.truth==1)|(results.pred==1)|(results.total_score>0.6)|(results.prob>0.3)].sort_values(['total_score'], ascending=False)
-        logger.debug("\nshow_res\n")
         logger.info(f'number of truthes to learn from: {len([x for x in y_train if x==1])} out of {len(y_train)}')
         logger.info(f'number of tests: {len(results[results.truth==1])}')
         feat_imp = pd.DataFrame({'feat':X.columns, 'imp':clf.feature_importances_}).sort_values('imp', ascending=False)
