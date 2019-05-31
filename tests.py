@@ -185,7 +185,7 @@ class IntegrationTests(unittest.TestCase):
 
     def test_truth_table(self):
 
-        prob_thresh = 0.65
+        prob_thresh = 0.3
         
         build_train_set()
         train_model(prob_thresh=prob_thresh)
@@ -226,7 +226,7 @@ class IntegrationTests(unittest.TestCase):
         
         # make sure not more than 10% false positives with below assert
         false_positives = len(results[results.pred_match == 1]) - qty_found_matches
-        self.assertTrue(false_positives <= round(qty_actual_matches*0.1,1), msg=f"found too many false positives ({false_positives}) out of total test projects ({qty_actual_matches})")
+        self.assertTrue(false_positives <= round(qty_actual_matches*0.25,1), msg=f"found too many false positives ({false_positives}) out of total test projects ({qty_actual_matches})")
 
         # test single sample
         sample_dilfo = pd.DataFrame({
