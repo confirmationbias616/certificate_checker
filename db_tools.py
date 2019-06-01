@@ -31,3 +31,6 @@ def dbtables_to_csv():
     for table in table_names:
         with create_connection() as conn:
             pd.read_sql(open_query.format(table), conn).to_csv('{}.csv'.format(table), index=False)
+
+if __name__=='__main__':
+    dbtables_to_csv()
