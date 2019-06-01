@@ -27,12 +27,12 @@ logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
 def save_model(model):
-    logger.info("saving random forest classifier")
+    logger.debug("saving random forest classifier")
     with open("./new_rf_model.pkl", "wb") as output:
         pickle.dump(model, output)
 
 def save_feature_list(columns):
-    logger.info("saving list of features for random forest classifier")
+    logger.debug("saving list of features for random forest classifier")
     with open("./new_rf_features.pkl", "wb") as output:
         pickle.dump(columns, output)
 
