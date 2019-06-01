@@ -258,9 +258,9 @@ class IntegrationTests(unittest.TestCase):
         # test same sample but using db retreival
         results = match(df_dilfo=sample_dilfo, since='2019-03-05', until='2019-03-07', test=True)
         prob_from_db_cert = results[results.contractor == 'gnc'].iloc[0].pred_prob  #'gnc' is what is returned from the wrangling funcs
-        self.assertTrue(round(prob, 2) == round(prob_from_db_cert, 2)) 
-    
-    def test_validate_model(self):
+        self.assertTrue(round(prob, 2) == round(prob_from_db_cert, 2))
+
+        # make sure validation runs
         validate_model(prob_thresh=prob_thresh, test=True)
 
 if __name__ == '__main__':
