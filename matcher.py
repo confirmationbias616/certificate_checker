@@ -78,7 +78,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 		results['pred_prob'] = results.apply(lambda row: predict_prob(row), axis=1)
 		results['pred_match'] = results.pred_prob.apply(lambda prob: predict_match(prob, prob_thresh))
 		results = results.sort_values('pred_prob', ascending=False)
-		logger.info(results.head(5))
+		logger.debug(results.head(5))
 		matches = results[results.pred_match==1]
 		if len(matches) > 0:
 			logger.info(f"found {len(matches)} match{'' if len(matches)==1 else 'es'}!")
