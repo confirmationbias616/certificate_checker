@@ -10,6 +10,7 @@ train_set.csv
 *.pkl
 
 # Ignore all data
+model_archive/
 Launchd/
 data/*
 # But not these files...

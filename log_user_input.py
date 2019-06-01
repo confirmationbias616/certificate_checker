@@ -94,6 +94,7 @@ def log_user_input():
                             'verifier': dict_input['receiver_email'],
                             'source': 'input',
                             'log_date': str(datetime.datetime.now().date()),
+                            'validate': 0,
                         }
                         df = df.append(match_dict_input, ignore_index=True)
                         df = df.drop_duplicates(subset=["job_number", "dcn_key"], keep='last')
@@ -146,6 +147,7 @@ def log_user_input():
                             'verifier': email_obj["sender"],
                             'source': 'feedback',
                             'log_date': str(datetime.datetime.now().date()),
+                            'validate': 0,
                         }
                         df = df.append(match_dict_input, ignore_index=True)
                         df = df.drop_duplicates(subset=["job_number", "dcn_key"], keep='last')

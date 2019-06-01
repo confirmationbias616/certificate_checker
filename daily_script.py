@@ -2,7 +2,7 @@ import os
 from log_user_input import log_user_input
 from scraper import scrape
 from matcher import match
-from ml import build_train_set, train_model
+from ml import build_train_set, train_model, validate_model
 import sys
 import logging
 
@@ -15,6 +15,7 @@ def daily_routine():
     build_train_set()
     train_model(prob_thresh=prob_thresh)
     match(since='2019-05-07', prob_thresh=prob_thresh)  #test=True to mute sending of e-mails
+    validate_model(prob_thresh=prob_thresh)
 
 if __name__=="__main__":
     logger = logging.getLogger(__name__)

@@ -21,8 +21,9 @@ log_handler.setFormatter(
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
-def load_model():
-    with open("./rf_model.pkl", "rb") as input_file:
+def load_model(version='status_quo'):
+    logger.debug(f"loading {version} random forest classifier")
+    with open(f"./{'new_' if version == 'new' else ''}rf_model.pkl", "rb") as input_file:
         return pickle.load(input_file)
 
 def load_feature_list():
@@ -41,7 +42,7 @@ def predict_match(prob, prob_thresh):
 	else:
 		return 0
 
-def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now', prob_thresh=0.65):
+def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now', prob_thresh=0.65, version='status_quo'):
 	logger.info('matching...')
 	if not isinstance(df_dilfo, pd.DataFrame):  # df_dilfo == False
 		open_query = "SELECT * FROM df_dilfo WHERE closed=0"

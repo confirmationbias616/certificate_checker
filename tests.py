@@ -7,11 +7,12 @@ from scraper import scrape
 from wrangler import clean_job_number, clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title, wrangle
 from matcher import match
 from communicator import communicate
-from ml import build_train_set, train_model
+from ml import build_train_set, train_model, validate_model
 from db_tools import create_connection
 import os
 
-    
+
+prob_thresh = 0.3 
 @ddt
 class TestWrangleFuncs(unittest.TestCase):
 
@@ -183,10 +184,7 @@ class IntegrationTests(unittest.TestCase):
             dilfo_row = pd.read_sql(match_first_query, conn).iloc[0]
         communicate(web_df, dilfo_row, test=True)  # This will not return legit matches.
 
-    def test_truth_table(self):
-
-        prob_thresh = 0.3
-        
+    def test_truth_table(self):        
         build_train_set()
         train_model(prob_thresh=prob_thresh)
         match_query = """
@@ -213,6 +211,8 @@ class IntegrationTests(unittest.TestCase):
                             df_dilfo.closed=1
                         AND
                             df_matched.ground_truth=1
+                        AND 
+                            df_matched.validate=0
                     """
         with create_connection() as conn:
             test_df_dilfo = pd.read_sql(match_query, conn)
@@ -259,6 +259,9 @@ class IntegrationTests(unittest.TestCase):
         results = match(df_dilfo=sample_dilfo, since='2019-03-05', until='2019-03-07', test=True)
         prob_from_db_cert = results[results.contractor == 'gnc'].iloc[0].pred_prob  #'gnc' is what is returned from the wrangling funcs
         self.assertTrue(round(prob, 2) == round(prob_from_db_cert, 2)) 
+    
+    def test_validate_model(self):
+        validate_model(prob_thresh=prob_thresh, test=True)
 
 if __name__ == '__main__':
     for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
