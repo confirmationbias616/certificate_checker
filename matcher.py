@@ -22,17 +22,20 @@ logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
 def load_model(version='status_quo'):
-    logger.debug(f"loading {version} random forest classifier")
-    with open(f"./{'new_' if version == 'new' else ''}rf_model.pkl", "rb") as input_file:
-        return pickle.load(input_file)
+	logger.debug(f"loading {version} random forest classifier")
+	version = '' if version == 'status_quo' else version + '_'
+	with open(f"./{version}rf_model.pkl", "rb") as input_file:
+		return pickle.load(input_file)
 
-def load_feature_list():
-    with open("./rf_features.pkl", "rb") as input_file:
-        return pickle.load(input_file)
+def load_feature_list(version='status_quo'):
+	logger.debug(f"loading {version} features for learning model")
+	version = '' if version == 'status_quo' else version + '_'
+	with open(f"./{version}rf_features.pkl", "rb") as input_file:
+		return pickle.load(input_file)
 
-def predict_prob(sample):
-    clf = load_model()
-    cols = load_feature_list()
+def predict_prob(sample, version):
+    clf = load_model(version=version)
+    cols = load_feature_list(version=version)
     prob = clf.predict_proba(sample[cols].values.reshape(1, -1))[0][1]
     return prob
 
@@ -75,7 +78,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 	for _, dilfo_row in df_dilfo.iterrows():
 		results = match_build(dilfo_row.to_frame().transpose(), df_web)  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
 		logger.info(f"searching for potential match for project #{dilfo_row['job_number']}...")
-		results['pred_prob'] = results.apply(lambda row: predict_prob(row), axis=1)
+		results['pred_prob'] = results.apply(lambda row: predict_prob(row, version=version), axis=1)
 		results['pred_match'] = results.pred_prob.apply(lambda prob: predict_match(prob, prob_thresh))
 		results = results.sort_values('pred_prob', ascending=False)
 		logger.debug(results.head(5))

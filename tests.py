@@ -217,7 +217,7 @@ class IntegrationTests(unittest.TestCase):
         with create_connection() as conn:
             test_df_dilfo = pd.read_sql(match_query, conn)
         test_web_df = scrape(ref=test_df_dilfo)
-        results = match(df_dilfo=test_df_dilfo, df_web=test_web_df, test=True, prob_thresh=prob_thresh)
+        results = match(df_dilfo=test_df_dilfo, df_web=test_web_df, test=True, prob_thresh=prob_thresh, version='temp')
         
         # confrim 100% recall with below assert
         qty_actual_matches = int(len(results)**0.5)
@@ -252,11 +252,11 @@ class IntegrationTests(unittest.TestCase):
             'engineer':None,
             'dcn_key':'B0046A36-3F1C-11E9-9A87-005056AA6F02',
             }, index=range(1))
-        is_match, prob = match(df_dilfo=sample_dilfo, df_web=sample_web, test=True).iloc[0][['pred_match','pred_prob']]
+        is_match, prob = match(df_dilfo=sample_dilfo, df_web=sample_web, test=True, version='temp').iloc[0][['pred_match','pred_prob']]
         self.assertTrue(is_match, msg=f"Project #{sample_dilfo.job_number} did not match successfully. Match probability returned was {prob}.") 
 
         # test same sample but using db retreival
-        results = match(df_dilfo=sample_dilfo, since='2019-03-05', until='2019-03-07', test=True)
+        results = match(df_dilfo=sample_dilfo, since='2019-03-05', until='2019-03-07', test=True, version='temp')
         prob_from_db_cert = results[results.contractor == 'gnc'].iloc[0].pred_prob  #'gnc' is what is returned from the wrangling funcs
         self.assertTrue(round(prob, 2) == round(prob_from_db_cert, 2))
 

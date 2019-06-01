@@ -176,7 +176,7 @@ def validate_model(**kwargs):
         validate_df_dilfo = pd.read_sql(match_query, conn)
     validate_web_df = scrape(ref=validate_df_dilfo)
 
-    sq_results = match(version='status_quo', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
+    sq_results = match(version='temp', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
     new_results = match(version='new', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
 
     # check if 100% recall for new model
