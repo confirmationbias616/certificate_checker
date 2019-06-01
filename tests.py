@@ -174,6 +174,11 @@ class IntegrationTests(unittest.TestCase):
                 os.rename('temp_'+filename, filename)
             except:  # if running on CI build
                 pass
+        for filename in ['rf_model.pkl', 'rf_features.pkl']:
+            try:
+                os.rename('new_'+filename)
+            except:
+                pass
 
     def test_scarpe_to_communicate(self):
         test_limit = 3
