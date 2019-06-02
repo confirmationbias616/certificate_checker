@@ -222,7 +222,7 @@ class IntegrationTests(unittest.TestCase):
         with create_connection() as conn:
             test_df_dilfo = pd.read_sql(match_query, conn)
         test_web_df = scrape(ref=test_df_dilfo)
-        results = match(df_dilfo=test_df_dilfo, df_web=test_web_df, test=True, prob_thresh=prob_thresh, version='temp')
+        results = match(df_dilfo=test_df_dilfo, df_web=test_web_df, test=True, prob_thresh=prob_thresh, version='new')
         
         # confrim 100% recall with below assert
         qty_actual_matches = int(len(results)**0.5)
