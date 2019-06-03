@@ -176,19 +176,28 @@ def validate_model(**kwargs):
         validate_df_dilfo = pd.read_sql(match_query, conn)
     validate_web_df = scrape(ref=validate_df_dilfo)
 
+    new_results = match(version='new', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
+    
+    # check if 100% recall for new model
+    qty_actual_matches = int(len(new_results)**0.5)
+    qty_found_matches = new_results[new_results.pred_match == 1].title.nunique()
+    is_100_recall = qty_found_matches == qty_actual_matches
+
     # the below exception will happen if there was no existing model present in
     # folder (in testing) important to not skip validation so that the function
     # can be propperly tested
     try:
         sq_results = match(version='status_quo', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
     except FileNotFoundError:
-        sq_results = match(version='new', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
-    new_results = match(version='new', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
-
-    # check if 100% recall for new model
-    qty_actual_matches = int(len(new_results)**0.5)
-    qty_found_matches = new_results[new_results.pred_match == 1].title.nunique()
-    is_100_recall = qty_found_matches == qty_actual_matches
+        logger.info("could not find any status quo models to use for baseline validation.")
+        if not test:
+            logger.info("adopting new model by default and skipping rest of validation")
+            for filename in ['rf_model.pkl', 'rf_features.pkl']:
+                os.rename('new_'+filename, filename)
+            return #exit function because there is no basline to validate against 
+        else:
+            logger.info("will keep testing validation using new model as baseline. Just for testing urposes.")
+            sq_results = match(version='new', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
 
     # check out how many false positives were generated with status quo model and new model
     sq_false_positives = len(sq_results[sq_results.pred_match == 1]) - qty_found_matches
