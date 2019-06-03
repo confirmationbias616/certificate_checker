@@ -176,7 +176,13 @@ def validate_model(**kwargs):
         validate_df_dilfo = pd.read_sql(match_query, conn)
     validate_web_df = scrape(ref=validate_df_dilfo)
 
-    sq_results = match(version='temp', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
+    # the below exception will happen if there was no existing model present in
+    # folder (in testing) important to not skip validation so that the function
+    # can be propperly tested
+    try:
+        sq_results = match(version='status_quo', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
+    except FileNotFoundError:
+        sq_results = match(version='new', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
     new_results = match(version='new', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
 
     # check if 100% recall for new model
