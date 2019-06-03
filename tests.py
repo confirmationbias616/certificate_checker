@@ -176,7 +176,7 @@ class IntegrationTests(unittest.TestCase):
                 pass
         for filename in ['rf_model.pkl', 'rf_features.pkl']:
             try:
-                os.rename('new_'+filename)
+                os.remove('new_'+filename)
             except:
                 pass
 
@@ -257,11 +257,11 @@ class IntegrationTests(unittest.TestCase):
             'engineer':None,
             'dcn_key':'B0046A36-3F1C-11E9-9A87-005056AA6F02',
             }, index=range(1))
-        is_match, prob = match(df_dilfo=sample_dilfo, df_web=sample_web, test=True, version='temp').iloc[0][['pred_match','pred_prob']]
+        is_match, prob = match(df_dilfo=sample_dilfo, df_web=sample_web, test=True, version='status_quo').iloc[0][['pred_match','pred_prob']]
         self.assertTrue(is_match, msg=f"Project #{sample_dilfo.job_number} did not match successfully. Match probability returned was {prob}.") 
 
         # test same sample but using db retreival
-        results = match(df_dilfo=sample_dilfo, since='2019-03-05', until='2019-03-07', test=True, version='temp')
+        results = match(df_dilfo=sample_dilfo, since='2019-03-05', until='2019-03-07', test=True, version='status_quo')
         prob_from_db_cert = results[results.contractor == 'gnc'].iloc[0].pred_prob  #'gnc' is what is returned from the wrangling funcs
         self.assertTrue(round(prob, 2) == round(prob_from_db_cert, 2))
 
