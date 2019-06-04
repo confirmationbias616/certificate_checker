@@ -39,32 +39,32 @@ def save_feature_list(columns):
 def build_train_set():
     logger.info("building dataset for training random forest classifier")
     match_query = """
-                        SELECT 
-                            df_dilfo.job_number,
-                            df_dilfo.city,
-                            df_dilfo.address,
-                            df_dilfo.title,
-                            df_dilfo.owner,
-                            df_dilfo.contractor,
-                            df_dilfo.engineer,
-                            df_dilfo.receiver_email,
-                            df_dilfo.cc_email,
-                            df_dilfo.quality,
-                            df_matched.dcn_key,
-                            df_matched.ground_truth
-                        FROM 
-                            df_dilfo 
-                        LEFT JOIN 
-                            df_matched
-                        ON 
-                            df_dilfo.job_number=df_matched.job_number
-                        WHERE 
-                            df_dilfo.closed=1
-                        AND 
-                            df_matched.ground_truth=1
-                        AND
-                            df_matched.validate=0
-                    """
+                    SELECT 
+                        df_dilfo.job_number,
+                        df_dilfo.city,
+                        df_dilfo.address,
+                        df_dilfo.title,
+                        df_dilfo.owner,
+                        df_dilfo.contractor,
+                        df_dilfo.engineer,
+                        df_dilfo.receiver_email,
+                        df_dilfo.cc_email,
+                        df_dilfo.quality,
+                        df_matched.dcn_key,
+                        df_matched.ground_truth
+                    FROM 
+                        df_dilfo 
+                    LEFT JOIN 
+                        df_matched
+                    ON 
+                        df_dilfo.job_number=df_matched.job_number
+                    WHERE 
+                        df_dilfo.closed=1
+                    AND 
+                        df_matched.ground_truth=1
+                    AND
+                        df_matched.validate=0
+                """
 
     with create_connection() as conn:
         test_df_dilfo = pd.read_sql(match_query, conn)
@@ -145,32 +145,32 @@ def validate_model(**kwargs):
     except KeyError:
         test = False
     match_query = """
-                        SELECT 
-                            df_dilfo.job_number,
-                            df_dilfo.city,
-                            df_dilfo.address,
-                            df_dilfo.title,
-                            df_dilfo.owner,
-                            df_dilfo.contractor,
-                            df_dilfo.engineer,
-                            df_dilfo.receiver_email,
-                            df_dilfo.cc_email,
-                            df_dilfo.quality,
-                            df_matched.dcn_key,
-                            df_matched.ground_truth
-                        FROM 
-                            df_dilfo 
-                        LEFT JOIN 
-                            df_matched
-                        ON 
-                            df_dilfo.job_number=df_matched.job_number
-                        WHERE 
-                            df_dilfo.closed=1
-                        AND
-                            df_matched.ground_truth=1
-                        AND 
-                            df_matched.validate=1
-                    """
+                    SELECT 
+                        df_dilfo.job_number,
+                        df_dilfo.city,
+                        df_dilfo.address,
+                        df_dilfo.title,
+                        df_dilfo.owner,
+                        df_dilfo.contractor,
+                        df_dilfo.engineer,
+                        df_dilfo.receiver_email,
+                        df_dilfo.cc_email,
+                        df_dilfo.quality,
+                        df_matched.dcn_key,
+                        df_matched.ground_truth
+                    FROM 
+                        df_dilfo 
+                    LEFT JOIN 
+                        df_matched
+                    ON 
+                        df_dilfo.job_number=df_matched.job_number
+                    WHERE 
+                        df_dilfo.closed=1
+                    AND
+                        df_matched.ground_truth=1
+                    AND 
+                        df_matched.validate=1
+                """
 
     with create_connection() as conn:
         validate_df_dilfo = pd.read_sql(match_query, conn)
