@@ -7,6 +7,7 @@ from scraper import scrape
 from wrangler import clean_job_number, clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title, wrangle
 from matcher import match
 from communicator import communicate
+from log_user_input import process_as_form, process_as_reply
 from ml import build_train_set, train_model, validate_model
 from db_tools import create_connection
 import os
@@ -151,6 +152,44 @@ class TestWrangleFuncs(unittest.TestCase):
     def test_clean_title(self, input_string, desired_string):
         output_string = clean_title(input_string)
         self.assertEqual(desired_string, output_string)
+    
+    def test_process_as_form(self):
+        email_obj = {
+            'sender' : 'Alex Roy <Alex.Roy@dilfo.com>',
+            'subject' : 'DO NOT MODIFY MESSAGE BELOW - JUST HIT `SEND`',
+            'date' : 'Tue, 7 May 2019 17:34:17 +0000',
+            'content' : 'job_number=2387&title=DWS+Building+Expansion&city=Ottawa&address=2562+Del+Zotto+Ave.%2C+Ottawa%2C+Ontario&contractor=GCN&engineer=Goodkey&owner=Douglas+Stalker&quality=2&cc_email=&link_to_cert=\r\n',
+        }
+        process_as_form(email_obj)
+
+    def test_process_as_reply(self):
+        email_obj = {
+            'sender' : 'Alex Roy <Alex.Roy@dilfo.com>',
+            'subject' : 'Re: [EXTERNAL] #2387 - Upcoming Holdback Release',
+            'date' : 'Thu, 30 May 2019 00:41:05 +0000',
+            'content' : (
+                """1\r\n\r\nAlex Roy\r\nDilfo Mechanical\r\n(613) 899-9324\r\n\r\n
+                ________________________________\r\nFrom: Dilfo HBR Bot 
+                <dilfo.hb.release@gmail.com>\r\nSent: Wednesday, May 29, 2019 8:40 
+                PM\r\nTo: Alex Roy\r\nSubject: [EXTERNAL] #2387 - Upcoming 
+                Holdback Release\r\n\r\nHi Alex,\r\n\r\nYou're receiving this 
+                e-mail notification because you added the project #2387 - DWS 
+                Building Expansion to the watchlist of upcoming holdback releases. 
+                \r\n\r\nBefore going any further, please follow the link below to 
+                make sure the algorithm correctly matched the project in 
+                question:\r\nhttps://link.spamstopshere.net/u/f544cec5/
+                3CEdd3OC6RGV00Hm8I9C_g?u=https%3A%2F%2Fcanada.constructconnect
+                .com%2Fdcn%2Fcertificates-and-notices%2F%2FB0046A36-3F1C-11E9-9A87
+                -005056AA6F02\r\n\r\nIf it's the right project, then the
+                certificate was just published this past Wednesday on March 6, 
+                2019. This means a valid holdback release invoice could be submitted 
+                as of:\r\nA) April 20, 2019 if the contract was signed before 
+                October 1, 2019 or;\r\nB) May 5, 2019 if the contract was signed 
+                since then.\r\n\r\nPlease be aware this is a fully automated message. 
+                The info presented above could be erroneous.\r\nYou can help improve
+                the matching algorithms by replying to this e-mail with a simple `1` or `0` to confirm whether or not the linked certificate represents the project in question.\r\n\r\nThanks,\r\nDilfo HBR Bot\r\n"""
+        }
+        process_as_reply(email_obj)
 
 
 class IntegrationTests(unittest.TestCase):
