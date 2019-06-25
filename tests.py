@@ -174,7 +174,11 @@ class IntegrationTests(unittest.TestCase):
             try:
                 os.rename('temp_'+filename, filename)
             except FileNotFoundError:
-                os.remove(filename)
+                try:
+                    os.remove(filename)
+                except FileNotFoundError:
+                    pass
+                
 
     # @data(
     #     ('', ''),
