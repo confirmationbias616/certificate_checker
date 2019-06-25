@@ -10,6 +10,7 @@ from communicator import communicate
 from log_user_input import process_as_form, process_as_reply
 from ml import build_train_set, train_model, validate_model
 from db_tools import create_connection
+from test.test_setup import create_test_db()
 import os
 
 
@@ -162,7 +163,7 @@ class InputTests(unittest.TestCase):
                 os.rename(filename, 'temp_'+filename)
             except FileNotFoundError:
                 pass
-        from test import test_setup
+        create_test_db()
         for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
             try:
                 os.rename('test_'+filename, filename)
@@ -276,7 +277,7 @@ class IntegrationTests(unittest.TestCase):
                 os.rename(filename, 'temp_'+filename)
             except FileNotFoundError:
                 pass
-        from test import test_setup
+        create_test_db()
         for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
             try:
                 os.rename('test_'+filename, filename)
