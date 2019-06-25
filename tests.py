@@ -157,28 +157,23 @@ class TestWrangleFuncs(unittest.TestCase):
 class IntegrationTests(unittest.TestCase):
     def setUp(self):
         # the import statement below runs some code automatically
+        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+            try:
+                os.rename(filename, 'temp_'+filename)
+            except FileNotFoundError:
+                pass
         from test import test_setup
         for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
-            try:  # if not running on CI build
-                os.rename(filename, 'temp_'+filename)
-            except:  # if running on CI build
-                pass
-        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
-            try:  # if not running on CI build           
+            try:
                 os.rename('test_'+filename, filename)
-            except:  # if running on CI build
+            except FileNotFoundError:
                 pass
     
     def tearDown(self):
         for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
-            try:  # if not running on CI build
-                os.rename('temp_'+filename, filename)
-            except:  # if running on CI build
-                pass
-        for filename in ['rf_model.pkl', 'rf_features.pkl']:
             try:
-                os.remove('new_'+filename)
-            except:
+                os.rename('temp_'+filename, filename)
+            except FileNotFoundError:
                 pass
 
     # @data(
