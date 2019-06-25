@@ -155,7 +155,7 @@ class TestWrangleFuncs(unittest.TestCase):
 
 @ddt
 class IntegrationTests(unittest.TestCase):
-    def setUpClass():
+    def setUp():
         # the import statement below runs some code automatically
         from test import test_setup
         for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
@@ -169,7 +169,7 @@ class IntegrationTests(unittest.TestCase):
             except:  # if running on CI build
                 pass
     
-    def tearDownClass():
+    def tearDown():
         for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
             try:  # if not running on CI build
                 os.rename('temp_'+filename, filename)
