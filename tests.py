@@ -154,8 +154,8 @@ class TestWrangleFuncs(unittest.TestCase):
         self.assertEqual(desired_string, output_string)
 
 @ddt
-class IntegrationTests(unittest.TestCase):
-    def setUp(self):
+class InputTests(unittest.TestCase):
+    def setUpClass():
         # the import statement below runs some code automatically
         for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
             try:
@@ -169,7 +169,7 @@ class IntegrationTests(unittest.TestCase):
             except FileNotFoundError:
                 pass
     
-    def tearDown(self):
+    def tearDownClass():
         for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
             try:
                 os.rename('temp_'+filename, filename)
@@ -267,6 +267,32 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(any(df_matched_post.ground_truth), was_prev_closed or ground_truth)
         self.assertEqual(len(df_matched_pre) + 1, len(df_matched_post) + was_prev_closed)
 
+
+class IntegrationTests(unittest.TestCase):
+    def setUp(self):
+        # the import statement below runs some code automatically
+        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+            try:
+                os.rename(filename, 'temp_'+filename)
+            except FileNotFoundError:
+                pass
+        from test import test_setup
+        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+            try:
+                os.rename('test_'+filename, filename)
+            except FileNotFoundError:
+                pass
+    
+    def tearDown(self):
+        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+            try:
+                os.rename('temp_'+filename, filename)
+            except FileNotFoundError:
+                try:
+                    os.remove(filename)
+                except FileNotFoundError:
+                    pass
+                
     def test_scarpe_to_communicate(self):
         test_limit = 3
         web_df = scrape(limit=test_limit, test=True, since='week_ago')
