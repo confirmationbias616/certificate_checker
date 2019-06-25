@@ -120,6 +120,11 @@ def process_as_reply(email_obj):
     feedback = int(0 if feedback == ('O' or 'o') else feedback)
     dcn_keys = dict(enumerate(re.findall('\w{8}-\w{4}-\w{4}-\w{4}-\w{12}', email_obj['content']),1))
     logger.info(f"got feedback `{feedback}` for job #`{job_number}`")
+    with create_connection() as conn:
+        was_prev_closed = pd.read_sql(f"SELECT * FROM df_dilfo WHERE job_number={job_number}", conn).iloc[0].closed
+    if was_prev_closed:
+        logger.info(f"job was already matched successfully and logged as `closed`... skipping.")
+        return
     if feedback > 0:
         logger.info(f"got feeback that the following DCN key {dcn_keys[feedback]} was correct")
         update_status_query = "UPDATE df_dilfo SET closed = 1 WHERE job_number = {}"
