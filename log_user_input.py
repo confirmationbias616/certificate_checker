@@ -26,8 +26,11 @@ logger.setLevel(logging.INFO)
 imap_ssl_host = 'imap.gmail.com'
 imap_ssl_port = 993
 username = 'dilfo.hb.release'
-with open(".password.txt") as file: 
-    password = file.read()
+try:
+    with open(".password.txt") as file: 
+        password = file.read()
+except FileNotFoundError:  # no password if running in CI
+    pass
 
 def parse_email(data):
     for response_part in data:
