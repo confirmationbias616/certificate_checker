@@ -15,7 +15,7 @@ log_handler.setFormatter(
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
-def create_connection(db_name='cert_db'):
+def create_connection(db_name='cert_db.sqlite3'):
     try:
         conn = sqlite3.connect(db_name)
         return conn

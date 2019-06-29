@@ -1,7 +1,7 @@
 cert_env
-cert_db
-temp_cert_db
-test_cert_db
+cert_db.sqlite3
+temp_cert_db.sqlite3
+test_cert_db.sqlite3
 train_set.csv
 
 .password.txt
@@ -135,4 +135,4 @@ venv.bak/
 .vscode/settings.json
 rf_model.pkl
 rf_features.pkl
-cert_db
+cert_db.sqlite3

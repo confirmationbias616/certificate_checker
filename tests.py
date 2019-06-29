@@ -158,20 +158,20 @@ class TestWrangleFuncs(unittest.TestCase):
 class InputTests(unittest.TestCase):
     def setUpClass():
         # the import statement below runs some code automatically
-        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
             try:
                 os.rename(filename, 'temp_'+filename)
             except FileNotFoundError:
                 pass
         create_test_db()
-        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
             try:
                 os.rename('test_'+filename, filename)
             except FileNotFoundError:
                 pass
     
     def tearDownClass():
-        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
             try:
                 os.rename('temp_'+filename, filename)
             except FileNotFoundError:
@@ -309,20 +309,20 @@ class InputTests(unittest.TestCase):
 class IntegrationTests(unittest.TestCase):
     def setUp(self):
         # the import statement below runs some code automatically
-        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
             try:
                 os.rename(filename, 'temp_'+filename)
             except FileNotFoundError:
                 pass
         create_test_db()
-        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
             try:
                 os.rename('test_'+filename, filename)
             except FileNotFoundError:
                 pass
     
     def tearDown(self):
-        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
             try:
                 os.rename('temp_'+filename, filename)
             except FileNotFoundError:
@@ -420,7 +420,7 @@ class IntegrationTests(unittest.TestCase):
         validate_model(prob_thresh=prob_thresh, test=True)
 
 if __name__ == '__main__':
-    for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+    for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
         try:
             os.rename('temp_'+filename, filename)
         except:
