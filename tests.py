@@ -245,7 +245,8 @@ class InputTests(unittest.TestCase):
         ('9996', 'B0046A36-3F1C-11E9-9A87-005056AA6F06', 1, 1, 1),
     )
     @unpack
-    def test_process_as_reply(self, job_number, dcn_key, ground_truth, was_prev_matched, was_prev_closed):
+    def test_process_as_reply(self, job_number, dcn_key, ground_truth,
+            was_prev_matched, was_prev_closed):
         email_obj = {
             'sender' : "Alex Roy <Alex.Roy@dilfo.com>",
             'subject' : f"Re: [EXTERNAL] #{job_number} - Upcoming Holdback Release",
