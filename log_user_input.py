@@ -113,7 +113,7 @@ def process_as_form(email_obj):
         df = df.append(dict_input, ignore_index=True)
         df = df.dropna(thresh=7)
         #loop through duplicates to drop the first records but retain their contacts
-        for dup_i in df[df.duplicated(subset=["job_number"], keep='first')].index:
+        for dup_i in df[df.duplicated(subset=["job_number"], keep='last')].index:
             dup_job_number = df.iloc[dup_i].job_number
             dup_receiver = df.iloc[dup_i].receiver_email
             dup_cc = df.iloc[dup_i].cc_email
