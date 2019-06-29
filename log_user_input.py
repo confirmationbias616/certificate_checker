@@ -89,8 +89,7 @@ def process_as_form(email_obj):
         dcn_key = ''
     dict_input.update({"receiver_email": re.findall('<?(\S+@\S+\.\w+)>?', email_obj["sender"])[0].lower()})
     dict_input.update({"log_date": email_obj["date"]})
-    try:  # if link was inputed from html form by using "dev mode"
-        dict_input['link_to_cert']
+    if dcn_key:
         dict_input.update({"closed": 1})
         with create_connection() as conn:
             df = pd.read_sql("SELECT * FROM df_matched", conn)
@@ -106,7 +105,7 @@ def process_as_form(email_obj):
             df = df.append(match_dict_input, ignore_index=True)
             df = df.drop_duplicates(subset=["job_number", "dcn_key"], keep='last')
             df.to_sql('df_matched', conn, if_exists='replace', index=False)
-    except KeyError:
+    else:
         dict_input.update({"closed": 0})
     with create_connection() as conn:
         df = pd.read_sql("SELECT * FROM df_dilfo", conn)
