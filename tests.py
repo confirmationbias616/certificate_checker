@@ -303,7 +303,7 @@ class InputTests(unittest.TestCase):
         self.assertEqual(len(df_dilfo_pre), len(df_dilfo_post))
         self.assertEqual(df_dilfo_post.iloc[0].closed, was_prev_closed or ground_truth)
         self.assertEqual(any(df_matched_post.ground_truth), was_prev_closed or ground_truth)
-        self.assertEqual(len(df_matched_pre) + 1, len(df_matched_post) + was_prev_closed)
+        self.assertEqual(len(df_matched_pre) + (not was_prev_closed), len(df_matched_post))
 
 
 class IntegrationTests(unittest.TestCase):
