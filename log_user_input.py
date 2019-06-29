@@ -84,7 +84,7 @@ def process_as_form(email_obj):
     except KeyError:
         pass
     try:
-        dcn_key = re.findall("(?<=notices/).*", dict_input.pop('link_to_cert'))[0]
+        dcn_key = re.findall('[\w-]*',dict_input.pop('link_to_cert'))[0]
     except (IndexError, KeyError):
         dcn_key = ''
     dict_input.update({"receiver_email": re.findall('<?(\S+@\S+\.\w+)>?', email_obj["sender"])[0].lower()})
