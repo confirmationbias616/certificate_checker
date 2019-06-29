@@ -9,6 +9,9 @@ train_set.csv
 # ignore all pickles
 *.pkl
 
+# ignore all Untitled documents (mostly for .ipynb's)
+Untitled*
+
 # Ignore all data
 model_archive/
 Launchd/
