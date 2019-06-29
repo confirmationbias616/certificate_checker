@@ -68,7 +68,16 @@ def get_job_input_data():
 
 def process_as_form(email_obj):
     dict_input = {
-        unquote(x.split('=')[0]):str(unquote(x.split('=')[1])).replace('+', ' ') for x in email_obj['content'].split('&')}            
+        unquote(x.split('=')[0]):str(unquote(x.split('=')[1])).replace('+', ' ') for x in email_obj['content'].split('&')}
+    job_number = dict_input['job_number']
+    with create_connection() as conn:
+        try:
+            was_prev_closed = pd.read_sql(f"SELECT * FROM df_dilfo WHERE job_number={job_number}", conn).iloc[0].closed
+        except IndexError:
+            was_prev_closed = 0
+    if was_prev_closed:
+        logger.info(f"job was already matched successfully and logged as `closed`... skipping.")
+        return
     try:
         if dict_input['cc_email'] != '':
             dict_input['cc_email'] += '@dilfo.com'
