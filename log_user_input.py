@@ -88,7 +88,6 @@ def process_as_form(email_obj):
     except (IndexError, KeyError):
         dcn_key = ''
     dict_input.update({"receiver_email": re.findall('<?(\S+@\S+\.\w+)>?', email_obj["sender"])[0].lower()})
-    dict_input.update({"log_date": email_obj["date"]})
     if dcn_key:
         dict_input.update({"closed": 1})
         with create_connection() as conn:
