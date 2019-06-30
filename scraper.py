@@ -87,8 +87,8 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
             lookup[key].append(company_results.get(key, np.nan))
     if isinstance(ref, pd.DataFrame):
         logger.info(f"fetching DCN certificate info for previously matched projects...")
-        for dcn_key in ref['dcn_key']:
-            get_details(dcn_key)
+        for key in ref['dcn_key']:
+            get_details(key)
     else:
         logger.info(f"scraping all of {number_of_matches} new certificates since {since}...")
         bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
