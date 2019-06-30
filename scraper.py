@@ -24,7 +24,7 @@ logger.setLevel(logging.INFO)
 
 def scrape(limit=False, test=False, ref=False, since='last_record'):
 
-    pub_date, city, address, title, owner, contractor, engineer, cert_url = [
+    pub_date, city, address, title, owner, contractor, engineer, dcn_key = [
         [] for _ in range(8)]
     now = datetime.datetime.now().date()
     base_url = "https://canada.constructconnect.com/dcn/certificates-and-notices\
@@ -56,7 +56,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
             url = 'https://canada.constructconnect.com/dcn/certificates-and-notices/' + entry
         else:
             url = 'https://canada.constructconnect.com' + entry.find("a")["href"]
-        cert_url.append(url)
+        dcn_key.append(url)
         while True:
             try:
                 response = requests.get(url)
@@ -67,6 +67,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
         html = response.content
         entry_soup = BeautifulSoup(html, "html.parser")
         pub_date.append(entry_soup.find("time").get_text())
+        
         city.append(
             entry_soup.find("div",{"class":"content-left"}).find("h4").get_text())
         address.append(
@@ -109,7 +110,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
             "owner": owner,
             "contractor": contractor,
             "engineer": engineer,
-            "dcn_key": [re.findall('(?<=notices[/%])[\w-]*', x)[0] for x in cert_url],
+            "dcn_key": [x.split('-notices/')[1] for x in dcn_key],
         }
     )
     # make date into actual datetime object
