@@ -83,10 +83,17 @@ def process_as_form(email_obj):
             dict_input['cc_email'] += '@dilfo.com'
     except KeyError:
         pass
+    
     try:
-        dcn_key = re.findall('[\w-]*',dict_input.pop('link_to_cert'))[0]
+        dcn_key = dict_input.pop('link_to_cert')
     except (IndexError, KeyError):
         dcn_key = ''
+    if dcn_key:
+        try:
+            dcn_key = dcn_key.split('-notices/')[1]
+        except IndexError:
+            pass
+        dcn_key = re.findall('[\w-]*',dcn_key)[0]
     dict_input.update({"receiver_email": re.findall('<?(\S+@\S+\.\w+)>?', email_obj["sender"])[0].lower()})
     if dcn_key:
         dict_input.update({"closed": 1})
