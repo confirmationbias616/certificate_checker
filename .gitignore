@@ -15,6 +15,7 @@ Untitled*
 # Ignore all data
 model_archive/
 Launchd/
+misc_notebooks/
 data/*
 # But not these files...
 !data/raw_dilfo_certs.csv
