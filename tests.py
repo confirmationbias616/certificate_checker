@@ -234,6 +234,8 @@ class InputTests(unittest.TestCase):
         self.assertEqual(bool(df_dilfo_post.iloc[0].closed), bool(was_prev_closed or dcn_key))
         self.assertEqual(any(df_matched_post.ground_truth), bool(was_prev_closed or dcn_key))
         self.assertEqual(len(df_matched_pre) + bool(dcn_key and not(was_prev_closed)), len(df_matched_post))
+        self.assertEqual(list(df_matched_pre.columns), list(df_matched_post.columns))
+        self.assertEqual(list(df_dilfo_pre.columns), list(df_dilfo_post.columns))
 
 
     @data(
@@ -304,6 +306,8 @@ class InputTests(unittest.TestCase):
         self.assertEqual(df_dilfo_post.iloc[0].closed, was_prev_closed or ground_truth)
         self.assertEqual(any(df_matched_post.ground_truth), was_prev_closed or ground_truth)
         self.assertEqual(len(df_matched_pre) + (not was_prev_closed), len(df_matched_post))
+        self.assertEqual(list(df_matched_pre.columns), list(df_matched_post.columns))
+        self.assertEqual(list(df_dilfo_pre.columns), list(df_dilfo_post.columns))
 
 
 class IntegrationTests(unittest.TestCase):
