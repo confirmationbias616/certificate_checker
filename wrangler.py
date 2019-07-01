@@ -192,7 +192,7 @@ def get_street_name(raw):
 def clean_title(raw):
     if raw == " ":
         return ""
-    title = raw
+    title = raw.lower()
     return title
 
 def wrangle(df):
