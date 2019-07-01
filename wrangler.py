@@ -156,7 +156,7 @@ def get_street_number(raw):
         return ""
 
 def get_street_name(raw):
-    if raw == " ":
+    if raw == " " or (raw == None):
         return ""
     raw = raw.lower()
     raw = unidecode.unidecode(raw)
@@ -171,7 +171,10 @@ def get_street_name(raw):
         "apartment ", 
         "unit ", 
         "suite "]]):
-        rest = rest.split(",")[1].lstrip(" ")
+        if ',' in rest:
+            rest = rest.split(",")[1].lstrip(" ")
+        else:
+            return ''
     for saint_word in ['st ', 'st. ', 'saint ', 'st-', 'saint-']:
         if rest.startswith(saint_word):
             rest = rest.replace(saint_word,'')
