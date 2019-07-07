@@ -35,6 +35,8 @@ def communicate(web_df, dilfo_row, test=False):
 			logger.info('given user e-mail address for cc has not been white listed (from dilfo.com '\
 				'domain or from Alex Roy address)')
 			cc_email = ''
+	else:
+		cc_email = ''
 			
 
 	def send_email():
