@@ -113,8 +113,8 @@ def communicate(web_df, dilfo_row, test=False):
 				with open(".password.txt") as file: 
 					password = file.read()
 				with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-				    server.login(sender_email, password)
-				    server.sendmail(sender_email, [receiver_email, cc_email], message)
+					server.login(sender_email, password)
+					server.sendmail(sender_email, [receiver_email, cc_email], message)
 				logger.info(f"Successfully sent an email to {receiver_email}")
 			except FileNotFoundError:
 				logger.info("password not available -> could not send e-mail")
