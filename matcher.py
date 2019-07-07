@@ -84,7 +84,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 		logger.debug(results.head(5))
 		matches = results[results.pred_match==1]
 		if len(matches) > 0:
-			logger.info(f"found {len(matches)} match{'' if len(matches)==1 else 'es'}!")
+			logger.info(f"found {len(matches)} match{'' if len(matches)==1 else 'es'}! with probability as high as {matches.iloc[0].pred_prob}")
 			logger.info("getting ready to send notification...")
 			communicate(matches, dilfo_row, test=test)
 			comm_count += 1
