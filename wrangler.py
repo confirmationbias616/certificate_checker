@@ -64,7 +64,7 @@ def clean_city(raw):
     return city
 
 def clean_company_name(raw):
-    if raw == " ":
+    if raw in (" ", 'None', None):
         return ""
     name = unidecode.unidecode(raw)
     try:
