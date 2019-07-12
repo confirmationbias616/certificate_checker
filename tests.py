@@ -14,7 +14,7 @@ from test.test_setup import create_test_db
 import os
 
 
-prob_thresh = 0.3 
+prob_thresh = 0.75
 @ddt
 class TestWrangleFuncs(unittest.TestCase):
 
