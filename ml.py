@@ -175,7 +175,6 @@ def validate_model(**kwargs):
     with create_connection() as conn:
         validate_df_dilfo = pd.read_sql(match_query, conn)
     validate_web_df = scrape(ref=validate_df_dilfo)
-
     new_results = match(version='new', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
     
     # check if 100% recall for new model
@@ -204,8 +203,16 @@ def validate_model(**kwargs):
     new_false_positives = len(new_results[new_results.pred_match == 1]) - qty_found_matches
 
     # pull out some stats
-    sq_pred_probs = sq_results[sq_results.pred_match==1].pred_prob
-    new_pred_probs = new_results[new_results.pred_match==1].pred_prob
+    sq_pred_probs = sq_results[sq_results.pred_match==1]
+    new_pred_probs = new_results[new_results.pred_match==1]
+    sq_pred_probs = sq_pred_probs.sort_values('pred_prob', ascending=False)
+    new_pred_probs = new_pred_probs.sort_values('pred_prob', ascending=False)
+    sq_pred_probs['index'] = sq_pred_probs.index
+    new_pred_probs['index'] = new_pred_probs.index
+    sq_pred_probs = sq_pred_probs.drop_duplicates(subset='index', keep='first')
+    new_pred_probs = new_pred_probs.drop_duplicates(subset='index', keep='first')
+    sq_pred_probs = sq_pred_probs.pred_prob
+    new_pred_probs = new_pred_probs.pred_prob
     sq_min_prob = round(min(sq_pred_probs),3)
     new_min_prob = round(min(new_pred_probs),3)
     sq_avg_prob = round(sum(sq_pred_probs)/len(sq_pred_probs),3)
