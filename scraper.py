@@ -24,7 +24,7 @@ logger.setLevel(logging.INFO)
 
 def scrape(limit=False, test=False, ref=False, since='last_record'):
 
-    pub_date, city, address, title, owner, contractor, engineer, cert_url = [
+    pub_date, city, address, title, owner, contractor, engineer, dcn_key = [
         [] for _ in range(8)]
     now = datetime.datetime.now().date()
     base_url = "https://canada.constructconnect.com/dcn/certificates-and-notices\
@@ -32,7 +32,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
     if since == 'week_ago':
         date_param_url = "&date=past_7&date_from=&date_to=#results"
     elif since == 'last_record':
-        hist_query = "SELECT pub_date FROM hist_certs ORDER BY pub_date DESC LIMIT 1"
+        hist_query = "SELECT pub_date FROM df_hist ORDER BY pub_date DESC LIMIT 1"
         with create_connection() as conn:
             last_date = conn.cursor().execute(hist_query).fetchone()[0]
             ld_year = int(last_date[:4])
@@ -53,10 +53,10 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
 
     def get_details(entry):
         if isinstance(ref, pd.DataFrame):
-            url = entry
+            url = 'https://canada.constructconnect.com/dcn/certificates-and-notices/' + entry
         else:
             url = 'https://canada.constructconnect.com' + entry.find("a")["href"]
-        cert_url.append(url)
+        dcn_key.append(url)
         while True:
             try:
                 response = requests.get(url)
@@ -67,6 +67,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
         html = response.content
         entry_soup = BeautifulSoup(html, "html.parser")
         pub_date.append(entry_soup.find("time").get_text())
+        
         city.append(
             entry_soup.find("div",{"class":"content-left"}).find("h4").get_text())
         address.append(
@@ -86,8 +87,8 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
             lookup[key].append(company_results.get(key, np.nan))
     if isinstance(ref, pd.DataFrame):
         logger.info(f"fetching DCN certificate info for previously matched projects...")
-        for link in ref.link_to_cert:
-            get_details(link)
+        for key in ref['dcn_key']:
+            get_details(key)
     else:
         logger.info(f"scraping all of {number_of_matches} new certificates since {since}...")
         bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
@@ -109,7 +110,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
             "owner": owner,
             "contractor": contractor,
             "engineer": engineer,
-            "cert_url": cert_url,
+            "dcn_key": [x.split('-notices/')[1] for x in dcn_key],
         }
     )
     # make date into actual datetime object
@@ -118,13 +119,13 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
 
     if not test and not isinstance(ref, pd.DataFrame):
         with create_connection() as conn:
-            df_web.to_sql('hist_certs', conn, if_exists='append', index=False)
+            df_web.to_sql('df_hist', conn, if_exists='append', index=False)
     else:
         return df_web
 
 
 if __name__=="__main__":
-    parser = argparse.ArgumentParser(description="scrapes DCM website and returns \
+    parser = argparse.ArgumentParser(description="scrapes DCN website and returns \
         certificates in the form of a pandas dataframe")
     parser.add_argument(
         "-l", "--limit",

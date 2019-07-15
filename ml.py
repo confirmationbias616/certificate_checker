@@ -12,6 +12,8 @@ from matcher_build import match_build
 from db_tools import create_connection
 import sys
 import logging
+import os
+import datetime
 
 
 logger = logging.getLogger(__name__)
@@ -25,51 +27,72 @@ logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
 def save_model(model):
-    logger.info("saving random forest classifier")
-    with open("./rf_model.pkl", "wb") as output:
+    logger.debug("saving random forest classifier")
+    with open("./new_rf_model.pkl", "wb") as output:
         pickle.dump(model, output)
 
 def save_feature_list(columns):
-    logger.info("saving list of features for random forest classifier")
-    with open("./rf_features.pkl", "wb") as output:
+    logger.debug("saving list of features for random forest classifier")
+    with open("./new_rf_features.pkl", "wb") as output:
         pickle.dump(columns, output)
-
-def load_model():
-    logger.info("loading random forest classifier")
-    with open("./rf_model.pkl", "rb") as input_file:
-        return pickle.load(input_file)
 
 def build_train_set():
     logger.info("building dataset for training random forest classifier")
-    match_query = "SELECT * FROM dilfo_matched"
+    match_query = """
+                    SELECT 
+                        df_dilfo.job_number,
+                        df_dilfo.city,
+                        df_dilfo.address,
+                        df_dilfo.title,
+                        df_dilfo.owner,
+                        df_dilfo.contractor,
+                        df_dilfo.engineer,
+                        df_dilfo.receiver_email,
+                        df_dilfo.cc_email,
+                        df_dilfo.quality,
+                        df_matched.dcn_key,
+                        df_matched.ground_truth
+                    FROM 
+                        df_dilfo 
+                    LEFT JOIN 
+                        df_matched
+                    ON 
+                        df_dilfo.job_number=df_matched.job_number
+                    WHERE 
+                        df_dilfo.closed=1
+                    AND 
+                        df_matched.ground_truth=1
+                    AND
+                        df_matched.validate=0
+                """
+
     with create_connection() as conn:
         test_df_dilfo = pd.read_sql(match_query, conn)
     test_web_df = scrape(ref=test_df_dilfo)
     test_web_df = wrangle(test_web_df)
-    
+
     # Get some certificates that are definitely not matches provide some false matches to train from
     start_date = '2011-01-01'
     end_date = '2011-04-30'
-    hist_query = "SELECT * FROM hist_certs WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
+    hist_query = "SELECT * FROM df_hist WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
     with create_connection() as conn:
         rand_web_df = pd.read_sql(hist_query, conn, params=[start_date, end_date])
     rand_web_df = wrangle(rand_web_df)
-    
+
     for i, test_row_dilfo in test_df_dilfo.iterrows():
         test_row_dilfo = wrangle(test_row_dilfo.to_frame().transpose())  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
         rand_web_df = rand_web_df.sample(n=len(test_df_dilfo), random_state=i)
         close_matches = match_build(test_row_dilfo, test_web_df)
         random_matches = match_build(test_row_dilfo, rand_web_df)
         matches = close_matches.append(random_matches)
-        matches['ground_truth'] = matches.cert_url.apply(
-            lambda x: 1 if x == test_row_dilfo.link_to_cert.iloc[0] else 0)
+        matches['ground_truth'] = matches.dcn_key.apply(
+            lambda x: 1 if x == test_row_dilfo.dcn_key.iloc[0] else 0)
         matches['dilfo_job_number'] = test_row_dilfo.job_number.iloc[0]
         matches['title_length'] = matches.title.apply(len)
         try:
             all_matches = all_matches.append(matches)
         except NameError:
             all_matches = matches
-
     all_matches.to_csv(f'./train_set.csv', index=False)
 
 def train_model(prob_thresh=0.65):
@@ -97,8 +120,6 @@ def train_model(prob_thresh=0.65):
         rc = len(results[(results.truth==1)&(results.pred==1)]) / len(results[results.truth==1])
         pr = len(results[(results.truth==1)&(results.pred==1)]) / len(results[results.pred==1])
         f1 = f1_score(y_test, pred)
-        show_res = results[(results.truth==1)|(results.pred==1)|(results.total_score>0.6)|(results.prob>0.3)].sort_values(['total_score'], ascending=False)
-        logger.debug("\nshow_res\n")
         logger.info(f'number of truthes to learn from: {len([x for x in y_train if x==1])} out of {len(y_train)}')
         logger.info(f'number of tests: {len(results[results.truth==1])}')
         feat_imp = pd.DataFrame({'feat':X.columns, 'imp':clf.feature_importances_}).sort_values('imp', ascending=False)
@@ -117,6 +138,130 @@ def train_model(prob_thresh=0.65):
     clf.fit(X_smo, y_smo)
     save_model(clf)
     return rc_cum, pr_cum, f1_cum
+
+def validate_model(**kwargs):
+    try:
+        test = kwargs['test']
+    except KeyError:
+        test = False
+    match_query = """
+                    SELECT 
+                        df_dilfo.job_number,
+                        df_dilfo.city,
+                        df_dilfo.address,
+                        df_dilfo.title,
+                        df_dilfo.owner,
+                        df_dilfo.contractor,
+                        df_dilfo.engineer,
+                        df_dilfo.receiver_email,
+                        df_dilfo.cc_email,
+                        df_dilfo.quality,
+                        df_matched.dcn_key,
+                        df_matched.ground_truth
+                    FROM 
+                        df_dilfo 
+                    LEFT JOIN 
+                        df_matched
+                    ON 
+                        df_dilfo.job_number=df_matched.job_number
+                    WHERE 
+                        df_dilfo.closed=1
+                    AND
+                        df_matched.ground_truth=1
+                    AND 
+                        df_matched.validate=1
+                """
+
+    with create_connection() as conn:
+        validate_df_dilfo = pd.read_sql(match_query, conn)
+    validate_web_df = scrape(ref=validate_df_dilfo)
+    new_results = match(version='new', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
+    
+    # check if 100% recall for new model
+    qty_actual_matches = int(len(new_results)**0.5)
+    qty_found_matches = new_results[new_results.pred_match == 1].title.nunique()
+    is_100_recall = qty_found_matches == qty_actual_matches
+
+    # the below exception will happen if there was no existing model present in
+    # folder (in testing) important to not skip validation so that the function
+    # can be propperly tested
+    try:
+        sq_results = match(version='status_quo', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
+    except FileNotFoundError:
+        logger.info("could not find any status quo models to use for baseline validation.")
+        if not test:
+            logger.info("adopting new model by default and skipping rest of validation")
+            for filename in ['rf_model.pkl', 'rf_features.pkl']:
+                os.rename('new_'+filename, filename)
+            return #exit function because there is no basline to validate against 
+        else:
+            logger.info("will keep testing validation using new model as baseline. Just for testing urposes.")
+            sq_results = match(version='new', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
+
+    # check out how many false positives were generated with status quo model and new model
+    sq_false_positives = len(sq_results[sq_results.pred_match == 1]) - qty_found_matches
+    new_false_positives = len(new_results[new_results.pred_match == 1]) - qty_found_matches
+
+    # pull out some stats
+    sq_pred_probs = sq_results[sq_results.pred_match==1]
+    new_pred_probs = new_results[new_results.pred_match==1]
+    sq_pred_probs = sq_pred_probs.sort_values('pred_prob', ascending=False)
+    new_pred_probs = new_pred_probs.sort_values('pred_prob', ascending=False)
+    sq_pred_probs['index'] = sq_pred_probs.index
+    new_pred_probs['index'] = new_pred_probs.index
+    sq_pred_probs = sq_pred_probs.drop_duplicates(subset='index', keep='first')
+    new_pred_probs = new_pred_probs.drop_duplicates(subset='index', keep='first')
+    sq_pred_probs = sq_pred_probs.pred_prob
+    new_pred_probs = new_pred_probs.pred_prob
+    sq_min_prob = round(min(sq_pred_probs),3)
+    new_min_prob = round(min(new_pred_probs),3)
+    sq_avg_prob = round(sum(sq_pred_probs)/len(sq_pred_probs),3)
+    new_avg_prob = round(sum(new_pred_probs)/len(new_pred_probs),3)
+
+    if not is_100_recall:
+        logger.warning(
+            f"100% recall not acheived with new model - archiving it "
+            f"and maintaining status quo!"
+            )
+        if test:
+            logger.info('skipping files transfers because running in test mode')
+        else:
+            for artifact in ['model', 'features']:
+                os.rename(
+                    f'new_rf_{artifact}.pkl',
+                    f'model_archive/rf_new_{artifact}-{datetime.datetime.now().date()}.pkl'
+                    )
+    else:
+        logger.info(
+            f"100% recall acheived! Adopting new model and archiving old one."
+            )
+        if test:
+            logger.info('skipping files transfers because running in test mode')
+        else:
+            for artifact in ['model', 'features']:
+                os.rename(
+                    f'rf_{artifact}.pkl',
+                    f'model_archive/rf_{artifact}-{datetime.datetime.now().date()}.pkl'
+                    )
+                os.rename(
+                    f'new_rf_{artifact}.pkl',
+                    f'rf_{artifact}.pkl'
+                    )
+        for metric, new, sq in zip(
+            ('false positive(s)', 'max threshold', 'average prediction probability'),
+            (new_false_positives, new_min_prob, new_avg_prob),
+            (sq_false_positives, sq_min_prob, sq_avg_prob)
+        ):
+            if new_false_positives <= sq_false_positives:
+                logger.info(
+                    f"New model produced {new} {metric}, "
+                    f"which is better or equal to status quo of {sq}."
+                    )
+            else:
+                logger.warning(
+                    f"Might want to investigate new model - new model produced "
+                    f"{new} {metric}, compared to status quo of {sq}"
+                    )
 
 if __name__ == '__main__':
     train_model()

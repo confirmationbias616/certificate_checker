@@ -21,17 +21,21 @@ log_handler.setFormatter(
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
-def load_model():
-    with open("./rf_model.pkl", "rb") as input_file:
-        return pickle.load(input_file)
+def load_model(version='status_quo'):
+	logger.debug(f"loading {version} random forest classifier")
+	version = '' if version == 'status_quo' else version + '_'
+	with open(f"./{version}rf_model.pkl", "rb") as input_file:
+		return pickle.load(input_file)
 
-def load_feature_list():
-    with open("./rf_features.pkl", "rb") as input_file:
-        return pickle.load(input_file)
+def load_feature_list(version='status_quo'):
+	logger.debug(f"loading {version} features for learning model")
+	version = '' if version == 'status_quo' else version + '_'
+	with open(f"./{version}rf_features.pkl", "rb") as input_file:
+		return pickle.load(input_file)
 
-def predict_prob(sample):
-    clf = load_model()
-    cols = load_feature_list()
+def predict_prob(sample, version):
+    clf = load_model(version=version)
+    cols = load_feature_list(version=version)
     prob = clf.predict_proba(sample[cols].values.reshape(1, -1))[0][1]
     return prob
 
@@ -41,10 +45,10 @@ def predict_match(prob, prob_thresh):
 	else:
 		return 0
 
-def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now', prob_thresh=0.65):
+def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now', prob_thresh=0.65, version='status_quo'):
 	logger.info('matching...')
 	if not isinstance(df_dilfo, pd.DataFrame):  # df_dilfo == False
-		open_query = "SELECT * FROM dilfo_open"
+		open_query = "SELECT * FROM df_dilfo WHERE closed=0"
 		with create_connection() as conn:
 			df_dilfo = pd.read_sql(open_query, conn)
 	df_dilfo = wrangle(df_dilfo)
@@ -63,7 +67,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 			valid_until_date = re.search("\d{4}-\d{2}-\d{2}", since)
 			if not valid_until_date:
 				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
-		hist_query = "SELECT * FROM hist_certs WHERE pub_date>=? AND pub_date<=? ORDER BY pub_date"
+		hist_query = "SELECT * FROM df_hist WHERE pub_date>=? AND pub_date<=? ORDER BY pub_date"
 		with create_connection() as conn:
 			df_web = pd.read_sql(hist_query, conn, params=[since, until])
 		if len(df_web) == 0:  # SQL query retunred nothing so no point of going any further
@@ -74,15 +78,18 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 	for _, dilfo_row in df_dilfo.iterrows():
 		results = match_build(dilfo_row.to_frame().transpose(), df_web)  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
 		logger.info(f"searching for potential match for project #{dilfo_row['job_number']}...")
-		results['pred_prob'] = results.apply(lambda row: predict_prob(row), axis=1)
+		results['pred_prob'] = results.apply(lambda row: predict_prob(row, version=version), axis=1)
 		results['pred_match'] = results.pred_prob.apply(lambda prob: predict_match(prob, prob_thresh))
 		results = results.sort_values('pred_prob', ascending=False)
-		logger.info(results.head(5))
+		logger.debug(results.head(5))
 		matches = results[results.pred_match==1]
-		logger.info(f"found {len(matches)} match{'' if len(matches)==1 else 'es'}!")
-		logger.info("getting ready to send notification...")
-		communicate(matches, dilfo_row, test=test)
-		comm_count += 1
+		if len(matches) > 0:
+			logger.info(f"found {len(matches)} match{'' if len(matches)==1 else 'es'}! with probability as high as {matches.iloc[0].pred_prob}")
+			logger.info("getting ready to send notification...")
+			communicate(matches, dilfo_row, test=test)
+			comm_count += 1
+		else:
+			logger.info(f"didn't find any matches")
 		try:
 			results_master = results_master.append(results)
 		except NameError:

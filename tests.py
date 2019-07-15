@@ -7,11 +7,14 @@ from scraper import scrape
 from wrangler import clean_job_number, clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title, wrangle
 from matcher import match
 from communicator import communicate
-from ml import build_train_set, train_model
+from log_user_input import process_as_form, process_as_reply
+from ml import build_train_set, train_model, validate_model
 from db_tools import create_connection
+from test.test_setup import create_test_db
 import os
 
-    
+
+prob_thresh = 0.75
 @ddt
 class TestWrangleFuncs(unittest.TestCase):
 
@@ -151,58 +154,239 @@ class TestWrangleFuncs(unittest.TestCase):
         output_string = clean_title(input_string)
         self.assertEqual(desired_string, output_string)
 
-
-class IntegrationTests(unittest.TestCase):
+@ddt
+class InputTests(unittest.TestCase):
     def setUpClass():
         # the import statement below runs some code automatically
-        from test import test_setup
-        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
-            try:  # if not running on CI build
+        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
+            try:
                 os.rename(filename, 'temp_'+filename)
-            except:  # if running on CI build
+            except FileNotFoundError:
                 pass
-        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
-            try:  # if not running on CI build           
+        create_test_db()
+        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
+            try:
                 os.rename('test_'+filename, filename)
-            except:  # if running on CI build
+            except FileNotFoundError:
                 pass
     
     def tearDownClass():
-        for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
-            try:  # if not running on CI build
+        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
+            try:
                 os.rename('temp_'+filename, filename)
-            except:  # if running on CI build
-                pass
+            except FileNotFoundError:
+                try:
+                    os.remove(filename)
+                except FileNotFoundError:
+                    pass
+                
 
+    @data(
+        ('9981', 'B0046A36-3F1C-11E9-9A87-005056AA6F11', 0, 0, 0),
+        ('9982', 'B0046A36-3F1C-11E9-9A87-005056AA6F12', 0, 0, 1),
+        ('9983', 'B0046A36-3F1C-11E9-9A87-005056AA6F13', 1, 0, 1),
+        ('9984', 'B0046A36-3F1C-11E9-9A87-005056AA6F14', 1, 1, 1),
+        ('9985', '', 0, 0, 0),
+        ('9986', '', 0, 0, 1),
+        ('9987', '', 1, 0, 1),
+        ('9988', '', 1, 1, 1),
+    )
+    @unpack
+    def test_process_as_form(self, job_number, dcn_key, was_prev_matched,
+            was_prev_closed, was_prev_tracked):
+        email_obj = {
+            'sender' : "Alex Roy <Alex.Roy@dilfo.com>",
+            'subject' : "DO NOT MODIFY MESSAGE BELOW - JUST HIT `SEND`",
+            'date' : "Tue, 7 May 2019 17:34:17 +0000",
+            'content' : (
+                f"job_number={job_number}&title=TEST_ENTRY&city=Ottawa&"
+                f"address=2562+Del+Zotto+Ave.%2C+Ottawa%2C+Ontario&"
+                f"contractor=GCN&engineer=Goodkey&owner=Douglas+Stalker&"
+                f"quality=2&cc_email=&link_to_cert={dcn_key}\r\n"
+            )
+        }
+        # set-up new entries in db, if necessary
+        fake_dilfo_insert = """
+            INSERT INTO df_dilfo (job_number, closed)
+            VALUES ({}, {})
+        """
+        fake_match_insert = """
+            INSERT INTO df_matched (job_number, ground_truth)
+            VALUES ({}, {})
+        """
+        with create_connection() as conn:
+            if was_prev_closed or was_prev_tracked:
+                conn.cursor().execute(fake_dilfo_insert.format(job_number, was_prev_closed))
+            if was_prev_matched:
+                if was_prev_closed:
+                    conn.cursor().execute(fake_match_insert.format(job_number, 1))
+                else:
+                    conn.cursor().execute(fake_match_insert.format(job_number, 0))
+        with create_connection() as conn:
+            df_dilfo_pre = pd.read_sql(f"SELECT * FROM df_dilfo WHERE job_number={job_number}", conn)
+            df_matched_pre = pd.read_sql(f"SELECT * FROM df_matched WHERE job_number={job_number}", conn)
+        process_as_form(email_obj)
+        # make assertions about db now that reply has been processed
+        with create_connection() as conn:
+            df_dilfo_post = pd.read_sql(f"SELECT * FROM df_dilfo WHERE job_number={job_number}", conn)
+            df_matched_post = pd.read_sql(f"SELECT * FROM df_matched WHERE job_number={job_number}", conn)
+        self.assertEqual(len(df_dilfo_post), 1)
+        self.assertEqual(bool(df_dilfo_post.iloc[0].closed), bool(was_prev_closed or dcn_key))
+        self.assertEqual(any(df_matched_post.ground_truth), bool(was_prev_closed or dcn_key))
+        self.assertEqual(len(df_matched_pre) + bool(dcn_key and not(was_prev_closed)), len(df_matched_post))
+        self.assertEqual(list(df_matched_pre.columns), list(df_matched_post.columns))
+        self.assertEqual(list(df_dilfo_pre.columns), list(df_dilfo_post.columns))
+
+
+    @data(
+        ('9991', 'B0046A36-3F1C-11E9-9A87-005056AA6F01', 0, 0, 0),
+        ('9992', 'B0046A36-3F1C-11E9-9A87-005056AA6F02', 0, 1, 0),
+        ('9993', 'B0046A36-3F1C-11E9-9A87-005056AA6F03', 0, 1, 1),
+        ('9994', 'B0046A36-3F1C-11E9-9A87-005056AA6F04', 1, 0, 0),
+        ('9995', 'B0046A36-3F1C-11E9-9A87-005056AA6F05', 1, 1, 0),
+        ('9996', 'B0046A36-3F1C-11E9-9A87-005056AA6F06', 1, 1, 1),
+    )
+    @unpack
+    def test_process_as_reply(self, job_number, dcn_key, ground_truth,
+            was_prev_matched, was_prev_closed):
+        email_obj = {
+            'sender' : "Alex Roy <Alex.Roy@dilfo.com>",
+            'subject' : f"Re: [EXTERNAL] #{job_number} - Upcoming Holdback Release",
+            'date' : "Thu, 30 May 2019 00:41:05 +0000",
+            'content' : (
+                f"{ground_truth}\r\n\r\nAlex Roy\r\nDilfo Mechanical\r\n(613) 899-9324\r\n\r\n"
+                f"________________________________\r\nFrom: Dilfo HBR Bot "
+                f"<dilfo.hb.release@gmail.com>\r\nSent: Wednesday, May 29, 2019 8:40 "
+                f"PM\r\nTo: Alex Roy\r\nSubject: [EXTERNAL] #{job_number} - Upcoming "
+                f"Holdback Release\r\n\r\nHi Alex,\r\n\r\nYou're receiving this "
+                f"e-mail notification because you added the project #{job_number} - DWS "
+                f"Building Expansion to the watchlist of upcoming holdback releases. "
+                f"\r\n\r\nBefore going any further, please follow the link below to "
+                f"make sure the algorithm correctly matched the project in "
+                f"question:\r\nhttps://link.spamstopshere.net/u/f544cec5/"
+                f"3CEdd3OC6RGV00Hm8I9C_g?u=https%3A%2F%2Fcanada.constructconnect"
+                f".com%2Fdcn%2Fcertificates-and-notices%2F%2F{dcn_key}\r\n\r\nIf it's the "
+                f"right project, then the "
+                f"certificate was just published this past Wednesday on March 6, "
+                f"2019. This means a valid holdback release invoice could be submitted "
+                f"as of:\r\nA) April 20, 2019 if the contract was signed before "
+                f"October 1, 2019 or;\r\nB) May 5, 2019 if the contract was signed "
+                f"since then.\r\n\r\nPlease be aware this is a fully automated message. "
+                f"The info presented above could be erroneous.\r\nYou can help improve "
+                f"the matching algorithms by replying to this e-mail with a simple `1` "
+                f"or `0` to confirm whether or not the linked certificate represents the "
+                f"project in question.\r\n\r\nThanks,\r\nDilfo HBR Bot\r\n"
+            )
+        }
+        # set-up new entries in db, if necessary
+        fake_dilfo_insert = """
+            INSERT INTO df_dilfo (job_number, closed)
+            VALUES ({}, {})
+        """
+        fake_match_insert = """
+            INSERT INTO df_matched (job_number, ground_truth)
+            VALUES ({}, {})
+        """
+        with create_connection() as conn:
+            conn.cursor().execute(fake_dilfo_insert.format(job_number, was_prev_closed))
+            if was_prev_matched:
+                if was_prev_closed:
+                    conn.cursor().execute(fake_match_insert.format(job_number, 1))
+                else:
+                    conn.cursor().execute(fake_match_insert.format(job_number, 0))
+        with create_connection() as conn:
+            df_dilfo_pre = pd.read_sql(f"SELECT * FROM df_dilfo WHERE job_number={job_number}", conn)
+            df_matched_pre = pd.read_sql(f"SELECT * FROM df_matched WHERE job_number={job_number}", conn)
+        process_as_reply(email_obj)
+        # make assertions about db now that reply has been processed
+        with create_connection() as conn:
+            df_dilfo_post = pd.read_sql(f"SELECT * FROM df_dilfo WHERE job_number={job_number}", conn)
+            df_matched_post = pd.read_sql(f"SELECT * FROM df_matched WHERE job_number={job_number}", conn)
+        self.assertEqual(len(df_dilfo_pre), len(df_dilfo_post))
+        self.assertEqual(df_dilfo_post.iloc[0].closed, was_prev_closed or ground_truth)
+        self.assertEqual(any(df_matched_post.ground_truth), was_prev_closed or ground_truth)
+        self.assertEqual(len(df_matched_pre) + (not was_prev_closed), len(df_matched_post))
+        self.assertEqual(list(df_matched_pre.columns), list(df_matched_post.columns))
+        self.assertEqual(list(df_dilfo_pre.columns), list(df_dilfo_post.columns))
+
+
+class IntegrationTests(unittest.TestCase):
+    def setUp(self):
+        # the import statement below runs some code automatically
+        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
+            try:
+                os.rename(filename, 'temp_'+filename)
+            except FileNotFoundError:
+                pass
+        create_test_db()
+        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
+            try:
+                os.rename('test_'+filename, filename)
+            except FileNotFoundError:
+                pass
+    
+    def tearDown(self):
+        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
+            try:
+                os.rename('temp_'+filename, filename)
+            except FileNotFoundError:
+                try:
+                    os.remove(filename)
+                except FileNotFoundError:
+                    pass
+                
     def test_scarpe_to_communicate(self):
         test_limit = 3
-        web_df = scrape(limit=test_limit, test=True)
+        web_df = scrape(limit=test_limit, test=True, since='week_ago')
         self.assertEqual(len(web_df), test_limit)
-        match_first_query = "SELECT * FROM dilfo_open LIMIT 1"
+        match_first_query = "SELECT * FROM df_dilfo WHERE closed=0 LIMIT 1"
         with create_connection() as conn:
             dilfo_row = pd.read_sql(match_first_query, conn).iloc[0]
         communicate(web_df, dilfo_row, test=True)  # This will not return legit matches.
 
-    def test_truth_table(self):
-
-        prob_thresh = 0.65
-        
+    def test_truth_table(self):        
         build_train_set()
         train_model(prob_thresh=prob_thresh)
-        match_query = "SELECT * FROM dilfo_matched"
+        match_query = """
+                        SELECT 
+                            df_dilfo.job_number,
+                            df_dilfo.city,
+                            df_dilfo.address,
+                            df_dilfo.title,
+                            df_dilfo.owner,
+                            df_dilfo.contractor,
+                            df_dilfo.engineer,
+                            df_dilfo.receiver_email,
+                            df_dilfo.cc_email,
+                            df_dilfo.quality,
+                            df_matched.dcn_key,
+                            df_matched.ground_truth
+                        FROM 
+                            df_dilfo 
+                        LEFT JOIN 
+                            df_matched
+                        ON 
+                            df_dilfo.job_number=df_matched.job_number
+                        WHERE 
+                            df_dilfo.closed=1
+                        AND
+                            df_matched.ground_truth=1
+                        AND 
+                            df_matched.validate=0
+                    """
         with create_connection() as conn:
             test_df_dilfo = pd.read_sql(match_query, conn)
         test_web_df = scrape(ref=test_df_dilfo)
-        results = match(df_dilfo=test_df_dilfo, df_web=test_web_df, test=True, prob_thresh=prob_thresh)
+        results = match(df_dilfo=test_df_dilfo, df_web=test_web_df, test=True, prob_thresh=prob_thresh, version='new')
         
         # confrim 100% recall with below assert
         qty_actual_matches = int(len(results)**0.5)
         qty_found_matches = results[results.pred_match == 1].title.nunique()
         self.assertTrue(qty_found_matches == qty_actual_matches, msg=f"qty_found_matches({qty_found_matches}) not equal qty_actual_matches({qty_actual_matches})")
         
-        # make sure not more than 10% false positives with below assert
+        # make sure not more than 25% false positives with below assert
         false_positives = len(results[results.pred_match == 1]) - qty_found_matches
-        self.assertTrue(false_positives <= round(qty_actual_matches*0.1,1), msg=f"found too many false positives ({false_positives}) out of total test projects ({qty_actual_matches})")
+        self.assertTrue(false_positives <= round(qty_actual_matches*0.25,1), msg=f"found too many false positives ({false_positives}) out of total test projects ({qty_actual_matches})")
 
         # test single sample
         sample_dilfo = pd.DataFrame({
@@ -216,8 +400,7 @@ class IntegrationTests(unittest.TestCase):
             'receiver_email':'alex.roy@dilfo.com',
             'cc_email':'',
             'quality':'2',
-            'link_to_cert':None,
-            'test_entry':None,
+            'closed':'0',
             }, index=range(1))
         sample_web = pd.DataFrame({
             'pub_date':'2019-03-06',
@@ -227,18 +410,21 @@ class IntegrationTests(unittest.TestCase):
             'owner':'Doug Stalker, DWS Roofing',
             'contractor':'GNC Constructors Inc.',
             'engineer':None,
-            'cert_url':'https://canada.constructconnect.com/dcn/certificates-and-notices/B0046A36-3F1C-11E9-9A87-005056AA6F02',
+            'dcn_key':'B0046A36-3F1C-11E9-9A87-005056AA6F02',
             }, index=range(1))
-        is_match, prob = match(df_dilfo=sample_dilfo, df_web=sample_web, test=True).iloc[0][['pred_match','pred_prob']]
+        is_match, prob = match(df_dilfo=sample_dilfo, df_web=sample_web, test=True, version='new').iloc[0][['pred_match','pred_prob']]
         self.assertTrue(is_match, msg=f"Project #{sample_dilfo.job_number} did not match successfully. Match probability returned was {prob}.") 
 
         # test same sample but using db retreival
-        results = match(df_dilfo=sample_dilfo, since='2019-03-05', until='2019-03-07', test=True)
+        results = match(df_dilfo=sample_dilfo, since='2019-03-05', until='2019-03-07', test=True, version='new')
         prob_from_db_cert = results[results.contractor == 'gnc'].iloc[0].pred_prob  #'gnc' is what is returned from the wrangling funcs
-        self.assertTrue(round(prob, 2) == round(prob_from_db_cert, 2)) 
+        self.assertTrue(round(prob, 2) == round(prob_from_db_cert, 2))
+
+        # make sure validation runs
+        validate_model(prob_thresh=prob_thresh, test=True)
 
 if __name__ == '__main__':
-    for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+    for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
         try:
             os.rename('temp_'+filename, filename)
         except:

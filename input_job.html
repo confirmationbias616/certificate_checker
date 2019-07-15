@@ -117,9 +117,10 @@ function show_dev() {
       Project Title<br>
       <input type="text" name="title" size="40" placeholder="ABC Tower D - Disruptek Office Fit-Up" required>
     </div><br>
-    City<br>
-    <input type="text" name="city" size="12" placeholder="Ottawa">
-    <br><br>
+    <div class="required">
+      City<br>
+      <input type="text" name="city" size="12" placeholder="Ottawa" required>
+    </div><br>
     <div class="required">
       Address<br>
       <input type="text" name="address" size="20" placeholder="123 Fake Street" required>
@@ -151,7 +152,6 @@ function show_dev() {
     <legend>Dev</legend>
     Link to matching DCN certification
     <input type="text" name="link_to_cert" placeholder="DCN Link"><br>
-    <input type="checkbox" name="test_entry" value="yes">Divert entry to test log?<br>
   </fieldset> 
 </form>
 </body>

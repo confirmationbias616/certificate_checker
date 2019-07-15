@@ -2,19 +2,26 @@ import os
 from log_user_input import log_user_input
 from scraper import scrape
 from matcher import match
-from ml import build_train_set, train_model
+from ml import build_train_set, train_model, validate_model
 import sys
 import logging
 
-prob_thresh = 0.65
+prob_thresh = 0.75
 
 def daily_routine():
     logger.info('initiating daily routine...')
+    logger.info('log_user_input')
     log_user_input()
+    logger.info('scrape')
     scrape()
+    logger.info('build_train_set')
     build_train_set()
+    logger.info('train_model')
     train_model(prob_thresh=prob_thresh)
-    match(since='2019-05-07', prob_thresh=prob_thresh)  #test=True to mute sending of e-mails
+    logger.info('match')
+    match(prob_thresh=prob_thresh)  #test=True to mute sending of e-mails
+    logger.info('validate')
+    validate_model(prob_thresh=prob_thresh)
 
 if __name__=="__main__":
     logger = logging.getLogger(__name__)
@@ -26,7 +33,7 @@ if __name__=="__main__":
     )
     logger.addHandler(log_handler)
     logger.setLevel(logging.INFO)
-    for filename in ['cert_db', 'rf_model.pkl', 'rf_features.pkl']:
+    for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
         try:
             os.rename('temp_'+filename, filename)
         except:

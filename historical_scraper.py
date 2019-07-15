@@ -16,7 +16,7 @@ def scrape(start='', finish='', limit=False, test=False):
         print(f"data already logged for time period of {start} to {finish}. Skipping..")
         return
     except FileNotFoundError:
-        pub_date, city, address, title, owner, contractor, engineer, cert_url = [
+        pub_date, city, address, title, owner, contractor, engineer, dcn_key = [
         [] for _ in range(8)
         ]
 
@@ -33,7 +33,7 @@ def scrape(start='', finish='', limit=False, test=False):
 
         def get_details(entry):
             url = 'https://canada.constructconnect.com' + entry.find("a")["href"]
-            cert_url.append(url)
+            dcn_key.append(url.split('-notices/')[1])
             while True:
                 try:
                     response = requests.get(url)
@@ -89,18 +89,18 @@ def scrape(start='', finish='', limit=False, test=False):
                 "owner": owner,
                 "contractor": contractor,
                 "engineer": engineer,
-                "cert_url": cert_url,
+                "dcn_key": dcn_key,
             }
         )
 
         # make date into actual datetime object
         df_web['pub_date'] = df_web.pub_date.apply(
             lambda x: re.findall('\d{4}-\d{2}-\d{2}', x)[0])
-        df_web.astype('str').to_csv(f'./data/raw_web_certs_{start}_to_{finish}.csv', index=False)
+        df_web.astype('str').to_csv(f'./raw_web_certs_{start}_to_{finish}.csv', index=False)
         return df_web
 
 
 #iterate through the years starting with 2001 because that's the first recorded year
-for y in range(2001, datetime.datetime.now().year + 1):
+for y in range(2019, datetime.datetime.now().year + 1):
     for m, d in zip([1, 5, 9], [30, 31, 31]):  # break year in trimestres to avoid errors
         scrape(start=f'{y}-{str(m).zfill(2)}-01', finish=f'{y}-{str(m+3).zfill(2)}-{d}')
