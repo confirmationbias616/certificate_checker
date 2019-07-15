@@ -18,8 +18,8 @@ def daily_routine():
     build_train_set()
     logger.info('train_model')
     train_model(prob_thresh=prob_thresh)
-    match(since='2019-05-07', prob_thresh=prob_thresh)  #test=True to mute sending of e-mails
     logger.info('match')
+    match(prob_thresh=prob_thresh)  #test=True to mute sending of e-mails
     logger.info('validate')
     validate_model(prob_thresh=prob_thresh)
 
