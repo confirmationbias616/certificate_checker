@@ -10,11 +10,17 @@ prob_thresh = 0.75
 
 def daily_routine():
     logger.info('initiating daily routine...')
+    logger.info('log_user_input')
     log_user_input()
+    logger.info('scrape')
     scrape()
+    logger.info('build_train_set')
     build_train_set()
+    logger.info('train_model')
     train_model(prob_thresh=prob_thresh)
     match(since='2019-05-07', prob_thresh=prob_thresh)  #test=True to mute sending of e-mails
+    logger.info('match')
+    logger.info('validate')
     validate_model(prob_thresh=prob_thresh)
 
 if __name__=="__main__":
