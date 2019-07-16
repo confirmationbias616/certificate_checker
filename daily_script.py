@@ -1,5 +1,5 @@
 import os
-from log_user_input import log_user_input
+from inbox_scanner import scan_inbox
 from scraper import scrape
 from matcher import match
 from ml import build_train_set, train_model, validate_model
@@ -10,8 +10,8 @@ prob_thresh = 0.75
 
 def daily_routine():
     logger.info('initiating daily routine...')
-    logger.info('log_user_input')
-    log_user_input()
+    logger.info('scan inbox once to process new e-mails')
+    scan_inbox(continuously=False)
     logger.info('scrape')
     scrape()
     logger.info('build_train_set')
