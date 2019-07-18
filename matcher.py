@@ -95,8 +95,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 		except NameError:
 			results_master = results
 	logger.info(f"Done looping through {len(df_dilfo)} open projects. Sent {comm_count} e-mails to communicate matches as a result.")
-	if test:
-		return results_master
+	return results_master
 
 if __name__=="__main__":
 	match()
