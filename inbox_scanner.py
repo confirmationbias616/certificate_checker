@@ -48,9 +48,6 @@ def process_as_form(email_obj):
             was_prev_closed = pd.read_sql(f"SELECT * FROM df_dilfo WHERE job_number={job_number}", conn).iloc[0].closed
         except IndexError:
             was_prev_closed = 0
-    if was_prev_closed:
-        logger.info(f"job was already matched successfully and logged as `closed`... skipping.")
-        return
     try:
         if dict_input['cc_email'] != '':
             dict_input['cc_email'] += '@dilfo.com'
@@ -60,6 +57,15 @@ def process_as_form(email_obj):
         dcn_key = dict_input.pop('link_to_cert')
     except (IndexError, KeyError):
         dcn_key = ''
+    try:
+        dict_input.pop('instant_scan')
+        instant_scan = True
+    except (IndexError, KeyError):
+        instant_scan = False
+    if was_prev_closed and not dcn_key:
+        logger.info(f"job was already matched successfully and logged as `closed`. Sending e-mail!")
+        # SEND CONF EMAIL
+        return
     if dcn_key:
         try:
             dcn_key = dcn_key.split('-notices/')[1]
