@@ -190,7 +190,9 @@ def scan_inbox(continuously=True):
                 elif len(re.findall('\d', user_email['content'])) >= 1:  # True if it's a response to a match notification email
                     logger.info(f'processing e-mail from {user_email["sender"]} as user feedback via email response')
                     process_as_reply(user_email)
-            except IndexError as e:
+                    logger.info('done.')
+                
+            except (IndexError, AttributeError) as e:
                 logger.info(e)
                 logger.info(traceback.format_exc())
                 logger.warning(f'Could not process e-mail from {user_email["sender"]}')
