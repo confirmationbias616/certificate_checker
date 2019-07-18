@@ -7,6 +7,7 @@ import numpy as np
 import re
 from urllib.parse import unquote
 from db_tools import create_connection
+from matcher import match
 import traceback
 import datetime
 import os
@@ -101,6 +102,15 @@ def process_as_form(email_obj):
             except TypeError:
                 pass
         df.to_sql('df_dilfo', conn, if_exists='replace', index=False)  # we're replacing here instead of appending because of the 2 previous lines
+        if instant_scan:
+            dilfo_query = "SELECT * FROM df_dilfo WHERE job_number=?"
+            with create_connection() as conn:
+                df_dilfo = pd.read_sql(dilfo_query, conn, params=[job_number])
+            hist_query = "SELECT * FROM df_hist ORDER BY pub_date DESC LIMIT 2000"
+            with create_connection() as conn:
+                df_web = pd.read_sql(hist_query, conn)
+            results = match(df_dilfo=df_dilfo, df_web=df_web, prob_thresh=0.2, test=False)
+            print(f"!!!{len(results[results.pred_match==1])}!!!!!!!!!!")
 
 def process_as_reply(email_obj):
     job_number = re.findall("(?<=#)[\d]+(?= - Upc)", email_obj['subject'])[0]
