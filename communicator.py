@@ -51,7 +51,7 @@ def communicate(web_df, dilfo_row, test=False):
 			f"\n"
 		    f"CC: {cc_email}"
 		    f"\n"
-		    f"Subject: #{dilfo_row.job_number} - Upcoming Holdback Release"
+		    f"Subject: Upcoming Holdback Release: #{dilfo_row.job_number}"
 		    f"\n\n"
 		    f"Hi {receiver_email.split('.')[0].title()},"
 		    f"\n\n"
