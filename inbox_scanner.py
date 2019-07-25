@@ -152,8 +152,36 @@ def process_as_form(email_obj):
             hist_query = "SELECT * FROM df_hist ORDER BY pub_date DESC LIMIT 2000"
             with create_connection() as conn:
                 df_web = pd.read_sql(hist_query, conn)
-            results = match(df_dilfo=df_dilfo, df_web=df_web, prob_thresh=0.2, test=False)
-            print(f"!!!{len(results[results.pred_match==1])}!!!!!!!!!!")
+            results = match(df_dilfo=df_dilfo, df_web=df_web, test=False)
+            if len(results[results.pred_match==1]) == 0:
+                message = (
+                    f"From: Dilfo HBR Bot"
+                    f"\n"
+                    f"To: {receiver_email}"
+                    f"\n"
+                    f"Subject: Successful Project Sign-Up: #{job_number}"
+                    f"\n\n"
+                    f"Hi {receiver_email.split('.')[0].title()},"
+                    f"\n\n"
+                    f"Your information for project #{job_number} was logged "
+                    f"successfully but no corresponding certificates in recent "
+                    f"history were matched to it."
+                    f"\n\n"
+                    f"Going forward, the Daily Commercial News website will be "
+                    f"scraped on a daily basis in search of your project. You "
+                    f"will be notified if a possible match has been detected."
+                    f"\n\n"
+                    f"Thanks,\n"
+                    f"Dilfo HBR Bot\n"
+                )
+                try:
+                    context = ssl.create_default_context()
+                    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+                        server.login(sender_email, password)
+                        server.sendmail(sender_email, [receiver_email], message)
+                    logger.info(f"Successfully sent an email to {receiver_email}")
+                except FileNotFoundError:
+                    logger.info("password not available -> could not send e-mail")
 
 def process_as_reply(email_obj):
     job_number = re.findall("(?<=#)[\d]+(?= - Upc)", email_obj['subject'])[0]
