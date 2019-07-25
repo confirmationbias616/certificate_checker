@@ -48,6 +48,8 @@ def process_as_form(email_obj):
             was_prev_closed = pd.read_sql(f"SELECT * FROM df_dilfo WHERE job_number={job_number}", conn).iloc[0].closed
         except IndexError:
             was_prev_closed = 0
+    receiver_email = re.findall('<?(\S+@\S+\.\w+)>?', email_obj["sender"])[0].lower()
+    dict_input.update({"receiver_email": receiver_email})
     try:
         if dict_input['cc_email'] != '':
             dict_input['cc_email'] += '@dilfo.com'
@@ -64,7 +66,44 @@ def process_as_form(email_obj):
         instant_scan = False
     if was_prev_closed and not dcn_key:
         logger.info(f"job was already matched successfully and logged as `closed`. Sending e-mail!")
-        # SEND CONF EMAIL
+        # Send email to inform of previous match
+        with create_connection() as conn:
+            prev_match = pd.read_sql(
+                "SELECT * FROM df_matched WHERE job_number=? AND ground_truth=1",
+                conn, params=[job_number]).iloc[0]
+        verifier = prev_match.verifier
+        log_date = prev_match.log_date
+        dcn_key = prev_match.dcn_key
+        message = (
+        f"From: Dilfo HBR Bot"
+        f"\n"
+        f"To: {receiver_email}"
+        f"\n"
+        f"Subject: Previously Matched: #{job_number}"
+        f"\n\n"
+        f"Hi {receiver_email.split('.')[0].title()},"
+        f"\n\n"
+        f"It looks like "
+        f"job #{job_number} corresponds to the following certificate:\n"
+        f"{lookup_url}{dcn_key}"
+        f"\n\n"
+        f"This confirmation was provided by {verifier.split('.')[0].title()}"
+        f"{' on ' + log_date if log_date is not None else ''}."
+        f"\n\n"
+        f"If any of the information above seems to be inaccurate, please reply "
+        f"to this e-mail for corrective action."
+        f"\n\n"
+        f"Thanks,\n"
+		f"Dilfo HBR Bot\n"
+        )
+        try:
+            context = ssl.create_default_context()
+            with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+                server.login(sender_email, password)
+                server.sendmail(sender_email, [receiver_email], message)
+            logger.info(f"Successfully sent an email to {receiver_email}")
+        except FileNotFoundError:
+            logger.info("password not available -> could not send e-mail")
         return
     if dcn_key:
         try:
@@ -72,7 +111,6 @@ def process_as_form(email_obj):
         except IndexError:
             pass
         dcn_key = re.findall('[\w-]*',dcn_key)[0]
-    dict_input.update({"receiver_email": re.findall('<?(\S+@\S+\.\w+)>?', email_obj["sender"])[0].lower()})
     if dcn_key:
         dict_input.update({"closed": 1})
         with create_connection() as conn:
