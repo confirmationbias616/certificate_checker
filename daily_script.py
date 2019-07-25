@@ -6,7 +6,7 @@ from ml import build_train_set, train_model, validate_model
 import sys
 import logging
 
-prob_thresh = 0.75
+prob_thresh = 0.7
 
 def daily_routine():
     logger.info('initiating daily routine...')
