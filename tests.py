@@ -148,6 +148,7 @@ class TestWrangleFuncs(unittest.TestCase):
     @data(
         (" ", ""),
         ("test", "test"),
+        ("testé", "teste"),
     )
     @unpack
     def test_clean_title(self, input_string, desired_string):
