@@ -59,6 +59,12 @@ def process_as_form(email_obj):
         dcn_key = dict_input.pop('link_to_cert')
     except (IndexError, KeyError):
         dcn_key = ''
+    if dcn_key:
+        try:
+            dcn_key = dcn_key.split('-notices/')[1]
+        except IndexError:
+            pass
+        dcn_key = re.findall('[\w-]*',dcn_key)[0]
     try:
         dict_input.pop('instant_scan')
         instant_scan = True
@@ -105,13 +111,6 @@ def process_as_form(email_obj):
         except FileNotFoundError:
             logger.info("password not available -> could not send e-mail")
         return
-    if dcn_key:
-        try:
-            dcn_key = dcn_key.split('-notices/')[1]
-        except IndexError:
-            pass
-        dcn_key = re.findall('[\w-]*',dcn_key)[0]
-    if dcn_key:
         dict_input.update({"closed": 1})
         with create_connection() as conn:
             df = pd.read_sql("SELECT * FROM df_matched", conn)
