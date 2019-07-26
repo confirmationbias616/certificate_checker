@@ -70,7 +70,7 @@ def process_as_form(email_obj):
         instant_scan = True
     except (IndexError, KeyError):
         instant_scan = False
-    if was_prev_closed and not dcn_key:
+    if was_prev_closed:
         logger.info(f"job was already matched successfully and logged as `closed`. Sending e-mail!")
         # Send email to inform of previous match
         with create_connection() as conn:
@@ -111,6 +111,7 @@ def process_as_form(email_obj):
         except FileNotFoundError:
             logger.info("password not available -> could not send e-mail")
         return
+    elif dcn_key:
         dict_input.update({"closed": 1})
         with create_connection() as conn:
             df = pd.read_sql("SELECT * FROM df_matched", conn)
