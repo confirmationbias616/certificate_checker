@@ -251,7 +251,7 @@ class InputTests(unittest.TestCase):
             was_prev_matched, was_prev_closed):
         email_obj = {
             'sender' : "Alex Roy <Alex.Roy@dilfo.com>",
-            'subject' : f"Re: [EXTERNAL] #{job_number} - Upcoming Holdback Release",
+            'subject' : f"Re: [EXTERNAL] Upcoming Holdback Release: #{job_number}",
             'date' : "Thu, 30 May 2019 00:41:05 +0000",
             'content' : (
                 f"{ground_truth}\r\n\r\nAlex Roy\r\nDilfo Mechanical\r\n(613) 899-9324\r\n\r\n"
