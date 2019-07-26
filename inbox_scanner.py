@@ -184,7 +184,7 @@ def process_as_form(email_obj):
                     logger.info("password not available -> could not send e-mail")
 
 def process_as_reply(email_obj):
-    job_number = re.findall("(?<=#)[\d]+(?= - Upc)", email_obj['subject'])[0]
+    job_number = email_obj['subject'].split(': #')[1]
     feedback = re.findall("^[\W]*([Oo\d]){1}(?=[\W]*)", email_obj['content'].replace('#','').replace('link', ''))[0]
     feedback = int(0 if feedback == ('O' or 'o') else feedback)
     dcn_keys = dict(enumerate(re.findall('\w{8}-\w{4}-\w{4}-\w{4}-\w{12}', email_obj['content']),1))
