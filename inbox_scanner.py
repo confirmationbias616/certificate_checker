@@ -108,7 +108,7 @@ def process_as_form(email_obj):
                 server.login(sender_email, password)
                 server.sendmail(sender_email, [receiver_email], message)
             logger.info(f"Successfully sent an email to {receiver_email}")
-        except FileNotFoundError:
+        except (FileNotFoundError, NameError):
             logger.info("password not available -> could not send e-mail")
         return
     elif dcn_key:
@@ -180,7 +180,7 @@ def process_as_form(email_obj):
                         server.login(sender_email, password)
                         server.sendmail(sender_email, [receiver_email], message)
                     logger.info(f"Successfully sent an email to {receiver_email}")
-                except FileNotFoundError:
+                except (FileNotFoundError, NameError):
                     logger.info("password not available -> could not send e-mail")
 
 def process_as_reply(email_obj):
