@@ -23,6 +23,7 @@ def clean_pub_date(raw):
 def clean_city(raw):
     if raw == " ":
         return ""
+    raw = unidecode.unidecode(raw)
     city = raw.lower()
     for variant in [
         " ste ",
@@ -192,6 +193,7 @@ def get_street_name(raw):
 def clean_title(raw):
     if raw == " ":
         return ""
+    raw = unidecode.unidecode(raw)
     title = raw.lower()
     return title
 
