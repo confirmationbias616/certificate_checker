@@ -207,12 +207,12 @@ class InputTests(unittest.TestCase):
         }
         # set-up new entries in db, if necessary
         fake_dilfo_insert = """
-            INSERT INTO df_dilfo (job_number, closed)
-            VALUES ({}, {})
+            INSERT INTO df_dilfo (job_number, receiver_email, closed)
+            VALUES ({}, 'alex.roy616@gmail.com', {})
         """
         fake_match_insert = """
-            INSERT INTO df_matched (job_number, ground_truth)
-            VALUES ({}, {})
+            INSERT INTO df_matched (job_number, verifier, ground_truth)
+            VALUES ({}, 'alex.roy616@gmail.com', {})
         """
         with create_connection() as conn:
             if was_prev_closed or was_prev_tracked:
