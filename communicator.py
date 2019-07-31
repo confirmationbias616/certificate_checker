@@ -71,41 +71,41 @@ def communicate(web_df, dilfo_row, test=False):
 		timing_msg = (
 		    f"If it's the right project, then the certificate was just published "
 		    f"on {datetime.datetime.strftime(pub_date,'%B %e, %Y')}. This means a "
-		    f"valid holdback release invoice could be submitted as of:"
-		    f"\nA)\t{datetime.datetime.strftime(due_date(45),'%B %e, %Y')} "
-		    f"if the contract was signed before October 1, 2019 or;"
-		    f"\nB)\t{datetime.datetime.strftime(due_date(60),'%B %e, %Y')} "
+		    f"valid holdback release invoice could be submitted as of:\n"
+		    f"A)\t{datetime.datetime.strftime(due_date(45),'%B %e, %Y')} "
+		    f"if the contract was signed before October 1, 2019 or;\n"
+		    f"B)\t{datetime.datetime.strftime(due_date(60),'%B %e, %Y')} "
 		    f"if the contract was signed since then."
 		    f"\n"
 		)
+		feedback_msg = (
+			"Your feedback will be required so the service can properly "
+			"handle this ticket, whether that means closing it out or keep "
+			"searching for new matches. It will also help improve the "
+			"matching algorithm for future projects.\n"
+			"\n"
+			"Please respond to this email with one of the numbers from below, "
+			"which corrsponds to your situation with regards to the proposed "
+			"link:\n"
+			"0)\tlink does not relate to my project\n"
+			"1)\tlink is accurate match for my project\n"
+			"2)\tlink is close but seems to relate to a different phase or "
+			"stage.\n"
+			"\n"
+			"Whether you were the main receiver or just in CC, your"
+			"feedback is greatly apreciated."
+			"\n"	
+		)
 		disclaimer_msg = (
-		    "Please be aware this is a fully automated message. "
+		    "Fianlly, please be aware this is a fully automated message. "
 		    "The info presented above could be erroneous."
 			"\n"
 		)
-		if len(web_df) == 1:
-			feedback_msg = (
-				"Your feedback will be required so the service can properly "
-				"handle this ticket, whether that means closing it out or keep "
-				"searching for new matches. It will also help improve the "
-				"matching algorithm for future projects.\n"
-				"Please respond to this email with one of the numbers from below, "
-				"which corrsponds to your situation with the most accuracy:\n"
-				"\t0: did not relate to my project\n"
-				"\t1: was accurate match for my project\n"
-				"\t2: was close but seemed to represent a different phase or "
-				"stage of my project.\n"
-				"Whether you were the main receiver or just in CC, your"
-				"feedback is greatly apreciated."
-				"\n"	
-			)
 		closeout_msg = (
 			"Thanks,\n"
 			"Dilfo HBR Bot\n"
 		)
-
 		message = '\n'.join([intro_msg, enum_msg, timing_msg, feedback_msg, disclaimer_msg, closeout_msg])
-
 		if not test:
 			try:
 				context = ssl.create_default_context()
