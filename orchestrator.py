@@ -25,7 +25,8 @@ def orchestrate():
         try:
             scan_inbox()
         except:  # socket.gaierror:
-            logger.info('no internet available - retrying...')
+            logger.info('no internet available - retrying in 5 minutes')
+            sleep(298)
         current_datetime = datetime.datetime.now()
         hist_query = "SELECT pub_date FROM df_hist ORDER BY pub_date DESC LIMIT 1"
         with create_connection() as conn:
