@@ -96,7 +96,7 @@ def build_train_set():
             all_matches = all_matches.append(matches)
         except NameError:
             all_matches = matches
-    all_matches.to_csv(f'./train_set.csv', index=False)
+    all_matches.to_csv('./train_set.csv', index=False)
 
 def train_model(prob_thresh=0.65):
     logger.info("training random forest classifier")
@@ -126,7 +126,7 @@ def train_model(prob_thresh=0.65):
         logger.info(f'number of truthes to learn from: {len([x for x in y_train if x==1])} out of {len(y_train)}')
         logger.info(f'number of tests: {len(results[results.truth==1])}')
         feat_imp = pd.DataFrame({'feat':X.columns, 'imp':clf.feature_importances_}).sort_values('imp', ascending=False)
-        logger.debug(f"\nfeat_imp\n")
+        logger.debug("\nfeat_imp\n")
         logger.info(f'top feature is `{feat_imp.iloc[0].feat}` with factor of {round(feat_imp.iloc[0].imp, 3)}')
         logger.info(f'recall: {round(rc, 3)}')
         logger.info(f'precision: {round(pr, 3)}')
@@ -226,8 +226,8 @@ def validate_model(**kwargs):
 
     if not is_100_recall:
         logger.warning(
-            f"100% recall not acheived with new model - archiving it "
-            f"and maintaining status quo!"
+            "100% recall not acheived with new model - archiving it "
+            "and maintaining status quo!"
             )
         if test:
             logger.info('skipping files transfers because running in test mode')
@@ -239,7 +239,7 @@ def validate_model(**kwargs):
                     )
     else:
         logger.info(
-            f"100% recall acheived! Adopting new model and archiving old one."
+            "100% recall acheived! Adopting new model and archiving old one."
             )
         if test:
             logger.info('skipping files transfers because running in test mode')

@@ -43,8 +43,8 @@ def orchestrate():
             latest_scrape_date != str(current_datetime.date())
         ):
             logger.info(
-                f"Since it's a passed 4 AM on a weekday for which data hasn't "
-                f"been scraped yet, launching daily_routine.")
+                "Since it's a passed 4 AM on a weekday for which data hasn't "
+                "been scraped yet, launching daily_routine.")
             daily_routine()
             new_day = False
         prev_datetime = current_datetime

@@ -89,7 +89,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 			communicate(matches, dilfo_row, test=test)
 			comm_count += 1
 		else:
-			logger.info(f"didn't find any matches")
+			logger.info("didn't find any matches")
 		try:
 			results_master = results_master.append(results)
 		except NameError:

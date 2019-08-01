@@ -71,7 +71,7 @@ def process_as_form(email_obj):
     except (IndexError, KeyError):
         instant_scan = False
     if was_prev_closed:
-        logger.info(f"job was already matched successfully and logged as `closed`. Sending e-mail!")
+        logger.info("job was already matched successfully and logged as `closed`. Sending e-mail!")
         # Send email to inform of previous match
         with create_connection() as conn:
             prev_match = pd.read_sql(
@@ -192,7 +192,7 @@ def process_as_reply(email_obj):
     with create_connection() as conn:
         was_prev_closed = pd.read_sql("SELECT * FROM df_dilfo WHERE job_number=?", conn, params=[job_number]).iloc[0].closed
     if was_prev_closed:
-        logger.info(f"job was already matched successfully and logged as `closed`... skipping.")
+        logger.info("job was already matched successfully and logged as `closed`... skipping.")
         return
     if feedback == 1:
         logger.info(f"got feeback that DCN key {dcn_key} was correct")
