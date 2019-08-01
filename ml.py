@@ -51,7 +51,8 @@ def build_train_set():
                         df_dilfo.cc_email,
                         df_dilfo.quality,
                         df_matched.dcn_key,
-                        df_matched.ground_truth
+                        df_matched.ground_truth,
+                        df_matched.multi_phase
                     FROM 
                         df_dilfo 
                     LEFT JOIN 
@@ -62,6 +63,8 @@ def build_train_set():
                         df_dilfo.closed=1
                     AND 
                         df_matched.ground_truth=1
+                    AND 
+                        df_matched.multi_phase=0
                     AND
                         df_matched.validate=0
                 """
@@ -157,7 +160,8 @@ def validate_model(**kwargs):
                         df_dilfo.cc_email,
                         df_dilfo.quality,
                         df_matched.dcn_key,
-                        df_matched.ground_truth
+                        df_matched.ground_truth,
+                        df_matched.multi_phase
                     FROM 
                         df_dilfo 
                     LEFT JOIN 
@@ -168,6 +172,8 @@ def validate_model(**kwargs):
                         df_dilfo.closed=1
                     AND
                         df_matched.ground_truth=1
+                    AND 
+                        df_matched.multi_phase=0
                     AND 
                         df_matched.validate=1
                 """
