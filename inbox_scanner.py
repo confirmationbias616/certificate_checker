@@ -45,7 +45,7 @@ def process_as_form(email_obj):
     job_number = dict_input['job_number']
     with create_connection() as conn:
         try:
-            was_prev_closed = pd.read_sql(f"SELECT * FROM df_dilfo WHERE job_number={job_number}", conn).iloc[0].closed
+            was_prev_closed = pd.read_sql("SELECT * FROM df_dilfo WHERE job_number=?", conn, params=[job_number]).iloc[0].closed
         except IndexError:
             was_prev_closed = 0
     receiver_email = re.findall('<?(\S+@\S+\.\w+)>?', email_obj["sender"])[0].lower()
@@ -190,15 +190,15 @@ def process_as_reply(email_obj):
     dcn_key = re.findall('\w{8}-\w{4}-\w{4}-\w{4}-\w{12}', email_obj['content'])[0]
     logger.info(f"got feedback `{feedback}` for job #`{job_number}`")
     with create_connection() as conn:
-        was_prev_closed = pd.read_sql(f"SELECT * FROM df_dilfo WHERE job_number={job_number}", conn).iloc[0].closed
+        was_prev_closed = pd.read_sql("SELECT * FROM df_dilfo WHERE job_number=?", conn, params=[job_number]).iloc[0].closed
     if was_prev_closed:
         logger.info(f"job was already matched successfully and logged as `closed`... skipping.")
         return
     if feedback == 1:
         logger.info(f"got feeback that DCN key {dcn_key} was correct")
-        update_status_query = "UPDATE df_dilfo SET closed = 1 WHERE job_number = {}"
+        update_status_query = "UPDATE df_dilfo SET closed = 1 WHERE job_number = ?"
         with create_connection() as conn:
-            conn.cursor().execute(update_status_query.format(job_number))
+            conn.cursor().execute(update_status_query, [job_number])
         logger.info(f"updated df_dilfo to show `closed` status for job #{job_number}")
     with create_connection() as conn:
         df = pd.read_sql("SELECT * FROM df_matched", conn)

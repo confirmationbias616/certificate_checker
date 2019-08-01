@@ -209,28 +209,28 @@ class InputTests(unittest.TestCase):
         # set-up new entries in db, if necessary
         fake_dilfo_insert = """
             INSERT INTO df_dilfo (job_number, receiver_email, closed)
-            VALUES ({}, 'alex.roy616@gmail.com', {})
+            VALUES (?, 'alex.roy616@gmail.com', ?)
         """
         fake_match_insert = """
             INSERT INTO df_matched (job_number, verifier, ground_truth)
-            VALUES ({}, 'alex.roy616@gmail.com', {})
+            VALUES (?, 'alex.roy616@gmail.com', ?)
         """
         with create_connection() as conn:
             if was_prev_closed or was_prev_tracked:
-                conn.cursor().execute(fake_dilfo_insert.format(job_number, was_prev_closed))
+                conn.cursor().execute(fake_dilfo_insert, [job_number, was_prev_closed])
             if was_prev_matched:
                 if was_prev_closed:
-                    conn.cursor().execute(fake_match_insert.format(job_number, 1))
+                    conn.cursor().execute(fake_match_insert, [job_number, 1])
                 else:
-                    conn.cursor().execute(fake_match_insert.format(job_number, 0))
+                    conn.cursor().execute(fake_match_insert, [job_number, 0])
         with create_connection() as conn:
-            df_dilfo_pre = pd.read_sql(f"SELECT * FROM df_dilfo WHERE job_number={job_number}", conn)
-            df_matched_pre = pd.read_sql(f"SELECT * FROM df_matched WHERE job_number={job_number}", conn)
+            df_dilfo_pre = pd.read_sql("SELECT * FROM df_dilfo WHERE job_number=?", conn, params=[job_number])
+            df_matched_pre = pd.read_sql("SELECT * FROM df_matched WHERE job_number=?", conn, params=[job_number])
         process_as_form(email_obj)
         # make assertions about db now that reply has been processed
         with create_connection() as conn:
-            df_dilfo_post = pd.read_sql(f"SELECT * FROM df_dilfo WHERE job_number={job_number}", conn)
-            df_matched_post = pd.read_sql(f"SELECT * FROM df_matched WHERE job_number={job_number}", conn)
+            df_dilfo_post = pd.read_sql("SELECT * FROM df_dilfo WHERE job_number=?", conn, params=[job_number])
+            df_matched_post = pd.read_sql("SELECT * FROM df_matched WHERE job_number=?", conn, params=[job_number])
         self.assertEqual(len(df_dilfo_post), 1)
         self.assertEqual(bool(df_dilfo_post.iloc[0].closed), bool(was_prev_closed or dcn_key))
         self.assertEqual(any(df_matched_post.ground_truth), bool(was_prev_closed or dcn_key))
@@ -282,27 +282,27 @@ class InputTests(unittest.TestCase):
         # set-up new entries in db, if necessary
         fake_dilfo_insert = """
             INSERT INTO df_dilfo (job_number, closed)
-            VALUES ({}, {})
+            VALUES (?, ?)
         """
         fake_match_insert = """
             INSERT INTO df_matched (job_number, ground_truth)
-            VALUES ({}, {})
+            VALUES (?, ?)
         """
         with create_connection() as conn:
-            conn.cursor().execute(fake_dilfo_insert.format(job_number, was_prev_closed))
+            conn.cursor().execute(fake_dilfo_insert, [job_number, was_prev_closed])
             if was_prev_matched:
                 if was_prev_closed:
-                    conn.cursor().execute(fake_match_insert.format(job_number, 1))
+                    conn.cursor().execute(fake_match_insert, [job_number, 1])
                 else:
-                    conn.cursor().execute(fake_match_insert.format(job_number, 0))
+                    conn.cursor().execute(fake_match_insert, [job_number, 0])
         with create_connection() as conn:
-            df_dilfo_pre = pd.read_sql(f"SELECT * FROM df_dilfo WHERE job_number={job_number}", conn)
-            df_matched_pre = pd.read_sql(f"SELECT * FROM df_matched WHERE job_number={job_number}", conn)
+            df_dilfo_pre = pd.read_sql("SELECT * FROM df_dilfo WHERE job_number=?", conn, params=[job_number])
+            df_matched_pre = pd.read_sql("SELECT * FROM df_matched WHERE job_number=?", conn, params=[job_number])
         process_as_reply(email_obj)
         # make assertions about db now that reply has been processed
         with create_connection() as conn:
-            df_dilfo_post = pd.read_sql(f"SELECT * FROM df_dilfo WHERE job_number={job_number}", conn)
-            df_matched_post = pd.read_sql(f"SELECT * FROM df_matched WHERE job_number={job_number}", conn)
+            df_dilfo_post = pd.read_sql("SELECT * FROM df_dilfo WHERE job_number=?", conn, params=[job_number])
+            df_matched_post = pd.read_sql("SELECT * FROM df_matched WHERE job_number=?", conn, params=[job_number])
         self.assertEqual(len(df_dilfo_pre), len(df_dilfo_post))
         self.assertEqual(df_dilfo_post.iloc[0].closed, was_prev_closed or ground_truth)
         self.assertEqual(any(df_matched_post.ground_truth), was_prev_closed or ground_truth)
