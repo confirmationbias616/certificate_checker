@@ -45,7 +45,7 @@ def process_as_form(email_obj):
     job_number = dict_input['job_number']
     with create_connection() as conn:
         try:
-            was_prev_closed = pd.read_sql("SELECT * FROM df_dilfo WHERE job_number=?", conn, params=[job_number]).iloc[0].closed
+            was_prev_closed = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[job_number]).iloc[0].closed
         except IndexError:
             was_prev_closed = 0
     receiver_email = re.findall('<?(\S+@\S+\.\w+)>?', email_obj["sender"])[0].lower()
@@ -75,7 +75,7 @@ def process_as_form(email_obj):
         # Send email to inform of previous match
         with create_connection() as conn:
             prev_match = pd.read_sql(
-                "SELECT * FROM df_matched WHERE job_number=? AND ground_truth=1",
+                "SELECT * FROM attempted_matches WHERE job_number=? AND ground_truth=1",
                 conn, params=[job_number]).iloc[0]
         verifier = prev_match.verifier
         log_date = prev_match.log_date
@@ -114,7 +114,7 @@ def process_as_form(email_obj):
     elif dcn_key:
         dict_input.update({"closed": 1})
         with create_connection() as conn:
-            df = pd.read_sql("SELECT * FROM df_matched", conn)
+            df = pd.read_sql("SELECT * FROM attempted_matches", conn)
             match_dict_input = {
                 'job_number': dict_input['job_number'],
                 'dcn_key': dcn_key,
@@ -126,11 +126,11 @@ def process_as_form(email_obj):
             }
             df = df.append(match_dict_input, ignore_index=True)
             df = df.drop_duplicates(subset=["job_number", "dcn_key"], keep='last')
-            df.to_sql('df_matched', conn, if_exists='replace', index=False)
+            df.to_sql('attempted_matches', conn, if_exists='replace', index=False)
     else:
         dict_input.update({"closed": 0})
     with create_connection() as conn:
-        df = pd.read_sql("SELECT * FROM df_dilfo", conn)
+        df = pd.read_sql("SELECT * FROM company_projects", conn)
         df = df.append(dict_input, ignore_index=True)
         #loop through duplicates to drop the first records but retain their contacts
         for dup_i in df[df.duplicated(subset=["job_number"], keep='last')].index:
@@ -144,15 +144,15 @@ def process_as_form(email_obj):
                 df.loc[update_i,'cc_email'] = df.loc[update_i,'cc_email'] + '; ' + dup_addrs
             except TypeError:
                 pass
-        df.to_sql('df_dilfo', conn, if_exists='replace', index=False)  # we're replacing here instead of appending because of the 2 previous lines
+        df.to_sql('company_projects', conn, if_exists='replace', index=False)  # we're replacing here instead of appending because of the 2 previous lines
         if instant_scan:
-            dilfo_query = "SELECT * FROM df_dilfo WHERE job_number=?"
+            dilfo_query = "SELECT * FROM company_projects WHERE job_number=?"
             with create_connection() as conn:
-                df_dilfo = pd.read_sql(dilfo_query, conn, params=[job_number])
-            hist_query = "SELECT * FROM df_hist ORDER BY pub_date DESC LIMIT 2000"
+                company_projects = pd.read_sql(dilfo_query, conn, params=[job_number])
+            hist_query = "SELECT * FROM dcn_certificates ORDER BY pub_date DESC LIMIT 2000"
             with create_connection() as conn:
                 df_web = pd.read_sql(hist_query, conn)
-            results = match(df_dilfo=df_dilfo, df_web=df_web, test=False)
+            results = match(company_projects=company_projects, df_web=df_web, test=False)
             if len(results[results.pred_match==1]) == 0:
                 message = (
                     f"From: Dilfo HBR Bot"
@@ -190,18 +190,18 @@ def process_as_reply(email_obj):
     dcn_key = re.findall('\w{8}-\w{4}-\w{4}-\w{4}-\w{12}', email_obj['content'])[0]
     logger.info(f"got feedback `{feedback}` for job #`{job_number}`")
     with create_connection() as conn:
-        was_prev_closed = pd.read_sql("SELECT * FROM df_dilfo WHERE job_number=?", conn, params=[job_number]).iloc[0].closed
+        was_prev_closed = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[job_number]).iloc[0].closed
     if was_prev_closed:
         logger.info("job was already matched successfully and logged as `closed`... skipping.")
         return
     if feedback == 1:
         logger.info(f"got feeback that DCN key {dcn_key} was correct")
-        update_status_query = "UPDATE df_dilfo SET closed = 1 WHERE job_number = ?"
+        update_status_query = "UPDATE company_projects SET closed = 1 WHERE job_number = ?"
         with create_connection() as conn:
             conn.cursor().execute(update_status_query, [job_number])
-        logger.info(f"updated df_dilfo to show `closed` status for job #{job_number}")
+        logger.info(f"updated company_projects to show `closed` status for job #{job_number}")
     with create_connection() as conn:
-        df = pd.read_sql("SELECT * FROM df_matched", conn)
+        df = pd.read_sql("SELECT * FROM attempted_matches", conn)
         match_dict_input = {
             'job_number': job_number,
             'dcn_key': dcn_key,
@@ -214,7 +214,7 @@ def process_as_reply(email_obj):
         }
         df = df.append(match_dict_input, ignore_index=True)
         df = df.drop_duplicates(subset=["job_number", "dcn_key"], keep='last')
-        df.to_sql('df_matched', conn, if_exists='replace', index=False)
+        df.to_sql('attempted_matches', conn, if_exists='replace', index=False)
         logger.info(
             f"DCN key `{dcn_key}` was a "
             f"{'successful match' if feedback == 1 else 'mis-match'} for job "

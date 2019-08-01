@@ -45,13 +45,13 @@ def predict_match(prob, prob_thresh):
 	else:
 		return 0
 
-def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now', prob_thresh=0.65, version='status_quo'):
+def match(company_projects=False, df_web=False, test=False, since='day_ago', until='now', prob_thresh=0.65, version='status_quo'):
 	logger.info('matching...')
-	if not isinstance(df_dilfo, pd.DataFrame):  # df_dilfo == False
-		open_query = "SELECT * FROM df_dilfo WHERE closed=0"
+	if not isinstance(company_projects, pd.DataFrame):  # company_projects == False
+		open_query = "SELECT * FROM company_projects WHERE closed=0"
 		with create_connection() as conn:
-			df_dilfo = pd.read_sql(open_query, conn)
-	df_dilfo = wrangle(df_dilfo)
+			company_projects = pd.read_sql(open_query, conn)
+	company_projects = wrangle(company_projects)
 	if not isinstance(df_web, pd.DataFrame):  # df_web == False
 		if since == 'day_ago':
 			since = (datetime.datetime.now()-datetime.timedelta(1)).date()
@@ -67,7 +67,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 			valid_until_date = re.search("\d{4}-\d{2}-\d{2}", since)
 			if not valid_until_date:
 				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
-		hist_query = "SELECT * FROM df_hist WHERE pub_date>=? AND pub_date<=? ORDER BY pub_date"
+		hist_query = "SELECT * FROM dcn_certificates WHERE pub_date>=? AND pub_date<=? ORDER BY pub_date"
 		with create_connection() as conn:
 			df_web = pd.read_sql(hist_query, conn, params=[since, until])
 		if len(df_web) == 0:  # SQL query retunred nothing so no point of going any further
@@ -75,7 +75,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 			return 0
 	df_web = wrangle(df_web)
 	comm_count = 0
-	for _, dilfo_row in df_dilfo.iterrows():
+	for _, dilfo_row in company_projects.iterrows():
 		results = match_build(dilfo_row.to_frame().transpose(), df_web)  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
 		logger.info(f"searching for potential match for project #{dilfo_row['job_number']}...")
 		results['pred_prob'] = results.apply(lambda row: predict_prob(row, version=version), axis=1)
@@ -94,7 +94,7 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 			results_master = results_master.append(results)
 		except NameError:
 			results_master = results
-	logger.info(f"Done looping through {len(df_dilfo)} open projects. Sent {comm_count} e-mails to communicate matches as a result.")
+	logger.info(f"Done looping through {len(company_projects)} open projects. Sent {comm_count} e-mails to communicate matches as a result.")
 	return results_master
 
 if __name__=="__main__":

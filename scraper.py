@@ -32,7 +32,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
     if since == 'week_ago':
         date_param_url = "&date=past_7&date_from=&date_to=#results"
     elif since == 'last_record':
-        hist_query = "SELECT pub_date FROM df_hist ORDER BY pub_date DESC LIMIT 1"
+        hist_query = "SELECT pub_date FROM dcn_certificates ORDER BY pub_date DESC LIMIT 1"
         with create_connection() as conn:
             last_date = conn.cursor().execute(hist_query).fetchone()[0]
             ld_year = int(last_date[:4])
@@ -119,7 +119,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
 
     if not test and not isinstance(ref, pd.DataFrame):
         with create_connection() as conn:
-            df_web.to_sql('df_hist', conn, if_exists='append', index=False)
+            df_web.to_sql('dcn_certificates', conn, if_exists='append', index=False)
     else:
         return df_web
 

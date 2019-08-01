@@ -28,7 +28,7 @@ def orchestrate():
             logger.info('no internet available - retrying in 5 minutes')
             sleep(298)
         current_datetime = datetime.datetime.now()
-        hist_query = "SELECT pub_date FROM df_hist ORDER BY pub_date DESC LIMIT 1"
+        hist_query = "SELECT pub_date FROM dcn_certificates ORDER BY pub_date DESC LIMIT 1"
         with create_connection() as conn:
             latest_scrape_date = conn.cursor().execute(hist_query).fetchone()[0]
         try:  # will raise NameError if initial run
