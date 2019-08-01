@@ -32,10 +32,10 @@ def orchestrate():
         with create_connection() as conn:
             latest_scrape_date = conn.cursor().execute(hist_query).fetchone()[0]
         try:  # will raise NameError if initial run
-            if current_datetime.hour <= prev_datetime.hour:
+            if current_datetime.hour < prev_datetime.hour:
                 new_day = True  # while loop already ran today
         except NameError:
-            new_day = True
+            pass
         if (
             (current_datetime.hour >= 4) and
             new_day and
