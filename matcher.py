@@ -39,7 +39,9 @@ def predict_prob(sample, version):
     prob = clf.predict_proba(sample[cols].values.reshape(1, -1))[0][1]
     return prob
 
-def predict_match(prob, prob_thresh):
+def predict_match(prob, multi_phase_proned, prob_thresh):
+	if multi_phase_proned:
+		prob_thresh = 0.98
 	if prob >= prob_thresh:
 		return 1
 	else:
@@ -78,8 +80,12 @@ def match(company_projects=False, df_web=False, test=False, since='day_ago', unt
 	for _, dilfo_row in company_projects.iterrows():
 		results = match_build(dilfo_row.to_frame().transpose(), df_web)  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
 		logger.info(f"searching for potential match for project #{dilfo_row['job_number']}...")
+		results['multi_phase_proned'] = results.apply(
+            lambda row: 1 if any(re.findall(
+                'campus|hospital|university|college', ''.join(
+                    row[['city', 'title']].apply(str)))) else 0, axis=1)
 		results['pred_prob'] = results.apply(lambda row: predict_prob(row, version=version), axis=1)
-		results['pred_match'] = results.pred_prob.apply(lambda prob: predict_match(prob, prob_thresh))
+		results['pred_match'] = results.apply(lambda row: predict_match(row.pred_prob, row.multi_phase_proned,prob_thresh), axis=1)
 		results = results.sort_values('pred_prob', ascending=False)
 		logger.debug(results.head(5))
 		matches = results[results.pred_match==1]
