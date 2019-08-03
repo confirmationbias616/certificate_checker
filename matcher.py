@@ -92,7 +92,9 @@ def match(company_projects=False, df_web=False, test=False, since='day_ago', unt
 		if len(matches) > 0:
 			logger.info(f"found {len(matches)} match{'' if len(matches)==1 else 'es'}! with probability as high as {matches.iloc[0].pred_prob}")
 			logger.info("getting ready to send notification...")
-			communicate(matches, dilfo_row, test=test)
+			communicate(
+				matches.drop(matches.index[1:]), # sending only top result for now
+				dilfo_row, test=test)
 			comm_count += 1
 		else:
 			logger.info("didn't find any matches")

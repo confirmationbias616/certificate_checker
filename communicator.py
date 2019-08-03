@@ -59,15 +59,10 @@ def communicate(web_df, dilfo_row, test=False):
 			f"{dilfo_row.title} might be almost ready for holdback release!"
 		    f"\n"
 		)
-		if len(web_df) == 1:
-			enum_msg = (
-				f"Before going any further, please follow the link below to make sure the "
-		    	f"algorithm correctly matched the project in question:\n{lookup_url}/{web_df.dcn_key.iloc[0]}\n"
-			)
-		else:
-			enum_msg = "More than one possible match came up. Please check out each one to see if it's the right one.\n"
-			for i, dcn_key in enumerate(web_df.dcn_key,1):
-				enum_msg += f'\tlink #{i}:\t{lookup_url}{dcn_key}\n'
+		cert_msg = (
+			f"Before going any further, please follow the link below to make sure the "
+			f"algorithm correctly matched the project in question:\n{lookup_url}/{web_df.dcn_key.iloc[0]}\n"
+		)
 		timing_msg = (
 		    f"If it's the right project, then the certificate was just published "
 		    f"on {datetime.datetime.strftime(pub_date,'%B %e, %Y')}. This means a "
@@ -105,7 +100,7 @@ def communicate(web_df, dilfo_row, test=False):
 			"Thanks,\n"
 			"Dilfo HBR Bot\n"
 		)
-		message = '\n'.join([intro_msg, enum_msg, timing_msg, feedback_msg, disclaimer_msg, closeout_msg])
+		message = '\n'.join([intro_msg, cert_msg, timing_msg, feedback_msg, disclaimer_msg, closeout_msg])
 		if not test:
 			try:
 				context = ssl.create_default_context()
