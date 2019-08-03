@@ -192,7 +192,11 @@ def process_as_reply(email_obj):
     dcn_key = re.findall('\w{8}-\w{4}-\w{4}-\w{4}-\w{12}', email_obj['content'])[0]
     logger.info(f"got feedback `{feedback}` for job #`{job_number}`")
     with create_connection() as conn:
-        was_prev_closed = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[job_number]).iloc[0].closed
+        try:
+            was_prev_closed = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[job_number]).iloc[0].closed
+        except IndexError:
+            logger.info("job must have been deleted from company_projects at some point... skipping.")
+            return
     if was_prev_closed:
         logger.info("job was already matched successfully and logged as `closed`... skipping.")
         return
