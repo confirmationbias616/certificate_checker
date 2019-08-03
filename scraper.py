@@ -39,12 +39,11 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
             ld_month = int(last_date[5:7])
             ld_day = int(last_date[8:])
             since = (datetime.datetime(ld_year, ld_month, ld_day) + datetime.timedelta(1)).date()
-        date_param_url = f'&date=custom&date_from={since}&date_to={now}#results'
     else:
         valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
         if not valid_since_date:
             raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
-        date_param_url = f'&date=custom&date_from={since}&date_to={now}#results'
+    date_param_url = f'&date=custom&date_from={since}&date_to={now}#results'
     response = requests.get(base_url + date_param_url)
     html = response.content
     soup = BeautifulSoup(html, "html.parser")
