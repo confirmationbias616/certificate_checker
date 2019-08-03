@@ -30,8 +30,12 @@ def orchestrate():
         if not new_day:
             try:
                 scan_inbox()
-            except:  # socket.gaierror:
-                logger.info("no internet available - retrying in 5 minutes")
+            except Exception as e: # socket.gaierror:
+                logger.info(repr(e))
+                logger.info(
+                    "What the above probably means is that there's no "
+                    "internet available - retrying in 5 minutes"
+                )
                 sleep(298)
         # Check if new_day flag shold be renewed as `True`
         hist_query = """
