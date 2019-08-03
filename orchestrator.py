@@ -20,7 +20,10 @@ logger.setLevel(logging.INFO)
 
 def orchestrate():
     logger.info("Starting up orchestration.")
-    logger.info("Will be continuously scanning inbox on downtime until something comes up...")
+    logger.info(
+        "Will be continuously scanning inbox on downtime until something "
+        "comes up..."
+    )
     new_day = True  # assume it's a new day on intial run
     daily_routine(exit_if_stale=True)  # run daily routine once intially
     while True:
