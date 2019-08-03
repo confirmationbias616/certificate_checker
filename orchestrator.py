@@ -34,9 +34,9 @@ def orchestrate():
                 logger.info(repr(e))
                 logger.info(
                     "What the above probably means is that there's no "
-                    "internet available - retrying in 5 minutes"
+                    "internet available - retrying in 2 minutes"
                 )
-                sleep(298)
+                sleep(118)
         # Check if new_day flag shold be renewed as `True`
         hist_query = """
             SELECT pub_date FROM dcn_certificates 
