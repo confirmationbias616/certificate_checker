@@ -90,6 +90,9 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
         for key in ref['dcn_key']:
             get_details(key)
     else:
+        if not number_of_matches:
+            logger.info('Nothing new to scrape in timeframe specified - exiting scrape function.')
+            return False # signaling that scrape returned nothing
         logger.info(f"scraping all of {number_of_matches} new certificates since {since}...")
         bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
             widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
@@ -120,6 +123,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
     if not test and not isinstance(ref, pd.DataFrame):
         with create_connection() as conn:
             df_web.to_sql('dcn_certificates', conn, if_exists='append', index=False)
+        return True  # signaling that something scrape did return some results
     else:
         return df_web
 

@@ -21,34 +21,49 @@ def orchestrate():
     logger.info("Starting up orchestration.")
     logger.info("Will be continuously scanning inbox on downtime until something comes up...")
     new_day = True  # assume it's a new day on intial run
+    daily_routine(exit_if_stale=True)  # run daily routine once intially
     while True:
-        try:
-            scan_inbox()
-        except:  # socket.gaierror:
-            logger.info('no internet available - retrying in 5 minutes')
-            sleep(298)
-        current_datetime = datetime.datetime.now()
-        hist_query = "SELECT pub_date FROM dcn_certificates ORDER BY pub_date DESC LIMIT 1"
+        if not new_day:
+            try:
+                scan_inbox()
+            except:  # socket.gaierror:
+                logger.info("no internet available - retrying in 5 minutes")
+                sleep(298)
+        # Check if new_day flag shold be renewed as `True`
+        hist_query = """
+            SELECT pub_date FROM dcn_certificates 
+            ORDER BY pub_date 
+            DESC LIMIT 1
+            """
         with create_connection() as conn:
             latest_scrape_date = conn.cursor().execute(hist_query).fetchone()[0]
+        try:  # will raise NameError if initial run
+            prev_datetime = current_datetime
+        except NameError:
+            pass
+        current_datetime = datetime.datetime.now()
         try:  # will raise NameError if initial run
             if current_datetime.hour < prev_datetime.hour:
                 new_day = True  # while loop already ran today
         except NameError:
             pass
+        if current_datetime.isoweekday() in [1,7]:  # (true if Monday or Sunday)
+            new_day = False  # known days where there's 0 new certs @4AM
+            logger.info("going back to listening for incoming e-mails...")
         if (
             (current_datetime.hour >= 4) and
             new_day and
-            current_datetime.isoweekday() <= 5  and # True if weekday
-            latest_scrape_date != str(current_datetime.date())
-        ):
+            (latest_scrape_date not in [
+                str(current_datetime.date()),
+                str(current_datetime.date()-datetime.timedelta(1))
+                ])
+            ):
             logger.info(
                 "Since it's a passed 4 AM on a weekday for which data hasn't "
                 "been scraped yet, launching daily_routine.")
-            daily_routine()
-            new_day = False
-        prev_datetime = current_datetime
-        sleep(2)
+            daily_routine(exit_if_stale=True)
+            logger.info("going back to listening for incoming e-mails...")
+        new_day = False
         
 
 if __name__=="__main__":

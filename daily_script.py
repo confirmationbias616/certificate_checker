@@ -18,12 +18,14 @@ log_handler.setFormatter(
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
-def daily_routine():
+def daily_routine(exit_if_stale=False):
     logger.info('initiating daily routine...')
     logger.info('scan inbox once to process new e-mails')
     scan_inbox()
     logger.info('scrape')
-    scrape()
+    fruitful_scraping = scrape()  # returns True or False
+    if not fruitful_scraping and exit_if_stale:
+        return  # short-ciruit out since new new data has been collected
     logger.info('build_train_set')
     build_train_set()
     logger.info('train_model')
