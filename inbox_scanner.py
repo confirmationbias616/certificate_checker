@@ -40,7 +40,7 @@ try:
 except FileNotFoundError:  # no password if running in CI
     pass
 
-def process_as_form(email_obj):
+def process_as_form(email_obj, test=False):
     dict_input = {
         unquote(x.split('=')[0]):str(unquote(x.split('=')[1])).replace('+', ' ') for x in email_obj['content'].split('&')}
     job_number = dict_input['job_number']
@@ -103,14 +103,15 @@ def process_as_form(email_obj):
         f"Thanks,\n"
 		f"Dilfo HBR Bot\n"
         )
-        try:
-            context = ssl.create_default_context()
-            with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-                server.login(sender_email, password)
-                server.sendmail(sender_email, [receiver_email], message)
-            logger.info(f"Successfully sent an email to {receiver_email}")
-        except (FileNotFoundError, NameError):
-            logger.info("password not available -> could not send e-mail")
+        if not test:
+            try:
+                context = ssl.create_default_context()
+                with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+                    server.login(sender_email, password)
+                    server.sendmail(sender_email, [receiver_email], message)
+                logger.info(f"Successfully sent an email to {receiver_email}")
+            except (FileNotFoundError, NameError):
+                logger.info("password not available -> could not send e-mail")
         return
     elif dcn_key:
         dict_input.update({"closed": 1})

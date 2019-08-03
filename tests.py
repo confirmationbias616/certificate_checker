@@ -226,7 +226,7 @@ class InputTests(unittest.TestCase):
         with create_connection() as conn:
             company_projects_pre = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[job_number])
             attempted_matches_pre = pd.read_sql("SELECT * FROM attempted_matches WHERE job_number=?", conn, params=[job_number])
-        process_as_form(email_obj)
+        process_as_form(email_obj, test=True)
         # make assertions about db now that reply has been processed
         with create_connection() as conn:
             company_projects_post = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[job_number])
