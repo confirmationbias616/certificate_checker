@@ -57,21 +57,23 @@ def match(company_projects=False, df_web=False, test=False, since='today', until
 	company_projects = wrangle(company_projects)
 	if not isinstance(df_web, pd.DataFrame):  # df_web == False
 		if since == 'today':
-			since = datetime.datetime.now()
+			since = datetime.datetime.now().date()
 		elif since == 'day_ago':
 			since = (datetime.datetime.now()-datetime.timedelta(1)).date()
 		elif since == 'week_ago':
 			since = (datetime.datetime.now()-datetime.timedelta(7)).date()
 		else:
-			valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
-			if not valid_since_date:
-				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
+			try:
+				since = re.findall("\d{4}-\d{2}-\d{2}", since)[0]
+			except KeyError:
+				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not a key_word")
 		if until == 'now':
-			now = (datetime.datetime.now())
+			until = (datetime.datetime.now())
 		else:
-			valid_until_date = re.search("\d{4}-\d{2}-\d{2}", since)
-			if not valid_until_date:
-				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
+			try:
+				until = re.findall("\d{4}-\d{2}-\d{2}", until)[0]
+			except KeyError:
+				raise ValueError("`until` parameter should be in the format yyyy-mm-dd if not a key_word")
 		hist_query = "SELECT * FROM dcn_certificates WHERE pub_date>=? AND pub_date<=? ORDER BY pub_date"
 		with create_connection() as conn:
 			df_web = pd.read_sql(hist_query, conn, params=[since, until])
