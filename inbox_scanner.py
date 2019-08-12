@@ -47,8 +47,10 @@ def process_as_form(email_obj, test=False):
     with create_connection() as conn:
         try:
             was_prev_closed = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[job_number]).iloc[0].closed
+            was_prev_logged = 1
         except IndexError:
             was_prev_closed = 0
+            was_prev_logged = 0
     receiver_email = re.findall('<?(\S+@\S+\.\w+)>?', email_obj["sender"])[0].lower()
     dict_input.update({"receiver_email": receiver_email})
     try:
@@ -139,6 +141,20 @@ def process_as_form(email_obj, test=False):
             dup_job_number = df.iloc[dup_i].job_number
             dup_receiver = df.iloc[dup_i].receiver_email
             dup_cc = df.iloc[dup_i].cc_email
+            
+            # next few lines below will need to be refctored big time for clarity!
+            a = df.iloc[dup_i].to_dict()
+            b = df[df.job_number==job_number].iloc[1].to_dict()
+            c = {k: [a[k], b[k]] for k in a if k in b and a[k] != b[k]}
+            d = {k: c.get(k,None) for k in ['title', 'city', 'address', 'contractor', 'engineer', 'owner']}
+            change_msg = 'Here are the changes you made compared to the prior version:\n'
+            no_change = True
+            for k in d:
+                if d[k]:
+                    change_msg += f"  -\t{k} changed from `{d[k][0]}` to `{d[k][1]}`\n"
+            if no_change:
+                change_msg += "All fields were the exact same as previous version!"
+            
             df = df.drop(dup_i)
             try:
                 dup_addrs = '; '.join([x for x in dup_cc + dup_receiver if x]) # filter out empty addresses and join them into one string  
@@ -156,6 +172,13 @@ def process_as_form(email_obj, test=False):
                 df_web = pd.read_sql(hist_query, conn)
             results = match(company_projects=company_projects, df_web=df_web, test=False)
             if len(results[results.pred_match==1]) == 0:
+                new_msg = (
+                    f"However, no corresponding certificates in recent "
+                    f"history were matched to it. "
+                    f"Going forward, the Daily Commercial News website will be "
+                    f"scraped on a daily basis in search of your project. You "
+                    f"will be notified if a possible match has been detected."
+                )
                 message = (
                     f"From: Dilfo HBR Bot"
                     f"\n"
@@ -165,13 +188,11 @@ def process_as_form(email_obj, test=False):
                     f"\n\n"
                     f"Hi {receiver_email.split('.')[0].title()},"
                     f"\n\n"
-                    f"Your information for project #{job_number} was logged "
-                    f"successfully but no corresponding certificates in recent "
-                    f"history were matched to it."
+                    f"Your information for project #{job_number} was "
+                    f"{'updated' if was_prev_logged else 'logged'} "
+                    f"successfully."
                     f"\n\n"
-                    f"Going forward, the Daily Commercial News website will be "
-                    f"scraped on a daily basis in search of your project. You "
-                    f"will be notified if a possible match has been detected."
+                    f"{change_msg if was_prev_logged else new_msg}"
                     f"\n\n"
                     f"Thanks,\n"
                     f"Dilfo HBR Bot\n"
