@@ -30,6 +30,7 @@ def orchestrate():
         if not new_day:
             try:
                 scan_inbox()
+                sleep(15)
             except Exception as e: # socket.gaierror:
                 logger.info(repr(e))
                 logger.info(
