@@ -48,7 +48,7 @@ def predict_match(prob, multi_phase_proned, prob_thresh):
 	else:
 		return 0
 
-def match(company_projects=False, df_web=False, test=False, since='day_ago', until='now', prob_thresh=0.65, version='status_quo'):
+def match(company_projects=False, df_web=False, test=False, since='today', until='now', prob_thresh=0.65, version='status_quo'):
 	logger.info('matching...')
 	if not isinstance(company_projects, pd.DataFrame):  # company_projects == False
 		open_query = "SELECT * FROM company_projects WHERE closed=0"
@@ -56,7 +56,9 @@ def match(company_projects=False, df_web=False, test=False, since='day_ago', unt
 			company_projects = pd.read_sql(open_query, conn)
 	company_projects = wrangle(company_projects)
 	if not isinstance(df_web, pd.DataFrame):  # df_web == False
-		if since == 'day_ago':
+		if since == 'today':
+			since = datetime.datetime.now()
+		elif since == 'day_ago':
 			since = (datetime.datetime.now()-datetime.timedelta(1)).date()
 		elif since == 'week_ago':
 			since = (datetime.datetime.now()-datetime.timedelta(7)).date()
