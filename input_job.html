@@ -95,7 +95,7 @@ function show_dev() {
 
 <body>
 <h2>
-  Dilfo HBR Bot - Project Signup Sheet
+  HBR Bot - Project Signup Sheet
 </h2>
 <h4>
   Sign your project up to receive notifications on its holdback release timeline
@@ -110,8 +110,8 @@ function show_dev() {
   <fieldset>
     <legend>Project Info</legend>
     <div class="required">
-      Dilfo Job #<br>
-      <input type="text" name="job_number" size="6" placeholder="2567" pattern="2\d{3}" title="4-digit Dilfo number (2###)" required autofocus>
+      Company Job #<br>
+      <input type="text" name="job_number" size="6" placeholder="2567" pattern="2\d{3}" title="4-digit job number (2###)" required autofocus>
     </div><br>
     <div class="required">
       Project Title<br>
@@ -145,7 +145,7 @@ function show_dev() {
     </select>
     <br><br>
     CC any notifications to:<br>
-    <input type="text" name="cc_email" size="14" pattern="[^@^ ^'^\x22]*" title="Must be a valid email dilfo address (typically first_name.last_name@dilfo.com)" placeholder="Joe.Bob">@dilfo.com
+    <input type="text" name="cc_email" size="14" pattern="[^@^ ^'^\x22]*" title="Must be a valid email address (typically first_name.last_name@dilfo.com)" placeholder="Joe.Bob">@dilfo.com
   </fieldset>
   <button class="unhidden" id="dev_button" type="button" title="Do not click unless you know why you're clicking it!" onclick="show_dev();">dev options</button>
   <fieldset class="hidden" id="dev_field">
