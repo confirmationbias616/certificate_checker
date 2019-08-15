@@ -113,9 +113,7 @@
 </style>
 <script>
 function show_hint() {
-  document.getElementById("hint").innerHTML = "Once the e-mail pops up, just hit `Send` and then come back to this 
-
-windown and hit `Reset` to enter a new project.\n\n";
+  document.getElementById("hint").innerHTML = "Once the e-mail pops up, just hit `Send` and then come back to this windown and hit `RESET` to enter a new project.\n\n";
   reset_button_color = document.getElementById("hint").style.color;
   reset_button_border = document.getElementById("hint").style.border;
   reset_button_boxShadow = document.getElementById("hint").style.boxShadow;
@@ -133,9 +131,7 @@ function hide_hint() {
   document.getElementById("submit").style.boxShadow = submit_button_boxShadow;
 }
 function show_dev() {
-  var r = confirm("WARNING: Dev options should not be used under normal circumstances. Only press `OK` if you have 
-
-authorization to do so.");
+  var r = confirm("WARNING: Dev options should not be used under normal circumstances. Only press `OK` if you have authorization to do so.");
   if (r == true) {
       document.getElementById("dev_field").className = 'unhidden';
       document.getElementById("dev_button").className = 'hidden';
@@ -152,20 +148,14 @@ authorization to do so.");
 </h2>
 <h4>
   Sign your project up to receive notifications on its holdback release timeline
-  by filling out the form below, hitting the "Submit" button and sending the pop-up e-mail.
+  by filling out the form below, hitting the "SUBMIT" button and sending the pop-up e-mail.
 </h4><br>
-<form action="mailto:dilfo.hb.release@gmail.com?subject=DO NOT MODIFY MESSAGE BELOW - JUST HIT `SEND`" 
+<form action="mailto:dilfo.hb.release@gmail.com?subject=DO NOT MODIFY MESSAGE BELOW - JUST HIT `SEND`" method="post" enctype="application/x-www-form-urlencoded">
+  <input id="submit" type="submit" value="SUBMIT" onclick="show_hint()" title="Generates a pre-populated e-mail draft from your default client (typically, Outlook).
+  Just click send when this e-mail draft pops up and your entry will automatically be added to the project watchlist.">
+  <input id="reset" type="reset" value="RESET" onclick="hide_hint()" title="Clears all fields so you can start from scratch or get started a new entry once previous entry has been 
 
-method="post" enctype="application/x-www-form-urlencoded">
-  <input id="submit" type="submit" value="SUBMIT" onclick="show_hint()" title="Generates a pre-populated e-mail 
-
-draft from your default client (typically, Outlook).
-  Just click send when this e-mail draft pops up and your entry will automatically be added to the project 
-
-watchlist.">
-  <input id="reset" type="reset" value="RESET" onclick="hide_hint()" title="Clears all fields so you can start from 
-
-scratch or get started a new entry once previous entry has been submitted.">
+submitted.">
   <br>  
   <p1 id="hint" color="#6b5b95" font-weight="bold"></p1><br>
   <br>
@@ -173,9 +163,7 @@ scratch or get started a new entry once previous entry has been submitted.">
     <legend>Project Info</legend>
     <div class="required">
       <p2>Subcontract Job #</p2><br>
-      <input type="text" name="job_number" size="6" placeholder="2567" pattern="2\d{3}" title="4-digit number 
-
-(2###)" required autofocus>
+      <input type="text" name="job_number" size="6" placeholder="2567" pattern="2\d{3}" title="4-digit number (2###)" required autofocus>
     </div><br>
     <div class="required">
       <p2>Project Title</p2><br>
@@ -212,13 +200,11 @@ scratch or get started a new entry once previous entry has been submitted.">
     </select>
     <br><br>
     <p2>CC any notifications to:</p2><br>
-    <input type="text" name="cc_email" size="14" pattern="[^@^ ^'^\x22]*" title="Must be a valid email dilfo 
+    <input type="text" name="cc_email" size="14" pattern="[^@^ ^'^\x22]*" title="Must be a valid email dilfo address (typically first_name.last_name@dilfo.com)" 
 
-address (typically first_name.last_name@dilfo.com)" placeholder="Joe.Bob">@dilfo.com
+placeholder="Joe.Bob">@dilfo.com
   </fieldset>
-  <button class="unhidden" id="dev_button" title="Do not click unless you know why you're clicking it!" 
-
-onclick="show_dev();">dev options</button>
+  <button class="unhidden" id="dev_button" title="Do not click unless you know why you're clicking it!" onclick="show_dev();">dev options</button>
   <fieldset class="hidden" id="dev_field">
     <legend>Dev</legend>
     <p2>Link to matching DCN certification</p2><br>
