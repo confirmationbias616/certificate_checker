@@ -68,7 +68,7 @@ def match(company_projects=False, df_web=False, test=False, since='today', until
 			except KeyError:
 				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not a key_word")
 		if until == 'now':
-			until = (datetime.datetime.now())
+			until = datetime.datetime.now()
 		else:
 			try:
 				until = re.findall("\d{4}-\d{2}-\d{2}", until)[0]
