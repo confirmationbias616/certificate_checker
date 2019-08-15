@@ -256,7 +256,7 @@ class InputTests(unittest.TestCase):
             'date' : "Thu, 30 May 2019 00:41:05 +0000",
             'content' : (
                 f"{ground_truth}\r\n\r\nAlex Roy\r\nDilfo Mechanical\r\n(613) 899-9324\r\n\r\n"
-                f"________________________________\r\nFrom: Dilfo HBR Bot "
+                f"________________________________\r\nFrom: HBR Bot "
                 f"<dilfo.hb.release@gmail.com>\r\nSent: Wednesday, May 29, 2019 8:40 "
                 f"PM\r\nTo: Alex Roy\r\nSubject: [EXTERNAL] #{job_number} - Upcoming "
                 f"Holdback Release\r\n\r\nHi Alex,\r\n\r\nYou're receiving this "
@@ -276,7 +276,7 @@ class InputTests(unittest.TestCase):
                 f"The info presented above could be erroneous.\r\nYou can help improve "
                 f"the matching algorithms by replying to this e-mail with a simple `1` "
                 f"or `0` to confirm whether or not the linked certificate represents the "
-                f"project in question.\r\n\r\nThanks,\r\nDilfo HBR Bot\r\n"
+                f"project in question.\r\n\r\nThanks,\r\nHBR Bot\r\n"
             )
         }
         # set-up new entries in db, if necessary

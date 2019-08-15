@@ -84,7 +84,7 @@ def process_as_form(email_obj, test=False):
         log_date = prev_match.log_date
         dcn_key = prev_match.dcn_key
         message = (
-        f"From: Dilfo HBR Bot"
+        f"From: HBR Bot"
         f"\n"
         f"To: {receiver_email}"
         f"\n"
@@ -103,7 +103,7 @@ def process_as_form(email_obj, test=False):
         f"to this e-mail for corrective action."
         f"\n\n"
         f"Thanks,\n"
-		f"Dilfo HBR Bot\n"
+		f"HBR Bot\n"
         )
         if not test:
             try:
@@ -180,7 +180,7 @@ def process_as_form(email_obj, test=False):
                     f"will be notified if a possible match has been detected."
                 )
                 message = (
-                    f"From: Dilfo HBR Bot"
+                    f"From: HBR Bot"
                     f"\n"
                     f"To: {receiver_email}"
                     f"\n"

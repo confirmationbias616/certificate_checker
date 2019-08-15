@@ -46,7 +46,7 @@ def communicate(web_df, dilfo_row, test=False):
 		due_date = lambda delay: pub_date + datetime.timedelta(days=delay)
 		
 		intro_msg = (
-		    f"From: Dilfo HBR Bot"
+		    f"From: HBR Bot"
 		    f"\n"
 		    f"To: {receiver_email}"
 			f"\n"
@@ -99,7 +99,7 @@ def communicate(web_df, dilfo_row, test=False):
 		)
 		closeout_msg = (
 			"Thanks,\n"
-			"Dilfo HBR Bot\n"
+			"HBR Bot\n"
 		)
 		message = '\n'.join([intro_msg, cert_msg, timing_msg, feedback_msg, disclaimer_msg, closeout_msg])
 		if not test:
