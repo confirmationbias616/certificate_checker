@@ -8,6 +8,7 @@ import re
 from urllib.parse import unquote
 from db_tools import create_connection
 from matcher import match
+from communicator import send_email
 import traceback
 import datetime
 import os
@@ -15,10 +16,6 @@ import sys
 import logging
 import smtplib, ssl
 
-port = 465 # for SSL
-smtp_server = "smtp.gmail.com"
-sender_email = "dilfo.hb.release"
-lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
 
 logger = logging.getLogger(__name__)
 log_handler = logging.StreamHandler(sys.stdout)
@@ -31,6 +28,7 @@ log_handler.setFormatter(
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
+lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
 imap_ssl_host = 'imap.gmail.com'
 imap_ssl_port = 993
 username = 'dilfo.hb.release'
@@ -105,15 +103,7 @@ def process_as_form(email_obj, test=False):
         f"Thanks,\n"
 		f"HBR Bot\n"
         )
-        if not test:
-            try:
-                context = ssl.create_default_context()
-                with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-                    server.login(sender_email, password)
-                    server.sendmail(sender_email, [receiver_email], message)
-                logger.info(f"Successfully sent an email to {receiver_email}")
-            except (FileNotFoundError, NameError):
-                logger.info("password not available -> could not send e-mail")
+        send_email(receiver_email, message, test)
         return
     elif dcn_key:
         dict_input.update({"closed": 1})
@@ -195,16 +185,9 @@ def process_as_form(email_obj, test=False):
                     f"{change_msg if was_prev_logged else new_msg}"
                     f"\n\n"
                     f"Thanks,\n"
-                    f"Dilfo HBR Bot\n"
+                    f"HBR Bot\n"
                 )
-                try:
-                    context = ssl.create_default_context()
-                    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-                        server.login(sender_email, password)
-                        server.sendmail(sender_email, [receiver_email], message)
-                    logger.info(f"Successfully sent an email to {receiver_email}")
-                except (FileNotFoundError, NameError):
-                    logger.info("password not available -> could not send e-mail")
+                send_email(receiver_email, message, test)
 
 def process_as_reply(email_obj):
     job_number = email_obj['subject'].split(': #')[1]
