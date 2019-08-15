@@ -15,12 +15,24 @@ log_handler.setFormatter(
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
-def communicate(web_df, dilfo_row, test=False):
+def send_email(receiver_email, message, test):
+	with open(".password.txt") as file: 
+		password = file.read()
 	port = 465 # for SSL
 	smtp_server = "smtp.gmail.com"
 	sender_email = "dilfo.hb.release"
-	lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
+	if test:
+		return  # escape early
+	try:
+		context = ssl.create_default_context()
+		with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+			server.login(sender_email, password)
+			server.sendmail(sender_email, [receiver_email], message)
+		logger.info(f"Successfully sent an email to {receiver_email}")
+	except (FileNotFoundError, NameError):
+		logger.info("password not available -> could not send e-mail")
 
+def communicate(web_df, dilfo_row, test=False):
 	receiver_email = dilfo_row.receiver_email
 	if (not receiver_email.endswith('@dilfo.com')) and (receiver_email not in[
 		'alex.roy616@gmail.com', 'alex.roy616@icloud.com', 'alex.roy616@me.com']):
@@ -39,8 +51,8 @@ def communicate(web_df, dilfo_row, test=False):
 	else:
 		cc_email = ''
 			
-
-	def send_email():
+	def send_match():
+		lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
 		pub_date = datetime.datetime(
 				*[int(web_df.iloc[0].pub_date.split('-')[x]) for x in range(3)]).date()
 		due_date = lambda delay: pub_date + datetime.timedelta(days=delay)
@@ -57,7 +69,7 @@ def communicate(web_df, dilfo_row, test=False):
 		    f"Hi {receiver_email.split('.')[0].title()},"
 		    f"\n\n"
 		    f"It looks like your project #{dilfo_row.job_number} - "
-			f"{dilfo_row.title} might be almost ready for holdback release!"
+			f"{dilfo_row.title.title()} might be almost ready for holdback release!"
 		    f"\n"
 		)
 		cert_msg = (
@@ -102,16 +114,6 @@ def communicate(web_df, dilfo_row, test=False):
 			"HBR Bot\n"
 		)
 		message = '\n'.join([intro_msg, cert_msg, timing_msg, feedback_msg, disclaimer_msg, closeout_msg])
-		if not test:
-			try:
-				context = ssl.create_default_context()
-				with open(".password.txt") as file: 
-					password = file.read()
-				with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-					server.login(sender_email, password)
-					server.sendmail(sender_email, [receiver_email, cc_email], message)
-				logger.info(f"Successfully sent an email to {receiver_email}")
-			except FileNotFoundError:
-				logger.info("password not available -> could not send e-mail")
+		send_email(receiver_email, message, test)
 
-	send_email()
+	send_match()
