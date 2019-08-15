@@ -16,8 +16,8 @@
   h2 {
     font-family: 'Roboto Mono', monospace; 
     font-size: 200%;
-    color:black;
-    text-shadow: -1px -1px 6px #a3b27f, -1px -1px 3px rgb(82, 81, 81);
+    color: black;
+    text-shadow: -1px -1px 6px #6b5b95, -1px -1px 3px rgb(82, 81, 81);
   }
   h4 {
     font-family: 'Roboto Mono', monospace;
@@ -44,6 +44,9 @@
   fieldset:hover { 
     box-shadow: -5px -5px 6px #6b5b95;
   }
+  legend:hover { 
+    box-shadow: -5px -5px 10px #6b5b95;
+  }
   input[type=text]{
     transition: box-shadow 0.5s;
     font-family: 'Roboto Mono', monospace;
@@ -57,7 +60,7 @@
     height: 2em;
     margin-right:10px;
     background-color: #878f99;
-    border: none;
+    border: 2px black solid;
     border-radius: 5px;
     box-shadow: -3px -3px 5px grey;
   }
@@ -68,7 +71,7 @@
     width: 30%;
     height: 2em;
     background-color: #878f99;
-    border: none;
+    border: 2px black solid;
     border-radius: 5px;
     box-shadow: -3px -3px 5px grey;
   }
@@ -95,12 +98,14 @@
     box-shadow: -5px -5px 5px grey;
   }
   legend{
+    transition: box-shadow 0.5s;
     padding: 0.2em 0.6em;
-    border: 2px solid #6b5b95;
-    background-color: #878f99; 
+    border: 2px solid black;
+    background-color: #878f99;
     font-family: 'Roboto Mono', monospace;
     font-size: 100%;
     font-weight: bold;
+    font-style: italic;
     text-align: right;
     border-radius: 20px;
     box-shadow: -5px -5px 10px grey;
@@ -108,7 +113,9 @@
 </style>
 <script>
 function show_hint() {
-  document.getElementById("hint").innerHTML = "Once the e-mail pops up, just hit `Send` and then come back to this windown and hit `Reset` to enter a new project.\n\n";
+  document.getElementById("hint").innerHTML = "Once the e-mail pops up, just hit `Send` and then come back to this 
+
+windown and hit `Reset` to enter a new project.\n\n";
   reset_button_color = document.getElementById("hint").style.color;
   reset_button_border = document.getElementById("hint").style.border;
   reset_button_boxShadow = document.getElementById("hint").style.boxShadow;
@@ -126,7 +133,9 @@ function hide_hint() {
   document.getElementById("submit").style.boxShadow = submit_button_boxShadow;
 }
 function show_dev() {
-  var r = confirm("WARNING: Dev options should not be used under normal circumstances. Only press `OK` if you have authorization to do so.");
+  var r = confirm("WARNING: Dev options should not be used under normal circumstances. Only press `OK` if you have 
+
+authorization to do so.");
   if (r == true) {
       document.getElementById("dev_field").className = 'unhidden';
       document.getElementById("dev_button").className = 'hidden';
@@ -145,10 +154,18 @@ function show_dev() {
   Sign your project up to receive notifications on its holdback release timeline
   by filling out the form below, hitting the "Submit" button and sending the pop-up e-mail.
 </h4><br>
-<form action="mailto:dilfo.hb.release@gmail.com?subject=DO NOT MODIFY MESSAGE BELOW - JUST HIT `SEND`" method="post" enctype="application/x-www-form-urlencoded">
-  <input id="submit" type="submit" value="SUBMIT" onclick="show_hint()" title="Generates a pre-populated e-mail draft from your default client (typically, Outlook).
-  Just click send when this e-mail draft pops up and your entry will automatically be added to the project watchlist.">
-  <input id="reset" type="reset" value="RESET" onclick="hide_hint()" title="Clears all fields so you can start from scratch or get started a new entry once previous entry has been submitted.">
+<form action="mailto:dilfo.hb.release@gmail.com?subject=DO NOT MODIFY MESSAGE BELOW - JUST HIT `SEND`" 
+
+method="post" enctype="application/x-www-form-urlencoded">
+  <input id="submit" type="submit" value="SUBMIT" onclick="show_hint()" title="Generates a pre-populated e-mail 
+
+draft from your default client (typically, Outlook).
+  Just click send when this e-mail draft pops up and your entry will automatically be added to the project 
+
+watchlist.">
+  <input id="reset" type="reset" value="RESET" onclick="hide_hint()" title="Clears all fields so you can start from 
+
+scratch or get started a new entry once previous entry has been submitted.">
   <br>  
   <p1 id="hint" color="#6b5b95" font-weight="bold"></p1><br>
   <br>
@@ -156,7 +173,9 @@ function show_dev() {
     <legend>Project Info</legend>
     <div class="required">
       <p2>Subcontract Job #</p2><br>
-      <input type="text" name="job_number" size="6" placeholder="2567" pattern="2\d{3}" title="4-digit number (2###)" required autofocus>
+      <input type="text" name="job_number" size="6" placeholder="2567" pattern="2\d{3}" title="4-digit number 
+
+(2###)" required autofocus>
     </div><br>
     <div class="required">
       <p2>Project Title</p2><br>
@@ -193,9 +212,13 @@ function show_dev() {
     </select>
     <br><br>
     <p2>CC any notifications to:</p2><br>
-    <input type="text" name="cc_email" size="14" pattern="[^@^ ^'^\x22]*" title="Must be a valid email dilfo address (typically first_name.last_name@dilfo.com)" placeholder="Joe.Bob">@dilfo.com
+    <input type="text" name="cc_email" size="14" pattern="[^@^ ^'^\x22]*" title="Must be a valid email dilfo 
+
+address (typically first_name.last_name@dilfo.com)" placeholder="Joe.Bob">@dilfo.com
   </fieldset>
-  <button class="unhidden" id="dev_button" type="button" title="Do not click unless you know why you're clicking it!" onclick="show_dev();">dev options</button>
+  <button class="unhidden" id="dev_button" title="Do not click unless you know why you're clicking it!" 
+
+onclick="show_dev();">dev options</button>
   <fieldset class="hidden" id="dev_field">
     <legend>Dev</legend>
     <p2>Link to matching DCN certification</p2><br>
