@@ -5,73 +5,81 @@
 <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css?family=Roboto+Mono&display=swap" rel="stylesheet">
 <style>
+  :root {
+  --highlight: rgb(97, 62, 143);
+  --background: rgb(148, 168, 165);
+  --outline: rgb(15, 15, 12);
+  --item: rgb(122, 128, 138);
+  --fieldset: rgb(190, 153, 138);
+  }
   .required:after { content:" *"; }
   .hidden{display:none;}
   .unhidden{display:block;}
   body {
-    background-color:#a2b9bc;
+    background-color: var(--background);
     font-family: 'Roboto Mono', monospace;
+    font-size: 100%;
     margin:30px;
   }
   h2 {
     font-family: 'Roboto Mono', monospace; 
-    font-size: 200%;
-    color: black;
-    text-shadow: -1px -1px 6px #6b5b95, -1px -1px 3px rgb(82, 81, 81);
+    font-size: 180%;
+    color: var(--outline);
+    text-shadow: -1px -1px 6px var(--highlight), -1px -1px 3px rgb(82, 81, 81);
   }
   h4 {
     font-family: 'Roboto Mono', monospace;
+    font-size: 100%;
   }
   p1 {
     font-family: 'Roboto Mono', monospace;
-    font-size: 80%;
+    font-size: 100%;
     font-style: italic;
-    color: #6b5b95;
+    color: var(--highlight);
     padding-left: 1%;
   }
   p2 {
     font-family: 'Roboto Mono', monospace;
-    font-size: 120%;
-    color: black;
+    font-size: 100%;
     padding-left: 1%;
   }
   input[type=submit]:hover { 
-    box-shadow: -3px -3px 6px #6b5b95;
+    box-shadow: -3px -3px 6px var(--highlight);
   }
   input[type=reset]:hover { 
-    box-shadow: -3px -3px 6px #6b5b95;
+    box-shadow: -3px -3px 6px var(--highlight);
   }
   fieldset:hover { 
-    box-shadow: -5px -5px 6px #6b5b95;
+    box-shadow: -5px -5px 6px var(--highlight);
   }
   legend:hover { 
-    box-shadow: -5px -5px 10px #6b5b95;
+    box-shadow: -5px -5px 10px var(--highlight);
   }
   input[type=text]{
     transition: box-shadow 0.5s;
     font-family: 'Roboto Mono', monospace;
-    font-size: 100%;
+    font-size: 120%;
   }
   input[type=submit]{
     transition: box-shadow 0.5s;
     font-family: 'Roboto Mono', monospace;
-    font-size: 130%;
+    font-size: 120%;
     width: 30%;
     height: 2em;
     margin-right:10px;
-    background-color: #878f99;
-    border: 2px black solid;
+    background-color: var(--item);
+    border: 2px var(--outline) solid;
     border-radius: 5px;
     box-shadow: -3px -3px 5px grey;
   }
   input[type=reset]{
     transition: box-shadow 0.5s;
     font-family: 'Roboto Mono', monospace;
-    font-size: 130%;
+    font-size: 120%;
     width: 30%;
     height: 2em;
-    background-color: #878f99;
-    border: 2px black solid;
+    background-color: var(--item);
+    border: 2px var(--outline) solid;
     border-radius: 5px;
     box-shadow: -3px -3px 5px grey;
   }
@@ -88,22 +96,22 @@
   }
   fieldset{
     transition: box-shadow 0.5s;
-    background-color: #a3b27f;
+    background-color: var(--fieldset);
     float: left;
     width: 45%;
     margin: 0.8%;
     padding: 2;
     box-sizing: 2px border-box;
-    border: 2px dashed black;
+    border: 2px dashed var(--outline);
     box-shadow: -5px -5px 5px grey;
   }
   legend{
     transition: box-shadow 0.5s;
     padding: 0.2em 0.6em;
-    border: 2px solid black;
-    background-color: #878f99;
+    border: 2px solid var(--outline);
+    background-color: var(--item);
     font-family: 'Roboto Mono', monospace;
-    font-size: 100%;
+    font-size: 80%;
     font-weight: bold;
     font-style: italic;
     text-align: right;
@@ -120,8 +128,8 @@ function show_hint() {
   submit_button_boxShadow = document.getElementById("hint").style.boxShadow;
   // document.getElementById("reset").style.color = "darkgreen";
   // document.getElementById("reset").style.border = "4px solid black";
-  document.getElementById("reset").style.boxShadow = "-3px -3px 6px #6b5b95";
-  document.getElementById("submit").style.boxShadow = "-1px -1px 1px #6b5b95";
+  document.getElementById("reset").style.boxShadow = "-3px -3px 6px var(--highlight)";
+  document.getElementById("submit").style.boxShadow = "-1px -1px 1px var(--highlight)";
 }
 function hide_hint() {
   document.getElementById("hint").innerHTML = "";
@@ -157,7 +165,7 @@ function show_dev() {
 
 submitted.">
   <br>  
-  <p1 id="hint" color="#6b5b95" font-weight="bold"></p1><br>
+  <p1 id="hint" color="var(--highlight)" font-weight="bold"></p1><br>
   <br>
   <fieldset>
     <legend>Project Info</legend>
