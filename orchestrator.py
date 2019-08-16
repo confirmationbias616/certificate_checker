@@ -21,6 +21,7 @@ logger.setLevel(logging.INFO)
 def orchestrate():
     logger.info("Starting up orchestration.")
     current_datetime = datetime.datetime.now()
+    prev_date = current_datetime.day  # just initializing
     run_routine = True  # assume it's a new day on intial run so that daily_routine gets called
     while True:
         if run_routine:
@@ -40,11 +41,13 @@ def orchestrate():
                 "internet available - retrying in 2 minutes"
             )
             sleep(118)
-        prev_datetime, current_datetime = current_datetime, datetime.datetime.now()
+        current_datetime = datetime.datetime.now()   
+        if current_datetime.day == prev_date:  # haven't reached turn of day
+            continue
+        else:
+            prev_date = prev_datetime.day
         if current_datetime.isoweekday() in [6,7]:  # (true if Saturday or Sunday)
             continue  # nothing posted during weekends
-        if current_datetime.hour >= prev_datetime.hour:  # haven't reached turn of day
-            continue
         with create_connection() as conn:
             latest_scrape_date = conn.cursor().execute("""
                 SELECT pub_date FROM dcn_certificates 
