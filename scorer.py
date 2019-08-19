@@ -9,6 +9,12 @@ def compile_score(row, scoreable_attrs):
     total_score = sum(scores)/countable_attrs if countable_attrs > 2 else 0
     return total_score
 
+def compile_score_add(row, scoreable_attrs):
+    scores = row[[f'{attr}_score' for attr in scoreable_attrs]]
+    scores = [x/100 for x in scores if type(x)==int]
+    total_add_score = sum(scores)
+    return total_add_score
+
 def attr_score(web_str, dilfo_str, match_style='full'):
     if web_str in ["", " ", "NaN", "nan", np.nan]:  # should not be comparing empty fields because empty vs empty is an exact match!
         return 0

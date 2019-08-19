@@ -1,4 +1,4 @@
-from scorer import compile_score, attr_score
+from scorer import compile_score, compile_score_add, attr_score
 
 
 def match_build(company_projects, df_web):
@@ -10,5 +10,7 @@ def match_build(company_projects, df_web):
 						web_row[attr], dilfo_row[attr], match_style=match_style), axis=1)
 		df_web['total_score'] = df_web.apply(lambda row: compile_score(
 			row, scoreable_attrs), axis=1)
+		# df_web['total_add_score'] = df_web.apply(lambda row: compile_score_add(
+		# 	row, scoreable_attrs), axis=1)
 		if len(company_projects) == 1:  # if single row was passed instead of actual dataframe
 			return df_web

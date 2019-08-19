@@ -2,7 +2,7 @@ import pandas as pd
 import datetime
 from wrangler import wrangle
 from communicator import communicate
-from scorer import compile_score, attr_score
+from scorer import compile_score, compile_score_add, attr_score
 from matcher_build import match_build
 import pickle
 from db_tools import create_connection
