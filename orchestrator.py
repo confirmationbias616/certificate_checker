@@ -45,8 +45,8 @@ def orchestrate():
         if current_datetime.day == prev_date:  # haven't reached turn of day
             continue
         else:
-            prev_date = prev_datetime.day
-        if current_datetime.isoweekday() in [6,7]:  # (true if Saturday or Sunday)
+            prev_date = current_datetime.day
+        if current_datetime.isoweekday() in [6,7]:  # (true if Saturday or Sunday
             continue  # nothing posted during weekends
         with create_connection() as conn:
             latest_scrape_date = conn.cursor().execute("""
