@@ -16,8 +16,11 @@ logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
 def send_email(receiver_email, message, test):
-	with open(".password.txt") as file: 
-		password = file.read()
+	try:
+		with open(".password.txt") as file: 
+			password = file.read()
+	except FileNotFoundError:  # no password if running in CI
+		pass
 	port = 465 # for SSL
 	smtp_server = "smtp.gmail.com"
 	sender_email = "dilfo.hb.release"
