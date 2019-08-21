@@ -34,14 +34,14 @@ def orchestrate():
         try:
             scan_inbox()
             sleep(15)
+            current_datetime = datetime.datetime.now()
         except Exception as e: # socket.gaierror:
             logger.info(repr(e))
             logger.info(
                 "What the above probably means is that there's no "
                 "internet available - retrying in 2 minutes"
             )
-            sleep(118)
-        current_datetime = datetime.datetime.now()   
+            sleep(118) 
         if current_datetime.day == prev_date:  # haven't reached turn of day
             continue
         else:
