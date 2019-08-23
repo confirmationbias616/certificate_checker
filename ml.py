@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 log_handler = logging.StreamHandler(sys.stdout)
 log_handler.setFormatter(
     logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s - line %(lineno)d"
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s "
+        "- line %(lineno)d"
     )
 )
 logger.addHandler(log_handler)
@@ -40,48 +41,51 @@ def build_train_set():
     logger.info("building dataset for training random forest classifier")
     match_query = """
                     SELECT 
-                        df_dilfo.job_number,
-                        df_dilfo.city,
-                        df_dilfo.address,
-                        df_dilfo.title,
-                        df_dilfo.owner,
-                        df_dilfo.contractor,
-                        df_dilfo.engineer,
-                        df_dilfo.receiver_email,
-                        df_dilfo.cc_email,
-                        df_dilfo.quality,
-                        df_matched.dcn_key,
-                        df_matched.ground_truth
+                        company_projects.job_number,
+                        company_projects.city,
+                        company_projects.address,
+                        company_projects.title,
+                        company_projects.owner,
+                        company_projects.contractor,
+                        company_projects.engineer,
+                        company_projects.receiver_email,
+                        company_projects.cc_email,
+                        company_projects.quality,
+                        attempted_matches.dcn_key,
+                        attempted_matches.ground_truth,
+                        attempted_matches.multi_phase
                     FROM 
-                        df_dilfo 
+                        company_projects 
                     LEFT JOIN 
-                        df_matched
+                        attempted_matches
                     ON 
-                        df_dilfo.job_number=df_matched.job_number
+                        company_projects.job_number=attempted_matches.job_number
                     WHERE 
-                        df_dilfo.closed=1
+                        company_projects.closed=1
                     AND 
-                        df_matched.ground_truth=1
+                        attempted_matches.ground_truth=1
+                    AND 
+                        attempted_matches.multi_phase=0
                     AND
-                        df_matched.validate=0
+                        attempted_matches.validate=0
                 """
 
     with create_connection() as conn:
-        test_df_dilfo = pd.read_sql(match_query, conn)
-    test_web_df = scrape(ref=test_df_dilfo)
+        test_company_projects = pd.read_sql(match_query, conn)
+    test_web_df = scrape(ref=test_company_projects)
     test_web_df = wrangle(test_web_df)
 
     # Get some certificates that are definitely not matches provide some false matches to train from
     start_date = '2011-01-01'
     end_date = '2011-04-30'
-    hist_query = "SELECT * FROM df_hist WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
+    hist_query = "SELECT * FROM dcn_certificates WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
     with create_connection() as conn:
         rand_web_df = pd.read_sql(hist_query, conn, params=[start_date, end_date])
     rand_web_df = wrangle(rand_web_df)
 
-    for i, test_row_dilfo in test_df_dilfo.iterrows():
+    for i, test_row_dilfo in test_company_projects.iterrows():
         test_row_dilfo = wrangle(test_row_dilfo.to_frame().transpose())  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
-        rand_web_df = rand_web_df.sample(n=len(test_df_dilfo), random_state=i)
+        rand_web_df = rand_web_df.sample(n=len(test_company_projects), random_state=i)
         close_matches = match_build(test_row_dilfo, test_web_df)
         random_matches = match_build(test_row_dilfo, rand_web_df)
         matches = close_matches.append(random_matches)
@@ -93,7 +97,7 @@ def build_train_set():
             all_matches = all_matches.append(matches)
         except NameError:
             all_matches = matches
-    all_matches.to_csv(f'./train_set.csv', index=False)
+    all_matches.to_csv('./train_set.csv', index=False)
 
 def train_model(prob_thresh=0.65):
     logger.info("training random forest classifier")
@@ -123,7 +127,7 @@ def train_model(prob_thresh=0.65):
         logger.info(f'number of truthes to learn from: {len([x for x in y_train if x==1])} out of {len(y_train)}')
         logger.info(f'number of tests: {len(results[results.truth==1])}')
         feat_imp = pd.DataFrame({'feat':X.columns, 'imp':clf.feature_importances_}).sort_values('imp', ascending=False)
-        logger.debug(f"\nfeat_imp\n")
+        logger.debug("\nfeat_imp\n")
         logger.info(f'top feature is `{feat_imp.iloc[0].feat}` with factor of {round(feat_imp.iloc[0].imp, 3)}')
         logger.info(f'recall: {round(rc, 3)}')
         logger.info(f'precision: {round(pr, 3)}')
@@ -146,36 +150,39 @@ def validate_model(**kwargs):
         test = False
     match_query = """
                     SELECT 
-                        df_dilfo.job_number,
-                        df_dilfo.city,
-                        df_dilfo.address,
-                        df_dilfo.title,
-                        df_dilfo.owner,
-                        df_dilfo.contractor,
-                        df_dilfo.engineer,
-                        df_dilfo.receiver_email,
-                        df_dilfo.cc_email,
-                        df_dilfo.quality,
-                        df_matched.dcn_key,
-                        df_matched.ground_truth
+                        company_projects.job_number,
+                        company_projects.city,
+                        company_projects.address,
+                        company_projects.title,
+                        company_projects.owner,
+                        company_projects.contractor,
+                        company_projects.engineer,
+                        company_projects.receiver_email,
+                        company_projects.cc_email,
+                        company_projects.quality,
+                        attempted_matches.dcn_key,
+                        attempted_matches.ground_truth,
+                        attempted_matches.multi_phase
                     FROM 
-                        df_dilfo 
+                        company_projects 
                     LEFT JOIN 
-                        df_matched
+                        attempted_matches
                     ON 
-                        df_dilfo.job_number=df_matched.job_number
+                        company_projects.job_number=attempted_matches.job_number
                     WHERE 
-                        df_dilfo.closed=1
+                        company_projects.closed=1
                     AND
-                        df_matched.ground_truth=1
+                        attempted_matches.ground_truth=1
                     AND 
-                        df_matched.validate=1
+                        attempted_matches.multi_phase=0
+                    AND 
+                        attempted_matches.validate=1
                 """
 
     with create_connection() as conn:
-        validate_df_dilfo = pd.read_sql(match_query, conn)
-    validate_web_df = scrape(ref=validate_df_dilfo)
-    new_results = match(version='new', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
+        validate_company_projects = pd.read_sql(match_query, conn)
+    validate_web_df = scrape(ref=validate_company_projects)
+    new_results = match(version='new', company_projects=validate_company_projects, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
     
     # check if 100% recall for new model
     qty_actual_matches = int(len(new_results)**0.5)
@@ -186,7 +193,7 @@ def validate_model(**kwargs):
     # folder (in testing) important to not skip validation so that the function
     # can be propperly tested
     try:
-        sq_results = match(version='status_quo', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
+        sq_results = match(version='status_quo', company_projects=validate_company_projects, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
     except FileNotFoundError:
         logger.info("could not find any status quo models to use for baseline validation.")
         if not test:
@@ -196,7 +203,7 @@ def validate_model(**kwargs):
             return #exit function because there is no basline to validate against 
         else:
             logger.info("will keep testing validation using new model as baseline. Just for testing urposes.")
-            sq_results = match(version='new', df_dilfo=validate_df_dilfo, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
+            sq_results = match(version='new', company_projects=validate_company_projects, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
 
     # check out how many false positives were generated with status quo model and new model
     sq_false_positives = len(sq_results[sq_results.pred_match == 1]) - qty_found_matches
@@ -220,8 +227,8 @@ def validate_model(**kwargs):
 
     if not is_100_recall:
         logger.warning(
-            f"100% recall not acheived with new model - archiving it "
-            f"and maintaining status quo!"
+            "100% recall not acheived with new model - archiving it "
+            "and maintaining status quo!"
             )
         if test:
             logger.info('skipping files transfers because running in test mode')
@@ -233,7 +240,7 @@ def validate_model(**kwargs):
                     )
     else:
         logger.info(
-            f"100% recall acheived! Adopting new model and archiving old one."
+            "100% recall acheived! Adopting new model and archiving old one."
             )
         if test:
             logger.info('skipping files transfers because running in test mode')

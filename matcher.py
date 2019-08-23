@@ -2,7 +2,7 @@ import pandas as pd
 import datetime
 from wrangler import wrangle
 from communicator import communicate
-from scorer import compile_score, attr_score
+from scorer import compile_score, compile_score_add, attr_score
 from matcher_build import match_build
 import pickle
 from db_tools import create_connection
@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 log_handler = logging.StreamHandler(sys.stdout)
 log_handler.setFormatter(
     logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s - line %(lineno)d"
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s "
+        "- line %(lineno)d"
     )
 )
 logger.addHandler(log_handler)
@@ -39,35 +40,41 @@ def predict_prob(sample, version):
     prob = clf.predict_proba(sample[cols].values.reshape(1, -1))[0][1]
     return prob
 
-def predict_match(prob, prob_thresh):
+def predict_match(prob, multi_phase_proned, prob_thresh):
+	if multi_phase_proned:
+		prob_thresh = 0.98
 	if prob >= prob_thresh:
 		return 1
 	else:
 		return 0
 
-def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now', prob_thresh=0.65, version='status_quo'):
+def match(company_projects=False, df_web=False, test=False, since='today', until='now', prob_thresh=0.65, version='status_quo'):
 	logger.info('matching...')
-	if not isinstance(df_dilfo, pd.DataFrame):  # df_dilfo == False
-		open_query = "SELECT * FROM df_dilfo WHERE closed=0"
+	if not isinstance(company_projects, pd.DataFrame):  # company_projects == False
+		open_query = "SELECT * FROM company_projects WHERE closed=0"
 		with create_connection() as conn:
-			df_dilfo = pd.read_sql(open_query, conn)
-	df_dilfo = wrangle(df_dilfo)
+			company_projects = pd.read_sql(open_query, conn)
+	company_projects = wrangle(company_projects)
 	if not isinstance(df_web, pd.DataFrame):  # df_web == False
-		if since == 'day_ago':
+		if since == 'today':
+			since = datetime.datetime.now().date()
+		elif since == 'day_ago':
 			since = (datetime.datetime.now()-datetime.timedelta(1)).date()
 		elif since == 'week_ago':
 			since = (datetime.datetime.now()-datetime.timedelta(7)).date()
 		else:
-			valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
-			if not valid_since_date:
-				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
+			try:
+				since = re.findall("\d{4}-\d{2}-\d{2}", since)[0]
+			except KeyError:
+				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not a key_word")
 		if until == 'now':
-			now = (datetime.datetime.now())
+			until = datetime.datetime.now()
 		else:
-			valid_until_date = re.search("\d{4}-\d{2}-\d{2}", since)
-			if not valid_until_date:
-				raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
-		hist_query = "SELECT * FROM df_hist WHERE pub_date>=? AND pub_date<=? ORDER BY pub_date"
+			try:
+				until = re.findall("\d{4}-\d{2}-\d{2}", until)[0]
+			except KeyError:
+				raise ValueError("`until` parameter should be in the format yyyy-mm-dd if not a key_word")
+		hist_query = "SELECT * FROM dcn_certificates WHERE pub_date>=? AND pub_date<=? ORDER BY pub_date"
 		with create_connection() as conn:
 			df_web = pd.read_sql(hist_query, conn, params=[since, until])
 		if len(df_web) == 0:  # SQL query retunred nothing so no point of going any further
@@ -75,28 +82,33 @@ def match(df_dilfo=False, df_web=False, test=False, since='day_ago', until='now'
 			return 0
 	df_web = wrangle(df_web)
 	comm_count = 0
-	for _, dilfo_row in df_dilfo.iterrows():
+	for _, dilfo_row in company_projects.iterrows():
 		results = match_build(dilfo_row.to_frame().transpose(), df_web)  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
 		logger.info(f"searching for potential match for project #{dilfo_row['job_number']}...")
+		results['multi_phase_proned'] = results.apply(
+            lambda row: 1 if any(re.findall(
+                'campus|hospital|university|college', ''.join(
+                    row[['city', 'title']].apply(str)))) else 0, axis=1)
 		results['pred_prob'] = results.apply(lambda row: predict_prob(row, version=version), axis=1)
-		results['pred_match'] = results.pred_prob.apply(lambda prob: predict_match(prob, prob_thresh))
+		results['pred_match'] = results.apply(lambda row: predict_match(row.pred_prob, row.multi_phase_proned,prob_thresh), axis=1)
 		results = results.sort_values('pred_prob', ascending=False)
 		logger.debug(results.head(5))
 		matches = results[results.pred_match==1]
 		if len(matches) > 0:
 			logger.info(f"found {len(matches)} match{'' if len(matches)==1 else 'es'}! with probability as high as {matches.iloc[0].pred_prob}")
 			logger.info("getting ready to send notification...")
-			communicate(matches, dilfo_row, test=test)
+			communicate(
+				matches.drop(matches.index[1:]), # sending only top result for now
+				dilfo_row, test=test)
 			comm_count += 1
 		else:
-			logger.info(f"didn't find any matches")
+			logger.info("didn't find any matches")
 		try:
 			results_master = results_master.append(results)
 		except NameError:
 			results_master = results
-	logger.info(f"Done looping through {len(df_dilfo)} open projects. Sent {comm_count} e-mails to communicate matches as a result.")
-	if test:
-		return results_master
+	logger.info(f"Done looping through {len(company_projects)} open projects. Sent {comm_count} e-mails to communicate matches as a result.")
+	return results_master
 
 if __name__=="__main__":
 	match()

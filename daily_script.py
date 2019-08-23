@@ -1,19 +1,32 @@
 import os
-from log_user_input import log_user_input
+from inbox_scanner import scan_inbox
 from scraper import scrape
 from matcher import match
 from ml import build_train_set, train_model, validate_model
 import sys
 import logging
 
-prob_thresh = 0.75
+prob_thresh = 0.7
 
-def daily_routine():
+logger = logging.getLogger(__name__)
+log_handler = logging.StreamHandler(sys.stdout)
+log_handler.setFormatter(
+    logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s "
+        "- line %(lineno)d"
+    )
+)
+logger.addHandler(log_handler)
+logger.setLevel(logging.INFO)
+
+def daily_routine(exit_if_stale=False):
     logger.info('initiating daily routine...')
-    logger.info('log_user_input')
-    log_user_input()
+    logger.info('scan inbox once to process new e-mails')
+    scan_inbox()
     logger.info('scrape')
-    scrape()
+    fruitful_scraping = scrape()  # returns True or False
+    if not fruitful_scraping and exit_if_stale:
+        return  # short-ciruit out since new new data has been collected
     logger.info('build_train_set')
     build_train_set()
     logger.info('train_model')
@@ -24,15 +37,6 @@ def daily_routine():
     validate_model(prob_thresh=prob_thresh)
 
 if __name__=="__main__":
-    logger = logging.getLogger(__name__)
-    log_handler = logging.StreamHandler(sys.stdout)
-    log_handler.setFormatter(
-        logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s - line %(lineno)d"
-        )
-    )
-    logger.addHandler(log_handler)
-    logger.setLevel(logging.INFO)
     for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
         try:
             os.rename('temp_'+filename, filename)

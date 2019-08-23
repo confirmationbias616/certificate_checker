@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 log_handler = logging.StreamHandler(sys.stdout)
 log_handler.setFormatter(
     logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s - line %(lineno)d"
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s "
+        "- line %(lineno)d"
     )
 )
 logger.addHandler(log_handler)
@@ -32,19 +33,20 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
     if since == 'week_ago':
         date_param_url = "&date=past_7&date_from=&date_to=#results"
     elif since == 'last_record':
-        hist_query = "SELECT pub_date FROM df_hist ORDER BY pub_date DESC LIMIT 1"
+        hist_query = "SELECT pub_date FROM dcn_certificates ORDER BY pub_date DESC LIMIT 1"
         with create_connection() as conn:
-            last_date = conn.cursor().execute(hist_query).fetchone()[0]
+            cur = conn.cursor()
+            cur.execute(hist_query)
+            last_date = cur.fetchone()[0]
             ld_year = int(last_date[:4])
             ld_month = int(last_date[5:7])
             ld_day = int(last_date[8:])
             since = (datetime.datetime(ld_year, ld_month, ld_day) + datetime.timedelta(1)).date()
-        date_param_url = f'&date=custom&date_from={since}&date_to={now}#results'
     else:
         valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
         if not valid_since_date:
             raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
-        date_param_url = f'&date=custom&date_from={since}&date_to={now}#results'
+    date_param_url = f'&date=custom&date_from={since}&date_to={now}#results'
     response = requests.get(base_url + date_param_url)
     html = response.content
     soup = BeautifulSoup(html, "html.parser")
@@ -90,6 +92,9 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
         for key in ref['dcn_key']:
             get_details(key)
     else:
+        if not number_of_matches:
+            logger.info('Nothing new to scrape in timeframe specified - exiting scrape function.')
+            return False # signaling that scrape returned nothing
         logger.info(f"scraping all of {number_of_matches} new certificates since {since}...")
         bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
             widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
@@ -119,7 +124,8 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
 
     if not test and not isinstance(ref, pd.DataFrame):
         with create_connection() as conn:
-            df_web.to_sql('df_hist', conn, if_exists='append', index=False)
+            df_web.to_sql('dcn_certificates', conn, if_exists='append', index=False)
+        return True  # signaling that something scrape did return some results
     else:
         return df_web
 

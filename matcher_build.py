@@ -1,14 +1,16 @@
-from scorer import compile_score, attr_score
+from scorer import compile_score, compile_score_add, attr_score
 
 
-def match_build(df_dilfo, df_web):
+def match_build(company_projects, df_web):
 	scoreable_attrs = ['contractor', 'street_name', 'street_number', 'title', 'city', 'owner']
-	for _, dilfo_row in df_dilfo.iterrows():  # nescessary even when df_dilfo is single row because it's still DataFrame instead of Series
+	for _, dilfo_row in company_projects.iterrows():  # nescessary even when company_projects is single row because it's still DataFrame instead of Series
 		for attr in scoreable_attrs:
 			for attr_suffix, match_style in zip(['score', 'pr_score'], ['full', 'partial']):
 				df_web[f'{attr}_{attr_suffix}'] = df_web.apply(lambda web_row: attr_score(
 						web_row[attr], dilfo_row[attr], match_style=match_style), axis=1)
 		df_web['total_score'] = df_web.apply(lambda row: compile_score(
 			row, scoreable_attrs), axis=1)
-		if len(df_dilfo) == 1:  # if single row was passed instead of actual dataframe
+		# df_web['total_add_score'] = df_web.apply(lambda row: compile_score_add(
+		# 	row, scoreable_attrs), axis=1)
+		if len(company_projects) == 1:  # if single row was passed instead of actual dataframe
 			return df_web
