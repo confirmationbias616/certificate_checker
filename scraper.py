@@ -35,7 +35,9 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
     elif since == 'last_record':
         hist_query = "SELECT pub_date FROM dcn_certificates ORDER BY pub_date DESC LIMIT 1"
         with create_connection() as conn:
-            last_date = conn.cursor().execute(hist_query).fetchone()[0]
+            cur = conn.cursor()
+            cur.execute(hist_query)
+            last_date = cur.fetchone()[0]
             ld_year = int(last_date[:4])
             ld_month = int(last_date[5:7])
             ld_day = int(last_date[8:])
