@@ -12,8 +12,6 @@
   --fieldset: rgb(190, 153, 138);
   }
   .required:after { content:" *"; }
-  .hidden{display:none;}
-  .unhidden{display:block;}
   body {
     background-color: var(--background);
     font-family: 'Roboto Mono', monospace;
@@ -118,16 +116,6 @@
     box-shadow: -5px -5px 10px grey;
   }
 </style>
-<script>
-function show_dev() {
-  var r = confirm("WARNING: Dev options should not be used under normal circumstances. Only press `OK` if you have authorization to do so.");
-  if (r == true) {
-      document.getElementById("dev_field").className = 'unhidden';
-      document.getElementById("dev_button").className = 'hidden';
-      document.getElementById("meta_field").className = 'hidden';
-  }
-}
-</script>
 </head>
 
 
@@ -137,7 +125,7 @@ function show_dev() {
 </h2>
 <h4>
   Sign your project up to receive notifications on its holdback release timeline
-  by filling out the form below, hitting the "SUBMIT" button and sending the pop-up e-mail.
+  by filling out the form below and hitting "SUBMIT".
 </h4><br>
 <form action="/" method="POST">
   <input id="submit" type="submit" value="SUBMIT">
@@ -178,26 +166,6 @@ function show_dev() {
     <p2>Is there a possibility that substantial completion has already been reached?</p2>
     <input type="checkbox" name="instant_scan">
   </fieldset>
-  <fieldset class="unhidden" id="meta_field">
-    <legend>Meta</legend>
-    <p2>How confident are you about the accuracy of project info you entered?</p2><br>
-    <select name="quality" size=1>
-      <option value=3>100%</option>
-      <option value=2 selected>moderately</option>
-      <option value=1>not at all</option>
-    </select>
-    <br><br>
-    <p2>CC any notifications to:</p2><br>
-    <input type="text" name="cc_email" size="14" pattern="[^@^ ^'^\x22]*" title="Must be a valid email dilfo address (typically first_name.last_name@dilfo.com)" 
-
-placeholder="Joe.Bob">@dilfo.com
-  </fieldset>
-  <button class="unhidden" id="dev_button" title="Do not click unless you know why you're clicking it!" onclick="show_dev();">dev options</button>
-  <fieldset class="hidden" id="dev_field">
-    <legend>Dev</legend>
-    <p2>Link to matching DCN certification</p2><br>
-    <input type="text" name="link_to_cert" placeholder="DCN Link"><br>
-  </fieldset> 
 </form>
 </body>
 </html>
