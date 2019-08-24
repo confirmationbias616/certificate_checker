@@ -28,7 +28,7 @@ app = Flask(__name__)
 def index():
     lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
     receiver_email = 'alex.roy616@gmail.com'  # temporary fix
-    new_entry = request.form
+    new_entry = dict(request.form)
     if [True for value in new_entry.values() if type(value) == list]:  # strange little fix
         new_entry = {key:new_entry[key][0] for key in new_entry.keys()}
     if request.method == 'POST':
@@ -58,7 +58,7 @@ def index():
             return f"Here's your <a href='{lookup_url}{dcn_key}'>certificate</a>!"  # need already_match page!
         with create_connection() as conn:
             df = pd.read_sql("SELECT * FROM company_projects", conn)
-            df = df.append(dict(new_entry), ignore_index=True)
+            df = df.append(new_entry, ignore_index=True)
             #loop through duplicates to drop the first records but retain their contacts
             for dup_i in df[df.duplicated(subset="job_number", keep='last')].index:
                 dup_job_number = df.iloc[dup_i].job_number
