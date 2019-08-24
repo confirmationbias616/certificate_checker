@@ -39,8 +39,6 @@ def index():
         
         
         
-        
-        
         with create_connection() as conn:
             try:
                 row = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[request.form['job_number']]).iloc[0]
