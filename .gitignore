@@ -6,8 +6,6 @@ train_set.csv
 
 .password.txt
 
-cert_count_timelog*
-
 # ignore all pickles
 *.pkl
 
