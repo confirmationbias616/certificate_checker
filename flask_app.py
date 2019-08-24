@@ -28,6 +28,8 @@ app = Flask(__name__)
 def index():
     lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
     receiver_email = 'alex.roy616@gmail.com'  # temporary fix
+    if [True for value in request.form.values() if type(value) == list]:  # strange little fix
+        request.form = {key:request.form[key][0] for key in request.form.keys()}
     if request.method == 'POST':
         with create_connection() as conn:
             try:
