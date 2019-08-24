@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  {% endblock %}
+</head>
+<body>
+    {% block body %}
+    <h3>
+        Project #{{ job_number }} has been previously matched. 
+        <br><br>
+        This was the <a id="dcn_link" href="{{ link }}" value='{{ link }}'>certificate</a>.
+    </h3>
+    {% endblock %}
+</body>
+</html>
+    

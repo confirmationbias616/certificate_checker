@@ -1,0 +1,125 @@
+:root {
+    --highlight: rgb(97, 62, 143);
+    --background: rgb(148, 168, 165);
+    --outline: rgb(15, 15, 12);
+    --item: rgb(122, 128, 138);
+    --fieldset: rgb(190, 153, 138);
+    }
+    .required:after { content:" *"; }
+    body {
+      background-color: var(--background);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 100%;
+      margin:30px;
+    }
+    h2 {
+      font-family: 'Roboto Mono', monospace; 
+      font-size: 180%;
+      text-align: center;
+      color: var(--outline);
+      text-shadow: -1px -1px 6px var(--highlight), -1px -1px 3px rgb(82, 81, 81);
+    }
+    h4 {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 100%;
+    }
+    p1 {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 100%;
+      font-style: italic;
+      color: var(--highlight);
+      padding-left: 1%;
+    }
+    p2 {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 100%;
+      padding-left: 1%;
+    }
+    input[type=submit]:hover { 
+      box-shadow: -3px -3px 6px var(--highlight);
+    }
+    input[type=reset]:hover { 
+      box-shadow: -3px -3px 6px var(--highlight);
+    }
+    fieldset:hover { 
+      box-shadow: -5px -5px 6px var(--highlight);
+    }
+    legend:hover { 
+      box-shadow: -5px -5px 10px var(--highlight);
+    }
+    input[type=text]{
+      transition: box-shadow 0.5s;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 120%;
+    }
+    input[type=submit]{
+      transition: box-shadow 0.5s;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 120%;
+      width: 30%;
+      height: 2em;
+      margin-right:10px;
+      background-color: var(--item);
+      border: 2px var(--outline) solid;
+      border-radius: 5px;
+      box-shadow: -3px -3px 5px grey;
+    }
+    input[type=reset]{
+      transition: box-shadow 0.5s;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 120%;
+      width: 30%;
+      height: 2em;
+      background-color: var(--item);
+      border: 2px var(--outline) solid;
+      border-radius: 5px;
+      box-shadow: -3px -3px 5px grey;
+    }
+    input[type=text]{
+      font-family: 'Roboto Mono', monospace;
+      font-size: 100%;
+      border: none;
+      border-radius: 5px;
+    }
+    select{
+      font-family: 'Roboto Mono', monospace;
+      font-size: 100%;
+      border: none;
+    }
+    fieldset{
+      transition: box-shadow 0.5s;
+      background-color: var(--fieldset);
+      float: left;
+      width: 45%;
+      margin: 0.8%;
+      padding: 2;
+      box-sizing: 2px border-box;
+      border: 2px dashed var(--outline);
+      box-shadow: -5px -5px 5px grey;
+    }
+    legend{
+      transition: box-shadow 0.5s;
+      padding: 0.2em 0.6em;
+      border: 2px solid var(--outline);
+      background-color: var(--item);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 80%;
+      font-weight: bold;
+      font-style: italic;
+      text-align: right;
+      border-radius: 20px;
+      box-shadow: -5px -5px 10px grey;
+    }
+    div#content {
+      display: none;
+    }
+    div#loading {
+      top: 200 px;
+      margin: auto;
+      position: absolute;
+      z-index: 1000;
+      width: 160px;
+      height: 24px;
+      background: url("https://thumbs.gfycat.com/ShadowyThornyGelada-size_restricted.gif") no-repeat;
+      cursor: wait;
+    }

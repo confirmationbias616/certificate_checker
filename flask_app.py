@@ -55,7 +55,7 @@ def index():
             verifier = prev_match.verifier
             log_date = prev_match.log_date
             dcn_key = prev_match.dcn_key
-            return f"Here's your <a href='{lookup_url}{dcn_key}'>certificate</a>!"  # need already_match page!
+            return render_template('already_matched.html', link=lookup_url+dcn_key, job_number=new_entry['job_number'])
         with create_connection() as conn:
             df = pd.read_sql("SELECT * FROM company_projects", conn)
             df = df.append(new_entry, ignore_index=True)
@@ -85,49 +85,47 @@ def index():
                     pass
             df.to_sql('company_projects', conn, if_exists='replace', index=False)  # we're replacing here instead of appending because of the 2 previous lines
             if was_prev_logged:
-                return change_msg  # need update page!
-            else:
-                if not instant_scan:
-                    return "blahh you're not interested" # need new_job confirmation page!
-                dilfo_query = "SELECT * FROM company_projects WHERE job_number=?"
-                with create_connection() as conn:
-                    company_projects = pd.read_sql(dilfo_query, conn, params=[new_entry['job_number']])
-                hist_query = "SELECT * FROM dcn_certificates ORDER BY pub_date DESC LIMIT 2000"
-                with create_connection() as conn:
-                    df_web = pd.read_sql(hist_query, conn)
-                results = match(company_projects=company_projects, df_web=df_web, test=False)
-                if len(results[results.pred_match==1]) > 0:
-                    return "Go see your inbox, there's a potential match!"
-                new_msg = (
-                    f"However, no corresponding certificates in recent "
-                    f"history were matched to it. "
-                    f"Going forward, the Daily Commercial News website will be "
-                    f"scraped on a daily basis in search of your project. You "
-                    f"will be notified if a possible match has been detected."
-                )
-                message = (
-                    f"From: HBR Bot"
-                    f"\n"
-                    f"To: {receiver_email}"
-                    f"\n"
-                    f"Subject: Successful Project Sign-Up: #{new_entry['job_number']}"
-                    f"\n\n"
-                    f"Hi {receiver_email.split('.')[0].title()},"
-                    f"\n\n"
-                    f"Your information for project #{new_entry['job_number']} was "
-                    f"{'updated' if was_prev_logged else 'logged'} "
-                    f"successfully."
-                    f"\n\n"
-                    f"{change_msg if was_prev_logged else new_msg}"
-                    f"\n\n"
-                    f"Thanks,\n"
-                    f"HBR Bot\n"
-                )
-                send_email(receiver_email, message, False)
-                return message
+                return render_template('update.html', change_msg=change_msg)
+            if not instant_scan:
+                return render_template('signup_no_action.html', job_number=new_entry['job_number'])
+            dilfo_query = "SELECT * FROM company_projects WHERE job_number=?"
+            with create_connection() as conn:
+                company_projects = pd.read_sql(dilfo_query, conn, params=[new_entry['job_number']])
+            hist_query = "SELECT * FROM dcn_certificates ORDER BY pub_date DESC LIMIT 2000"
+            with create_connection() as conn:
+                df_web = pd.read_sql(hist_query, conn)
+            results = match(company_projects=company_projects, df_web=df_web, test=False)
+            if len(results[results.pred_match==1]) > 0:
+                return render_template('potential_match.html', job_number=new_entry['job_number'])
+            new_msg = (
+                f"However, no corresponding certificates in recent "
+                f"history were matched to it. "
+                f"Going forward, the Daily Commercial News website will be "
+                f"scraped on a daily basis in search of your project. You "
+                f"will be notified if a possible match has been detected."
+            )
+            message = (
+                f"From: HBR Bot"
+                f"\n"
+                f"To: {receiver_email}"
+                f"\n"
+                f"Subject: Successful Project Sign-Up: #{new_entry['job_number']}"
+                f"\n\n"
+                f"Hi {receiver_email.split('.')[0].title()},"
+                f"\n\n"
+                f"Your information for project #{new_entry['job_number']} was "
+                f"{'updated' if was_prev_logged else 'logged'} "
+                f"successfully."
+                f"\n\n"
+                f"{change_msg if was_prev_logged else new_msg}"
+                f"\n\n"
+                f"Thanks,\n"
+                f"HBR Bot\n"
+            )
+            send_email(receiver_email, message, False)
+            return render_template('nothing_yet.html', message=message)
     else:
-        with open('index.html', 'r') as a:
-            return(a.read())
+        return render_template('index.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
