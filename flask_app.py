@@ -57,7 +57,7 @@ def index():
             df = pd.read_sql("SELECT * FROM company_projects", conn)
             df = df.append(dict(request.form), ignore_index=True)
             #loop through duplicates to drop the first records but retain their contacts
-            for dup_i in df[df.duplicated(subset=["job_number"], keep='last')].index:
+            for dup_i in df[df.duplicated(subset="job_number", keep='last')].index:
                 dup_job_number = df.iloc[dup_i].job_number
                 dup_receiver = df.iloc[dup_i].receiver_email
                 dup_cc = df.iloc[dup_i].cc_email
