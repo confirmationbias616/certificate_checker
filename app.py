@@ -28,17 +28,12 @@ app = Flask(__name__)
 def index():
     lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
     if request.method == 'POST':
-        
-        
         # with create_connection() as conn:
         #     try:
         #         was_prev_closed = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[request.form['job_number']]).iloc[0].closed
         #         print(was_prev_closed)
         #     except IndexError:
         #         print('..!!..')
-        
-        
-        
         with create_connection() as conn:
             try:
                 row = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[request.form['job_number']]).iloc[0]
