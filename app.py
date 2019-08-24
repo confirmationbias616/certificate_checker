@@ -87,8 +87,8 @@ def index():
             f"Thanks,\n"
             f"HBR Bot\n"
             )
-            send_email(receiver_email, message, False)        
-        return redirect('/')
+            send_email(receiver_email, message, False)
+        return f"Here's your certificate: \n{lookup_url}{dcn_key}"
     else:
         with open('index.html', 'r') as a:
             return(a.read())
