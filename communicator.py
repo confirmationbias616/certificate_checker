@@ -36,7 +36,7 @@ def send_email(receiver_email, message, test):
 		logger.info("password not available -> could not send e-mail")
 
 def communicate(web_df, dilfo_row, test=False):
-	receiver_email = dilfo_row.receiver_email
+	receiver_email = 'alex.roy616@gmail.com'  # temporary fix
 	if (not receiver_email.endswith('@dilfo.com')) and (receiver_email not in[
 		'alex.roy616@gmail.com', 'alex.roy616@icloud.com', 'alex.roy616@me.com']):
 		logger.info('given user e-mail address has not been white listed (from dilfo.com '\
