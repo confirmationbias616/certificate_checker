@@ -8,9 +8,11 @@
 </head>
 <body>
     {% block body %}
-    <h4>
+    <h3>
         There's a potential match for project #{{ job_number }}! Go see your inbox for validation.
-    </h4>
+        <br><br>
+        Go have a look at the <a id="dcn_link" href="{{ link }}" value='{{ link }}'>certificate</a>.
+    </h3>
     {% endblock %}
 </body>
 </html>

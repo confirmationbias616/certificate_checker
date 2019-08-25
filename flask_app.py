@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, session
 from datetime import datetime
 from db_tools import create_connection
 from communicator import send_email
@@ -23,15 +23,18 @@ logger.setLevel(logging.INFO)
 
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'e5ac358c-f0bf-11e5-9e39-d3b532c10a28'
+
+lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
+receiver_email = 'alex.roy616@gmail.com' 
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
-    receiver_email = 'alex.roy616@gmail.com'  # temporary fix
     new_entry = dict(request.form)
-    if [True for value in new_entry.values() if type(value) == list]:  # strange little fix
-        new_entry = {key:new_entry[key][0] for key in new_entry.keys()}
+    session['new_entry'] = new_entry
     if request.method == 'POST':
+        if [True for value in new_entry.values() if type(value) == list]:  # strange little fix
+            new_entry = {key:new_entry[key][0] for key in new_entry.keys()}
         with create_connection() as conn:
             try:
                 row = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[new_entry['job_number']]).iloc[0]
@@ -46,16 +49,7 @@ def index():
         except (IndexError, KeyError):
             instant_scan = False
         if was_prev_closed:
-            logger.info("job was already matched successfully and logged as `closed`. Sending e-mail!")
-            # Send email to inform of previous match
-            with create_connection() as conn:
-                prev_match = pd.read_sql(
-                    "SELECT * FROM attempted_matches WHERE job_number=? AND ground_truth=1",
-                    conn, params=[new_entry['job_number']]).iloc[0]
-            verifier = prev_match.verifier
-            log_date = prev_match.log_date
-            dcn_key = prev_match.dcn_key
-            return render_template('already_matched.html', link=lookup_url+dcn_key, job_number=new_entry['job_number'])
+            return redirect(url_for('already_matched'))
         with create_connection() as conn:
             df = pd.read_sql("SELECT * FROM company_projects", conn)
             df = df.append(new_entry, ignore_index=True)
@@ -85,47 +79,81 @@ def index():
                     pass
             df.to_sql('company_projects', conn, if_exists='replace', index=False)  # we're replacing here instead of appending because of the 2 previous lines
             if was_prev_logged:
-                return render_template('update.html', change_msg=change_msg)
+                session['change_msg'] = change_msg
+                return redirect(url_for('update'))
             if not instant_scan:
-                return render_template('signup_no_action.html', job_number=new_entry['job_number'])
+                return redirect(url_for('signup_no_action'))
             dilfo_query = "SELECT * FROM company_projects WHERE job_number=?"
             with create_connection() as conn:
                 company_projects = pd.read_sql(dilfo_query, conn, params=[new_entry['job_number']])
             hist_query = "SELECT * FROM dcn_certificates ORDER BY pub_date DESC LIMIT 2000"
             with create_connection() as conn:
                 df_web = pd.read_sql(hist_query, conn)
-            results = match(company_projects=company_projects, df_web=df_web, test=False)
+            results = match(company_projects=company_projects, df_web=df_web, test=True)
             if len(results[results.pred_match==1]) > 0:
-                return render_template('potential_match.html', job_number=new_entry['job_number'])
-            new_msg = (
-                f"However, no corresponding certificates in recent "
-                f"history were matched to it. "
-                f"Going forward, the Daily Commercial News website will be "
-                f"scraped on a daily basis in search of your project. You "
-                f"will be notified if a possible match has been detected."
-            )
-            message = (
-                f"From: HBR Bot"
-                f"\n"
-                f"To: {receiver_email}"
-                f"\n"
-                f"Subject: Successful Project Sign-Up: #{new_entry['job_number']}"
-                f"\n\n"
-                f"Hi {receiver_email.split('.')[0].title()},"
-                f"\n\n"
-                f"Your information for project #{new_entry['job_number']} was "
-                f"{'updated' if was_prev_logged else 'logged'} "
-                f"successfully."
-                f"\n\n"
-                f"{change_msg if was_prev_logged else new_msg}"
-                f"\n\n"
-                f"Thanks,\n"
-                f"HBR Bot\n"
-            )
-            send_email(receiver_email, message, False)
-            return render_template('nothing_yet.html', message=message)
+                session['dcn_key'] = results.iloc[0].dcn_key
+                return redirect(url_for('potential_match'))
+            return redirect(url_for('nothing_yet'))
     else:
         return render_template('index.html')
+
+@app.route('/already_matched', methods=['POST', 'GET'])
+def already_matched():
+    job_number = session['new_entry']['job_number']
+    with create_connection() as conn:
+        prev_match = pd.read_sql(
+            "SELECT * FROM attempted_matches WHERE job_number=? AND ground_truth=1",
+            conn, params=[job_number]).iloc[0]
+    dcn_key = prev_match.dcn_key
+    return render_template('already_matched.html', link=lookup_url+dcn_key, job_number=job_number)
+
+@app.route('/nothing_yet', methods=['POST', 'GET'])
+def nothing_yet():
+    job_number = session['new_entry']['job_number']
+    new_msg = (
+        f"No corresponding certificates in recent "
+        f"history were found as a match. "
+        f"Going forward, the Daily Commercial News website will be "
+        f"scraped on a daily basis in search of your project. You "
+        f"will be notified if a possible match has been detected."
+    )
+    message = (
+        f"From: HBR Bot"
+        f"\n"
+        f"To: {receiver_email}"
+        f"\n"
+        f"Subject: Successful Project Sign-Up: #{job_number}"
+        f"\n\n"
+        f"Hi {receiver_email.split('.')[0].title()},"
+        f"\n\n"
+        f"Your information for project #{job_number} was "
+        f"logged successfully."
+        f"\n\n"
+        f"However, {new_msg}"
+        f"\n\n"
+        f"Thanks,\n"
+        f"HBR Bot\n"
+    )
+    send_email(receiver_email, message, True)
+    return render_template('nothing_yet.html', message=new_msg)
+
+@app.route('/potential_match', methods=['POST', 'GET'])
+def potential_match():
+    job_number = session['job_number']
+    dcn_key = session['dcn_key']
+    return render_template('potential_match.html', job_number=job_number, link=lookup_url+dcn_key)
+
+@app.route('/update', methods=['POST', 'GET'])
+def update():
+    change_msg = session['change_msg']
+    return render_template('update.html', change_msg=change_msg)
+
+@app.route('/signup_no_action', methods=['POST', 'GET'])
+def signup_no_action():
+    job_number = session['new_entry']['job_number']
+    return render_template('signup_no_action.html', job_number=job_number)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
