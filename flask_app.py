@@ -30,11 +30,12 @@ receiver_email = 'alex.roy616@gmail.com'
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    new_entry = dict(request.form)
-    session['new_entry'] = new_entry
     if request.method == 'POST':
+        new_entry = dict(request.form)
         if [True for value in new_entry.values() if type(value) == list]:  # strange little fix
             new_entry = {key:new_entry[key][0] for key in new_entry.keys()}
+        session['new_entry'] = new_entry
+        logger.info(f"session:  {session}")
         with create_connection() as conn:
             try:
                 row = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[new_entry['job_number']]).iloc[0]
