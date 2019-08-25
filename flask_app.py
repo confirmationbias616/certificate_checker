@@ -140,7 +140,7 @@ def nothing_yet():
 
 @app.route('/potential_match', methods=['POST', 'GET'])
 def potential_match():
-    job_number = session['job_number']
+    job_number = session['new_entry']['job_number']
     dcn_key = session['dcn_key']
     return render_template('potential_match.html', job_number=job_number, link=lookup_url+dcn_key)
 
