@@ -26,7 +26,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'e5ac358c-f0bf-11e5-9e39-d3b532c10a28'
 
 lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
-receiver_email = 'alex.roy616@gmail.com' 
+receiver_email = 'alex.roy616@gmail.com'
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
@@ -43,6 +43,7 @@ def index():
                 was_prev_logged = 1
             except IndexError:
                 was_prev_closed = 0
+                new_entry['closed'] = 0
                 was_prev_logged = 0
         try:
             new_entry['instant_scan']
@@ -73,7 +74,7 @@ def index():
                     change_msg += "All fields were the exact same as previous version!"
                 df = df.drop(dup_i)
                 try:
-                    dup_addrs = '; '.join([x for x in dup_cc + dup_receiver if x]) # filter out empty addresses and join them into one string  
+                    dup_addrs = '; '.join([x for x in dup_cc + dup_receiver if x]) # filter out empty addresses and join them into one string
                     update_i = df[df.job_number==dup_job_number].index
                     df.loc[update_i,'cc_email'] = df.loc[update_i,'cc_email'] + '; ' + dup_addrs
                 except TypeError:
