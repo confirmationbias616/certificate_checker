@@ -165,6 +165,12 @@ def signup_no_action():
     job_number = session['new_entry']['job_number']
     return render_template('signup_no_action.html', job_number=job_number)
 
+@app.route('/summary_table')
+def summary_table():
+    with create_connection() as conn:
+        df = pd.read_sql("SELECT * FROM company_projects", conn)
+        df = df[['job_number', 'city', 'address', 'title', 'owner', 'contractor', 'engineer']].sort_values('job_number')
+    return render_template('summary_table.html', df=df.to_html())
 
 
 if __name__ == "__main__":
