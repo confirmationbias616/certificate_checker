@@ -12,4 +12,16 @@
     </h2>
     {% block body %}{% endblock %}
 </body>
+<footer>
+    {% block footer %}
+    {% if job_number or df %}
+    <div align="center">
+        <br><br>
+        <form action="/" method="GET">
+            <input type="submit" value="GO BACK"></button>
+        </form>
+    </div>
+    {% endif %}
+    {% endblock %}
+</footer>
 </html>

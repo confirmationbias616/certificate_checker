@@ -100,6 +100,8 @@ def index():
 
 @app.route('/already_matched', methods=['POST', 'GET'])
 def already_matched():
+    if request.method == 'POST':
+        return redirect(url_for('index'))
     job_number = session['new_entry']['job_number']
     with create_connection() as conn:
         prev_match = pd.read_sql(
@@ -110,6 +112,8 @@ def already_matched():
 
 @app.route('/nothing_yet', methods=['POST', 'GET'])
 def nothing_yet():
+    if request.method == 'POST':
+        return redirect(url_for('index'))
     job_number = session['new_entry']['job_number']
     new_msg = (
         f"No corresponding certificates in recent "
@@ -136,21 +140,28 @@ def nothing_yet():
         f"HBR Bot\n"
     )
     send_email(receiver_email, message, True)
-    return render_template('nothing_yet.html', message=new_msg)
+    return render_template('nothing_yet.html', job_number=job_number, message=new_msg)
 
 @app.route('/potential_match', methods=['POST', 'GET'])
 def potential_match():
+    if request.method == 'POST':
+        return redirect(url_for('index'))
     job_number = session['new_entry']['job_number']
     dcn_key = session['dcn_key']
     return render_template('potential_match.html', job_number=job_number, link=lookup_url+dcn_key)
 
 @app.route('/update', methods=['POST', 'GET'])
 def update():
+    # if request.method == 'POST':
+    #     return redirect(url_for('index'))
+    job_number = session['new_entry']['job_number']
     change_msg = session['change_msg']
-    return render_template('update.html', change_msg=change_msg)
+    return render_template('update.html', job_number=job_number, change_msg=change_msg)
 
 @app.route('/signup_no_action', methods=['POST', 'GET'])
 def signup_no_action():
+    if request.method == 'POST':
+        return redirect(url_for('index'))
     job_number = session['new_entry']['job_number']
     return render_template('signup_no_action.html', job_number=job_number)
 

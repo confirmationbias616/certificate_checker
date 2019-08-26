@@ -41,6 +41,9 @@
     input[type=reset]:hover { 
       box-shadow: -3px -3px 6px var(--highlight);
     }
+    button[type=submit]:hover { 
+      box-shadow: -3px -3px 6px var(--highlight);
+    }
     fieldset:hover { 
       box-shadow: -5px -5px 6px var(--highlight);
     }
@@ -53,6 +56,18 @@
       font-size: 120%;
     }
     input[type=submit]{
+      transition: box-shadow 0.5s;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 120%;
+      width: 30%;
+      height: 2em;
+      margin-right:10px;
+      background-color: var(--item);
+      border: 2px var(--outline) solid;
+      border-radius: 5px;
+      box-shadow: -3px -3px 5px grey;
+    }
+    button[type=submit]{
       transition: box-shadow 0.5s;
       font-family: 'Roboto Mono', monospace;
       font-size: 120%;
