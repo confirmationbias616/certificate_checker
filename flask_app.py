@@ -40,6 +40,9 @@ def index():
             try:
                 row = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[new_entry['job_number']]).iloc[0]
                 was_prev_closed = row.closed
+                if not was_prev_closed:
+                    was_prev_closed = 0
+                    new_entry['closed'] = 0
                 was_prev_logged = 1
             except IndexError:
                 was_prev_closed = 0
@@ -170,7 +173,7 @@ def signup_no_action():
 def summary_table():
     with create_connection() as conn:
         closed_query = """
-            SELECT 
+            SELECT
                 company_projects.job_number,
                 company_projects.city,
                 company_projects.address,
@@ -180,9 +183,9 @@ def summary_table():
                 company_projects.engineer,
                 attempted_matches.dcn_key
             FROM company_projects
-            LEFT JOIN 
+            LEFT JOIN
                 attempted_matches
-            ON 
+            ON
                 company_projects.job_number=attempted_matches.job_number
             WHERE
                 company_projects.closed=1
@@ -190,7 +193,7 @@ def summary_table():
                 attempted_matches.ground_truth=1
         """
         open_query = """
-            SELECT 
+            SELECT
                 company_projects.job_number,
                 company_projects.city,
                 company_projects.address,
