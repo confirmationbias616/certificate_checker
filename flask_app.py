@@ -169,9 +169,46 @@ def signup_no_action():
 @app.route('/summary_table')
 def summary_table():
     with create_connection() as conn:
-        df = pd.read_sql("SELECT * FROM company_projects", conn)
-        df = df[['job_number', 'city', 'address', 'title', 'owner', 'contractor', 'engineer']].sort_values('job_number')
-    return render_template('summary_table.html', df=df.to_html())
+        closed_query = """
+            SELECT 
+                company_projects.job_number,
+                company_projects.city,
+                company_projects.address,
+                company_projects.title,
+                company_projects.owner,
+                company_projects.contractor,
+                company_projects.engineer,
+                attempted_matches.dcn_key
+            FROM company_projects
+            LEFT JOIN 
+                attempted_matches
+            ON 
+                company_projects.job_number=attempted_matches.job_number
+            WHERE
+                company_projects.closed=1
+            AND
+                attempted_matches.ground_truth=1
+        """
+        open_query = """
+            SELECT 
+                company_projects.job_number,
+                company_projects.city,
+                company_projects.address,
+                company_projects.title,
+                company_projects.owner,
+                company_projects.contractor,
+                company_projects.engineer
+            FROM company_projects
+            WHERE
+                company_projects.closed=0
+        """
+        pd.set_option('display.max_colwidth', -1)
+        df_closed = pd.read_sql(closed_query, conn).sort_values('job_number')
+        df_closed['job_number'] = df_closed.apply(lambda row: f'''<a href="{lookup_url+row.dcn_key}">{row.job_number}</a>''', axis=1)
+        df_closed = df_closed.drop('dcn_key', axis=1)
+        df_open = pd.read_sql(open_query, conn).sort_values('job_number')
+        df_open['action'] = df_open.apply(lambda row: f'''<a href="/">modify</a> / <a href="/">delete</a>''', axis=1)
+    return render_template('summary_table.html', df_closed=df_closed.to_html(index=False, justify='center', escape=False), df_open=df_open.to_html(index=False, bold_rows=False, justify='center', escape=False))
 
 
 if __name__ == "__main__":

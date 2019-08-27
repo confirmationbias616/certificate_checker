@@ -8,8 +8,17 @@
 </head>
 <body>
     {% block body %}
+    <h3>
+      Actively serching for:
+    </h3>
     <h5>
-        {{df | safe}}
+      {{df_open | safe}}
+    </h5>
+    <h3>
+      Already matched:
+    </h3>
+    <h5>
+        {{df_closed | safe}}
     </h5>
     {% endblock %}
 </body>
