@@ -30,47 +30,52 @@
 <br><br>
 <div align="center">
   <form action="/summary_table" method="GET">
-    <input type="submit" value="SHOW SUMMARY"></button>
+    {% if not job_number %}
+      <input type="submit" value="SHOW SUMMARY"></button>
+      <br><br><br>
+    {% endif %}
   </form>
 </div>
-<br><br>
 <form action="/" method="POST">
   <div align="center">
       <input id="submit" type="submit" value="SUBMIT">
-      <input id="reset" type="reset" value="RESET">
+      {% if not job_number %}
+        <input id="reset" type="reset" value="RESET">
+      {% endif %}
   </div>
-  <br>
-  <br>
+  <br><br>
   <fieldset>
-    <legend>Enter New Project Info</legend>
+    <legend>{% if job_number %}Adjust{% else %}Enter New{% endif %} Project Info</legend>
     <div class="required">
       <p2>Subcontract Job #</p2><br>
-      <input type="text" name="job_number" size="6" placeholder="2567" pattern="2\d{3}" title="4-digit number (2###)" required autofocus>
+      <input type="text" name="job_number" size="6" {% if job_number %}value="{{job_number}}" {% else %}placeholder="2567"{% endif %} pattern="2\d{3}" {% if job_number %} readonly title="Cannot modify project number once it has been set." {% else %} autofocus required title="4-digit number (2###)"{% endif %}>
     </div><br>
     <div class="required">
       <p2>Project Title</p2><br>
-      <input type="text" name="title" size="35" placeholder="ABC Tower D - Disruptek Office Fit-Up" required>
+      <input type="text" name="title" size="35" {% if title %}value="{{title}}" {% else %}placeholder="ABC Tower D - Disruptek Office Fit-Up"{% endif %} required {% if job_number %} autofocus {% endif %}>
     </div><br>
     <div class="required">
       <p2>City</p2><br>
-      <input type="text" name="city" size="12" placeholder="Ottawa" required>
+      <input type="text" name="city" size="12" {% if city %}value="{{city}}" {% else %}placeholder="Ottawa"{% endif %} required>
     </div><br>
     <div class="required">
       <p2>Address</p2><br>
-      <input type="text" name="address" size="20" placeholder="123 Fake Street" required>
+      <input type="text" name="address" size="20" {% if address %}value="{{address}}" {% else %}placeholder="123 Fake Street"{% endif %} required>
     </div><br>
     <div class="required">
       <p2>General Contractor</p2><br>
-      <input type="text" name="contractor" size="30" placeholder="MegaCon Builders" required>
+      <input type="text" name="contractor" size="30" {% if contractor %}value="{{contractor}}" {% else %}placeholder="MegaCon Builders"{% endif %} required>
     </div><br>
       <p2>Consultant</p2><br>
-      <input type="text" name="engineer" size="30" placeholder="Superior Associates Limited">
+      <input type="text" name="engineer" size="30" {% if engineer %}value="{{engineer}}" {% else %}placeholder="Superior Associates Limited"{% endif %}>
     <br><br>
     <p2>Owner</p2><br>
-    <input type="text" name="owner" size="30" placeholder="ASAP Properties Inc.">
-    <br><br>
-    <p2>Is there a possibility that substantial completion has already been reached?</p2>
-    <input type="checkbox" name="instant_scan">
+    <input type="text" name="owner" size="30" {% if owner %}value="{{owner}}" {% else %}placeholder="ASAP Properties Inc."{% endif %}>
+    {% if not job_number %}
+      <br><br>
+      <p2>Is there a possibility that substantial completion has already been reached?</p2>
+      <input type="checkbox" name="instant_scan">
+    {% endif %}
   </fieldset>
   <img src="https://thumbs.gfycat.com/ShadowyThornyGelada-size_restricted.gif">
 </form>

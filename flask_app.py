@@ -101,7 +101,10 @@ def index():
                 return redirect(url_for('potential_match'))
             return redirect(url_for('nothing_yet'))
     else:
-        return render_template('index.html')
+        try:
+            return render_template('index.html', **{key:request.args.get(key) for key in request.args})
+        except NameError:
+            return render_template('index.html')
 
 @app.route('/already_matched', methods=['POST', 'GET'])
 def already_matched():
@@ -211,8 +214,14 @@ def summary_table():
         df_closed['action'] = df_closed.apply(lambda row: f'''<a href="{lookup_url+row.dcn_key}">view</a>''', axis=1)
         df_closed = df_closed.drop('dcn_key', axis=1)
         df_open = pd.read_sql(open_query, conn).sort_values('job_number')
-        df_open['action'] = df_open.apply(lambda row: f'''<a href="/">modify</a> / <a href="/">delete</a>''', axis=1)
-    return render_template('summary_table.html', df_closed=df_closed.to_html(index=False, justify='center', escape=False), df_open=df_open.to_html(index=False, bold_rows=False, justify='center', escape=False))
+        df_open['action'] = df_open.apply(lambda row: f'''<a href="{url_for('index', **row)}">modify</a> / <a href="/">delete</a>''', axis=1)
+        col_order = ['action', 'job_number', 'title', 'contractor', 'engineer', 'owner', 'address', 'city']
+        print(url_for('index', modify_row=df_open.iloc[0]))
+    return render_template(
+        'summary_table.html',
+        df_closed=df_closed.to_html(index=False, columns=col_order, justify='center', escape=False),
+        df_open=df_open.to_html(index=False, columns=col_order, justify='center', escape=False)
+    )
 
 
 if __name__ == "__main__":
