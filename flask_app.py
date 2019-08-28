@@ -73,6 +73,7 @@ def index():
                 for k in d:
                     if d[k]:
                         change_msg += f"  -\t{k} changed from `{d[k][0]}` to `{d[k][1]}`\n"
+                        no_change = False
                 if no_change:
                     change_msg += "All fields were the exact same as previous version!"
                 df = df.drop(dup_i)
