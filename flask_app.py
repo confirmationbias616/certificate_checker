@@ -208,7 +208,7 @@ def summary_table():
         """
         pd.set_option('display.max_colwidth', -1)
         df_closed = pd.read_sql(closed_query, conn).sort_values('job_number')
-        df_closed['job_number'] = df_closed.apply(lambda row: f'''<a href="{lookup_url+row.dcn_key}">{row.job_number}</a>''', axis=1)
+        df_closed['action'] = df_closed.apply(lambda row: f'''<a href="{lookup_url+row.dcn_key}">view</a>''', axis=1)
         df_closed = df_closed.drop('dcn_key', axis=1)
         df_open = pd.read_sql(open_query, conn).sort_values('job_number')
         df_open['action'] = df_open.apply(lambda row: f'''<a href="/">modify</a> / <a href="/">delete</a>''', axis=1)
