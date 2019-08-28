@@ -40,7 +40,7 @@ def index():
             try:
                 row = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[new_entry['job_number']]).iloc[0]
                 was_prev_closed = row.closed
-                if not was_prev_closed:
+                if not was_prev_closed:  # case where `closed` column is empty
                     was_prev_closed = 0
                     new_entry['closed'] = 0
                 was_prev_logged = 1
