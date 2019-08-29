@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  <script>
+    function show_hint() {
+      document.getElementById("display_after").style = "display:block";
+      document.getElementById("display_after2").style = "display:block";
+      document.getElementById("hide_after").style = "display:none";
+      document.getElementById("hide_after2").style = "display:none";
+    }
+  </script>
+  {% endblock %}
+</head>
+<body>
+    {% block body %}
+    <h4>
+        Your job #{{ job_number }} was successfully signed up and will be monitored on a daily basis for potential matches.
+    </h4>
+    <br><br>
+    <div align="center">
+      <h4 id="hide_after"> 
+        Would you also like to scan the last 6 months of certificates to see if there's a match?
+      </h4>
+      <br><br>
+      <form id="hide_after2" action="{{ url_for('instant_scan', job_number=job_number) }}" method="POST">
+          <input type="submit" value="GO!" onclick="show_hint()">
+      </form>
+    </div>
+    <div align="center">
+        <h4 id="display_after" style="display:none">
+            Depending on traffic, this scan could take a while. An email will be sent once the scan is complete - feel free to navigate away from this page.
+        </h4>
+        <img id="display_after2" style="display:none" src="https://thumbs.gfycat.com/ShadowyThornyGelada-size_restricted.gif">
+    </div>
+    <br><br>
+    {% endblock %}
+</body>
+</html>
+    

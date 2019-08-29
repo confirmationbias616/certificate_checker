@@ -35,11 +35,6 @@ def index():
                 was_prev_closed = 0
                 new_entry['closed'] = 0
                 was_prev_logged = 0
-        try:
-            new_entry['instant_scan']
-            instant_scan = True
-        except (IndexError, KeyError):
-            instant_scan = False
         if was_prev_closed:
             return redirect(url_for('already_matched'))
         with create_connection() as conn:
@@ -74,19 +69,7 @@ def index():
             if was_prev_logged:
                 session['change_msg'] = change_msg
                 return redirect(url_for('update'))
-            if not instant_scan:
-                return redirect(url_for('signup_no_action'))
-            dilfo_query = "SELECT * FROM company_projects WHERE job_number=?"
-            with create_connection() as conn:
-                company_projects = pd.read_sql(dilfo_query, conn, params=[new_entry['job_number']])
-            hist_query = "SELECT * FROM dcn_certificates ORDER BY pub_date DESC LIMIT 2000"
-            with create_connection() as conn:
-                df_web = pd.read_sql(hist_query, conn)
-            results = match(company_projects=company_projects, df_web=df_web, test=True)
-            if len(results[results.pred_match==1]) > 0:
-                session['dcn_key'] = results.iloc[0].dcn_key
-                return redirect(url_for('potential_match'))
-            return redirect(url_for('nothing_yet'))
+            return redirect(url_for('signup_confirmation'))
     else:
         try:
             return render_template('index.html', **{key:request.args.get(key) for key in request.args})
@@ -153,12 +136,10 @@ def update():
     change_msg = session['change_msg']
     return render_template('update.html', job_number=job_number, change_msg=change_msg)
 
-@app.route('/signup_no_action', methods=['POST', 'GET'])
-def signup_no_action():
-    if request.method == 'POST':
-        return redirect(url_for('index'))
+@app.route('/signup_confirmation', methods=['POST', 'GET'])
+def signup_confirmation():
     job_number = session['new_entry']['job_number']
-    return render_template('signup_no_action.html', job_number=job_number)
+    return render_template('signup_confirmation.html', job_number=job_number)
 
 @app.route('/summary_table')
 def summary_table():
@@ -219,6 +200,22 @@ def delete_job():
     with create_connection() as conn:
         conn.cursor().execute(delete_job_query, [job_number])
     return redirect(url_for('summary_table'))
+
+@app.route('/instant_scan', methods=['POST', 'GET'])
+def instant_scan():
+    if request.method == 'POST':
+        job_number = request.args.get('job_number')
+        dilfo_query = "SELECT * FROM company_projects WHERE job_number=?"
+        with create_connection() as conn:
+            company_projects = pd.read_sql(dilfo_query, conn, params=[job_number])
+        hist_query = "SELECT * FROM dcn_certificates ORDER BY pub_date DESC LIMIT 2000"
+        with create_connection() as conn:
+            df_web = pd.read_sql(hist_query, conn)
+        results = match(company_projects=company_projects, df_web=df_web, test=True)
+        if len(results[results.pred_match==1]) > 0:
+            session['dcn_key'] = results.iloc[0].dcn_key
+            return redirect(url_for('potential_match'))
+        return redirect(url_for('nothing_yet'))
 
 
 if __name__ == "__main__":
