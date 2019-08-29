@@ -10,18 +10,6 @@ import logging
 import sys
 
 
-logger = logging.getLogger(__name__)
-log_handler = logging.StreamHandler(sys.stdout)
-log_handler.setFormatter(
-    logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s "
-        "- line %(lineno)d"
-    )
-)
-logger.addHandler(log_handler)
-logger.setLevel(logging.INFO)
-
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'e5ac358c-f0bf-11e5-9e39-d3b532c10a28'
 
@@ -35,7 +23,6 @@ def index():
         if [True for value in new_entry.values() if type(value) == list]:  # strange little fix
             new_entry = {key:new_entry[key][0] for key in new_entry.keys()}
         session['new_entry'] = new_entry
-        logger.info(f"session:  {session}")
         with create_connection() as conn:
             try:
                 row = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[new_entry['job_number']]).iloc[0]
