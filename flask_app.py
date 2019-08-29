@@ -216,7 +216,6 @@ def summary_table():
         df_open = pd.read_sql(open_query, conn).sort_values('job_number')
         df_open['action'] = df_open.apply(lambda row: f'''<a href="{url_for('index', **row)}">modify</a> / <a href="{url_for('delete_job', job_number=row.job_number)}">delete</a>''', axis=1)
         col_order = ['action', 'job_number', 'title', 'contractor', 'engineer', 'owner', 'address', 'city']
-        print(url_for('index', modify_row=df_open.iloc[0]))
     return render_template(
         'summary_table.html',
         df_closed=df_closed.to_html(index=False, columns=col_order, justify='center', escape=False),
