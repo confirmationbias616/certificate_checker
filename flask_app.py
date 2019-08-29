@@ -214,7 +214,7 @@ def summary_table():
         df_closed['action'] = df_closed.apply(lambda row: f'''<a href="{lookup_url+row.dcn_key}">view</a>''', axis=1)
         df_closed = df_closed.drop('dcn_key', axis=1)
         df_open = pd.read_sql(open_query, conn).sort_values('job_number')
-        df_open['action'] = df_open.apply(lambda row: f'''<a href="{url_for('index', **row)}">modify</a> / <a href="/">delete</a>''', axis=1)
+        df_open['action'] = df_open.apply(lambda row: f'''<a href="{url_for('index', **row)}">modify</a> / <a href="{url_for('delete_job', job_number=row.job_number)}">delete</a>''', axis=1)
         col_order = ['action', 'job_number', 'title', 'contractor', 'engineer', 'owner', 'address', 'city']
         print(url_for('index', modify_row=df_open.iloc[0]))
     return render_template(
@@ -222,6 +222,17 @@ def summary_table():
         df_closed=df_closed.to_html(index=False, columns=col_order, justify='center', escape=False),
         df_open=df_open.to_html(index=False, columns=col_order, justify='center', escape=False)
     )
+
+@app.route('/delete_job')
+def delete_job():
+    delete_job_query = """
+            DELETE FROM company_projects
+            WHERE job_number=?
+        """
+    job_number = request.args.get('job_number')
+    with create_connection() as conn:
+        conn.cursor().execute(delete_job_query, [job_number])
+    return redirect(url_for('summary_table'))
 
 
 if __name__ == "__main__":
