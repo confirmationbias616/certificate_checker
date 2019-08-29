@@ -152,12 +152,20 @@ def summary_table():
                 company_projects.owner,
                 company_projects.contractor,
                 company_projects.engineer,
-                attempted_matches.dcn_key
-            FROM company_projects
+                attempted_matches.dcn_key,
+                modern_dcn_certificates.pub_date
+            FROM (SELECT * 
+                FROM dcn_certificates
+                WHERE
+                    pub_date>"2015-01-01") as modern_dcn_certificates
             LEFT JOIN
                 attempted_matches
             ON
-                company_projects.job_number=attempted_matches.job_number
+                modern_dcn_certificates.dcn_key = attempted_matches.dcn_key
+            LEFT JOIN
+                company_projects
+            ON
+                attempted_matches.job_number=company_projects.job_number
             WHERE
                 company_projects.closed=1
             AND
@@ -186,7 +194,7 @@ def summary_table():
         col_order = ['action', 'job_number', 'title', 'contractor', 'engineer', 'owner', 'address', 'city']
     return render_template(
         'summary_table.html',
-        df_closed=df_closed.to_html(index=False, columns=col_order, justify='center', escape=False),
+        df_closed=df_closed.to_html(index=False, columns=col_order+['pub_date'], justify='center', escape=False),
         df_open=df_open.to_html(index=False, columns=col_order, justify='center', escape=False)
     )
 
