@@ -175,8 +175,7 @@ def signup_no_action():
 
 @app.route('/summary_table')
 def summary_table():
-    with create_connection() as conn:
-        closed_query = """
+    closed_query = """
             SELECT
                 company_projects.job_number,
                 company_projects.city,
@@ -196,7 +195,7 @@ def summary_table():
             AND
                 attempted_matches.ground_truth=1
         """
-        open_query = """
+    open_query = """
             SELECT
                 company_projects.job_number,
                 company_projects.city,
@@ -209,6 +208,7 @@ def summary_table():
             WHERE
                 company_projects.closed=0
         """
+    with create_connection() as conn:
         pd.set_option('display.max_colwidth', -1)
         df_closed = pd.read_sql(closed_query, conn).sort_values('job_number')
         df_closed['action'] = df_closed.apply(lambda row: f'''<a href="{lookup_url+row.dcn_key}">view</a>''', axis=1)
