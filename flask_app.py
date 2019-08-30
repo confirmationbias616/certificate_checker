@@ -244,7 +244,7 @@ def process_feedback():
 
 @app.route('/thanks_for_feedback', methods=['POST', 'GET'])
 def thanks_for_feedback():
-    return render_template('thanks_for_feedback.html', job_number=request.args['job_number'], response=request.args['response']))
+    return render_template('thanks_for_feedback.html', job_number=request.args['job_number'], response=request.args['response'])
 
 
 if __name__ == "__main__":
