@@ -155,14 +155,12 @@ def summary_table():
                 company_projects.contractor,
                 company_projects.engineer,
                 attempted_matches.dcn_key,
-                dcn_certificates.pub_date
-            FROM dcn_certificates
+                dcn.pub_date
+            FROM (SELECT * FROM dcn_certificates ORDER BY cert_id DESC LIMIT 16000) as dcn
             LEFT JOIN
                 attempted_matches
             ON
-                dcn_certificates.dcn_key = attempted_matches.dcn_key
-            AND
-                dcn_certificates.pub_date>"2015-01-01"
+                dcn.dcn_key = attempted_matches.dcn_key
             LEFT JOIN
                 company_projects
             ON
