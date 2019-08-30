@@ -6,6 +6,7 @@ from dateutil.parser import parse as parse_date
 from db_tools import create_connection
 from communicator import send_email
 from matcher import match
+from inbox_scanner import process_as_feedback
 import pandas as pd
 import logging
 import sys
@@ -226,14 +227,21 @@ def instant_scan():
         dilfo_query = "SELECT * FROM company_projects WHERE job_number=?"
         with create_connection() as conn:
             company_projects = pd.read_sql(dilfo_query, conn, params=[job_number])
-        hist_query = "SELECT * FROM dcn_certificates ORDER BY pub_date DESC LIMIT 6500"
+        hist_query = "SELECT * FROM dcn_certificates ORDER BY pub_date DESC LIMIT 200"
         with create_connection() as conn:
             df_web = pd.read_sql(hist_query, conn)
-        results = match(company_projects=company_projects, df_web=df_web, test=True)
+        results = match(company_projects=company_projects, df_web=df_web, test=False)
         if len(results[results.pred_match==1]) > 0:
             session['dcn_key'] = results.iloc[0].dcn_key
             return redirect(url_for('potential_match'))
         return redirect(url_for('nothing_yet'))
+
+@app.route('/process_feedback', methods=['POST', 'GET'])
+def process_feedback():
+    if request.method == 'GET':
+        process_as_feedback(request.args)
+        print(request.args)
+        return redirect(url_for('index'))
 
 
 if __name__ == "__main__":

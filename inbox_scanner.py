@@ -231,6 +231,49 @@ def process_as_reply(email_obj):
             f"#{job_number}"
         )
 
+def process_as_feedback(feedback):
+    job_number = feedback['job_number']
+    response = int(feedback['response'])
+    dcn_key = feedback['dcn_key']
+    receiver_email = feedback['receiver_email']
+    # job_number = '2999', response = 1, dcn_key = 'A1B99EB2-CA2A-11E9-B133-005056AA6F02', receiver_email = 'alex.roy616@gmail.com'
+    logger.info(f"got feedback `{response}` for job #`{job_number}`")
+    with create_connection() as conn:
+        try:
+            was_prev_closed = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[job_number]).iloc[0].closed
+        except IndexError:
+            logger.info("job must have been deleted from company_projects at some point... skipping.")
+            return
+    if was_prev_closed:
+        logger.info("job was already matched successfully and logged as `closed`... skipping.")
+        return
+    if response == 1:
+        logger.info(f"got feeback that DCN key {dcn_key} was correct")
+        update_status_query = "UPDATE company_projects SET closed = 1 WHERE job_number = ?"
+        with create_connection() as conn:
+            conn.cursor().execute(update_status_query, [job_number])
+        logger.info(f"updated company_projects to show `closed` status for job #{job_number}")
+    with create_connection() as conn:
+        df = pd.read_sql("SELECT * FROM attempted_matches", conn)
+        match_dict_input = {
+            'job_number': job_number,
+            'dcn_key': dcn_key,
+            'ground_truth': 1 if response == 1 else 0,
+            'multi_phase': 1 if response == 2 else 0,
+            'verifier': receiver_email,
+            'source': 'feedback',  # don't need no more
+            'log_date': str(datetime.datetime.now().date()),
+            'validate': 0,
+        }
+        df = df.append(match_dict_input, ignore_index=True)
+        df = df.drop_duplicates(subset=["job_number", "dcn_key"], keep='last')
+        df.to_sql('attempted_matches', conn, if_exists='replace', index=False)
+        logger.info(
+            f"DCN key `{dcn_key}` was a "
+            f"{'successful match' if response == 1 else 'mis-match'} for job "
+            f"#{job_number}"
+        )
+
 def parse_email(data):
     for response_part in data:
         if isinstance(response_part, tuple):
