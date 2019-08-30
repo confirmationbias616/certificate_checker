@@ -240,7 +240,6 @@ def instant_scan():
 def process_feedback():
     if request.method == 'GET':
         process_as_feedback(request.args)
-        print(request.args)
         return redirect(url_for('thanks_for_feedback'), job_number=request.args['job_number'], response=request.args['response'])
 
 @app.route('/thanks_for_feedback', methods=['POST', 'GET'])
