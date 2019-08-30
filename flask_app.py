@@ -2,12 +2,14 @@
 
 from flask import Flask, render_template, url_for, request, redirect, session
 from datetime import datetime
+from dateutil.parser import parse as parse_date
 from db_tools import create_connection
 from communicator import send_email
 from matcher import match
 import pandas as pd
 import logging
 import sys
+import re
 
 
 app = Flask(__name__)
@@ -186,15 +188,26 @@ def summary_table():
     with create_connection() as conn:
         pd.set_option('display.max_colwidth', -1)
         df_closed = pd.read_sql(closed_query, conn).sort_values('job_number')
-        df_closed['action'] = df_closed.apply(lambda row: f'''<a href="{lookup_url+row.dcn_key}">view</a>''', axis=1)
+        df_closed['pub_date'] = df_closed.apply(lambda row: f'''<a href="{lookup_url+row.dcn_key}">{row.pub_date}</a>''', axis=1)
         df_closed = df_closed.drop('dcn_key', axis=1)
         df_open = pd.read_sql(open_query, conn).sort_values('job_number')
         df_open['action'] = df_open.apply(lambda row: f'''<a href="{url_for('index', **row)}">modify</a> / <a href="{url_for('delete_job', job_number=row.job_number)}">delete</a>''', axis=1)
-        col_order = ['action', 'job_number', 'title', 'contractor', 'engineer', 'owner', 'address', 'city']
+        col_order = ['job_number', 'title', 'contractor', 'engineer', 'owner', 'address', 'city']
+        def highlight_pending(s):
+            days_old = (datetime.now().date() - parse_date(re.findall('\d{4}-\d{2}-\d{2}',s.pub_date)[0]).date()).days
+            if days_old < 245:
+                row_colour = ''
+            elif days_old < 300:
+                row_colour = 'yellow'
+            else:
+                row_colour = 'red'
+            return [f'background-color: {row_colour}' for i in range(len(s))]
+        df_closed = df_closed[['pub_date']+col_order].style.set_table_attributes('border="1"').set_properties(**{'font-size': '10pt'}).hide_index().apply(highlight_pending, axis=1)
+        df_open = df_open[['action']+col_order].style.set_table_attributes('border="1"').set_properties(**{'font-size': '10pt'}).hide_index()
     return render_template(
         'summary_table.html',
-        df_closed=df_closed.to_html(index=False, columns=col_order+['pub_date'], justify='center', escape=False),
-        df_open=df_open.to_html(index=False, columns=col_order, justify='center', escape=False)
+        df_closed=df_closed.render(escape=False),
+        df_open=df_open.render(escape=False)
     )
 
 @app.route('/delete_job')
