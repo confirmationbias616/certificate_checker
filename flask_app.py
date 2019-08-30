@@ -185,10 +185,10 @@ def summary_table():
         """
     with create_connection() as conn:
         pd.set_option('display.max_colwidth', -1)
-        df_closed = pd.read_sql(closed_query, conn).sort_values('job_number')
+        df_closed = pd.read_sql(closed_query, conn).sort_values('job_number', ascending=False)
         df_closed['pub_date'] = df_closed.apply(lambda row: f'''<a href="{lookup_url+row.dcn_key}">{row.pub_date}</a>''', axis=1)
         df_closed = df_closed.drop('dcn_key', axis=1)
-        df_open = pd.read_sql(open_query, conn).sort_values('job_number')
+        df_open = pd.read_sql(open_query, conn).sort_values('job_number', ascending=False)
         df_open['action'] = df_open.apply(lambda row: f'''<a href="{url_for('index', **row)}">modify</a> / <a href="{url_for('delete_job', job_number=row.job_number)}">delete</a>''', axis=1)
         col_order = ['job_number', 'title', 'contractor', 'engineer', 'owner', 'address', 'city']
         def highlight_pending(s):
