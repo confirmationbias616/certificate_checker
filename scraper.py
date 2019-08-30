@@ -106,8 +106,11 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
                 break
             bar.update(i+1)
         bar.finish()      
+    with create_connection() as conn:
+        last_cert_id = pd.read_sql("SELECT * from dcn_certificates ORDER BY cert_id DESC LIMIT 1", conn).iloc[0].cert_id
     df_web = pd.DataFrame(
         data={
+            "cert_id": [int(x) for x in range(last_cert_id+1,last_cert_id+1+len(dcn_key))],
             "pub_date": pub_date,
             "city": city,
             "address": address,
@@ -123,8 +126,30 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
             lambda x: re.findall('\d{4}-\d{2}-\d{2}', x)[0])
 
     if not test and not isinstance(ref, pd.DataFrame):
-        with create_connection() as conn:
-            df_web.to_sql('dcn_certificates', conn, if_exists='append', index=False)
+        for _, row in df_web.iterrows():
+            with create_connection() as conn:
+                query=''' INSERT INTO dcn_certificates (
+                    cert_id,
+                    pub_date,
+                    city,
+                    address,
+                    title,
+                    owner,
+                    contractor,
+                    engineer,
+                    dcn_key
+                ) values (?,?,?,?,?,?,?,?,?) '''
+                conn.cursor().execute(query, [
+                    row.cert_id,
+                    row.pub_date,
+                    row.city,
+                    row.address,
+                    row.title,
+                    row.owner,
+                    row.contractor,
+                    row.engineer,
+                    row.dcn_key
+                ])
         return True  # signaling that something scrape did return some results
     else:
         return df_web
