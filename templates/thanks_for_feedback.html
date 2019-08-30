@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  {% endblock %}
+</head>
+<body>
+    {% block body %}
+    <h4>
+        Thanks for your feedback!
+    </h4>
+    <h4>
+        {% if response== 1%}
+        Your project #{{  }} will be marked as closed and saved along with the link for its certificate.
+        Make sure to set a reminder to release your holdback when the ? period is up.
+        {% else %}
+        HBR Bot will keep an eye out for your project in upcoming certificates.
+        {% endif %}
+    </h4>
+    {% endblock %}
+</body>
+</html>
+    
