@@ -215,7 +215,7 @@ def instant_scan():
         dilfo_query = "SELECT * FROM company_projects WHERE job_number=?"
         with create_connection() as conn:
             company_projects = pd.read_sql(dilfo_query, conn, params=[job_number])
-        hist_query = "SELECT * FROM dcn_certificates ORDER BY pub_date DESC LIMIT 2000"
+        hist_query = "SELECT * FROM dcn_certificates ORDER BY pub_date DESC LIMIT 6500"
         with create_connection() as conn:
             df_web = pd.read_sql(hist_query, conn)
         results = match(company_projects=company_projects, df_web=df_web, test=True)
