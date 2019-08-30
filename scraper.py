@@ -110,7 +110,6 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
         last_cert_id = pd.read_sql("SELECT * from dcn_certificates ORDER BY cert_id DESC LIMIT 1", conn).iloc[0].cert_id
     df_web = pd.DataFrame(
         data={
-            "cert_id": [int(x) for x in range(last_cert_id+1,last_cert_id+1+len(dcn_key))],
             "pub_date": pub_date,
             "city": city,
             "address": address,
@@ -121,6 +120,8 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
             "dcn_key": [x.split('-notices/')[1] for x in dcn_key],
         }
     )
+    df_web = df_web.sort_values('pub_date', ascending=True)
+    df_web['cert_id'] = [int(x) for x in range(last_cert_id+1,last_cert_id+1+len(df_web))]
     # make date into actual datetime object
     df_web['pub_date'] = df_web.pub_date.apply(
             lambda x: re.findall('\d{4}-\d{2}-\d{2}', x)[0])
