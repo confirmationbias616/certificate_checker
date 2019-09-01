@@ -11,8 +11,26 @@
     <h3>
         There's a potential match for project #{{ job_number }}! Go see your inbox for validation.
         <br><br>
-        Go have a look at the <a id="dcn_link" href="{{ link }}" value='{{ link }}'>certificate</a>.
+        Go have a look at the <a id="dcn_link" href="{{ lookup_url+dcn_key }}" value='{{ lookup_url+dcn_key }}'>certificate</a>.
     </h3>
+    <div align=center>
+      <div display=block>
+        <form  action="{{ url_for('process_feedback', job_number=job_number, response=0, dcn_key=dcn_key, receiver_email=receiver_email) }}" method="POST">
+          <input type="submit" id="large_button" value="NOPE, WRONG PROJECT :(" onclick="show_hint()">
+        </form>
+      </div><br>
+      <div display=block>
+        <form  action="{{ url_for('process_feedback', job_number=job_number, response=1, dcn_key=dcn_key, receiver_email=receiver_email) }}" method="POST">
+          <input type="submit" id="large_button" value="THIS IS THE ONE!" onclick="show_hint()">
+        </form>
+      </div><br>
+      <div display=block>
+        <form  action="{{ url_for('process_feedback', job_number=job_number, response=2, dcn_key=dcn_key, receiver_email=receiver_email) }}" method="POST">
+          <input type="submit" id="large_button" value="MULTI-PHASE - NOT QUITE THE RIGHT ROJECT" onclick="show_hint()">
+        </form>
+      </div>
+    </div>
+
     {% endblock %}
 </body>
 </html>

@@ -143,7 +143,7 @@ def potential_match():
         return redirect(url_for('index'))
     job_number = session['new_entry']['job_number']
     dcn_key = session['dcn_key']
-    return render_template('potential_match.html', job_number=job_number, link=lookup_url+dcn_key)
+    return render_template('potential_match.html', job_number=job_number, lookup_url=lookup_url, dcn_key=dcn_key, receiver_email=receiver_email)
 
 @app.route('/update', methods=['POST', 'GET'])
 def update():
@@ -238,12 +238,19 @@ def delete_job():
 def instant_scan():
     if request.method == 'POST':
         job_number = request.args.get('job_number')
+        lookback = request.args.get('lookback')
+        if lookback=='2_months':
+            lookback_cert_count = 3000
+        elif lookback=='1_month':
+            lookback_cert_count = 1500
+        else:  # also applies for `2_weeks`
+            lookback_cert_count = 750
         dilfo_query = "SELECT * FROM company_projects WHERE job_number=?"
         with create_connection() as conn:
             company_projects = pd.read_sql(dilfo_query, conn, params=[job_number])
-        hist_query = "SELECT * FROM dcn_certificates ORDER BY pub_date DESC LIMIT 200"
+        hist_query = "SELECT * FROM dcn_certificates ORDER BY pub_date DESC LIMIT ?"
         with create_connection() as conn:
-            df_web = pd.read_sql(hist_query, conn)
+            df_web = pd.read_sql(hist_query, conn, params=[lookback_cert_count])
         results = match(company_projects=company_projects, df_web=df_web, test=False)
         if len(results[results.pred_match==1]) > 0:
             session['dcn_key'] = results.iloc[0].dcn_key
@@ -252,9 +259,9 @@ def instant_scan():
 
 @app.route('/process_feedback', methods=['POST', 'GET'])
 def process_feedback():
-    if request.method == 'GET':
-        process_as_feedback(request.args)
-        return redirect(url_for('thanks_for_feedback', job_number=request.args['job_number'], response=request.args['response']))
+    # if request.method == 'GET':
+    process_as_feedback(request.args)
+    return redirect(url_for('thanks_for_feedback', job_number=request.args['job_number'], response=request.args['response']))
 
 @app.route('/thanks_for_feedback', methods=['POST', 'GET'])
 def thanks_for_feedback():
