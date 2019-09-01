@@ -127,30 +127,24 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
             lambda x: re.findall('\d{4}-\d{2}-\d{2}', x)[0])
 
     if not test and not isinstance(ref, pd.DataFrame):
-        for _, row in df_web.iterrows():
-            with create_connection() as conn:
-                query=''' INSERT INTO dcn_certificates (
-                    cert_id,
-                    pub_date,
-                    city,
-                    address,
-                    title,
-                    owner,
-                    contractor,
-                    engineer,
-                    dcn_key
-                ) values (?,?,?,?,?,?,?,?,?) '''
-                conn.cursor().execute(query, [
-                    row.cert_id,
-                    row.pub_date,
-                    row.city,
-                    row.address,
-                    row.title,
-                    row.owner,
-                    row.contractor,
-                    row.engineer,
-                    row.dcn_key
-                ])
+        attrs = [
+            'cert_id',
+            'pub_date',
+            'city',
+            'address',
+            'title',
+            'owner',
+            'contractor',
+            'engineer',
+            'dcn_key'
+        ]
+        query=f''' 
+            INSERT INTO dcn_certificates 
+            ({', '.join(attrs)}) VALUES ({','.join(['?']*len(attrs))})
+        '''
+        new_certs = [[row[attr] for attr in attrs] for _, row in df_web.iterrows()]
+        with create_connection() as conn:
+            conn.cursor().executemany(query, new_certs)
         return True  # signaling that something scrape did return some results
     else:
         return df_web
