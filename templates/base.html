@@ -50,11 +50,10 @@
 </body>
 <footer>
     {% block footer %}
-    {% if job_number or df_open %}
+    {% if not home%}
     <div align="center">
         <br><br>
         <form action="/" method="GET">
-            <input type="submit" value="GO BACK"></button>
             <input type="submit" id="large_button" value="GO BACK"></button>
         </form>
     </div>

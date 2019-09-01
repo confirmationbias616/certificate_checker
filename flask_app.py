@@ -75,9 +75,9 @@ def index():
             return redirect(url_for('signup_confirmation'))
     else:
         try:
-            return render_template('index.html', **{key:request.args.get(key) for key in request.args})
+            return render_template('index.html', home=True, contacts=contacts, **{key:request.args.get(key) for key in request.args})
         except NameError:
-            return render_template('index.html')
+            return render_template('index.html', home=True, contacts=contacts)
 
 @app.route('/already_matched', methods=['POST', 'GET'])
 def already_matched():
