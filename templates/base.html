@@ -5,11 +5,47 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto+Mono&display=swap" rel="stylesheet">
     <link href="{{ url_for('static',filename='style.css') }}" rel="stylesheet" type="text/css">
     {% block head %}{% endblock %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        .column[type=header] {
+            float: left;
+            width: 33.33%;
+            padding: 5px;
+            height: 60px;
+            }
+
+            /* Clear floats after the columns */
+            .row:after {
+            content: "";
+            display: table;
+            clear: both;
+            }
+    </style>
 </head>
-<body>
-    <h2>
-        HBR Bot
-    </h2>
+<body>    
+    
+    <div class="row">
+        <div class="column" type=header>
+        </div>
+        <div class="column" type=header>
+            <h2>
+                HBR Bot
+            </h2>
+        </div>
+        <div class="column" type=header align="center">
+            {% if not hide_helper_links %}
+            <a href={{ url_for('about') }}>
+                about
+            </a>&nbsp;
+            <a href={{ url_for('contact_config') }}>
+                configure contacts
+            </a>
+            {% endif %}
+        </div>
+    </div>
     {% block body %}{% endblock %}
 </body>
 <footer>
