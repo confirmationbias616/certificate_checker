@@ -260,6 +260,10 @@ def process_feedback():
 def thanks_for_feedback():
     return render_template('thanks_for_feedback.html', job_number=request.args['job_number'], response=int(request.args['response']))
 
+@app.route('/about', methods=['POST', 'GET'])
+def about():
+    return render_template('about.html', about=True, hide_helper_links=True)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
