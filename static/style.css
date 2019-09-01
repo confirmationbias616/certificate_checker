@@ -35,13 +35,10 @@
       font-size: 100%;
       padding-left: 1%;
     }
-    input[type=submit]:hover { 
+    input[id=large_button]:hover { 
       box-shadow: -3px -3px 6px var(--highlight);
     }
-    input[type=reset]:hover { 
-      box-shadow: -3px -3px 6px var(--highlight);
-    }
-    button[type=submit]:hover { 
+    input[id=small_button]:hover { 
       box-shadow: -3px -3px 6px var(--highlight);
     }
     fieldset:hover { 
@@ -55,7 +52,7 @@
       font-family: 'Roboto Mono', monospace;
       font-size: 120%;
     }
-    input[type=submit]{
+    input[id=large_button]{
       transition: box-shadow 0.5s;
       font-family: 'Roboto Mono', monospace;
       font-size: 120%;
@@ -67,24 +64,12 @@
       border-radius: 5px;
       box-shadow: -3px -3px 5px grey;
     }
-    button[type=submit]{
+    input[id=small_button]{
       transition: box-shadow 0.5s;
       font-family: 'Roboto Mono', monospace;
-      font-size: 120%;
-      width: 30%;
-      height: 2em;
-      margin-right:10px;
-      background-color: var(--item);
-      border: 2px var(--outline) solid;
-      border-radius: 5px;
-      box-shadow: -3px -3px 5px grey;
-    }
-    input[type=reset]{
-      transition: box-shadow 0.5s;
-      font-family: 'Roboto Mono', monospace;
-      font-size: 120%;
-      width: 30%;
-      height: 2em;
+      font-size: 90%;
+      width: 10%;
+      height: 1.8em;
       background-color: var(--item);
       border: 2px var(--outline) solid;
       border-radius: 5px;
