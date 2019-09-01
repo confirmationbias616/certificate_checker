@@ -10,6 +10,7 @@ from inbox_scanner import process_as_feedback
 import pandas as pd
 import logging
 import sys
+import os
 import re
 
 
@@ -18,6 +19,19 @@ app.config['SECRET_KEY'] = 'e5ac358c-f0bf-11e5-9e39-d3b532c10a28'
 
 lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
 receiver_email = 'alex.roy616@gmail.com'
+
+@app.context_processor
+def override_url_for():
+    return dict(url_for=dated_url_for)
+
+def dated_url_for(endpoint, **values):
+    if endpoint == 'static':
+        filename = values.get('filename', None)
+        if filename:
+            file_path = os.path.join(app.root_path,
+                                 endpoint, filename)
+            values['q'] = int(os.stat(file_path).st_mtime)
+    return url_for(endpoint, **values)
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
