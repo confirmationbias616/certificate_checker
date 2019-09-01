@@ -215,10 +215,10 @@ def summary_table():
             if days_old < 245:
                 row_colour = ''
             elif days_old < 300:
-                row_colour = 'yellow'
+                row_colour = '#696714'
             else:
-                row_colour = 'red'
-            return [f'background-color: {row_colour}' for i in range(len(s))]
+                row_colour = '#6b2515'
+            return [f'color: {row_colour}' for i in range(len(s))]
         df_closed = df_closed[['pub_date']+col_order].style.set_table_attributes('border="1"').set_properties(**{'font-size': '10pt'}).hide_index().apply(highlight_pending, axis=1)
         df_open = df_open[['action']+col_order].style.set_table_attributes('border="1"').set_properties(**{'font-size': '10pt'}).hide_index()
     return render_template(
