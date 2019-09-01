@@ -35,7 +35,11 @@ def dated_url_for(endpoint, **values):
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
+    contacts_query = "SELECT * FROM contacts"
+    with create_connection() as conn:
+        contacts = pd.read_sql(contacts_query, conn)
     if request.method == 'POST':
+        selected_contacts = request.form.getlist("contacts")
         new_entry = dict(request.form)
         if [True for value in new_entry.values() if type(value) == list]:  # strange little fix
             new_entry = {key:new_entry[key][0] for key in new_entry.keys()}
