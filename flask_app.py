@@ -281,7 +281,7 @@ def contact_config():
     contacts_query = "SELECT * FROM contacts"
     with create_connection() as conn:
         contacts = pd.read_sql(contacts_query, conn)
-    contacts['action'] = contacts.apply(lambda row: f'''<a href="{url_for('add_update_contact', **row)}">modify</a> / <a href="{url_for('delete_contact', **row)}">delete</a>''', axis=1)
+    contacts['action'] = contacts.apply(lambda row: f'''<a href="{url_for('update_contact', **row)}">modify</a> / <a href="{url_for('delete_contact', **row)}">delete</a>''', axis=1)
     contacts = contacts[['name', 'email_addr', 'action']]
     contacts = contacts.style.set_table_attributes('border="1"').set_properties(**{'font-size': '10pt'}).hide_index()
     return render_template('contact_config.html', contacts=contacts.render(escape=False), contact=contact, config=True, hide_helper_links=True)
@@ -297,32 +297,45 @@ def delete_contact():
         conn.cursor().execute(delete_contact_query, [contact.get('id')])
     return redirect(url_for('contact_config'))
 
-@app.route('/add_update_contact', methods=['POST', 'GET'])
-def add_update_contact():
+@app.route('/update_contact', methods=['POST', 'GET'])
+def update_contact():
+    contact = request.args
+    add_contact_query = """
+        INSERT INTO contacts
+        (name, email_addr, id) VALUES(?, ?, ?)
+    """
+    update_contact_query = """
+        UPDATE contacts
+        SET (name, email_addr)=(?, ?)
+        WHERE id=?
+    """
+    if request.method == "POST":
+        contact = request.form
+        with create_connection() as conn:
+            conn.cursor().execute(update_contact_query, [contact.get('name'), contact.get('email_addr'), contact.get('id')])
+    return redirect(url_for('contact_config', **contact))
+
+@app.route('/add_contact', methods=['POST', 'GET'])
+def add_contact():
     contact = request.args
     get_contact_ids = """
         SELECT id FROM contacts
     """
     with create_connection() as conn:
         contact_ids = pd.read_sql(get_contact_ids, conn).sort_values('id')
-    update_contact_query = """
-        UPDATE contacts
-        SET (name, email_addr)=(?, ?)
-        WHERE id=?
-    """
     add_contact_query = """
         INSERT INTO contacts
         (name, email_addr, id) VALUES(?, ?, ?)
     """
     if request.method == "POST":
         contact = request.form
-        if contact.get('id') in [str(x) for x in contact_ids.id]:
-            with create_connection() as conn:
-                conn.cursor().execute(update_contact_query, [contact.get('name'), contact.get('email_addr'), contact.get('id')])
+        if len(contact_ids):
+            new_contact_id = int(contact_ids.iloc[-1]+1)
         else:
-            with create_connection() as conn:
-                conn.cursor().execute(add_contact_query, [contact.get('name'), contact.get('email_addr'), int(contact_ids.iloc[-1]+1)])
-    return redirect(url_for('contact_config', **contact))
+            new_contact_id = 1
+        with create_connection() as conn:
+            conn.cursor().execute(add_contact_query, [contact.get('name'), contact.get('email_addr'), new_contact_id])
+    return redirect(url_for('contact_config'))
 
 
 if __name__ == "__main__":
