@@ -7,19 +7,6 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto+Mono&display=swap" rel="stylesheet">
   <link href="{{ url_for('static',filename='style.css') }}" rel="stylesheet" type="text/css">
   {% endblock %}
-  <script>
-      function show_hint() {
-        document.getElementById("hint").innerHTML = "Once the e-mail pops up, just hit `Send` and then come back to this windown and hit `RESET` to enter a new project.\n\n";
-        reset_button_color = document.getElementById("hint").style.color;
-        reset_button_border = document.getElementById("hint").style.border;
-        reset_button_boxShadow = document.getElementById("hint").style.boxShadow;
-        submit_button_boxShadow = document.getElementById("hint").style.boxShadow;
-        // document.getElementById("reset").style.color = "darkgreen";
-        // document.getElementById("reset").style.border = "4px solid black";
-        document.getElementById("reset").style.boxShadow = "-3px -3px 6px var(--highlight)";
-        document.getElementById("submit").style.boxShadow = "-1px -1px 1px var(--highlight)";
-      }
-    </script>
 </head>
 
 <body>
@@ -33,7 +20,7 @@
       {% endif %}
     </form>
   </div>
-  <form action="/" method="POST">
+  <form action="/" name = "job_entry" method="POST" onsubmit="return(validate())">
     <div align="center">
         <input type="submit" id="large_button" value="SUBMIT">
         {% if not job_number %}
@@ -71,15 +58,42 @@
     </fieldset>
     <fieldset>
         <legend>Interested Parties</legend>
-        {% for _, contact in contacts.iterrows() %}
-          <div>
-            <input type="checkbox" id="id_{{contact['id']}}" name="contacts" value="{{contact['id']}}">
-            <label for="id_{{contact['id']}}">{{contact['name']}}</label>
-          </div>
-        {% endfor %}
+        {% if contacts|length %}
+          {% for _, contact in contacts.iterrows() %}
+            <div>
+              <input type="checkbox" id="id_{{contact['id']}}" name="contacts" value="{{contact['id']}}">
+              <label for="id_{{contact['id']}}">{{contact['name']}}</label>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p align="right">
+            ^^^
+          </p>
+          <p>
+            You must first configure your company's contacts in order to submit a project.
+          </p>
+          <p align="right">
+            ^^^
+          </p>
+        {% endif %}
       </fieldset>
     <!-- <img src="https://thumbs.gfycat.com/ShadowyThornyGelada-size_restricted.gif"> -->
   </form>
+  <script type = "text/javascript">
+    function validate() {
+      var checked = false;
+      var checkboxes = document.getElementsByName("contacts");
+      
+      for(var i=0; i < checkboxes.length; i++) {
+        if(checkboxes[i].checked)
+          checked = true;
+      }      
+      if (checked == false) {
+        alert('You must select at least one contact from `Interested Parties` field.');
+        return false
+      }
+    }
+    </script>
   {% endblock %}
 </body>
 </html>
