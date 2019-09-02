@@ -92,7 +92,7 @@ def match(company_projects=False, df_web=False, test=False, since='today', until
 		results['pred_prob'] = results.apply(lambda row: predict_prob(row, version=version), axis=1)
 		results['pred_match'] = results.apply(lambda row: predict_match(row.pred_prob, row.multi_phase_proned,prob_thresh), axis=1)
 		results = results.sort_values('pred_prob', ascending=False)
-		logger.debug(results.head(5))
+		logger.info(f"top 5 probabilities: {', '. join([str(round(x, 3)) for x in results.head(5).pred_prob])}")
 		matches = results[results.pred_match==1]
 		if len(matches) > 0:
 			logger.info(f"found {len(matches)} match{'' if len(matches)==1 else 'es'}! with probability as high as {matches.iloc[0].pred_prob}")
