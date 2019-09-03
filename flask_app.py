@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from flask import Flask, render_template, url_for, request, redirect, session
+from flask import Flask, render_template, url_for, request, redirect
 from datetime import datetime
 from dateutil.parser import parse as parse_date
 from db_tools import create_connection
@@ -43,7 +43,6 @@ def index():
         new_entry = dict(request.form)
         if [True for value in new_entry.values() if type(value) == list]:  # strange little fix
             new_entry = {key:new_entry[key][0] for key in new_entry.keys()}
-        session['new_entry'] = new_entry
         with create_connection() as conn:
             try:
                 row = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[new_entry['job_number']]).iloc[0]
@@ -88,9 +87,8 @@ def index():
                     pass
             df.to_sql('company_projects', conn, if_exists='replace', index=False)  # we're replacing here instead of appending because of the 2 previous lines
             if was_prev_logged:
-                session['change_msg'] = change_msg
-                return redirect(url_for('update'))
-            return redirect(url_for('signup_confirmation'))
+                return redirect(url_for('update', job_number=new_entry['job_number'], change_msg=change_msg))
+            return redirect(url_for('signup_confirmation', job_number=new_entry['job_number']))
     else:
         try:
             return render_template('index.html', home=True, contacts=contacts, **{key:request.args.get(key) for key in request.args})
@@ -101,7 +99,7 @@ def index():
 def already_matched():
     if request.method == 'POST':
         return redirect(url_for('index'))
-    job_number = session['new_entry']['job_number']
+    job_number = request.args.get('job_number')
     with create_connection() as conn:
         prev_match = pd.read_sql(
             "SELECT * FROM attempted_matches WHERE job_number=? AND ground_truth=1",
@@ -113,7 +111,7 @@ def already_matched():
 def nothing_yet():
     if request.method == 'POST':
         return redirect(url_for('index'))
-    job_number = session['new_entry']['job_number']
+    job_number = request.args.get('job_number')
     new_msg = (
         f"No corresponding certificates in recent "
         f"history were found as a match. "
@@ -145,21 +143,21 @@ def nothing_yet():
 def potential_match():
     if request.method == 'POST':
         return redirect(url_for('index'))
-    job_number = session['new_entry']['job_number']
-    dcn_key = session['dcn_key']
+    job_number = request.args.get('job_number')
+    dcn_key = request.args.get('dcn_key')
     return render_template('potential_match.html', job_number=job_number, lookup_url=lookup_url, dcn_key=dcn_key, receiver_email=receiver_email)
 
 @app.route('/update', methods=['POST', 'GET'])
 def update():
     # if request.method == 'POST':
     #     return redirect(url_for('index'))
-    job_number = session['new_entry']['job_number']
-    change_msg = session['change_msg']
+    job_number = request.args.get('job_number')
+    change_msg = request.args.get('change_msg')
     return render_template('update.html', job_number=job_number, change_msg=change_msg)
 
 @app.route('/signup_confirmation', methods=['POST', 'GET'])
 def signup_confirmation():
-    job_number = session['new_entry']['job_number']
+    job_number = request.args.get('job_number')
     return render_template('signup_confirmation.html', job_number=job_number)
 
 @app.route('/summary_table')
@@ -257,8 +255,8 @@ def instant_scan():
             df_web = pd.read_sql(hist_query, conn, params=[lookback_cert_count])
         results = match(company_projects=company_projects, df_web=df_web, test=False)
         if len(results[results.pred_match==1]) > 0:
-            session['dcn_key'] = results.iloc[0].dcn_key
-            return redirect(url_for('potential_match'))
+            dcn_key = results.iloc[0].dcn_key
+            return redirect(url_for('potential_match', dcn_key=dcn_key))
         return redirect(url_for('nothing_yet'))
 
 @app.route('/process_feedback', methods=['POST', 'GET'])
