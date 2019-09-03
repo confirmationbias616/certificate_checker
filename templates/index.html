@@ -59,8 +59,8 @@
     <fieldset>
         <legend>Interested Parties</legend>
         * Must select at least 1 contact:
-        {% if contacts|length %}
-          {% for _, contact in contacts.iterrows() %}
+        {% if all_contacts|length %}
+          {% for _, contact in all_contacts.iterrows() %}
             <ul>
               <input type="checkbox" id="id_{{contact['id']}}" name="contacts" value="{{contact['id']}}">
               <label for="id_{{contact['id']}}">{{contact['name']}}</label>

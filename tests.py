@@ -357,7 +357,6 @@ class IntegrationTests(unittest.TestCase):
                             company_projects.owner,
                             company_projects.contractor,
                             company_projects.engineer,
-                            company_projects.receiver_email,
                             company_projects.cc_email,
                             company_projects.quality,
                             attempted_matches.dcn_key,

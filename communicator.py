@@ -2,6 +2,7 @@ import smtplib, ssl
 import datetime
 import sys
 import logging
+import ast
 
 
 logger = logging.getLogger(__name__)
@@ -30,18 +31,20 @@ def send_email(receiver_email, message, test):
 		context = ssl.create_default_context()
 		with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
 			server.login(sender_email, password)
-			server.sendmail(sender_email, [receiver_email], message)
-		logger.info(f"Successfully sent an email to {receiver_email}")
+			server.sendmail(sender_email, [*receiver_email.values()], message)
+		logger.info(f"Successfully sent an email to {', '.join(receiver_email.keys())}")
 	except (FileNotFoundError, NameError):
 		logger.info("password not available -> could not send e-mail")
 
 def communicate(web_df, dilfo_row, test=False):
-	receiver_email = 'alex.roy616@gmail.com'  # temporary fix
-	if (not receiver_email.endswith('@dilfo.com')) and (receiver_email not in[
-		'alex.roy616@gmail.com', 'alex.roy616@icloud.com', 'alex.roy616@me.com']):
-		logger.info('given user e-mail address has not been white listed (from dilfo.com '\
-			'domain or from Alex Roy address)')
-		return 1
+	receiver_emails_dump = dilfo_row.receiver_emails_dump
+	# receiver_emails_dump = "{'Alex': 'alex.roy616@gmail.com', 'ARoy':'alex.roy616@me.com'}"
+	receiver_email = ast.literal_eval(receiver_emails_dump)
+	# if (not receiver_email.endswith('@dilfo.com')) and (receiver_email not in[
+	# 	'alex.roy616@gmail.com', 'alex.roy616@icloud.com', 'alex.roy616@me.com']):
+	# 	logger.info('given user e-mail address has not been white listed (from dilfo.com '\
+	# 		'domain or from Alex Roy address)')
+	# 	return 1
 	cc_email = dilfo_row.cc_email
 	if cc_email:
 		if cc_email.endswith('@dilfo.com') or (cc_email in[
@@ -63,13 +66,11 @@ def communicate(web_df, dilfo_row, test=False):
 		intro_msg = (
 		    f"From: HBR Bot"
 		    f"\n"
-		    f"To: {receiver_email}"
-			f"\n"
-		    f"CC: {cc_email}"
+		    f"To: {', '.join(receiver_email.values())}"
 		    f"\n"
 		    f"Subject: Upcoming Holdback Release: #{dilfo_row.job_number}"
 		    f"\n\n"
-		    f"Hi {receiver_email.split('.')[0].title()},"
+		    f"Hi {', '.join(receiver_email.keys())},"
 		    f"\n\n"
 		    f"It looks like your project #{dilfo_row.job_number} - "
 			f"{dilfo_row.title.title()} might be almost ready for holdback release!"
@@ -89,7 +90,7 @@ def communicate(web_df, dilfo_row, test=False):
 		    f"if the contract was signed since then."
 		    f"\n"
 		)
-		link_constructor = "https://www.hbr-bot.com/process_feedback?job_number={}&response={}&dcn_key={}&receiver_email={}"
+		link_constructor = "https://www.hbr-bot.com/process_feedback?job_number={}&response={}&dcn_key={}"
 		feedback_msg = (
 			f"Your feedback will be required so the service can properly "
 			f"handle this ticket, whether that means closing it out or keep "
@@ -100,12 +101,12 @@ def communicate(web_df, dilfo_row, test=False):
 			f"which corrsponds to your situation with regards to the proposed "
 			f"link:\n"
 			f"\tlink does not relate to my project\n"
-			f"\t{link_constructor.format(dilfo_row.job_number, 0, web_df.iloc[0].dcn_key, receiver_email)}\n"
+			f"\t{link_constructor.format(dilfo_row.job_number, 0, web_df.iloc[0].dcn_key)}\n"
 			f"\tlink is accurate match for my project\n"
-			f"\t{link_constructor.format(dilfo_row.job_number, 1, web_df.iloc[0].dcn_key, receiver_email)}\n"
+			f"\t{link_constructor.format(dilfo_row.job_number, 1, web_df.iloc[0].dcn_key)}\n"
 			f"\tlink is close but seems to relate to a different phase or "
 			f"stage.\n"
-			f"\t{link_constructor.format(dilfo_row.job_number, 2, web_df.iloc[0].dcn_key, receiver_email)}\n"
+			f"\t{link_constructor.format(dilfo_row.job_number, 2, web_df.iloc[0].dcn_key)}\n"
 			f"\n"
 			f"Whether you were the main receiver or just in CC, your"
 			f"feedback is greatly apreciated."

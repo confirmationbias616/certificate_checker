@@ -4,7 +4,6 @@ from flask import Flask, render_template, url_for, request, redirect
 from datetime import datetime
 from dateutil.parser import parse as parse_date
 from db_tools import create_connection
-from communicator import send_email
 from matcher import match
 from inbox_scanner import process_as_feedback
 import pandas as pd
@@ -18,7 +17,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'e5ac358c-f0bf-11e5-9e39-d3b532c10a28'
 
 lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
-receiver_email = 'alex.roy616@gmail.com'
 
 @app.context_processor
 def override_url_for():
@@ -35,12 +33,18 @@ def dated_url_for(endpoint, **values):
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    contacts_query = "SELECT * FROM contacts"
+    all_contacts_query = "SELECT * FROM contacts"
     with create_connection() as conn:
-        contacts = pd.read_sql(contacts_query, conn)
+        all_contacts = pd.read_sql(all_contacts_query, conn)
     if request.method == 'POST':
-        selected_contacts = request.form.getlist("contacts")
+        selected_contact_ids = request.form.getlist("contacts")
+        selected_contacts_query = f"SELECT name, email_addr FROM contacts WHERE id in ({','.join('?'*len(selected_contact_ids))})"
+        with create_connection() as conn:
+            selected_contacts = pd.read_sql(selected_contacts_query, conn, params=[*selected_contact_ids])
+        receiver_emails_dump = str({row['name']: row['email_addr'] for _,row in selected_contacts.iterrows()})
         new_entry = dict(request.form)
+        new_entry.update({'receiver_emails_dump': receiver_emails_dump})
+        new_entry.pop('contacts')  #useless
         if [True for value in new_entry.values() if type(value) == list]:  # strange little fix
             new_entry = {key:new_entry[key][0] for key in new_entry.keys()}
         with create_connection() as conn:
@@ -63,8 +67,6 @@ def index():
             #loop through duplicates to drop the first records but retain their contacts
             for dup_i in df[df.duplicated(subset="job_number", keep='last')].index:
                 dup_job_number = df.iloc[dup_i].job_number
-                dup_receiver = df.iloc[dup_i].receiver_email
-                dup_cc = df.iloc[dup_i].cc_email
                 # next few lines below will need to be refctored big time for clarity!
                 a = df.iloc[dup_i].to_dict()
                 b = df[df.job_number==new_entry['job_number']].iloc[1].to_dict()
@@ -79,21 +81,15 @@ def index():
                 if no_change:
                     change_msg += "All fields were the exact same as previous version!"
                 df = df.drop(dup_i)
-                try:
-                    dup_addrs = '; '.join([x for x in dup_cc + dup_receiver if x]) # filter out empty addresses and join them into one string
-                    update_i = df[df.job_number==dup_job_number].index
-                    df.loc[update_i,'cc_email'] = df.loc[update_i,'cc_email'] + '; ' + dup_addrs
-                except TypeError:
-                    pass
             df.to_sql('company_projects', conn, if_exists='replace', index=False)  # we're replacing here instead of appending because of the 2 previous lines
             if was_prev_logged:
                 return redirect(url_for('update', job_number=new_entry['job_number'], change_msg=change_msg))
             return redirect(url_for('signup_confirmation', job_number=new_entry['job_number']))
     else:
         try:
-            return render_template('index.html', home=True, contacts=contacts, **{key:request.args.get(key) for key in request.args})
+            return render_template('index.html', home=True, all_contacts=all_contacts, **{key:request.args.get(key) for key in request.args})
         except NameError:
-            return render_template('index.html', home=True, contacts=contacts)
+            return render_template('index.html', home=True, all_contacts=all_contacts)
 
 @app.route('/already_matched', methods=['POST', 'GET'])
 def already_matched():
@@ -114,30 +110,12 @@ def nothing_yet():
     job_number = request.args.get('job_number')
     new_msg = (
         f"No corresponding certificates in recent "
-        f"history were found as a match. "
+        f"history were found as a match for project {job_number}. "
         f"Going forward, the Daily Commercial News website will be "
         f"scraped on a daily basis in search of your project. You "
         f"will be notified if a possible match has been detected."
     )
-    message = (
-        f"From: HBR Bot"
-        f"\n"
-        f"To: {receiver_email}"
-        f"\n"
-        f"Subject: Successful Project Sign-Up: #{job_number}"
-        f"\n\n"
-        f"Hi {receiver_email.split('.')[0].title()},"
-        f"\n\n"
-        f"Your information for project #{job_number} was "
-        f"logged successfully."
-        f"\n\n"
-        f"However, {new_msg}"
-        f"\n\n"
-        f"Thanks,\n"
-        f"HBR Bot\n"
-    )
-    send_email(receiver_email, message, True)
-    return render_template('nothing_yet.html', job_number=job_number, message=new_msg)
+    return render_template('nothing_yet.html', message=new_msg)
 
 @app.route('/potential_match', methods=['POST', 'GET'])
 def potential_match():
@@ -145,7 +123,7 @@ def potential_match():
         return redirect(url_for('index'))
     job_number = request.args.get('job_number')
     dcn_key = request.args.get('dcn_key')
-    return render_template('potential_match.html', job_number=job_number, lookup_url=lookup_url, dcn_key=dcn_key, receiver_email=receiver_email)
+    return render_template('potential_match.html', job_number=job_number, lookup_url=lookup_url, dcn_key=dcn_key)
 
 @app.route('/update', methods=['POST', 'GET'])
 def update():
@@ -256,7 +234,7 @@ def instant_scan():
         results = match(company_projects=company_projects, df_web=df_web, test=False)
         if len(results[results.pred_match==1]) > 0:
             dcn_key = results.iloc[0].dcn_key
-            return redirect(url_for('potential_match', dcn_key=dcn_key))
+            return redirect(url_for('potential_match', job_number=job_number, dcn_key=dcn_key))
         return redirect(url_for('nothing_yet'))
 
 @app.route('/process_feedback', methods=['POST', 'GET'])
@@ -276,13 +254,13 @@ def about():
 @app.route('/contact_config', methods=['POST', 'GET'])
 def contact_config():
     contact = request.args
-    contacts_query = "SELECT * FROM contacts"
+    all_contacts_query = "SELECT * FROM contacts"
     with create_connection() as conn:
-        contacts = pd.read_sql(contacts_query, conn)
-    contacts['action'] = contacts.apply(lambda row: f'''<a href="{url_for('update_contact', **row)}">modify</a> / <a href="{url_for('delete_contact', **row)}">delete</a>''', axis=1)
-    contacts = contacts[['name', 'email_addr', 'action']]
-    contacts = contacts.style.set_table_attributes('border="1"').set_properties(**{'font-size': '10pt'}).hide_index()
-    return render_template('contact_config.html', contacts=contacts.render(escape=False), contact=contact, config=True, hide_helper_links=True)
+        all_contacts = pd.read_sql(all_contacts_query, conn)
+    all_contacts['action'] = all_contacts.apply(lambda row: f'''<a href="{url_for('update_contact', **row)}">modify</a> / <a href="{url_for('delete_contact', **row)}">delete</a>''', axis=1)
+    all_contacts = all_contacts[['name', 'email_addr', 'action']]
+    all_contacts = all_contacts.style.set_table_attributes('border="1"').set_properties(**{'font-size': '10pt'}).hide_index()
+    return render_template('contact_config.html', all_contacts=all_contacts.render(escape=False), contact=contact, config=True, hide_helper_links=True)
 
 @app.route('/delete_contact')
 def delete_contact():
