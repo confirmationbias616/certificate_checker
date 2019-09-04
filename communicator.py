@@ -78,7 +78,7 @@ def communicate(web_df, dilfo_row, test=False):
 		)
 		cert_msg = (
 			f"Before going any further, please follow the link below to make sure the "
-			f"algorithm correctly matched the project in question:\n{lookup_url}/{web_df.dcn_key.iloc[0]}\n"
+			f"algorithm correctly matched project in question:\n{lookup_url}/{web_df.dcn_key.iloc[0]}\n"
 		)
 		timing_msg = (
 		    f"If it's the right project, then the certificate was just published "
@@ -92,25 +92,21 @@ def communicate(web_df, dilfo_row, test=False):
 		)
 		link_constructor = "https://www.hbr-bot.com/process_feedback?job_number={}&response={}&dcn_key={}"
 		feedback_msg = (
-			f"Your feedback will be required so the service can properly "
+			f"Your feedback will be required so that HBR Bot can properly "
 			f"handle this ticket, whether that means closing it out or keep "
 			f"searching for new matches. It will also help improve the "
 			f"matching algorithm for future projects.\n"
 			f"\n"
-			f"Please respond to this email with one of the numbers from below, "
-			f"which corrsponds to your situation with regards to the proposed "
-			f"link:\n"
-			f"\tlink does not relate to my project\n"
-			f"\t{link_constructor.format(dilfo_row.job_number, 0, web_df.iloc[0].dcn_key)}\n"
-			f"\tlink is accurate match for my project\n"
-			f"\t{link_constructor.format(dilfo_row.job_number, 1, web_df.iloc[0].dcn_key)}\n"
+			f"Please click on 1 of the 3 links below to submit your response "
+			f"with regards to this match.\n"
+			f"\tlink does not relate to my project:\n\n"
+			f"\t{link_constructor.format(dilfo_row.job_number, 0, web_df.iloc[0].dcn_key)}\n\n"
+			f"\tlink is accurate match for my project:\n"
+			f"\t{link_constructor.format(dilfo_row.job_number, 1, web_df.iloc[0].dcn_key)}\n\n"
 			f"\tlink is close but seems to relate to a different phase or "
-			f"stage.\n"
-			f"\t{link_constructor.format(dilfo_row.job_number, 2, web_df.iloc[0].dcn_key)}\n"
-			f"\n"
-			f"Whether you were the main receiver or just in CC, your"
-			f"feedback is greatly apreciated."
-			f"\n"	
+			f"stage:\n"
+			f"\t{link_constructor.format(dilfo_row.job_number, 2, web_df.iloc[0].dcn_key)}\n\n"
+			f"\n\n"
 		)
 		disclaimer_msg = (
 		    "Fianlly, please be aware this is a fully automated message. "
