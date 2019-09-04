@@ -14,7 +14,7 @@ try:
     else:
         print('not copied to week_old yet because not stale enough')
 except Exception as e:
-    print('could not copy to week_old due to :\n{e}')
+    print(f'could not copy to week_old due to :\n{e}')
 try:
     shutil.move('./db_backup/2_day/cert_db.sqlite3', './db_backup/3_day/cert_db.sqlite3')
     print('copied to day_3')
