@@ -43,10 +43,10 @@ def index():
             selected_contacts = pd.read_sql(selected_contacts_query, conn, params=[*selected_contact_ids])
         receiver_emails_dump = str({row['name']: row['email_addr'] for _,row in selected_contacts.iterrows()})
         new_entry = dict(request.form)
-        new_entry.update({'receiver_emails_dump': receiver_emails_dump})
         new_entry.pop('contacts')  #useless
         if [True for value in new_entry.values() if type(value) == list]:  # strange little fix
             new_entry = {key:new_entry[key][0] for key in new_entry.keys()}
+        new_entry.update({'receiver_emails_dump': receiver_emails_dump})
         with create_connection() as conn:
             try:
                 row = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[new_entry['job_number']]).iloc[0]
