@@ -9,7 +9,7 @@ try:
     today_date = datetime.datetime.now()
     week_old_date = dateutil.parser.parse(re.findall('\d{4}-\d{2}-\d{2}', listdir('./db_backup/week_old')[0])[0])
     if (today_date - week_old_date).days > 7:
-        shutil.move('./db_backup/3_day/cert_db.sqlite3', f'./db_backup/week_old/cert_db-{today_date.date()}.sqlite3')
+        shutil.move('./db_backup/3_day/cert_db.sqlite3', f'./db_backup/week_old/cert_db_{today_date.date()}.sqlite3')
         print('copied to week_old')
     else:
         print('not copied to week_old yet because not stale enough')
