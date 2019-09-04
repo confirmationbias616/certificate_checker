@@ -1,5 +1,4 @@
 import os
-from inbox_scanner import scan_inbox
 from scraper import scrape
 from matcher import match
 from ml import build_train_set, train_model, validate_model
@@ -21,8 +20,6 @@ logger.setLevel(logging.INFO)
 
 def daily_routine(exit_if_stale=False):
     logger.info('initiating daily routine...')
-    logger.info('scan inbox once to process new e-mails')
-    scan_inbox()
     logger.info('scrape')
     fruitful_scraping = scrape()  # returns True or False
     if not fruitful_scraping and exit_if_stale:
