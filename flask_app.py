@@ -254,8 +254,6 @@ def about():
 @app.route('/contact_config', methods=['POST', 'GET'])
 def contact_config():
     contact = request.args
-    if [True for value in contact.values() if type(value) == list]:  # strange little fix
-        contact = {key:contact[key][0] for key in contact.keys()}
     all_contacts_query = "SELECT * FROM contacts"
     with create_connection() as conn:
         all_contacts = pd.read_sql(all_contacts_query, conn)
@@ -284,7 +282,7 @@ def update_contact():
     """
     update_contact_query = """
         UPDATE contacts
-        SET (name, email_addr)=(?, ?)
+        SET name = ?,  email_addr = ?
         WHERE id=?
     """
     if request.method == "POST":
