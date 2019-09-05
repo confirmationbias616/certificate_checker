@@ -188,12 +188,10 @@ def summary_table():
         col_order = ['job_number', 'title', 'contractor', 'engineer', 'owner', 'address', 'city']
         def highlight_pending(s):
             days_old = (datetime.now().date() - parse_date(re.findall('\d{4}-\d{2}-\d{2}',s.pub_date)[0]).date()).days
-            if days_old < 245:
-                row_colour = ''
-            elif days_old < 300:
-                row_colour = '#696714'
+            if days_old < 60: # fresh - within lien period
+                row_colour = 'rgb(97, 62, 143)'
             else:
-                row_colour = '#6b2515'
+                row_colour = ''
             return [f'color: {row_colour}' for i in range(len(s))]
         df_closed = df_closed[['pub_date']+col_order].style.set_table_styles([{'selector': 'th','props': [('background-color', 'rgb(122, 128, 138)'),('color', 'black')]}]).set_table_attributes('border="1"').set_properties(**{'font-size': '10pt', 'background-color':'rgb(171, 173, 173)'}).hide_index().apply(highlight_pending, axis=1)
         df_open = df_open[['action']+col_order].style.set_table_styles([{'selector': 'th','props': [('background-color', 'rgb(122, 128, 138)'),('color', 'black')]}]).set_table_attributes('border="1"').set_properties(**{'font-size': '10pt', 'background-color':'rgb(190, 153, 138)'}).hide_index()
