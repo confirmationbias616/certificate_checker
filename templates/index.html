@@ -30,6 +30,7 @@
     <br><br>
     <fieldset>
       <legend>{% if job_number %}Adjust{% else %}New{% endif %} Project Info</legend>
+      <span>   *</span><span style="font-size:90%"><i> denotes a required field</i><br><br></span>
       <div class="required">
         <p2>Subcontract Job #</p2><br>
         <input type="text" name="job_number" size="6" {% if job_number %}value="{{job_number}}" {% else %}placeholder="2567"{% endif %} pattern="2\d{3}" {% if job_number %} readonly title="Cannot modify project number once it has been set." {% else %} autofocus required title="4-digit number (2###)"{% endif %}>
@@ -58,7 +59,7 @@
     </fieldset>
     <fieldset>
         <legend>Interested Parties</legend>
-        * Must select at least 1 contact:
+        <span style="font-size:90%"><i>   Must select at least 1 contact from below</i></span>
         {% if all_contacts|length %}
           {% for _, contact in all_contacts.iterrows() %}
             <ul>
