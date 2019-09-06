@@ -182,7 +182,7 @@ def summary_table():
     with create_connection() as conn:
         pd.set_option('display.max_colwidth', -1)
         df_closed = pd.read_sql(closed_query, conn).sort_values('job_number', ascending=False)
-        df_closed['pub_date'] = df_closed.apply(lambda row: f'''<a href="{lookup_url+row.dcn_key}">{row.pub_date}</a>''', axis=1)
+        df_closed['job_number'] = df_closed.apply(lambda row: f'''<a href="{lookup_url+row.dcn_key}">{row.job_number}</a>''', axis=1)
         df_closed = df_closed.drop('dcn_key', axis=1)
         df_open = pd.read_sql(open_query, conn).sort_values('job_number', ascending=False)
         df_open['action'] = df_open.apply(lambda row: f'''<a href="{url_for('index', **row)}">modify</a> <a href="{url_for('delete_job', job_number=row.job_number)}">delete</a>''', axis=1)
@@ -196,7 +196,7 @@ def summary_table():
                 row_colour = ''
             return [f'color: {row_colour}' for i in range(len(s))]
         df_closed = df_closed[['pub_date']+col_order].style.set_table_styles([{'selector': 'th','props': [('background-color', 'rgb(122, 128, 138)'),('color', 'black')]}]).set_table_attributes('border="1"').set_properties(**{'font-size': '10pt', 'background-color':'rgb(171, 173, 173)'}).hide_index().apply(highlight_pending, axis=1)
-        df_open = df_open[['action']+col_order].style.set_table_styles([{'selector': 'th','props': [('background-color', 'rgb(122, 128, 138)'),('color', 'black')]}]).set_table_attributes('border="1"').set_properties(**{'font-size': '10pt', 'background-color':'rgb(190, 153, 138)'}).hide_index()
+        df_open = df_open[['action']+col_order+['contacts']].style.set_table_styles([{'selector': 'th','props': [('background-color', 'rgb(122, 128, 138)'),('color', 'black')]}]).set_table_attributes('border="1"').set_properties(**{'font-size': '10pt', 'background-color':'rgb(190, 153, 138)'}).hide_index()
     return render_template(
         'summary_table.html',
         df_closed=df_closed.render(escape=False),
