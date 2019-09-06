@@ -63,7 +63,7 @@
         {% if all_contacts|length %}
           {% for _, contact in all_contacts.iterrows() %}
             <ul>
-              <input type="checkbox" id="id_{{contact['id']}}" name="contacts" value="{{contact['id']}}">
+              <input type="checkbox" id="id_{{contact['id']}}" name="contacts" value="{{contact['id']}}" {% if receiver_emails_dump and contact['email_addr'] in receiver_emails_dump %} checked {% endif %}>
               <label for="id_{{contact['id']}}">{{contact['name']}}</label>
             </ul>
           {% endfor %}

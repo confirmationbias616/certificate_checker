@@ -173,7 +173,8 @@ def summary_table():
                 company_projects.title,
                 company_projects.owner,
                 company_projects.contractor,
-                company_projects.engineer
+                company_projects.engineer,
+                company_projects.receiver_emails_dump
             FROM company_projects
             WHERE
                 company_projects.closed=0
@@ -184,7 +185,8 @@ def summary_table():
         df_closed['pub_date'] = df_closed.apply(lambda row: f'''<a href="{lookup_url+row.dcn_key}">{row.pub_date}</a>''', axis=1)
         df_closed = df_closed.drop('dcn_key', axis=1)
         df_open = pd.read_sql(open_query, conn).sort_values('job_number', ascending=False)
-        df_open['action'] = df_open.apply(lambda row: f'''<a href="{url_for('index', **row)}">modify</a> / <a href="{url_for('delete_job', job_number=row.job_number)}">delete</a>''', axis=1)
+        df_open['action'] = df_open.apply(lambda row: f'''<a href="{url_for('index', **row)}">modify</a> <a href="{url_for('delete_job', job_number=row.job_number)}">delete</a>''', axis=1)
+        df_open['contacts'] = df_open.apply(lambda row: ', '.join(ast.literal_eval(row.receiver_emails_dump).keys()), axis=1)
         col_order = ['job_number', 'title', 'contractor', 'engineer', 'owner', 'address', 'city']
         def highlight_pending(s):
             days_old = (datetime.now().date() - parse_date(re.findall('\d{4}-\d{2}-\d{2}',s.pub_date)[0]).date()).days
