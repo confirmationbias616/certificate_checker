@@ -210,6 +210,10 @@ def delete_job():
             DELETE FROM company_projects
             WHERE job_number=?
         """
+    delete_job_query = """
+            DELETE FROM attempted_matches
+            WHERE job_number=?
+        """
     job_number = request.args.get('job_number')
     with create_connection() as conn:
         conn.cursor().execute(delete_job_query, [job_number])
