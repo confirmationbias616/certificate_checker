@@ -8,10 +8,11 @@
 </head>
 <body>
     {% block body %}
-    <h3>
+    <h3 align=center>
+        <br><br>
         Project #{{ job_number }} has been previously matched. 
         <br><br>
-        This was the <a id="dcn_link" href="{{ link }}" value='{{ link }}'>certificate</a>.
+        This was the <a id="cert_url" href="{{ link }}" value='{{ link }}'>certificate</a>.
     </h3>
     {% endblock %}
 </body>
