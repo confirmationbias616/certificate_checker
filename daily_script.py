@@ -1,5 +1,6 @@
 import os
-from scraper import scrape
+from scraper import scrape as scrape_dcn
+from scraper_ocn import scrape as scrape_ocn
 from matcher import match
 from ml import build_train_set, train_model, validate_model
 import sys
@@ -20,8 +21,10 @@ logger.setLevel(logging.INFO)
 
 def daily_routine(exit_if_stale=False):
     logger.info('initiating daily routine...')
-    logger.info('scrape')
-    fruitful_scraping = scrape()  # returns True or False
+    logger.info('scrape ocn')
+    scrape_ocn()
+    logger.info('scrape dcn')
+    fruitful_scraping = scrape_dcn()  # returns True or False
     if not fruitful_scraping and exit_if_stale:
         return  # short-ciruit out since new new data has been collected
     logger.info('build_train_set')
