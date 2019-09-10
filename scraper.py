@@ -57,6 +57,8 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
     def get_details(entry):
         if isinstance(ref, pd.DataFrame):
             entry = 'https://canada.constructconnect.com/dcn/certificates-and-notices/' + entry
+        else:
+            entry = 'https://canada.constructconnect.com' + entry
         url_key.append(entry.split('https://canada.constructconnect.com/dcn/certificates-and-notices/')[1])
         while True:
             try:
@@ -97,7 +99,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
         bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
             widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
         bar.start()
-        entries = soup.find_all("article", {"class":"cards-item"})
+        entries = [x.find('a').get('href') for x in soup.find_all("article", {"class":"cards-item"})]
         for i, entry in enumerate(entries, 1):
             get_details(entry)
             if limit and (i >= limit):
