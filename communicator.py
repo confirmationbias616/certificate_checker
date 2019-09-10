@@ -3,6 +3,8 @@ import datetime
 import sys
 import logging
 import ast
+from db_tools import create_connection
+import pandas as pd
 
 
 logger = logging.getLogger(__name__)
@@ -56,9 +58,13 @@ def communicate(web_df, dilfo_row, test=False):
 			cc_email = ''
 	else:
 		cc_email = ''
+	source = web_df.iloc[0].source
+	source_base_url_query = "SELECT base_url FROM base_urls WHERE source=?"
+	with create_connection() as conn:
+		base_url = conn.cursor().execute(source_base_url_query, [source]).fetchone()[0]
+	url_key = web_df.iloc[0].url_key
 			
 	def send_match():
-		lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
 		pub_date = datetime.datetime(
 				*[int(web_df.iloc[0].pub_date.split('-')[x]) for x in range(3)]).date()
 		due_date = lambda delay: pub_date + datetime.timedelta(days=delay)
@@ -78,7 +84,7 @@ def communicate(web_df, dilfo_row, test=False):
 		)
 		cert_msg = (
 			f"Before going any further, please follow the link below to make sure the "
-			f"algorithm correctly matched project in question:\n{lookup_url}/{web_df.dcn_key.iloc[0]}\n"
+			f"algorithm correctly matched project in question:\n{base_url}{url_key}\n"
 		)
 		timing_msg = (
 		    f"If it's the right project, then the certificate was just published "
@@ -90,7 +96,7 @@ def communicate(web_df, dilfo_row, test=False):
 		    f"if the contract was signed since then."
 		    f"\n"
 		)
-		link_constructor = "https://www.hbr-bot.com/process_feedback?job_number={}&response={}&dcn_key={}"
+		link_constructor = "https://www.hbr-bot.com/process_feedback?job_number={}&response={}&source={}&url_key={}"
 		feedback_msg = (
 			f"Your feedback will be required so that HBR Bot can properly "
 			f"handle this ticket, whether that means closing it out or keep "
@@ -100,12 +106,12 @@ def communicate(web_df, dilfo_row, test=False):
 			f"Please click on 1 of the 3 links below to submit your response "
 			f"with regards to this match.\n\n"
 			f"\t - link does not relate to my project:\n"
-			f"\t{link_constructor.format(dilfo_row.job_number, 0, web_df.iloc[0].dcn_key)}\n\n"
+			f"\t{link_constructor.format(dilfo_row.job_number, 0, source, url_key)}\n\n"
 			f"\t - link is accurate match for my project:\n"
-			f"\t{link_constructor.format(dilfo_row.job_number, 1, web_df.iloc[0].dcn_key)}\n\n"
+			f"\t{link_constructor.format(dilfo_row.job_number, 1, source, url_key)}\n\n"
 			f"\t - link is close but seems to relate to a different phase or "
 			f"stage:\n"
-			f"\t{link_constructor.format(dilfo_row.job_number, 2, web_df.iloc[0].dcn_key)}\n\n"
+			f"\t{link_constructor.format(dilfo_row.job_number, 2, source, url_key)}\n\n"
 			f"\n\n"
 		)
 		disclaimer_msg = (

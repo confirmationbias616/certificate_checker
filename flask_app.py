@@ -17,8 +17,6 @@ import ast
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'e5ac358c-f0bf-11e5-9e39-d3b532c10a28'
 
-lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
-
 @app.context_processor
 def override_url_for():
     return dict(url_for=dated_url_for)
@@ -61,7 +59,7 @@ def index():
                 new_entry['closed'] = 0
                 was_prev_logged = 0
         if was_prev_closed:
-            return redirect(url_for('already_matched'))
+            return redirect(url_for('already_matched', job_number=new_entry['job_number']))
         with create_connection() as conn:
             df = pd.read_sql("SELECT * FROM company_projects", conn)
             df = df.append(new_entry, ignore_index=True)
@@ -97,12 +95,27 @@ def already_matched():
     if request.method == 'POST':
         return redirect(url_for('index'))
     job_number = request.args.get('job_number')
+    link_query = """
+        SELECT
+            (base_urls.base_url || attempted_matches.url_key) AS link 
+        FROM
+            attempted_matches
+        LEFT JOIN
+            web_certificates    
+        ON
+            web_certificates.url_key = attempted_matches.url_key
+        LEFT JOIN
+            base_urls
+        ON
+            base_urls.source = web_certificates.source
+        WHERE
+            job_number=?
+        AND
+            attempted_matches.ground_truth = 1
+    """
     with create_connection() as conn:
-        prev_match = pd.read_sql(
-            "SELECT * FROM attempted_matches WHERE job_number=? AND ground_truth=1",
-            conn, params=[job_number]).iloc[0]
-    dcn_key = prev_match.dcn_key
-    return render_template('already_matched.html', link=lookup_url+dcn_key, job_number=job_number)
+        link = conn.cursor().execute(link_query, [job_number]).fetchone()[0]
+    return render_template('already_matched.html', link=link, job_number=job_number)
 
 @app.route('/nothing_yet', methods=['POST', 'GET'])
 def nothing_yet():
@@ -123,8 +136,12 @@ def potential_match():
     if request.method == 'POST':
         return redirect(url_for('index'))
     job_number = request.args.get('job_number')
-    dcn_key = request.args.get('dcn_key')
-    return render_template('potential_match.html', job_number=job_number, lookup_url=lookup_url, dcn_key=dcn_key)
+    url_key = request.args.get('url_key')
+    source = request.args.get('source')
+    source_base_url_query = "SELECT base_url FROM base_urls WHERE source=?"
+    with create_connection() as conn:
+        base_url = conn.cursor().execute(source_base_url_query, [source]).fetchone()[0]
+    return render_template('potential_match.html', job_number=job_number, base_url=base_url, url_key=url_key, source=source)
 
 @app.route('/update', methods=['POST', 'GET'])
 def update():
@@ -150,17 +167,22 @@ def summary_table():
                 company_projects.owner,
                 company_projects.contractor,
                 company_projects.engineer,
-                attempted_matches.dcn_key,
-                dcn.pub_date
-            FROM (SELECT * FROM dcn_certificates ORDER BY cert_id DESC LIMIT 16000) as dcn
+                attempted_matches.url_key,
+                web.pub_date,
+                (base_urls.base_url || attempted_matches.url_key) AS link 
+            FROM (SELECT * FROM web_certificates ORDER BY cert_id DESC LIMIT 16000) as web
             LEFT JOIN
                 attempted_matches
             ON
-                dcn.dcn_key = attempted_matches.dcn_key
+                web.url_key = attempted_matches.url_key
             LEFT JOIN
                 company_projects
             ON
                 attempted_matches.job_number=company_projects.job_number
+            LEFT JOIN
+                base_urls
+            ON
+                base_urls.source=web.source
             WHERE
                 company_projects.closed=1
             AND
@@ -183,8 +205,8 @@ def summary_table():
     with create_connection() as conn:
         pd.set_option('display.max_colwidth', -1)
         df_closed = pd.read_sql(closed_query, conn).sort_values('job_number', ascending=False)
-        df_closed['job_number'] = df_closed.apply(lambda row: f'''<a href="{lookup_url+row.dcn_key}">{row.job_number}</a>''', axis=1)
-        df_closed = df_closed.drop('dcn_key', axis=1)
+        df_closed['job_number'] = df_closed.apply(lambda row: f'''<a href="{row.link}">{row.job_number}</a>''', axis=1)
+        df_closed = df_closed.drop('url_key', axis=1)
         df_open = pd.read_sql(open_query, conn).sort_values('job_number', ascending=False)
         df_open['action'] = df_open.apply(lambda row: f'''<a href="{url_for('index', **row)}">modify</a> <a href="{url_for('delete_job', job_number=row.job_number)}">delete</a>''', axis=1)
         df_open['contacts'] = df_open.apply(lambda row: ', '.join(ast.literal_eval(row.receiver_emails_dump).keys()), axis=1)
@@ -210,13 +232,14 @@ def delete_job():
             DELETE FROM company_projects
             WHERE job_number=?
         """
-    delete_job_query = """
+    delete_match_query = """
             DELETE FROM attempted_matches
             WHERE job_number=?
         """
     job_number = request.args.get('job_number')
     with create_connection() as conn:
         conn.cursor().execute(delete_job_query, [job_number])
+        conn.cursor().execute(delete_match_query, [job_number])
     return redirect(url_for('summary_table'))
 
 @app.route('/instant_scan', methods=['POST', 'GET'])
@@ -233,13 +256,14 @@ def instant_scan():
         dilfo_query = "SELECT * FROM company_projects WHERE job_number=?"
         with create_connection() as conn:
             company_projects = pd.read_sql(dilfo_query, conn, params=[job_number])
-        hist_query = "SELECT * FROM dcn_certificates ORDER BY pub_date DESC LIMIT ?"
+        hist_query = "SELECT * FROM web_certificates ORDER BY pub_date DESC LIMIT ?"
         with create_connection() as conn:
             df_web = pd.read_sql(hist_query, conn, params=[lookback_cert_count])
         results = match(company_projects=company_projects, df_web=df_web, test=False)
         if len(results[results.pred_match==1]) > 0:
-            dcn_key = results.iloc[0].dcn_key
-            return redirect(url_for('potential_match', job_number=job_number, dcn_key=dcn_key))
+            url_key = results.iloc[0].url_key
+            source = results.iloc[0].source
+            return redirect(url_for('potential_match', job_number=job_number, source=source, url_key=url_key))
         return redirect(url_for('nothing_yet'))
 
 @app.route('/process_feedback', methods=['POST', 'GET'])

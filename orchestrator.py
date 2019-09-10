@@ -50,7 +50,7 @@ def orchestrate():
             continue  # nothing posted during weekends
         with create_connection() as conn:
             latest_scrape_date = conn.cursor().execute("""
-                SELECT pub_date FROM dcn_certificates 
+                SELECT pub_date FROM web_certificates 
                 ORDER BY pub_date 
                 DESC LIMIT 1
             """).fetchone()[0]

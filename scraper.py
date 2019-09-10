@@ -10,6 +10,7 @@ from time import sleep
 from db_tools import create_connection
 import sys
 import logging
+import dateutil.parser
 
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ logger.setLevel(logging.INFO)
 
 def scrape(limit=False, test=False, ref=False, since='last_record'):
 
-    pub_date, city, address, title, owner, contractor, engineer, dcn_key = [
+    pub_date, city, address, title, owner, contractor, engineer, url_key = [
         [] for _ in range(8)]
     now = datetime.datetime.now().date()
     base_url = "https://canada.constructconnect.com/dcn/certificates-and-notices\
@@ -33,7 +34,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
     if since == 'week_ago':
         date_param_url = "&date=past_7&date_from=&date_to=#results"
     elif since == 'last_record':
-        hist_query = "SELECT pub_date FROM dcn_certificates ORDER BY pub_date DESC LIMIT 1"
+        hist_query = "SELECT pub_date FROM web_certificates WHERE source='dcn' ORDER BY pub_date DESC LIMIT 1"
         with create_connection() as conn:
             cur = conn.cursor()
             cur.execute(hist_query)
@@ -55,13 +56,11 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
 
     def get_details(entry):
         if isinstance(ref, pd.DataFrame):
-            url = 'https://canada.constructconnect.com/dcn/certificates-and-notices/' + entry
-        else:
-            url = 'https://canada.constructconnect.com' + entry.find("a")["href"]
-        dcn_key.append(url)
+            entry = 'https://canada.constructconnect.com/dcn/certificates-and-notices/' + entry
+        url_key.append(entry.split('https://canada.constructconnect.com/dcn/certificates-and-notices/')[1])
         while True:
             try:
-                response = requests.get(url)
+                response = requests.get(entry)
                 break
             except requests.exceptions.ConnectionError:
                 sleep(1)
@@ -69,7 +68,6 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
         html = response.content
         entry_soup = BeautifulSoup(html, "html.parser")
         pub_date.append(entry_soup.find("time").get_text())
-        
         city.append(
             entry_soup.find("div",{"class":"content-left"}).find("h4").get_text())
         address.append(
@@ -85,11 +83,11 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
             "Name of Contractor": contractor,
             "Name of Certifier": engineer
         }
-        for key in list(lookup.keys()):
+        for key in lookup:
             lookup[key].append(company_results.get(key, np.nan))
     if isinstance(ref, pd.DataFrame):
-        logger.info(f"fetching DCN certificate info for previously matched projects...")
-        for key in ref['dcn_key']:
+        logger.info(f"fetching web certificate info for previously matched projects...")
+        for key in ref['url_key']:
             get_details(key)
     else:
         if not number_of_matches:
@@ -99,7 +97,8 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
         bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
             widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
         bar.start()
-        for i, entry in enumerate(soup.find_all("article", {"class":"cards-item"}), 1):
+        entries = soup.find_all("article", {"class":"cards-item"})
+        for i, entry in enumerate(entries, 1):
             get_details(entry)
             if limit and (i >= limit):
                 logger.info("limit reached - breaking out of loop.")
@@ -107,7 +106,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
             bar.update(i+1)
         bar.finish()      
     with create_connection() as conn:
-        last_cert_id = pd.read_sql("SELECT * from dcn_certificates ORDER BY cert_id DESC LIMIT 1", conn).iloc[0].cert_id
+        last_cert_id = pd.read_sql("SELECT * from web_certificates ORDER BY cert_id DESC LIMIT 1", conn).iloc[0].cert_id
     df_web = pd.DataFrame(
         data={
             "pub_date": pub_date,
@@ -117,7 +116,8 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
             "owner": owner,
             "contractor": contractor,
             "engineer": engineer,
-            "dcn_key": [x.split('-notices/')[1] for x in dcn_key],
+            "url_key": url_key,
+            "source": "ocn"
         }
     )
     df_web = df_web.sort_values('pub_date', ascending=True)
@@ -136,10 +136,11 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
             'owner',
             'contractor',
             'engineer',
-            'dcn_key'
+            'url_key', 
+            'source'
         ]
         query=f''' 
-            INSERT INTO dcn_certificates 
+            INSERT INTO web_certificates 
             ({', '.join(attrs)}) VALUES ({','.join(['?']*len(attrs))})
         '''
         new_certs = [[row[attr] for attr in attrs] for _, row in df_web.iterrows()]
@@ -151,7 +152,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
 
 
 if __name__=="__main__":
-    parser = argparse.ArgumentParser(description="scrapes DCN website and returns \
+    parser = argparse.ArgumentParser(description="scrapes certificate websites and returns \
         certificates in the form of a pandas dataframe")
     parser.add_argument(
         "-l", "--limit",

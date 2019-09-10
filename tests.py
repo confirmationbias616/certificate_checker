@@ -193,7 +193,7 @@ class InputTests(unittest.TestCase):
         ('9988', '', 1, 1, 1),
     )
     @unpack
-    def test_process_as_form(self, job_number, dcn_key, was_prev_matched,
+    def test_process_as_form(self, job_number, url_key, was_prev_matched,
             was_prev_closed, was_prev_tracked):
         email_obj = {
             'sender' : "Alex Roy <Alex.Roy@dilfo.com>",
@@ -203,7 +203,7 @@ class InputTests(unittest.TestCase):
                 f"job_number={job_number}&title=TEST_ENTRY&city=Ottawa&"
                 f"address=2562+Del+Zotto+Ave.%2C+Ottawa%2C+Ontario&"
                 f"contractor=GCN&engineer=Goodkey&owner=Douglas+Stalker&"
-                f"quality=2&cc_email=&link_to_cert={dcn_key}\r\n"
+                f"quality=2&cc_email=&link_to_cert={url_key}\r\n"
             )
         }
         # set-up new entries in db, if necessary
@@ -232,9 +232,9 @@ class InputTests(unittest.TestCase):
             company_projects_post = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[job_number])
             attempted_matches_post = pd.read_sql("SELECT * FROM attempted_matches WHERE job_number=?", conn, params=[job_number])
         self.assertEqual(len(company_projects_post), 1)
-        self.assertEqual(bool(company_projects_post.iloc[0].closed), bool(was_prev_closed or dcn_key))
-        self.assertEqual(any(attempted_matches_post.ground_truth), bool(was_prev_closed or dcn_key))
-        self.assertEqual(len(attempted_matches_pre) + bool(dcn_key and not(was_prev_closed)), len(attempted_matches_post))
+        self.assertEqual(bool(company_projects_post.iloc[0].closed), bool(was_prev_closed or url_key))
+        self.assertEqual(any(attempted_matches_post.ground_truth), bool(was_prev_closed or url_key))
+        self.assertEqual(len(attempted_matches_pre) + bool(url_key and not(was_prev_closed)), len(attempted_matches_post))
         self.assertEqual(list(attempted_matches_pre.columns), list(attempted_matches_post.columns))
         self.assertEqual(list(company_projects_pre.columns), list(company_projects_post.columns))
 
@@ -248,7 +248,7 @@ class InputTests(unittest.TestCase):
         ('9996', 'B0046A36-3F1C-11E9-9A87-005056AA6F06', 1, 1, 1),
     )
     @unpack
-    def test_process_as_reply(self, job_number, dcn_key, ground_truth,
+    def test_process_as_reply(self, job_number, url_key, ground_truth,
             was_prev_matched, was_prev_closed):
         email_obj = {
             'sender' : "Alex Roy <Alex.Roy@dilfo.com>",
@@ -266,7 +266,7 @@ class InputTests(unittest.TestCase):
                 f"make sure the algorithm correctly matched the project in "
                 f"question:\r\nhttps://link.spamstopshere.net/u/f544cec5/"
                 f"3CEdd3OC6RGV00Hm8I9C_g?u=https%3A%2F%2Fcanada.constructconnect"
-                f".com%2Fdcn%2Fcertificates-and-notices%2F%2F{dcn_key}\r\n\r\nIf it's the "
+                f".com%2Fdcn%2Fcertificates-and-notices%2F%2F{url_key}\r\n\r\nIf it's the "
                 f"right project, then the "
                 f"certificate was just published this past Wednesday on March 6, "
                 f"2019. This means a valid holdback release invoice could be submitted "
@@ -359,7 +359,7 @@ class IntegrationTests(unittest.TestCase):
                             company_projects.engineer,
                             company_projects.cc_email,
                             company_projects.quality,
-                            attempted_matches.dcn_key,
+                            attempted_matches.url_key,
                             attempted_matches.ground_truth
                         FROM 
                             company_projects 
@@ -410,7 +410,7 @@ class IntegrationTests(unittest.TestCase):
             'owner':'Doug Stalker, DWS Roofing',
             'contractor':'GNC Constructors Inc.',
             'engineer':None,
-            'dcn_key':'B0046A36-3F1C-11E9-9A87-005056AA6F02',
+            'url_key':'B0046A36-3F1C-11E9-9A87-005056AA6F02',
             }, index=range(1))
         is_match, prob = match(company_projects=sample_dilfo, df_web=sample_web, test=True, version='new').iloc[0][['pred_match','pred_prob']]
         self.assertTrue(is_match, msg=f"Project #{sample_dilfo.job_number} did not match successfully. Match probability returned was {prob}.") 

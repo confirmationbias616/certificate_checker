@@ -49,7 +49,7 @@ def build_train_set():
                         company_projects.contractor,
                         company_projects.engineer,
                         company_projects.quality,
-                        attempted_matches.dcn_key,
+                        attempted_matches.url_key,
                         attempted_matches.ground_truth,
                         attempted_matches.multi_phase
                     FROM 
@@ -76,7 +76,7 @@ def build_train_set():
     # Get some certificates that are definitely not matches provide some false matches to train from
     start_date = '2011-01-01'
     end_date = '2011-04-30'
-    hist_query = "SELECT * FROM dcn_certificates WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
+    hist_query = "SELECT * FROM web_certificates WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
     with create_connection() as conn:
         rand_web_df = pd.read_sql(hist_query, conn, params=[start_date, end_date])
     rand_web_df = wrangle(rand_web_df)
@@ -87,8 +87,8 @@ def build_train_set():
         close_matches = match_build(test_row_dilfo, test_web_df)
         random_matches = match_build(test_row_dilfo, rand_web_df)
         matches = close_matches.append(random_matches)
-        matches['ground_truth'] = matches.dcn_key.apply(
-            lambda x: 1 if x == test_row_dilfo.dcn_key.iloc[0] else 0)
+        matches['ground_truth'] = matches.url_key.apply(
+            lambda x: 1 if x == test_row_dilfo.url_key.iloc[0] else 0)
         matches['dilfo_job_number'] = test_row_dilfo.job_number.iloc[0]
         matches['title_length'] = matches.title.apply(len)
         try:
@@ -156,7 +156,7 @@ def validate_model(**kwargs):
                         company_projects.contractor,
                         company_projects.engineer,
                         company_projects.quality,
-                        attempted_matches.dcn_key,
+                        attempted_matches.url_key,
                         attempted_matches.ground_truth,
                         attempted_matches.multi_phase
                     FROM 

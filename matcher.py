@@ -74,7 +74,7 @@ def match(company_projects=False, df_web=False, test=False, since='today', until
 				until = re.findall("\d{4}-\d{2}-\d{2}", until)[0]
 			except KeyError:
 				raise ValueError("`until` parameter should be in the format yyyy-mm-dd if not a key_word")
-		hist_query = "SELECT * FROM dcn_certificates WHERE pub_date>=? AND pub_date<=? ORDER BY pub_date"
+		hist_query = "SELECT * FROM web_certificates WHERE pub_date>=? AND pub_date<=? ORDER BY pub_date"
 		with create_connection() as conn:
 			df_web = pd.read_sql(hist_query, conn, params=[since, until])
 		if len(df_web) == 0:  # SQL query retunred nothing so no point of going any further

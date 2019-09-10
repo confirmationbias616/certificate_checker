@@ -28,7 +28,6 @@ log_handler.setFormatter(
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
-lookup_url = "https://canada.constructconnect.com/dcn/certificates-and-notices/"
 imap_ssl_host = 'imap.gmail.com'
 imap_ssl_port = 993
 username = 'dilfo.hb.release'
@@ -57,15 +56,15 @@ except FileNotFoundError:  # no password if running in CI
 #     except KeyError:
 #         pass
 #     try:
-#         dcn_key = dict_input.pop('link_to_cert')
+#         url_key = dict_input.pop('link_to_cert')
 #     except (IndexError, KeyError):
-#         dcn_key = ''
-#     if dcn_key:
+#         url_key = ''
+#     if url_key:
 #         try:
-#             dcn_key = dcn_key.split('-notices/')[1]
+#             url_key = url_key.split('-notices/')[1]
 #         except IndexError:
 #             pass
-#         dcn_key = re.findall('[\w-]*',dcn_key)[0]
+#         url_key = re.findall('[\w-]*',url_key)[0]
 #     try:
 #         dict_input.pop('instant_scan')
 #         instant_scan = True
@@ -80,7 +79,7 @@ except FileNotFoundError:  # no password if running in CI
 #                 conn, params=[job_number]).iloc[0]
 #         verifier = prev_match.verifier
 #         log_date = prev_match.log_date
-#         dcn_key = prev_match.dcn_key
+#         url_key = prev_match.url_key
 #         message = (
 #         f"From: HBR Bot"
 #         f"\n"
@@ -92,7 +91,7 @@ except FileNotFoundError:  # no password if running in CI
 #         f"\n\n"
 #         f"It looks like "
 #         f"job #{job_number} corresponds to the following certificate:\n"
-#         f"{lookup_url}{dcn_key}"
+#         f"{lookup_url}{url_key}"
 #         f"\n\n"
 #         f"This confirmation was provided by {verifier.split('.')[0].title()}"
 #         f"{' on ' + log_date if log_date is not None else ''}."
@@ -105,13 +104,13 @@ except FileNotFoundError:  # no password if running in CI
 #         )
 #         send_email(receiver_email, message, test)
 #         return
-#     elif dcn_key:
+#     elif url_key:
 #         dict_input.update({"closed": 1})
 #         with create_connection() as conn:
 #             df = pd.read_sql("SELECT * FROM attempted_matches", conn)
 #             match_dict_input = {
 #                 'job_number': dict_input['job_number'],
-#                 'dcn_key': dcn_key,
+#                 'url_key': url_key,
 #                 'ground_truth': 1,
 #                 'verifier': dict_input['receiver_email'],
 #                 'source': 'input',
@@ -119,7 +118,7 @@ except FileNotFoundError:  # no password if running in CI
 #                 'validate': 0,
 #             }
 #             df = df.append(match_dict_input, ignore_index=True)
-#             df = df.drop_duplicates(subset=["job_number", "dcn_key"], keep='last')
+#             df = df.drop_duplicates(subset=["job_number", "url_key"], keep='last')
 #             df.to_sql('attempted_matches', conn, if_exists='replace', index=False)
 #     else:
 #         dict_input.update({"closed": 0})
@@ -157,7 +156,7 @@ except FileNotFoundError:  # no password if running in CI
 #             dilfo_query = "SELECT * FROM company_projects WHERE job_number=?"
 #             with create_connection() as conn:
 #                 company_projects = pd.read_sql(dilfo_query, conn, params=[job_number])
-#             hist_query = "SELECT * FROM dcn_certificates ORDER BY pub_date DESC LIMIT 2000"
+#             hist_query = "SELECT * FROM web_certificates ORDER BY pub_date DESC LIMIT 2000"
 #             with create_connection() as conn:
 #                 df_web = pd.read_sql(hist_query, conn)
 #             results = match(company_projects=company_projects, df_web=df_web, test=False)
@@ -193,7 +192,7 @@ except FileNotFoundError:  # no password if running in CI
 #     job_number = email_obj['subject'].split(': #')[1]
 #     feedback = re.findall("^[\W]*([Oo\d]){1}(?=[\W]*)", email_obj['content'].replace('#','').replace('link', ''))[0]
 #     feedback = int(0 if feedback == ('O' or 'o') else feedback)
-#     dcn_key = re.findall('\w{8}-\w{4}-\w{4}-\w{4}-\w{12}', email_obj['content'])[0]
+#     url_key = re.findall('\w{8}-\w{4}-\w{4}-\w{4}-\w{12}', email_obj['content'])[0]
 #     logger.info(f"got feedback `{feedback}` for job #`{job_number}`")
 #     with create_connection() as conn:
 #         try:
@@ -205,7 +204,7 @@ except FileNotFoundError:  # no password if running in CI
 #         logger.info("job was already matched successfully and logged as `closed`... skipping.")
 #         return
 #     if feedback == 1:
-#         logger.info(f"got feeback that DCN key {dcn_key} was correct")
+#         logger.info(f"got feeback that DCN key {url_key} was correct")
 #         update_status_query = "UPDATE company_projects SET closed = 1 WHERE job_number = ?"
 #         with create_connection() as conn:
 #             conn.cursor().execute(update_status_query, [job_number])
@@ -214,7 +213,7 @@ except FileNotFoundError:  # no password if running in CI
 #         df = pd.read_sql("SELECT * FROM attempted_matches", conn)
 #         match_dict_input = {
 #             'job_number': job_number,
-#             'dcn_key': dcn_key,
+#             'url_key': url_key,
 #             'ground_truth': 1 if feedback == 1 else 0,
 #             'multi_phase': 1 if feedback == 2 else 0,
 #             'verifier': email_obj["sender"],
@@ -223,10 +222,10 @@ except FileNotFoundError:  # no password if running in CI
 #             'validate': 0,
 #         }
 #         df = df.append(match_dict_input, ignore_index=True)
-#         df = df.drop_duplicates(subset=["job_number", "dcn_key"], keep='last')
+#         df = df.drop_duplicates(subset=["job_number", "url_key"], keep='last')
 #         df.to_sql('attempted_matches', conn, if_exists='replace', index=False)
 #         logger.info(
-#             f"DCN key `{dcn_key}` was a "
+#             f"DCN key `{url_key}` was a "
 #             f"{'successful match' if feedback == 1 else 'mis-match'} for job "
 #             f"#{job_number}"
 #         )
@@ -234,7 +233,8 @@ except FileNotFoundError:  # no password if running in CI
 def process_as_feedback(feedback):
     job_number = feedback['job_number']
     response = int(feedback['response'])
-    dcn_key = feedback['dcn_key']
+    source = feedback['source']
+    url_key = feedback['url_key']
     logger.info(f"got feedback `{response}` for job #`{job_number}`")
     with create_connection() as conn:
         try:
@@ -246,7 +246,7 @@ def process_as_feedback(feedback):
         logger.info("job was already matched successfully and logged as `closed`... skipping.")
         return
     if response == 1:
-        logger.info(f"got feeback that DCN key {dcn_key} was correct")
+        logger.info(f"got feeback that url key {url_key} from {source} was correct")
         update_status_query = "UPDATE company_projects SET closed = 1 WHERE job_number = ?"
         with create_connection() as conn:
             conn.cursor().execute(update_status_query, [job_number])
@@ -255,18 +255,17 @@ def process_as_feedback(feedback):
         df = pd.read_sql("SELECT * FROM attempted_matches", conn)
         match_dict_input = {
             'job_number': job_number,
-            'dcn_key': dcn_key,
+            'url_key': url_key,
             'ground_truth': 1 if response == 1 else 0,
             'multi_phase': 1 if response == 2 else 0,
-            'source': 'feedback',  # don't need no more
             'log_date': str(datetime.datetime.now().date()),
             'validate': 0,
         }
         df = df.append(match_dict_input, ignore_index=True)
-        df = df.drop_duplicates(subset=["job_number", "dcn_key"], keep='last')
+        df = df.drop_duplicates(subset=["job_number", "url_key"], keep='last')
         df.to_sql('attempted_matches', conn, if_exists='replace', index=False)
         logger.info(
-            f"DCN key `{dcn_key}` was a "
+            f"URL key `{url_key}` from {source} was a "
             f"{'successful match' if response == 1 else 'mis-match'} for job "
             f"#{job_number}"
         )

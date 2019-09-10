@@ -1,4 +1,4 @@
-"job_number","dcn_key","ground_truth","multi_phase","verifier","source","log_date","validate"
+"job_number","url_key","ground_truth","multi_phase","verifier","source","log_date","validate"
 "2208","7F116051-2679-4813-A236-AB5F38A5907B","1","0","alex.roy616@gmail.com","input","","1"
 "2207","574DD878-9E95-40BB-BE13-73CC1DDFEAA4","1","0","alex.roy616@gmail.com","input","","0"
 "2206","2DF0FDFB-19A7-49B3-9933-8C4EB5C55878","1","0","alex.roy616@gmail.com","input","","0"

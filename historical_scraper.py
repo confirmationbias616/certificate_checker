@@ -16,7 +16,7 @@ def scrape(start='', finish='', limit=False, test=False):
         print(f"data already logged for time period of {start} to {finish}. Skipping..")
         return
     except FileNotFoundError:
-        pub_date, city, address, title, owner, contractor, engineer, dcn_key = [
+        pub_date, city, address, title, owner, contractor, engineer, url_key = [
         [] for _ in range(8)
         ]
 
@@ -33,7 +33,7 @@ def scrape(start='', finish='', limit=False, test=False):
 
         def get_details(entry):
             url = 'https://canada.constructconnect.com' + entry.find("a")["href"]
-            dcn_key.append(url.split('-notices/')[1])
+            url_key.append(url.split('-notices/')[1])
             while True:
                 try:
                     response = requests.get(url)
@@ -89,7 +89,7 @@ def scrape(start='', finish='', limit=False, test=False):
                 "owner": owner,
                 "contractor": contractor,
                 "engineer": engineer,
-                "dcn_key": dcn_key,
+                "url_key": url_key,
             }
         )
 
