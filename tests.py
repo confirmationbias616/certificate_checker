@@ -6,8 +6,7 @@ from ddt import ddt, data, unpack
 from scraper import scrape
 from wrangler import clean_job_number, clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title, wrangle
 from matcher import match
-from communicator import communicate
-from inbox_scanner import process_as_form, process_as_reply
+from communicator import communicate, process_as_feedback
 from ml import build_train_set, train_model, validate_model
 from db_tools import create_connection
 from test.test_setup import create_test_db
@@ -248,7 +247,7 @@ class InputTests(unittest.TestCase):
         ('9996', 'B0046A36-3F1C-11E9-9A87-005056AA6F06', 1, 1, 1),
     )
     @unpack
-    def test_process_as_reply(self, job_number, url_key, ground_truth,
+    def test_process_as_feedback(self, job_number, url_key, ground_truth,
             was_prev_matched, was_prev_closed):
         email_obj = {
             'sender' : "Alex Roy <Alex.Roy@dilfo.com>",
