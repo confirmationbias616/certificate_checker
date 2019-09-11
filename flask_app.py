@@ -5,7 +5,7 @@ from datetime import datetime
 from dateutil.parser import parse as parse_date
 from db_tools import create_connection
 from matcher import match
-from inbox_scanner import process_as_feedback
+from communicator import process_as_feedback
 import pandas as pd
 import logging
 import sys
