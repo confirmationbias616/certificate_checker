@@ -8,14 +8,14 @@
 </head>
 <body>
     {% block body %}
-    <h4>
+    <h4 align=center>
         Thanks for your feedback!
     </h4>
     <br><br>
     <h4 align=center>
         {% if response == 1 %}
         Your project #{{ job_number }} will be marked as closed and saved along with the link for its certificate.
-        Make sure to set a reminder to release your holdback when the ? period is up.
+        Make sure to set a reminder to release your holdback when the 60-day lien period is up.
         {% else %}
         HBR Bot will keep an eye out for your project in upcoming certificates.
         {% endif %}
