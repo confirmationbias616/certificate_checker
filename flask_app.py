@@ -60,30 +60,15 @@ def index():
                 was_prev_logged = 0
         if was_prev_closed:
             return redirect(url_for('already_matched', job_number=new_entry['job_number']))
-        with create_connection() as conn:
-            df = pd.read_sql("SELECT * FROM company_projects", conn)
-            df = df.append(new_entry, ignore_index=True)
-            #loop through duplicates to drop the first records but retain their contacts
-            for dup_i in df[df.duplicated(subset="job_number", keep='last')].index:
-                dup_job_number = df.iloc[dup_i].job_number
-                # next few lines below will need to be refctored big time for clarity!
-                a = df.iloc[dup_i].to_dict()
-                b = df[df.job_number==new_entry['job_number']].iloc[1].to_dict()
-                c = {k: [a[k], b[k]] for k in a if k in b and a[k] != b[k]}
-                d = {k: c.get(k,None) for k in ['title', 'city', 'address', 'contractor', 'engineer', 'owner']}
-                change_msg = 'Here are the changes you made compared to the prior version:\n'
-                no_change = True
-                for k in d:
-                    if d[k]:
-                        change_msg += f"  -\t{k} changed from `{d[k][0]}` to `{d[k][1]}`\n"
-                        no_change = False
-                if no_change:
-                    change_msg += "All fields were the exact same as previous version!"
-                df = df.drop(dup_i)
-            df.to_sql('company_projects', conn, if_exists='replace', index=False)  # we're replacing here instead of appending because of the 2 previous lines
-            if was_prev_logged:
-                return redirect(url_for('update', job_number=new_entry['job_number'], change_msg=change_msg))
-            return redirect(url_for('signup_confirmation', job_number=new_entry['job_number']))
+        df = pd.read_sql("SELECT * FROM company_projects", conn)
+        df = df.append(new_entry, ignore_index=True)
+        if not was_prev_logged:
+            df.to_sql('company_projects', conn, if_exists='replace', index=False)
+            return render_template('signup_confirmation.html', job_number=new_entry['job_number'])
+        recorded_change = True if any(list(df.duplicated(subset="job_number"))) else False
+        df = df.drop_duplicates(subset="job_number", keep='last')
+        df.to_sql('company_projects', conn, if_exists='replace', index=False)
+        return render_template('update.html', job_number=new_entry['job_number'], recorded_change=recorded_change)
     else:
         try:
             return render_template('index.html', home=True, all_contacts=all_contacts, **{key:request.args.get(key) for key in request.args})
@@ -117,20 +102,6 @@ def already_matched():
         link = conn.cursor().execute(link_query, [job_number]).fetchone()[0]
     return render_template('already_matched.html', link=link, job_number=job_number)
 
-@app.route('/nothing_yet', methods=['POST', 'GET'])
-def nothing_yet():
-    if request.method == 'POST':
-        return redirect(url_for('index'))
-    job_number = request.args.get('job_number')
-    new_msg = (
-        f"No corresponding certificates in recent "
-        f"history were found as a match for project {job_number}. "
-        f"Going forward, the Daily Commercial News website will be "
-        f"scraped on a daily basis in search of your project. You "
-        f"will be notified if a possible match has been detected."
-    )
-    return render_template('nothing_yet.html', message=new_msg)
-
 @app.route('/potential_match', methods=['POST', 'GET'])
 def potential_match():
     if request.method == 'POST':
@@ -142,19 +113,6 @@ def potential_match():
     with create_connection() as conn:
         base_url = conn.cursor().execute(source_base_url_query, [source]).fetchone()[0]
     return render_template('potential_match.html', job_number=job_number, base_url=base_url, url_key=url_key, source=source)
-
-@app.route('/update', methods=['POST', 'GET'])
-def update():
-    # if request.method == 'POST':
-    #     return redirect(url_for('index'))
-    job_number = request.args.get('job_number')
-    change_msg = request.args.get('change_msg')
-    return render_template('update.html', job_number=job_number, change_msg=change_msg)
-
-@app.route('/signup_confirmation', methods=['POST', 'GET'])
-def signup_confirmation():
-    job_number = request.args.get('job_number')
-    return render_template('signup_confirmation.html', job_number=job_number)
 
 @app.route('/summary_table')
 def summary_table():
@@ -264,7 +222,7 @@ def instant_scan():
             url_key = results.iloc[0].url_key
             source = results.iloc[0].source
             return redirect(url_for('potential_match', job_number=job_number, source=source, url_key=url_key))
-        return redirect(url_for('nothing_yet'))
+        return render_template('nothing_yet.html', job_number=job_number)
 
 @app.route('/process_feedback', methods=['POST', 'GET'])
 def process_feedback():
