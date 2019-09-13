@@ -26,7 +26,7 @@ except FileNotFoundError:  # no password if running in CI
 def send_email(receiver_email, message, test):
 	port = 465 # for SSL
 	smtp_server = "smtp.gmail.com"
-	sender_email = "dilfo.hb.release"
+	sender_email = "hbr.bot.notifier"
 	if test:
 		return  # escape early
 	try:
@@ -131,7 +131,7 @@ def communicate(web_df, dilfo_row, test=False):
 def process_as_feedback(feedback):
     imap_ssl_host = 'imap.gmail.com'
     imap_ssl_port = 993
-    username = 'dilfo.hb.release'
+    username = 'hbr.bot.notifier'
     job_number = feedback['job_number']
     response = int(feedback['response'])
     source = feedback['source']

@@ -256,7 +256,7 @@ class InputTests(unittest.TestCase):
             'content' : (
                 f"{ground_truth}\r\n\r\nAlex Roy\r\nDilfo Mechanical\r\n(613) 899-9324\r\n\r\n"
                 f"________________________________\r\nFrom: HBR Bot "
-                f"<dilfo.hb.release@gmail.com>\r\nSent: Wednesday, May 29, 2019 8:40 "
+                f"<hbr.bot.notifier@gmail.com>\r\nSent: Wednesday, May 29, 2019 8:40 "
                 f"PM\r\nTo: Alex Roy\r\nSubject: [EXTERNAL] #{job_number} - Upcoming "
                 f"Holdback Release\r\n\r\nHi Alex,\r\n\r\nYou're receiving this "
                 f"e-mail notification because you added the project #{job_number} - DWS "
