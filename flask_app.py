@@ -82,11 +82,11 @@ def already_matched():
     job_number = request.args.get('job_number')
     link_query = """
         SELECT
-            (base_urls.base_url || attempted_matches.url_key) AS link 
+            (base_urls.base_url || attempted_matches.url_key) AS link
         FROM
             attempted_matches
         LEFT JOIN
-            web_certificates    
+            web_certificates
         ON
             web_certificates.url_key = attempted_matches.url_key
         LEFT JOIN
@@ -127,7 +127,7 @@ def summary_table():
                 company_projects.engineer,
                 attempted_matches.url_key,
                 web.pub_date,
-                (base_urls.base_url || attempted_matches.url_key) AS link 
+                (base_urls.base_url || attempted_matches.url_key) AS link
             FROM (SELECT * FROM web_certificates ORDER BY cert_id DESC LIMIT 16000) as web
             LEFT JOIN
                 attempted_matches
@@ -228,11 +228,7 @@ def instant_scan():
 def process_feedback():
     # if request.method == 'GET':
     status = process_as_feedback(request.args)
-    return redirect(url_for('thanks_for_feedback', job_number=request.args['job_number'], response=request.args['response'], status=status))
-
-@app.route('/thanks_for_feedback', methods=['POST', 'GET'])
-def thanks_for_feedback():
-    return render_template('thanks_for_feedback.html', job_number=request.args['job_number'], response=int(request.args['response']))
+    return render_template('thanks_for_feedback.html', job_number=request.args['job_number'], response=request.args['response'], status=status)
 
 @app.route('/about', methods=['POST', 'GET'])
 def about():

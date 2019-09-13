@@ -14,11 +14,11 @@
     <br><br>
     <h4 align=center>
         {% if status == 'deleted' %}
-            The project you responded for was previously wiped from the database by someone at your company.
-        {% elif status == 'already_closed' and response in [0, 2] %}
+            However, the project you responded for was previously wiped from the database by someone at your company.
+        {% elif status == 'already_closed' and response in [0, 2, '0', '2'] %}
             The project you responded to was already marked as a successful match by someone at your company. Your response will not be recorded.
         {% else %}
-            {% if response == 1 %}
+            {% if response in [1, '1']  %}
                 Your project #{{ job_number }} will be marked as closed and saved along with the link for its certificate.
                 Make sure to set a reminder to release your holdback when the 60-day lien period is up.
             {% else %}
@@ -29,4 +29,3 @@
     {% endblock %}
 </body>
 </html>
-    
