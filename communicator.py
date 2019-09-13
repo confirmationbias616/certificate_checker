@@ -142,10 +142,10 @@ def process_as_feedback(feedback):
             was_prev_closed = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[job_number]).iloc[0].closed
         except IndexError:
             logger.info("job must have been deleted from company_projects at some point... skipping.")
-            return
+            return 'deleted'
     if was_prev_closed:
         logger.info("job was already matched successfully and logged as `closed`... skipping.")
-        return
+        return 'already_closed'
     if response == 1:
         logger.info(f"got feeback that url key {url_key} from {source} was correct")
         update_status_query = "UPDATE company_projects SET closed = 1 WHERE job_number = ?"
