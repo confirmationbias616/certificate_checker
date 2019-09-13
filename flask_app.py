@@ -211,9 +211,9 @@ def instant_scan():
             lookback_cert_count = 1500
         else:  # also applies for `2_weeks`
             lookback_cert_count = 750
-        dilfo_query = "SELECT * FROM company_projects WHERE job_number=?"
+        company_query = "SELECT * FROM company_projects WHERE job_number=?"
         with create_connection() as conn:
-            company_projects = pd.read_sql(dilfo_query, conn, params=[job_number])
+            company_projects = pd.read_sql(company_query, conn, params=[job_number])
         hist_query = "SELECT * FROM web_certificates ORDER BY pub_date DESC LIMIT ?"
         with create_connection() as conn:
             df_web = pd.read_sql(hist_query, conn, params=[lookback_cert_count])
