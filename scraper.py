@@ -24,20 +24,56 @@ log_handler.setFormatter(
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
-def scrape(limit=False, test=False, ref=False, since='last_record'):
+def scrape(source=None, limit=False, test=False, ref=False, since='last_record'):
+    # Initialize string and lambda functions based on source :
+    if source == 'dcn':
+        base_search_url = "https://canada.constructconnect.com/dcn/certificates-and-notices\
+                ?perpage=1000&phrase=&sort=publish_date&owner=&contractor="
+        custom_param_url = '&date=custom&date_from={}&date_to={}#results'
+        get_number_of_matches = lambda soup: int(re.compile('\d\d*').findall((soup.find('h4', {'class':'search-total h-normalize'}).get_text()))[0])
+        get_pub_date = lambda entry_soup: entry_soup.find("time").get_text()
+        get_city = lambda entry_soup: entry_soup.find("div",{"class":"content-left"}).find("h4").get_text()
+        get_address = lambda entry_soup: entry_soup.find("p",{"class":"print-visible"}).get_text()
+        get_title = lambda entry_soup: entry_soup.find_all("section",{"class":"content"})[3].find("p").get_text()
+        get_company_soup = lambda entry_soup: entry_soup.find_all("section",{"class":"content"})[4]
+        get_company_results = lambda company_soup: {key.get_text():value.get_text() for key, value in zip(company_soup.find_all("dt"), company_soup.find_all("dd"))}
+        company_term = {
+            'owner': 'Name of Owner',
+            'contractor': 'Name of Contractor',
+            'engineer': 'Name of Certifier'
+        }
+        get_entries = lambda soup: [x.find('a').get('href') for x in soup.find_all("article", {"class":"cards-item"})]
+        base_url = 'https://canada.constructconnect.com'
+        base_aug_url = 'https://canada.constructconnect.com/dcn/certificates-and-notices/'
 
+    elif source == 'ocn':
+        base_search_url = "https://ontarioconstructionnews.com/certificates/?per_page=1000&certificates_page=1&search=&form_id=&owner_name_like=&contractor_name_like="
+        custom_param_url = '&date_published=custom&date_published_from={}&date_published_to={}'
+        get_number_of_matches = lambda soup: int((soup.find_all('span', {'class':'items-found'})[1].get_text().split(' of ')[1]))
+        get_pub_date = lambda entry_soup: str(dateutil.parser.parse(entry_soup.find("date").get_text()).date())
+        get_city = lambda entry_soup: entry_soup.find("h2",{"class":"ocn-subheading"}).get_text()
+        get_address = lambda entry_soup: entry_soup.find("div",{"class":"ocn-certificate"}).find('p').get_text()
+        get_title = lambda entry_soup: entry_soup.find("h2", {"class":"ocn-heading"}).find_next_sibling('p').get_text()
+        get_company_soup = lambda entry_soup: entry_soup.find('div', {'class':'ocn-participant-wrap'})
+        get_company_results = lambda company_soup: {key.get_text():value.get_text() for key, value in zip(company_soup.find_all("div", {'class':'participant-type'})[::2], company_soup.find_all("div", {'class':'participant-name-wrap'}))}
+        company_term = {
+            'owner': 'Name of Owner',
+            'contractor': 'Name of Contractor',
+            'engineer': 'Name of Payment Certifier'
+        }
+        get_entries = lambda soup: [x.find('a').get('href') for x in soup.find_all('td', {'class':'col-location'})]
+        base_url = ''
+        base_aug_url = 'https://ontarioconstructionnews.com/certificates/'
+    else:
+        raise ValueError("Must specify CSP source.")
     pub_date, city, address, title, owner, contractor, engineer, url_key = [
         [] for _ in range(8)]
     now = datetime.datetime.now().date()
-    base_url = "https://canada.constructconnect.com/dcn/certificates-and-notices\
-            ?perpage=1000&phrase=&sort=publish_date&owner=&contractor="
-    if since == 'week_ago':
-        date_param_url = "&date=past_7&date_from=&date_to=#results"
-    elif since == 'last_record':
-        hist_query = "SELECT pub_date FROM web_certificates WHERE source='dcn' ORDER BY pub_date DESC LIMIT 1"
+    if since == 'last_record':
+        hist_query = "SELECT pub_date FROM web_certificates WHERE source=? ORDER BY pub_date DESC LIMIT 1"
         with create_connection() as conn:
             cur = conn.cursor()
-            cur.execute(hist_query)
+            cur.execute(hist_query, [source])
             last_date = cur.fetchone()[0]
             ld_year = int(last_date[:4])
             ld_month = int(last_date[5:7])
@@ -46,20 +82,19 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
     else:
         valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
         if not valid_since_date:
-            raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not default value of `week_ago`")
-    date_param_url = f'&date=custom&date_from={since}&date_to={now}#results'
-    response = requests.get(base_url + date_param_url)
+            raise ValueError("`since` parameter should be in the format yyyy-mm-dd if not a predefined term.")
+    date_param_url = custom_param_url.format(since, now)
+    response = requests.get(base_search_url + date_param_url)
     html = response.content
     soup = BeautifulSoup(html, "html.parser")
-    number_of_matches = int(re.compile('\d\d*').findall(
-        (soup.find('h4', {'class':'search-total h-normalize'}).get_text()))[0])
+    number_of_matches = get_number_of_matches(soup)
 
     def get_details(entry):
         if isinstance(ref, pd.DataFrame):
-            entry = 'https://canada.constructconnect.com/dcn/certificates-and-notices/' + entry
+            entry = base_aug_url + entry
         else:
-            entry = 'https://canada.constructconnect.com' + entry
-        url_key.append(entry.split('https://canada.constructconnect.com/dcn/certificates-and-notices/')[1])
+            entry = base_url + entry
+        url_key.append(entry.split(base_aug_url)[1])
         while True:
             try:
                 response = requests.get(entry)
@@ -69,21 +104,16 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
                 continue
         html = response.content
         entry_soup = BeautifulSoup(html, "html.parser")
-        pub_date.append(entry_soup.find("time").get_text())
-        city.append(
-            entry_soup.find("div",{"class":"content-left"}).find("h4").get_text())
-        address.append(
-            entry_soup.find("p",{"class":"print-visible"}).get_text())
-        title.append(
-            entry_soup.find_all("section",{"class":"content"})[3].find("p").get_text())
-        company_soup = entry_soup.find_all("section",{"class":"content"})[4]
-        company_results = {
-            key.get_text():value.get_text() for key, value in zip(
-                company_soup.find_all("dt"), company_soup.find_all("dd"))}
+        pub_date.append(get_pub_date(entry_soup))
+        city.append(get_city(entry_soup))
+        address.append(get_address(entry_soup))
+        title.append(get_title(entry_soup))
+        company_soup = get_company_soup(entry_soup)
+        company_results = get_company_results(company_soup)
         lookup = {
-            "Name of Owner": owner,
-            "Name of Contractor": contractor,
-            "Name of Certifier": engineer
+            company_term['owner']: owner,
+            company_term['contractor']: contractor,
+            company_term['engineer']: engineer
         }
         for key in lookup:
             lookup[key].append(company_results.get(key, np.nan))
@@ -99,7 +129,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
         bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
             widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
         bar.start()
-        entries = [x.find('a').get('href') for x in soup.find_all("article", {"class":"cards-item"})]
+        entries = get_entries(soup)
         for i, entry in enumerate(entries, 1):
             get_details(entry)
             if limit and (i >= limit):
@@ -119,7 +149,7 @@ def scrape(limit=False, test=False, ref=False, since='last_record'):
             "contractor": contractor,
             "engineer": engineer,
             "url_key": url_key,
-            "source": "dcn"
+            "source": source
         }
     )
     df_web = df_web.sort_values('pub_date', ascending=True)
@@ -157,9 +187,19 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser(description="scrapes certificate websites and returns \
         certificates in the form of a pandas dataframe")
     parser.add_argument(
+        "-s", "--source",
+        type=str,
+        help="specifies source webstie being scraped for CSP's",
+    )
+    parser.add_argument(
         "-l", "--limit",
         type=int,
         help="limits the amount of certificates to be scraped. Default is no limit.",
     )
+    parser.add_argument(
+        "--since",
+        type=str,
+        help="datefrom when to begin looking for new CSP's",
+    )
     args = parser.parse_args()
-    scrape(limit=args.limit)
+    scrape(source=args.source, since=args.since, limit=args.limit)
