@@ -40,13 +40,7 @@ def send_email(receiver_email, message, test):
 
 def communicate(web_df, dilfo_row, test=False):
 	receiver_emails_dump = dilfo_row.receiver_emails_dump
-	# receiver_emails_dump = "{'Alex': 'alex.roy616@gmail.com', 'ARoy':'alex.roy616@me.com'}"
 	receiver_email = ast.literal_eval(receiver_emails_dump)
-	# if (not receiver_email.endswith('@dilfo.com')) and (receiver_email not in[
-	# 	'alex.roy616@gmail.com', 'alex.roy616@icloud.com', 'alex.roy616@me.com']):
-	# 	logger.info('given user e-mail address has not been white listed (from dilfo.com '\
-	# 		'domain or from Alex Roy address)')
-	# 	return 1
 	cc_email = dilfo_row.cc_email
 	if cc_email:
 		if cc_email.endswith('@dilfo.com') or (cc_email in[
