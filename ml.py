@@ -40,37 +40,69 @@ def save_feature_list(columns):
 def build_train_set():
     logger.info("building dataset for training random forest classifier")
     match_query = """
-                    SELECT 
-                        company_projects.job_number,
-                        company_projects.city,
-                        company_projects.address,
-                        company_projects.title,
-                        company_projects.owner,
-                        company_projects.contractor,
-                        company_projects.engineer,
-                        company_projects.quality,
-                        attempted_matches.url_key,
-                        attempted_matches.ground_truth,
-                        attempted_matches.multi_phase
-                    FROM 
-                        company_projects 
-                    LEFT JOIN 
-                        attempted_matches
-                    ON 
-                        company_projects.job_number=attempted_matches.job_number
-                    WHERE 
-                        company_projects.closed=1
-                    AND 
-                        attempted_matches.ground_truth=1
-                    AND 
-                        attempted_matches.multi_phase=0
-                    AND
-                        attempted_matches.validate=0
-                """
+        SELECT
+            company_projects.job_number,
+            company_projects.city,
+            company_projects.address,
+            company_projects.title,
+            company_projects.owner,
+            company_projects.contractor,
+            company_projects.engineer,
+            web_certificates.url_key,
+            company_projects.receiver_emails_dump
+        FROM 
+            web_certificates
+        LEFT JOIN
+            attempted_matches
+        ON
+            web_certificates.url_key = attempted_matches.url_key
+        LEFT JOIN
+            company_projects
+        ON
+            attempted_matches.job_number=company_projects.job_number
+        LEFT JOIN
+            base_urls
+        ON
+            base_urls.source=web_certificates.source
+        WHERE 
+            company_projects.closed=1
+        AND
+            attempted_matches.ground_truth=1
+        AND 
+            attempted_matches.multi_phase=0
+        AND 
+            attempted_matches.validate=0
+    """
+    corr_web_certs_query = """
+        SELECT
+            web_certificates.*
+        FROM 
+            web_certificates
+        LEFT JOIN
+            attempted_matches
+        ON
+            web_certificates.url_key = attempted_matches.url_key
+        LEFT JOIN
+            company_projects
+        ON
+            attempted_matches.job_number=company_projects.job_number
+        LEFT JOIN
+            base_urls
+        ON
+            base_urls.source=web_certificates.source
+        WHERE 
+            company_projects.closed=1
+        AND
+            attempted_matches.ground_truth=1
+        AND 
+            attempted_matches.multi_phase=0
+        AND 
+            attempted_matches.validate=0
+    """
 
     with create_connection() as conn:
         test_company_projects = pd.read_sql(match_query, conn)
-    test_web_df = scrape(ref=test_company_projects)
+        test_web_df = pd.read_sql(corr_web_certs_query, conn)
     test_web_df = wrangle(test_web_df)
 
     # Get some certificates that are definitely not matches provide some false matches to train from
@@ -147,37 +179,75 @@ def validate_model(**kwargs):
     except KeyError:
         test = False
     match_query = """
-                    SELECT 
-                        company_projects.job_number,
-                        company_projects.city,
-                        company_projects.address,
-                        company_projects.title,
-                        company_projects.owner,
-                        company_projects.contractor,
-                        company_projects.engineer,
-                        company_projects.quality,
-                        attempted_matches.url_key,
-                        attempted_matches.ground_truth,
-                        attempted_matches.multi_phase
-                    FROM 
-                        company_projects 
-                    LEFT JOIN 
-                        attempted_matches
-                    ON 
-                        company_projects.job_number=attempted_matches.job_number
-                    WHERE 
-                        company_projects.closed=1
-                    AND
-                        attempted_matches.ground_truth=1
-                    AND 
-                        attempted_matches.multi_phase=0
-                    AND 
-                        attempted_matches.validate=1
-                """
+        SELECT
+            company_projects.job_number,
+            company_projects.city,
+            company_projects.address,
+            company_projects.title,
+            company_projects.owner,
+            company_projects.contractor,
+            company_projects.engineer,
+            company_projects.receiver_emails_dump,
+            attempted_matches.url_key,
+            attempted_matches.ground_truth,
+            attempted_matches.multi_phase,
+            web_certificates.pub_date,
+            web_certificates.source,
+            (base_urls.base_url || attempted_matches.url_key) AS link
+        FROM
+            web_certificates
+        LEFT JOIN
+            attempted_matches
+        ON
+            web_certificates.url_key = attempted_matches.url_key
+        LEFT JOIN
+            company_projects
+        ON
+            attempted_matches.job_number=company_projects.job_number
+        LEFT JOIN
+            base_urls
+        ON
+            base_urls.source=web_certificates.source
+        WHERE 
+            company_projects.closed=1
+        AND
+            attempted_matches.ground_truth=1
+        AND 
+            attempted_matches.multi_phase=0
+        AND 
+            attempted_matches.validate=1
+    """
+
+    corr_web_certs_query = """
+        SELECT
+            web_certificates.*
+        FROM 
+            web_certificates
+        LEFT JOIN
+            attempted_matches
+        ON
+            web_certificates.url_key = attempted_matches.url_key
+        LEFT JOIN
+            company_projects
+        ON
+            attempted_matches.job_number=company_projects.job_number
+        LEFT JOIN
+            base_urls
+        ON
+            base_urls.source=web_certificates.source
+        WHERE 
+            company_projects.closed=1
+        AND
+            attempted_matches.ground_truth=1
+        AND 
+            attempted_matches.multi_phase=0
+        AND 
+            attempted_matches.validate=1
+    """
 
     with create_connection() as conn:
         validate_company_projects = pd.read_sql(match_query, conn)
-    validate_web_df = scrape(ref=validate_company_projects)
+        validate_web_df = pd.read_sql(corr_web_certs_query, conn)
     new_results = match(version='new', company_projects=validate_company_projects, df_web=validate_web_df, test=True, prob_thresh=kwargs['prob_thresh'])
     
     # check if 100% recall for new model
