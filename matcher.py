@@ -82,9 +82,9 @@ def match(company_projects=False, df_web=False, test=False, since='today', until
 			return 0
 	df_web = wrangle(df_web)
 	comm_count = 0
-	for _, dilfo_row in company_projects.iterrows():
-		results = match_build(dilfo_row.to_frame().transpose(), df_web)  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
-		logger.info(f"searching for potential match for project #{dilfo_row['job_number']}...")
+	for _, company_project_row in company_projects.iterrows():
+		results = match_build(company_project_row.to_frame().transpose(), df_web)  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
+		logger.info(f"searching for potential match for project #{company_project_row['job_number']}...")
 		results['multi_phase_proned'] = results.apply(
             lambda row: 1 if any(re.findall(
                 'campus|hospital|university|college', ''.join(
@@ -99,7 +99,7 @@ def match(company_projects=False, df_web=False, test=False, since='today', until
 			logger.info("getting ready to send notification...")
 			communicate(
 				matches.drop(matches.index[1:]), # sending only top result for now
-				dilfo_row, test=test)
+				company_project_row, test=test)
 			comm_count += 1
 		else:
 			logger.info("didn't find any matches")

@@ -18,8 +18,6 @@ Launchd/
 misc_notebooks/
 data/*
 # But not these files...
-!data/raw_dilfo_certs.csv
-!data/test_raw_dilfo_certs.csv
 !data/raw_web_certs_2011-01-01_to_2011-04-30.csv
 
 *.DS_Store

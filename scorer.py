@@ -15,13 +15,13 @@ def compile_score_add(row, scoreable_attrs):
     total_add_score = sum(scores)
     return total_add_score
 
-def attr_score(web_str, dilfo_str, match_style='full'):
+def attr_score(web_str, company_project_str, match_style='full'):
     if web_str in ["", " ", "NaN", "nan", np.nan]:  # should not be comparing empty fields because empty vs empty is an exact match!
         return 0
     try:
         if match_style == 'full':
-            return fuzz.ratio(web_str, dilfo_str)
+            return fuzz.ratio(web_str, company_project_str)
         else:
-            return fuzz.partial_ratio(web_str, dilfo_str)
+            return fuzz.partial_ratio(web_str, company_project_str)
     except TypeError:
         return 0

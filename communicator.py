@@ -38,8 +38,8 @@ def send_email(receiver_email, message, test):
 	except (FileNotFoundError, NameError):
 		logger.info("password not available -> could not send e-mail")
 
-def communicate(web_df, dilfo_row, test=False):
-	receiver_emails_dump = dilfo_row.receiver_emails_dump
+def communicate(web_df, company_project_row, test=False):
+	receiver_emails_dump = company_project_row.receiver_emails_dump
 	receiver_email = ast.literal_eval(receiver_emails_dump)
 	source = web_df.iloc[0].source
 	source_base_url_query = "SELECT base_url FROM base_urls WHERE source=?"
@@ -57,12 +57,12 @@ def communicate(web_df, dilfo_row, test=False):
 		    f"\n"
 		    f"To: {', '.join(receiver_email.values())}"
 		    f"\n"
-		    f"Subject: Upcoming Holdback Release: #{dilfo_row.job_number}"
+		    f"Subject: Upcoming Holdback Release: #{company_project_row.job_number}"
 		    f"\n\n"
 		    f"Hi {', '.join(receiver_email.keys())},"
 		    f"\n\n"
-		    f"It looks like your project #{dilfo_row.job_number} "
-			f"({dilfo_row.title.title()}) might be almost ready for holdback release!"
+		    f"It looks like your project #{company_project_row.job_number} "
+			f"({company_project_row.title.title()}) might be almost ready for holdback release!"
 		    f"\n"
 		)
 		cert_msg = (
@@ -89,12 +89,12 @@ def communicate(web_df, dilfo_row, test=False):
 			f"Please click on 1 of the 3 links below to submit your response "
 			f"with regards to this match.\n\n"
 			f"\t - link does not relate to my project:\n"
-			f"\t{link_constructor.format(dilfo_row.job_number, 0, source, url_key)}\n\n"
+			f"\t{link_constructor.format(company_project_row.job_number, 0, source, url_key)}\n\n"
 			f"\t - link is accurate match for my project:\n"
-			f"\t{link_constructor.format(dilfo_row.job_number, 1, source, url_key)}\n\n"
+			f"\t{link_constructor.format(company_project_row.job_number, 1, source, url_key)}\n\n"
 			f"\t - link is close but seems to relate to a different phase or "
 			f"stage:\n"
-			f"\t{link_constructor.format(dilfo_row.job_number, 2, source, url_key)}\n\n"
+			f"\t{link_constructor.format(company_project_row.job_number, 2, source, url_key)}\n\n"
 			f"\n\n"
 		)
 		disclaimer_msg = (

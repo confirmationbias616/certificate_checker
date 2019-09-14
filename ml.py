@@ -112,15 +112,14 @@ def build_train_set():
         rand_web_df = pd.read_sql(hist_query, conn, params=[start_date, end_date])
     rand_web_df = wrangle(rand_web_df)
 
-    for i, test_row_dilfo in test_company_projects.iterrows():
-        test_row_dilfo = wrangle(test_row_dilfo.to_frame().transpose())  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
+    for i, test_company_row in test_company_projects.iterrows():
+        test_company_row = wrangle(test_company_row.to_frame().transpose())  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
         rand_web_df = rand_web_df.sample(n=len(test_company_projects), random_state=i)
-        close_matches = match_build(test_row_dilfo, test_web_df)
-        random_matches = match_build(test_row_dilfo, rand_web_df)
+        close_matches = match_build(test_company_row, test_web_df)
+        random_matches = match_build(test_company_row, rand_web_df)
         matches = close_matches.append(random_matches)
         matches['ground_truth'] = matches.url_key.apply(
-            lambda x: 1 if x == test_row_dilfo.url_key.iloc[0] else 0)
-        matches['dilfo_job_number'] = test_row_dilfo.job_number.iloc[0]
+            lambda x: 1 if x == test_company_row.url_key.iloc[0] else 0)
         matches['title_length'] = matches.title.apply(len)
         try:
             all_matches = all_matches.append(matches)

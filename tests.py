@@ -290,7 +290,7 @@ class IntegrationTests(unittest.TestCase):
         self.assertTrue(false_positives <= round(qty_actual_matches*0.25,1), msg=f"found too many false positives ({false_positives}) out of total test projects ({qty_actual_matches})")
 
         # test single sample
-        sample_dilfo = pd.DataFrame({
+        sample_company = pd.DataFrame({
             'job_number':'2387',
             'city':'Ottawa',
             'address':'2562 Del Zotto Ave., Ottawa, Ontario',
@@ -312,11 +312,11 @@ class IntegrationTests(unittest.TestCase):
             'url_key':'B0046A36-3F1C-11E9-9A87-005056AA6F02',
             'source': 'dcn',
             }, index=range(1))
-        is_match, prob = match(company_projects=sample_dilfo, df_web=sample_web, test=True, version='new').iloc[0][['pred_match','pred_prob']]
-        self.assertTrue(is_match, msg=f"Project #{sample_dilfo.job_number} did not match successfully. Match probability returned was {prob}.") 
+        is_match, prob = match(company_projects=sample_company, df_web=sample_web, test=True, version='new').iloc[0][['pred_match','pred_prob']]
+        self.assertTrue(is_match, msg=f"Project #{sample_company.job_number} did not match successfully. Match probability returned was {prob}.") 
 
         # test same sample but using db retreival
-        results = match(company_projects=sample_dilfo, since='2019-03-05', until='2019-03-07', test=True, version='new')
+        results = match(company_projects=sample_company, since='2019-03-05', until='2019-03-07', test=True, version='new')
         prob_from_db_cert = results[results.contractor == 'gnc'].iloc[0].pred_prob  #'gnc' is what is returned from the wrangling funcs
         self.assertTrue(round(prob, 2) == round(prob_from_db_cert, 2))
 
