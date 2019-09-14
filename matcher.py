@@ -48,7 +48,7 @@ def predict_match(prob, multi_phase_proned, prob_thresh):
 	else:
 		return 0
 
-def match(company_projects=False, df_web=False, test=False, since='today', until='now', prob_thresh=0.65, version='status_quo'):
+def match(company_projects=False, df_web=False, test=False, since='today', until='now', prob_thresh=0.7, version='status_quo'):
 	logger.info('matching...')
 	if not isinstance(company_projects, pd.DataFrame):  # company_projects == False
 		open_query = "SELECT * FROM company_projects WHERE closed=0"

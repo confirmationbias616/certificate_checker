@@ -127,7 +127,7 @@ def build_train_set():
             all_matches = matches
     all_matches.to_csv('./train_set.csv', index=False)
 
-def train_model(prob_thresh=0.65):
+def train_model(prob_thresh=0.7):
     logger.info("training random forest classifier")
     df = pd.read_csv('./train_set.csv')
     X = df[[x for x in df.columns if x.endswith('_score')]]
