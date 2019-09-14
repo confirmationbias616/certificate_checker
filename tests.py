@@ -181,8 +181,15 @@ class InputTests(unittest.TestCase):
                     pass
     
     @data(
+        ('dcn',),
+        ('ocn',),
     )
     @unpack
+    def test_scarpe(self, source):
+        test_limit = 3
+        web_df = scrape(source=source, limit=test_limit, test=True, since=str(datetime.datetime.now().date()-datetime.timedelta(7)))
+        self.assertEqual(len(web_df), test_limit)
+        # need more assertions here to endure quality of scraped data
 
 
 class IntegrationTests(unittest.TestCase):
@@ -209,15 +216,6 @@ class IntegrationTests(unittest.TestCase):
                     os.remove(filename)
                 except FileNotFoundError:
                     pass
-                
-    def test_scarpe_to_communicate(self):
-        test_limit = 3
-        web_df = scrape(limit=test_limit, test=True, since=str(datetime.datetime.now().date()-datetime.timedelta(7)))
-        self.assertEqual(len(web_df), test_limit)
-        match_first_query = "SELECT * FROM company_projects WHERE closed=0 LIMIT 1"
-        with create_connection() as conn:
-            dilfo_row = pd.read_sql(match_first_query, conn).iloc[0]
-        communicate(web_df, dilfo_row, test=True)  # This will not return legit matches.
 
     def test_truth_table(self):        
         build_train_set()
