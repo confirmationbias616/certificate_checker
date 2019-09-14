@@ -223,34 +223,63 @@ class IntegrationTests(unittest.TestCase):
         build_train_set()
         train_model(prob_thresh=prob_thresh)
         match_query = """
-                        SELECT 
-                            company_projects.job_number,
-                            company_projects.city,
-                            company_projects.address,
-                            company_projects.title,
-                            company_projects.owner,
-                            company_projects.contractor,
-                            company_projects.engineer,
-                            company_projects.cc_email,
-                            company_projects.quality,
-                            attempted_matches.url_key,
-                            attempted_matches.ground_truth
-                        FROM 
-                            company_projects 
-                        LEFT JOIN 
-                            attempted_matches
-                        ON 
-                            company_projects.job_number=attempted_matches.job_number
-                        WHERE 
-                            company_projects.closed=1
-                        AND
-                            attempted_matches.ground_truth=1
-                        AND 
-                            attempted_matches.validate=0
-                    """
+            SELECT
+                company_projects.*,
+                web_certificates.url_key
+            FROM 
+                web_certificates
+            LEFT JOIN
+                attempted_matches
+            ON
+                web_certificates.url_key = attempted_matches.url_key
+            LEFT JOIN
+                company_projects
+            ON
+                attempted_matches.job_number=company_projects.job_number
+            LEFT JOIN
+                base_urls
+            ON
+                base_urls.source=web_certificates.source
+            WHERE 
+                company_projects.closed=1
+            AND
+                attempted_matches.ground_truth=1
+            AND 
+                attempted_matches.multi_phase=0
+            AND 
+                attempted_matches.validate=0
+        """
+        corr_web_certs_query = """
+            SELECT
+                web_certificates.*
+            FROM 
+                web_certificates
+            LEFT JOIN
+                attempted_matches
+            ON
+                web_certificates.url_key = attempted_matches.url_key
+            LEFT JOIN
+                company_projects
+            ON
+                attempted_matches.job_number=company_projects.job_number
+            LEFT JOIN
+                base_urls
+            ON
+                base_urls.source=web_certificates.source
+            WHERE 
+                company_projects.closed=1
+            AND
+                attempted_matches.ground_truth=1
+            AND 
+                attempted_matches.multi_phase=0
+            AND 
+                attempted_matches.validate=0
+        """
+
         with create_connection() as conn:
             test_company_projects = pd.read_sql(match_query, conn)
-        test_web_df = scrape(ref=test_company_projects)
+            test_web_df = pd.read_sql(corr_web_certs_query, conn)
+        test_web_df = wrangle(test_web_df)
         results = match(company_projects=test_company_projects, df_web=test_web_df, test=True, prob_thresh=prob_thresh, version='new')
         
         # confrim 100% recall with below assert
