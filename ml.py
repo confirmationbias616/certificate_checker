@@ -5,7 +5,6 @@ from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import KFold
 from sklearn.metrics import f1_score
 import pickle
-from scraper import scrape
 from wrangler import wrangle
 from matcher import match
 from matcher_build import match_build
