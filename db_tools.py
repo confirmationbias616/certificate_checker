@@ -16,7 +16,8 @@ log_handler.setFormatter(
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
-def create_connection(db_name='cert_db.sqlite3'):
+
+def create_connection(db_name="cert_db.sqlite3"):
     try:
         conn = sqlite3.connect(db_name)
         return conn
@@ -24,14 +25,22 @@ def create_connection(db_name='cert_db.sqlite3'):
         logger.critical(e)
     return None
 
+
 def dbtables_to_csv():
     with create_connection() as conn:
-        table_names = conn.cursor().execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+        table_names = (
+            conn.cursor()
+            .execute("SELECT name FROM sqlite_master WHERE type='table';")
+            .fetchall()
+        )
     table_names = [x[0] for x in table_names]
     open_query = "SELECT * FROM ?"
     for table in table_names:
         with create_connection() as conn:
-            pd.read_sql(open_query, conn, params=[table]).to_csv(f'{table}.csv', index=False)
+            pd.read_sql(open_query, conn, params=[table]).to_csv(
+                f"{table}.csv", index=False
+            )
 
-if __name__=='__main__':
+
+if __name__ == "__main__":
     dbtables_to_csv()

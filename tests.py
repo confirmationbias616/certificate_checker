@@ -4,7 +4,17 @@ import numpy as np
 import datetime
 from ddt import ddt, data, unpack
 from scraper import scrape
-from wrangler import clean_job_number, clean_pub_date, clean_city, clean_company_name, get_acronyms, get_street_number, get_street_name, clean_title, wrangle
+from wrangler import (
+    clean_job_number,
+    clean_pub_date,
+    clean_city,
+    clean_company_name,
+    get_acronyms,
+    get_street_number,
+    get_street_name,
+    clean_title,
+    wrangle,
+)
 from matcher import match
 from communicator import communicate, process_as_feedback
 from ml import build_train_set, train_model, validate_model
@@ -14,9 +24,10 @@ import os
 
 
 prob_thresh = 0.7
+
+
 @ddt
 class TestWrangleFuncs(unittest.TestCase):
-
     @data(
         (" ", ""),
         ("\n  #2404\n", "2404"),
@@ -73,7 +84,7 @@ class TestWrangleFuncs(unittest.TestCase):
         ("Niagara Region, City of St. Catharines, Canada", "st.catharine"),
         ("York Region, Town of Markham", "markham"),
         ("Town of Wasaga Beach", "wasagabeach"),
-        ("Ottawa-Carleton", "ottawa")
+        ("Ottawa-Carleton", "ottawa"),
     )
     @unpack
     def test_clean_city(self, input_string, desired_string):
@@ -96,7 +107,7 @@ class TestWrangleFuncs(unittest.TestCase):
         ("srmech", "sr"),
         ("G&L Insulation", "g&l"),
         ("8906785 Canada Inc. O/A R.E. Hein Construction (Ontario)", "rehein"),
-        ('PCL Constructors Canada Inc. for GAL Power Systems', 'pcl')
+        ("PCL Constructors Canada Inc. for GAL Power Systems", "pcl"),
     )
     @unpack
     def test_clean_company_name(self, input_string, desired_string):
@@ -129,65 +140,70 @@ class TestWrangleFuncs(unittest.TestCase):
         ("6250 saint albans court", "6250", "albans"),
         ("6250 st. albans", "6250", "albans"),
         ("6250 st-albans CRT", "6250", "albans"),
-        ("University of Ottawa, Faculty of Medicine and Faculty of Health Sciences, Roger Guindon Hall, 451 Smyth Road, Ottawa, Ontario K1H 8L1", "451", "smyth"),
+        (
+            "University of Ottawa, Faculty of Medicine and Faculty of Health Sciences, Roger Guindon Hall, 451 Smyth Road, Ottawa, Ontario K1H 8L1",
+            "451",
+            "smyth",
+        ),
         ("145 Jean-Jacques Lussier", "145", "jean-jacques"),
         ("Edwardsburgh/Cardinal", "", ""),
     )
+
     @data(*address_test_data)
     @unpack
     def test_get_street_number(self, input_string, desired_string1, desired_string2):
         output_string = get_street_number(input_string)
         self.assertEqual(desired_string1, output_string)
+
     @data(*address_test_data)
     @unpack
     def test_get_street_name(self, input_string, desired_string1, desired_string2):
         output_string = get_street_name(input_string)
         self.assertEqual(desired_string2, output_string)
 
-    @data(
-        (" ", ""),
-        ("test", "test"),
-        ("testé", "teste"),
-    )
+    @data((" ", ""), ("test", "test"), ("testé", "teste"))
     @unpack
     def test_clean_title(self, input_string, desired_string):
         output_string = clean_title(input_string)
         self.assertEqual(desired_string, output_string)
 
+
 @ddt
 class InputTests(unittest.TestCase):
     def setUpClass():
         # the import statement below runs some code automatically
-        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
+        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
             try:
-                os.rename(filename, 'temp_'+filename)
+                os.rename(filename, "temp_" + filename)
             except FileNotFoundError:
                 pass
         create_test_db()
-        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
+        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
             try:
-                os.rename('test_'+filename, filename)
+                os.rename("test_" + filename, filename)
             except FileNotFoundError:
                 pass
-    
+
     def tearDownClass():
-        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
+        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
             try:
-                os.rename('temp_'+filename, filename)
+                os.rename("temp_" + filename, filename)
             except FileNotFoundError:
                 try:
                     os.remove(filename)
                 except FileNotFoundError:
                     pass
-    
-    @data(
-        ('dcn',),
-        ('ocn',),
-    )
+
+    @data(("dcn",), ("ocn",))
     @unpack
     def test_scarpe(self, source):
         test_limit = 3
-        web_df = scrape(source=source, limit=test_limit, test=True, since=str(datetime.datetime.now().date()-datetime.timedelta(7)))
+        web_df = scrape(
+            source=source,
+            limit=test_limit,
+            test=True,
+            since=str(datetime.datetime.now().date() - datetime.timedelta(7)),
+        )
         self.assertEqual(len(web_df), test_limit)
         # need more assertions here to endure quality of scraped data
 
@@ -195,29 +211,29 @@ class InputTests(unittest.TestCase):
 class IntegrationTests(unittest.TestCase):
     def setUp(self):
         # the import statement below runs some code automatically
-        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
+        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
             try:
-                os.rename(filename, 'temp_'+filename)
+                os.rename(filename, "temp_" + filename)
             except FileNotFoundError:
                 pass
         create_test_db()
-        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
+        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
             try:
-                os.rename('test_'+filename, filename)
+                os.rename("test_" + filename, filename)
             except FileNotFoundError:
                 pass
-    
+
     def tearDown(self):
-        for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
+        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
             try:
-                os.rename('temp_'+filename, filename)
+                os.rename("temp_" + filename, filename)
             except FileNotFoundError:
                 try:
                     os.remove(filename)
                 except FileNotFoundError:
                     pass
 
-    def test_truth_table(self):        
+    def test_truth_table(self):
         build_train_set()
         train_model(prob_thresh=prob_thresh)
         match_query = """
@@ -278,55 +294,87 @@ class IntegrationTests(unittest.TestCase):
             test_company_projects = pd.read_sql(match_query, conn)
             test_web_df = pd.read_sql(corr_web_certs_query, conn)
         test_web_df = wrangle(test_web_df)
-        results = match(company_projects=test_company_projects, df_web=test_web_df, test=True, prob_thresh=prob_thresh, version='new')
-        
+        results = match(
+            company_projects=test_company_projects,
+            df_web=test_web_df,
+            test=True,
+            prob_thresh=prob_thresh,
+            version="new",
+        )
+
         # confrim 100% recall with below assert
-        qty_actual_matches = int(len(results)**0.5)
+        qty_actual_matches = int(len(results) ** 0.5)
         qty_found_matches = results[results.pred_match == 1].title.nunique()
-        self.assertTrue(qty_found_matches == qty_actual_matches, msg=f"qty_found_matches({qty_found_matches}) not equal qty_actual_matches({qty_actual_matches})")
-        
+        self.assertTrue(
+            qty_found_matches == qty_actual_matches,
+            msg=f"qty_found_matches({qty_found_matches}) not equal qty_actual_matches({qty_actual_matches})",
+        )
+
         # make sure not more than 25% false positives with below assert
         false_positives = len(results[results.pred_match == 1]) - qty_found_matches
-        self.assertTrue(false_positives <= round(qty_actual_matches*0.25,1), msg=f"found too many false positives ({false_positives}) out of total test projects ({qty_actual_matches})")
+        self.assertTrue(
+            false_positives <= round(qty_actual_matches * 0.25, 1),
+            msg=f"found too many false positives ({false_positives}) out of total test projects ({qty_actual_matches})",
+        )
 
         # test single sample
-        sample_company = pd.DataFrame({
-            'job_number':'2387',
-            'city':'Ottawa',
-            'address':'2562 Del Zotto Ave., Ottawa, Ontario',
-            'title':'DWS Building Expansion',
-            'owner':'Douglas Stalker',
-            'contractor':'GNC',
-            'engineer':'Goodkey',
-            'receiver_emails_dump':"{'alex': 'alex.roy616@gmail.com'}",
-            'closed':'0',
-            }, index=range(1))
-        sample_web = pd.DataFrame({
-            'pub_date':'2019-03-06',
-            'city':'Ottawa-Carleton',
-            'address':'2562 Del Zotto Avenue, Gloucester, Ontario',
-            'title':'Construct a 1 storey storage addition to a 2 storey office/industrial building',
-            'owner':'Doug Stalker, DWS Roofing',
-            'contractor':'GNC Constructors Inc.',
-            'engineer':None,
-            'url_key':'B0046A36-3F1C-11E9-9A87-005056AA6F02',
-            'source': 'dcn',
-            }, index=range(1))
-        is_match, prob = match(company_projects=sample_company, df_web=sample_web, test=True, version='new').iloc[0][['pred_match','pred_prob']]
-        self.assertTrue(is_match, msg=f"Project #{sample_company.job_number} did not match successfully. Match probability returned was {prob}.") 
+        sample_company = pd.DataFrame(
+            {
+                "job_number": "2387",
+                "city": "Ottawa",
+                "address": "2562 Del Zotto Ave., Ottawa, Ontario",
+                "title": "DWS Building Expansion",
+                "owner": "Douglas Stalker",
+                "contractor": "GNC",
+                "engineer": "Goodkey",
+                "receiver_emails_dump": "{'alex': 'alex.roy616@gmail.com'}",
+                "closed": "0",
+            },
+            index=range(1),
+        )
+        sample_web = pd.DataFrame(
+            {
+                "pub_date": "2019-03-06",
+                "city": "Ottawa-Carleton",
+                "address": "2562 Del Zotto Avenue, Gloucester, Ontario",
+                "title": "Construct a 1 storey storage addition to a 2 storey office/industrial building",
+                "owner": "Doug Stalker, DWS Roofing",
+                "contractor": "GNC Constructors Inc.",
+                "engineer": None,
+                "url_key": "B0046A36-3F1C-11E9-9A87-005056AA6F02",
+                "source": "dcn",
+            },
+            index=range(1),
+        )
+        is_match, prob = match(
+            company_projects=sample_company, df_web=sample_web, test=True, version="new"
+        ).iloc[0][["pred_match", "pred_prob"]]
+        self.assertTrue(
+            is_match,
+            msg=f"Project #{sample_company.job_number} did not match successfully. Match probability returned was {prob}.",
+        )
 
         # test same sample but using db retreival
-        results = match(company_projects=sample_company, since='2019-03-05', until='2019-03-07', test=True, version='new')
-        prob_from_db_cert = results[results.contractor == 'gnc'].iloc[0].pred_prob  #'gnc' is what is returned from the wrangling funcs
+        results = match(
+            company_projects=sample_company,
+            since="2019-03-05",
+            until="2019-03-07",
+            test=True,
+            version="new",
+        )
+        prob_from_db_cert = (
+            results[results.contractor == "gnc"].iloc[0].pred_prob
+        )  #'gnc' is what is returned from the wrangling funcs
         self.assertTrue(round(prob, 2) == round(prob_from_db_cert, 2))
 
         # make sure validation runs
         validate_model(prob_thresh=prob_thresh, test=True)
 
-if __name__ == '__main__':
-    for filename in ['cert_db.sqlite3', 'rf_model.pkl', 'rf_features.pkl']:
+
+if __name__ == "__main__":
+    for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
         try:
-            os.rename('temp_'+filename, filename)
+            os.rename("temp_" + filename, filename)
         except:
             pass
     unittest.main(verbosity=2)
