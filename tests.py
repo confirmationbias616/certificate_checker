@@ -300,9 +300,7 @@ class IntegrationTests(unittest.TestCase):
             'owner':'Douglas Stalker',
             'contractor':'GNC',
             'engineer':'Goodkey',
-            'receiver_email':'alex.roy@dilfo.com',
-            'cc_email':'',
-            'quality':'2',
+            'receiver_emails_dump':"{'alex': 'alex.roy616@gmail.com'}",
             'closed':'0',
             }, index=range(1))
         sample_web = pd.DataFrame({
@@ -314,6 +312,7 @@ class IntegrationTests(unittest.TestCase):
             'contractor':'GNC Constructors Inc.',
             'engineer':None,
             'url_key':'B0046A36-3F1C-11E9-9A87-005056AA6F02',
+            'source': 'dcn',
             }, index=range(1))
         is_match, prob = match(company_projects=sample_dilfo, df_web=sample_web, test=True, version='new').iloc[0][['pred_match','pred_prob']]
         self.assertTrue(is_match, msg=f"Project #{sample_dilfo.job_number} did not match successfully. Match probability returned was {prob}.") 
