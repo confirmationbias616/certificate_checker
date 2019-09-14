@@ -24,7 +24,7 @@ log_handler.setFormatter(
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
-def scrape(source=None, limit=False, test=False, ref=False, since='last_record'):
+def scrape(source=None, limit=False, test=False, since='last_record'):
     # Initialize string and lambda functions based on source :
     if source == 'dcn':
         base_search_url = "https://canada.constructconnect.com/dcn/certificates-and-notices\
@@ -90,10 +90,7 @@ def scrape(source=None, limit=False, test=False, ref=False, since='last_record')
     number_of_matches = get_number_of_matches(soup)
 
     def get_details(entry):
-        if isinstance(ref, pd.DataFrame):
-            entry = base_aug_url + entry
-        else:
-            entry = base_url + entry
+        entry = base_url + entry
         url_key.append(entry.split(base_aug_url)[1])
         while True:
             try:
@@ -117,26 +114,21 @@ def scrape(source=None, limit=False, test=False, ref=False, since='last_record')
         }
         for key in lookup:
             lookup[key].append(company_results.get(key, np.nan))
-    if isinstance(ref, pd.DataFrame):
-        logger.info(f"fetching web certificate info for previously matched projects...")
-        for key in ref['url_key']:
-            get_details(key)
-    else:
-        if not number_of_matches:
-            logger.info('Nothing new to scrape in timeframe specified - exiting scrape function.')
-            return False # signaling that scrape returned nothing
-        logger.info(f"scraping all of {number_of_matches} new certificates since {since}...")
-        bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
-            widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-        bar.start()
-        entries = get_entries(soup)
-        for i, entry in enumerate(entries, 1):
-            get_details(entry)
-            if limit and (i >= limit):
-                logger.info("limit reached - breaking out of loop.")
-                break
-            bar.update(i+1)
-        bar.finish()      
+    if not number_of_matches:
+        logger.info('Nothing new to scrape in timeframe specified - exiting scrape function.')
+        return False # signaling that scrape returned nothing
+    logger.info(f"scraping all of {number_of_matches} new certificates since {since}...")
+    bar = progressbar.ProgressBar(maxval=number_of_matches+1, \
+        widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+    bar.start()
+    entries = get_entries(soup)
+    for i, entry in enumerate(entries, 1):
+        get_details(entry)
+        if limit and (i >= limit):
+            logger.info("limit reached - breaking out of loop.")
+            break
+        bar.update(i+1)
+    bar.finish()      
     with create_connection() as conn:
         last_cert_id = pd.read_sql("SELECT * from web_certificates ORDER BY cert_id DESC LIMIT 1", conn).iloc[0].cert_id
     df_web = pd.DataFrame(
@@ -158,7 +150,7 @@ def scrape(source=None, limit=False, test=False, ref=False, since='last_record')
     df_web['pub_date'] = df_web.pub_date.apply(
             lambda x: re.findall('\d{4}-\d{2}-\d{2}', x)[0])
 
-    if not test and not isinstance(ref, pd.DataFrame):
+    if not test:
         attrs = [
             'cert_id',
             'pub_date',
