@@ -42,7 +42,7 @@ def predict_prob(sample, version):
 
 def predict_match(prob, multi_phase_proned, prob_thresh):
 	if multi_phase_proned:
-		prob_thresh = 0.98
+		prob_thresh = 0.97
 	if prob >= prob_thresh:
 		return 1
 	else:
