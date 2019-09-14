@@ -41,17 +41,6 @@ def send_email(receiver_email, message, test):
 def communicate(web_df, dilfo_row, test=False):
 	receiver_emails_dump = dilfo_row.receiver_emails_dump
 	receiver_email = ast.literal_eval(receiver_emails_dump)
-	cc_email = dilfo_row.cc_email
-	if cc_email:
-		if cc_email.endswith('@dilfo.com') or (cc_email in[
-			'alex.roy616@gmail.com', 'alex.roy616@icloud.com']):
-			pass
-		else:
-			logger.info('given user e-mail address for cc has not been white listed (from dilfo.com '\
-				'domain or from Alex Roy address)')
-			cc_email = ''
-	else:
-		cc_email = ''
 	source = web_df.iloc[0].source
 	source_base_url_query = "SELECT base_url FROM base_urls WHERE source=?"
 	with create_connection() as conn:
