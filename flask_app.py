@@ -17,7 +17,8 @@ import ast
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "e5ac358c-f0bf-11e5-9e39-d3b532c10a28"
 
-
+# this function works in conjunction with `dated_url_for` to make sure the browser uses
+# the latest version of css stylesheet when modified and reloaded during testing
 @app.context_processor
 def override_url_for():
     return dict(url_for=dated_url_for)
@@ -39,7 +40,10 @@ def index():
         all_contacts = pd.read_sql(all_contacts_query, conn)
     if request.method == "POST":
         selected_contact_ids = request.form.getlist("contacts")
-        selected_contacts_query = f"SELECT name, email_addr FROM contacts WHERE id in ({','.join('?'*len(selected_contact_ids))})"
+        selected_contacts_query = (
+            f"SELECT name, email_addr FROM contacts WHERE id in "
+            f"({','.join('?'*len(selected_contact_ids))})"
+        )
         with create_connection() as conn:
             selected_contacts = pd.read_sql(
                 selected_contacts_query, conn, params=[*selected_contact_ids]
@@ -209,7 +213,10 @@ def summary_table():
             "job_number", ascending=False
         )
         df_open["action"] = df_open.apply(
-            lambda row: f"""<a href="{url_for('index', **row)}">modify</a> <a href="{url_for('delete_job', job_number=row.job_number)}">delete</a>""",
+            lambda row: (
+                f"""<a href="{url_for('index', **row)}">modify</a> / """
+                f"""<a href="{url_for('delete_job', job_number=row.job_number)}">delete</a>"""
+            ),
             axis=1,
         )
         df_open["contacts"] = df_open.apply(
@@ -356,7 +363,10 @@ def contact_config():
     with create_connection() as conn:
         all_contacts = pd.read_sql(all_contacts_query, conn)
     all_contacts["action"] = all_contacts.apply(
-        lambda row: f"""<a href="{url_for('update_contact', **row)}">modify</a> / <a href="{url_for('delete_contact', **row)}">delete</a>""",
+        lambda row: (
+            f"""<a href="{url_for('update_contact', **row)}">modify</a> /"""
+            f""" <a href="{url_for('delete_contact', **row)}">delete</a>"""
+        ),
         axis=1,
     )
     all_contacts = all_contacts[["name", "email_addr", "action"]]
