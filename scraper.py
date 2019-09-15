@@ -25,7 +25,21 @@ logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
 
-def scrape(source='dcn', limit=False, test=False, since="last_record"):
+def scrape(source='dcn', limit=False, since="last_record", test=False):
+    """Extracts new certificates by scraping CSP websites and writes data to the web_certificates table in the database.
+    
+    Parameters:
+     - source (str): Specifies source webstie being scraped for CSP's. Can be either `dcn` for Daily Commercial News or `ocn` for Ontario Construction News.
+     - limit (int): Specifies a limit for the amount of certificates to be scraped. Default is no limit.
+     - since (str): Specifies date from when to begin looking for new CSP's. Can be either `last_record` or `yyyy-mm-dd` string format.
+     - test (bool): Set to True to cancel writing to the database and return DataFrame of scraped certificates instead.
+
+    Returns:
+     - True if 1 or more certificates were scraped
+     - False if no certificates were scraped
+     - Pandas DataFrame containing new certificates if Test=True
+
+    """
     # Initialize string and lambda functions based on source :
     if source == "dcn":
         base_search_url = "https://canada.constructconnect.com/dcn/certificates-and-\
