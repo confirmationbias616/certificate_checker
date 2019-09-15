@@ -41,6 +41,31 @@ def scrape(source='dcn', limit=False, since="last_record", test=False):
 
     """
     # Initialize string and lambda functions based on source :
+    def get_details(entry):
+        entry = base_url + entry
+        url_key.append(entry.split(base_aug_url)[1])
+        while True:
+            try:
+                response = requests.get(entry)
+                break
+            except requests.exceptions.ConnectionError:
+                sleep(1)
+                continue
+        html = response.content
+        entry_soup = BeautifulSoup(html, "html.parser")
+        pub_date.append(get_pub_date(entry_soup))
+        city.append(get_city(entry_soup))
+        address.append(get_address(entry_soup))
+        title.append(get_title(entry_soup))
+        company_soup = get_company_soup(entry_soup)
+        company_results = get_company_results(company_soup)
+        lookup = {
+            company_term["owner"]: owner,
+            company_term["contractor"]: contractor,
+            company_term["engineer"]: engineer,
+        }
+        for key in lookup:
+            lookup[key].append(company_results.get(key, np.nan))
     if source == "dcn":
         base_search_url = "https://canada.constructconnect.com/dcn/certificates-and-\
                 notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor="
@@ -86,7 +111,6 @@ def scrape(source='dcn', limit=False, since="last_record", test=False):
         base_aug_url = (
             "https://canada.constructconnect.com/dcn/certificates-and-notices/"
         )
-
     elif source == "ocn":
         base_search_url = "https://ontarioconstructionnews.com/certificates/?\
             per_page=1000&certificates_page=1&search=&form_id=&owner_name_like\
@@ -173,33 +197,6 @@ def scrape(source='dcn', limit=False, since="last_record", test=False):
     html = response.content
     soup = BeautifulSoup(html, "html.parser")
     number_of_matches = get_number_of_matches(soup)
-
-    def get_details(entry):
-        entry = base_url + entry
-        url_key.append(entry.split(base_aug_url)[1])
-        while True:
-            try:
-                response = requests.get(entry)
-                break
-            except requests.exceptions.ConnectionError:
-                sleep(1)
-                continue
-        html = response.content
-        entry_soup = BeautifulSoup(html, "html.parser")
-        pub_date.append(get_pub_date(entry_soup))
-        city.append(get_city(entry_soup))
-        address.append(get_address(entry_soup))
-        title.append(get_title(entry_soup))
-        company_soup = get_company_soup(entry_soup)
-        company_results = get_company_results(company_soup)
-        lookup = {
-            company_term["owner"]: owner,
-            company_term["contractor"]: contractor,
-            company_term["engineer"]: engineer,
-        }
-        for key in lookup:
-            lookup[key].append(company_results.get(key, np.nan))
-
     if not number_of_matches:
         logger.info(
             "Nothing new to scrape in timeframe specified - exiting scrape function."
@@ -250,37 +247,32 @@ def scrape(source='dcn', limit=False, since="last_record", test=False):
     df_web["pub_date"] = df_web.pub_date.apply(
         lambda x: re.findall("\d{4}-\d{2}-\d{2}", x)[0]
     )
-
-    if not test:
-        attrs = [
-            "cert_id",
-            "pub_date",
-            "city",
-            "address",
-            "title",
-            "owner",
-            "contractor",
-            "engineer",
-            "url_key",
-            "source",
-        ]
-        query = f""" 
-            INSERT INTO web_certificates 
-            ({', '.join(attrs)}) VALUES ({','.join(['?']*len(attrs))})
-        """
-        new_certs = [[row[attr] for attr in attrs] for _, row in df_web.iterrows()]
-        with create_connection() as conn:
-            conn.cursor().executemany(query, new_certs)
-        return True  # signaling that something scrape did return some results
-    else:
+    if test:
         return df_web
+    attrs = [
+        "cert_id",
+        "pub_date",
+        "city",
+        "address",
+        "title",
+        "owner",
+        "contractor",
+        "engineer",
+        "url_key",
+        "source",
+    ]
+    query = f""" 
+        INSERT INTO web_certificates 
+        ({', '.join(attrs)}) VALUES ({','.join(['?']*len(attrs))})
+    """
+    new_certs = [[row[attr] for attr in attrs] for _, row in df_web.iterrows()]
+    with create_connection() as conn:
+        conn.cursor().executemany(query, new_certs)
+    return True  # signaling that something scrape did return some results
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="scrapes certificate websites and returns \
-        certificates in the form of a pandas dataframe"
-    )
+    parser = argparse.ArgumentParser()
     parser.add_argument(
         "-s",
         "--source",
