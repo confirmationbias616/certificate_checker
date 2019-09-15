@@ -25,7 +25,7 @@ logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
 
-def scrape(source=None, limit=False, test=False, since="last_record"):
+def scrape(source='dcn', limit=False, test=False, since="last_record"):
     # Initialize string and lambda functions based on source :
     if source == "dcn":
         base_search_url = "https://canada.constructconnect.com/dcn/certificates-and-\
