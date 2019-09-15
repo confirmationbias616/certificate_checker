@@ -283,4 +283,11 @@ if __name__ == "__main__":
         "--since", type=str, help="datefrom when to begin looking for new CSP's"
     )
     args = parser.parse_args()
-    scrape(source=args.source, since=args.since, limit=args.limit)
+    kwargs = {}
+    if args.source:
+        kwargs['source'] = args.source
+    if args.since:
+        kwargs['since'] = args.since
+    if args.limit:
+        kwargs['limit'] = args.limit
+    scrape(**kwargs)
