@@ -259,7 +259,10 @@ def summary_table():
             )
             .set_table_attributes('border="1"')
             .set_properties(
-                **{"font-size": "10pt", "background-color": "rgb(171, 173, 173)"}
+                **{"font-size": "10pt", "background-color": "rgb(168, 185, 191)"}
+            )
+            .set_properties(subset=['action','job_number'],
+                **{"text-align": "center"}
             )
             .hide_index()
             .apply(highlight_pending, axis=1)
@@ -272,14 +275,17 @@ def summary_table():
                         "selector": "th",
                         "props": [
                             ("background-color", "rgb(122, 128, 138)"),
-                            ("color", "black"),
+                            ("color", "black")
                         ],
                     }
                 ]
             )
             .set_table_attributes('border="1"')
             .set_properties(
-                **{"font-size": "10pt", "background-color": "rgb(190, 153, 138)"}
+                **{"font-size": "10pt", "background-color": "rgb(138, 175, 190)"}
+            )
+            .set_properties(subset=['action','job_number','contacts'],
+                **{"text-align": "center"}
             )
             .hide_index()
         )
@@ -372,7 +378,18 @@ def contact_config():
     all_contacts = all_contacts[["name", "email_addr", "action"]]
     all_contacts = (
         all_contacts.style.set_table_attributes('border="1"')
-        .set_properties(**{"font-size": "10pt"})
+        .set_table_styles(
+            [
+                {
+                    "selector": "th",
+                    "props": [
+                        ("background-color", "rgb(122, 128, 138)"),
+                        ("color", "black"),
+                    ],
+                }
+            ]
+        )
+        .set_properties(**{"font-size": "10pt", "background-color": "rgb(138, 175, 190)"})
         .hide_index()
     )
     return render_template(

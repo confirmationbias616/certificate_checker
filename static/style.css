@@ -1,37 +1,37 @@
 :root {
-    --highlight: rgb(97, 62, 143);
-    --background: rgb(148, 168, 165);
+    --highlight: rgb(104, 76, 141);
+    --background: rgb(159, 190, 187);
     --outline: rgb(15, 15, 12);
     --item: rgb(122, 128, 138);
-    --fieldset: rgb(190, 153, 138);
+    --fieldset: rgb(138, 175, 190);
     }
     .required:after { content:" *"; }
     body {
       background-color: var(--background);
-      font-family: 'Roboto Mono', monospace;
+      font-family: 'Montserrat', sans-serif;
       font-size: 100%;
       margin:30px;
     }
     h2 {
-      font-family: 'Roboto Mono', monospace; 
-      font-size: 180%;
+      font-family: 'Montserrat', sans-serif; 
+      font-size: 280%;
       text-align: center;
       color: var(--outline);
-      text-shadow: -1px -1px 6px var(--highlight), -1px -1px 3px rgb(82, 81, 81);
+      text-shadow: -1px -1px 6px var(--highlight);
     }
     h4 {
-      font-family: 'Roboto Mono', monospace;
+      font-family: 'Montserrat', sans-serif;
       font-size: 100%;
     }
     p1 {
-      font-family: 'Roboto Mono', monospace;
+      font-family: 'Montserrat', sans-serif;
       font-size: 100%;
       font-style: italic;
       color: var(--highlight);
       padding-left: 1%;
     }
     p2 {
-      font-family: 'Roboto Mono', monospace;
+      font-family: 'Montserrat', sans-serif;
       font-size: 100%;
       padding-left: 1%;
     }
@@ -49,12 +49,12 @@
     }
     input[type=text]{
       transition: box-shadow 0.5s;
-      font-family: 'Roboto Mono', monospace;
+      font-family: 'Montserrat', sans-serif;
       font-size: 120%;
     }
     input[id=large_button]{
       transition: box-shadow 0.5s;
-      font-family: 'Roboto Mono', monospace;
+      font-family: 'Montserrat', sans-serif;
       font-size: 120%;
       width: 30%;
       height: 2em;
@@ -66,7 +66,7 @@
     }
     input[id=small_button]{
       transition: box-shadow 0.5s;
-      font-family: 'Roboto Mono', monospace;
+      font-family: 'Montserrat', sans-serif;
       font-size: 90%;
       width: 10%;
       height: 1.8em;
@@ -76,13 +76,13 @@
       box-shadow: -3px -3px 5px grey;
     }
     input[type=text]{
-      font-family: 'Roboto Mono', monospace;
+      font-family: 'Montserrat', sans-serif;
       font-size: 100%;
       border: none;
       border-radius: 5px;
     }
     select{
-      font-family: 'Roboto Mono', monospace;
+      font-family: 'Montserrat', sans-serif;
       font-size: 100%;
       border: none;
     }
@@ -102,7 +102,7 @@
       padding: 0.2em 0.6em;
       border: 2px solid var(--outline);
       background-color: var(--item);
-      font-family: 'Roboto Mono', monospace;
+      font-family: 'Montserrat', sans-serif;
       font-size: 80%;
       font-weight: bold;
       font-style: italic;

@@ -3,7 +3,7 @@
 <html>
 <head>
     <title>HBR Bot</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
     <link href="{{ url_for('static',filename='style.css') }}" rel="stylesheet" type="text/css">
     {% block head %}{% endblock %}
     <style>
@@ -34,7 +34,7 @@
             <h2>
                 HBR Bot
             </h2>
-        </div>
+        </div><br><br>
         <div class="column" type=header align="center">
             {% if not hide_helper_links %}
             <a href={{ url_for('about') }}>
