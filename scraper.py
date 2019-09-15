@@ -28,8 +28,8 @@ logger.setLevel(logging.INFO)
 def scrape(source=None, limit=False, test=False, since="last_record"):
     # Initialize string and lambda functions based on source :
     if source == "dcn":
-        base_search_url = "https://canada.constructconnect.com/dcn/certificates-and-notices\
-                ?perpage=1000&phrase=&sort=publish_date&owner=&contractor="
+        base_search_url = "https://canada.constructconnect.com/dcn/certificates-and-\
+                notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor="
         custom_param_url = "&date=custom&date_from={}&date_to={}#results"
         get_number_of_matches = lambda soup: int(
             re.compile("\d\d*").findall(
@@ -74,7 +74,9 @@ def scrape(source=None, limit=False, test=False, since="last_record"):
         )
 
     elif source == "ocn":
-        base_search_url = "https://ontarioconstructionnews.com/certificates/?per_page=1000&certificates_page=1&search=&form_id=&owner_name_like=&contractor_name_like="
+        base_search_url = "https://ontarioconstructionnews.com/certificates/?\
+            per_page=1000&certificates_page=1&search=&form_id=&owner_name_like\
+                =&contractor_name_like="
         custom_param_url = (
             "&date_published=custom&date_published_from={}&date_published_to={}"
         )
@@ -129,7 +131,12 @@ def scrape(source=None, limit=False, test=False, since="last_record"):
     ]
     now = datetime.datetime.now().date()
     if since == "last_record":
-        hist_query = "SELECT pub_date FROM web_certificates WHERE source=? ORDER BY pub_date DESC LIMIT 1"
+        hist_query = """
+            SELECT pub_date 
+            FROM web_certificates 
+            WHERE source=? 
+            ORDER BY pub_date DESC LIMIT 1
+        """
         with create_connection() as conn:
             cur = conn.cursor()
             cur.execute(hist_query, [source])
@@ -144,7 +151,8 @@ def scrape(source=None, limit=False, test=False, since="last_record"):
         valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
         if not valid_since_date:
             raise ValueError(
-                "`since` parameter should be in the format yyyy-mm-dd if not a predefined term."
+                "`since` parameter should be in the format yyyy-mm-dd if not a "\
+                "predefined term."
             )
     date_param_url = custom_param_url.format(since, now)
     response = requests.get(base_search_url + date_param_url)
