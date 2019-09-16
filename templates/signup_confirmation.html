@@ -16,14 +16,14 @@
 </head>
 <body>
     {% block body %}
-    <h4 align="center">
+    <P class="blocktext">
         Your job #{{ job_number }} was successfully signed up and will be monitored on a daily basis for potential matches.
-    </h4>
+    </P>
     <br><br>
+    <P class="blocktext" id="hide_after">
+      Would you also like to scan the database of recently issued certificates to see if there's a match?
+    </P>
     <div align="center">
-      <h4 id="hide_after">
-        Would you also like to scan the database of recently issued certificates to see if there's a match?
-      </h4>
       <br>
       <div id="hide_after2">
         <div display=block>
@@ -47,9 +47,9 @@
       </div>
     </div>
     <div align="center">
-        <h4 id="display_after" style="display:none">
+        <P class="blocktext" id="display_after" style="display:none">
             Depending on traffic, this scan could take a while. An email will be sent once the scan is complete - feel free to navigate away from this page.
-        </h4>
+        </P>
         <img id="display_after2" style="display:none" src="https://thumbs.gfycat.com/ShadowyThornyGelada-size_restricted.gif">
     </div>
     <br><br>

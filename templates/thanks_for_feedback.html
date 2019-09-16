@@ -8,11 +8,11 @@
 </head>
 <body>
     {% block body %}
-    <h4 align=center>
+    <P class="blocktext">
         Thanks for your feedback!
-    </h4>
+    </P>
     <br><br>
-    <h4 align=center>
+    <P class="blocktext">
         {% if status == 'deleted' %}
             However, the project you responded for was previously wiped from the database by someone at your company.
         {% elif status == 'already_closed' and response in [0, 2, '0', '2'] %}
@@ -25,7 +25,7 @@
                 HBR Bot will keep an eye out for your project in upcoming certificates.
             {% endif %}
         {% endif %}
-    </h4>
+    </P>
     {% endblock %}
 </body>
 </html>

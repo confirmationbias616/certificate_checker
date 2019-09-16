@@ -8,7 +8,7 @@
 </head>
 <body>
     {% block body %}
-    <h4 align=center>
+    <P class="blocktext">
       {% if recorded_change %}
         Your change to project #{{ job_number }} was successfully recorded.
         These updated details will be used for future matching.
@@ -17,7 +17,7 @@
         Project #{{ job_number }} was previously logged and no changes have been detected.
         HBR Bot will keep looking for potential matches on a daily basis.
       {% endif %}
-    </h4>
+    </P>
     {% endblock %}
 </body>
 </html>

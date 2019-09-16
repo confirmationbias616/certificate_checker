@@ -10,7 +10,8 @@
       background-color: var(--background);
       font-family: 'Montserrat', sans-serif;
       font-size: 100%;
-      margin:30px;
+      margin-left:80px;
+      margin-right:80px;
     }
     h2 {
       font-family: 'Montserrat', sans-serif; 
@@ -34,6 +35,11 @@
       font-family: 'Montserrat', sans-serif;
       font-size: 100%;
       padding-left: 1%;
+    }
+    P.blocktext {
+      margin-left: auto;
+      margin-right: auto;
+      width: 33em
     }
     input[id=large_button]:hover { 
       box-shadow: -3px -3px 6px var(--highlight);

@@ -11,16 +11,16 @@
     <h3>
       Actively searching for:
     </h3>
-    <h5>
+    <p>
       {{df_open | safe}}
-    </h5>
+    </p><br>
     <h3>
       Already matched:
     </h3>
-    <h5>
+    <p>
       {{df_closed | safe}}
-    </h5>
-    <p align="center" style="color:rgb(85, 82, 88)"><i>assuming 60-day lien period:</i>  <b><span style="color:rgb(97, 62, 143)">lien period still in effect</span>  --  <span style="color:black">lien period expired</span></b></p>
+    </p>
+    <p align="center" style="color:rgb(85, 82, 88)"><i>assuming 60-day lien period:</i>  <span style="color:rgb(97, 62, 143)">lien period still in effect</span>  --  <span style="color:black">lien period expired</span></p>
     {% endblock %}
 </body>
 </html>
