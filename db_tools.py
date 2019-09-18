@@ -18,6 +18,14 @@ logger.setLevel(logging.INFO)
 
 
 def create_connection(db_name="cert_db.sqlite3"):
+    """Creates a connection with specified SQLite3 database in current directory.
+    Connection conveniently closes on unindent of with block.
+
+    Typical usage pattern is as follows:
+    with create_connection() as conn:
+        some_df = pd.read_sql(some_query, conn)
+    
+    """
     try:
         conn = sqlite3.connect(db_name)
         return conn
@@ -26,6 +34,13 @@ def create_connection(db_name="cert_db.sqlite3"):
     return None
 
 
+def dbtables_to_csv(db_name="cert_db.sqlite3", destination=''):
+    """Writes all tables of specified SQLite3 database to separate CSV files located in
+    specified destination subdirectory.
+    Not specifying a destination parameter will save CSV files to current directory.
+
+    """
+    with create_connection(db_name) as conn:
         table_names = (
             conn.cursor()
             .execute("SELECT name FROM sqlite_master WHERE type='table';")
