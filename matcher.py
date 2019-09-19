@@ -72,9 +72,9 @@ def load_feature_list(version="status_quo"):
     return prob
 
 
-def predict_match(prob, multi_phase_proned, prob_thresh):
+def predict_match(prob, prob_thresh, multi_phase_proned, multi_phase_proned_thresh):
     if multi_phase_proned:
-        prob_thresh = 0.97
+        prob_thresh = multi_phase_proned_thresh
     if prob >= prob_thresh:
         return 1
     else:
@@ -88,6 +88,7 @@ def match(
     since="today",
     until="now",
     prob_thresh=0.7,
+    multi_phase_proned_thresh=0.97,
     version="status_quo",
 ):
     logger.info("matching...")
@@ -154,7 +155,7 @@ def match(
         )
         results["pred_match"] = results.apply(
             lambda row: predict_match(
-                row.pred_prob, row.multi_phase_proned, prob_thresh
+                row.pred_prob, prob_thresh, row.multi_phase_proned, multi_phase_proned_thresh
             ),
             axis=1,
         )
