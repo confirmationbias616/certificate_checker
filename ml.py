@@ -28,18 +28,24 @@ logger.setLevel(logging.INFO)
 
 
 def save_model(model):
+    """Pickles current machine learning model nd saves it to the project's root directory."""
     logger.debug("saving random forest classifier")
     with open("./new_rf_model.pkl", "wb") as output:
         pickle.dump(model, output)
 
 
 def save_feature_list(columns):
+    """Pickles a list of features used in current machine learning model and saves it to
+    the project's root directory."""
     logger.debug("saving list of features for random forest classifier")
     with open("./new_rf_features.pkl", "wb") as output:
         pickle.dump(columns, output)
 
 
 def build_train_set():
+    """Builds training dataset by extracting relevant rows from `web_certificates` and 
+    `company_projects` tables within cert_db databse, wrangling the data, and combining
+    it in various ways. Saves to project root directory as Pandas Dataframe."""
     logger.info("building dataset for training random forest classifier")
     match_query = """
         SELECT
@@ -135,6 +141,20 @@ def build_train_set():
 
 
 def train_model(prob_thresh=0.7):
+    """Trains instance of scikit-learn's RandomForestClassifier model on the training dataset
+    from project's root directory and saves trained model to root directory as well.
+    
+    Parameters:
+     - prob_thresh (float): probability threshold which the classifier will use to determine
+     whether or not there is a match. Scikit-learn's default threshold is 0.5 but this is being
+     disregarded. Note that this threshold doesn't impact the actual training of the model - 
+     only its custom predictions and performance metrics.
+
+    Returns:
+     - rc_cum (float): average recall
+     - pr_cum (float): average precision
+     - f1_cum (float): avergae f1 score
+    """
     logger.info("training random forest classifier")
     df = pd.read_csv("./train_set.csv")
     X = df[[x for x in df.columns if x.endswith("_score")]]
@@ -199,6 +219,15 @@ def train_model(prob_thresh=0.7):
 
 
 def validate_model(**kwargs):
+    """Compares new model with status quo production model and compiles/reports the results.
+    Based on results, will either replace model and archive old one or just maintain status quo.
+    
+    Parameters:
+     - prob_thresh (float): probability threshold which the classifier will use to determine
+     whether or not there is a match.
+     - test (bool): whether in testing or not, will dtermine flow of operations and mute emails appropriately.
+
+    """
     try:
         test = kwargs["test"]
     except KeyError:

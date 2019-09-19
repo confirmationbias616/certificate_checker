@@ -24,6 +24,17 @@ logger.setLevel(logging.INFO)
 
 
 def load_model(version="status_quo"):
+    """Unpickles random forest model `rf_model.pkl` from project's root directory and loads
+    it into memory.
+    
+    Parameters:
+    version (str): default is `status_quo` but `new` can also be used for validating
+    newly-trained models.
+
+    Returns:
+    a trained instance of scikit-learn's RandomForestClassifier, which has been previously
+    trained and saved in project's root directory.
+    """
     logger.debug(f"loading {version} random forest classifier")
     version = "" if version == "status_quo" else version + "_"
     with open(f"./{version}rf_model.pkl", "rb") as input_file:
@@ -31,6 +42,16 @@ def load_model(version="status_quo"):
 
 
 def load_feature_list(version="status_quo"):
+    """Unpickles list of features used in matching version of `rf_model.pkl` from project's
+    root directory and loads it into memory.
+    
+    Parameters:
+    version (str): default is `status_quo` but `new` can also be used for validating
+    newly-trained models.
+
+    Returns:
+    list of strings, each representing a feature (column) of the model (training data).
+    """
     logger.debug(f"loading {version} features for learning model")
     version = "" if version == "status_quo" else version + "_"
     with open(f"./{version}rf_features.pkl", "rb") as input_file:
