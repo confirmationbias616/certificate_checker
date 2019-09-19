@@ -1,6 +1,4 @@
-import datetime
 import pandas as pd
-import numpy as np
 from cleanco import cleanco
 import unidecode
 import re
