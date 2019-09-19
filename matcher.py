@@ -58,7 +58,14 @@ def load_feature_list(version="status_quo"):
         return pickle.load(input_file)
 
 
-def predict_prob(sample, version):
+    if not isinstance(sample, pd.Series):
+        try:
+            pd.read_csv(sample).iloc[0]
+        except:
+            raise TypeError(
+                "Need to pass in a Pandas Series or filename of csv file within root"
+                " folder, whcih contsains a single row of data (after header)."
+            )
     clf = load_model(version=version)
     cols = load_feature_list(version=version)
     prob = clf.predict_proba(sample[cols].values.reshape(1, -1))[0][1]
