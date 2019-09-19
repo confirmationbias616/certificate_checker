@@ -271,7 +271,6 @@ def validate_model(**kwargs):
         AND 
             attempted_matches.validate=1
     """
-
     corr_web_certs_query = """
         SELECT
             web_certificates.*
@@ -298,7 +297,6 @@ def validate_model(**kwargs):
         AND 
             attempted_matches.validate=1
     """
-
     with create_connection() as conn:
         validate_company_projects = pd.read_sql(match_query, conn)
         validate_web_df = pd.read_sql(corr_web_certs_query, conn)
@@ -309,12 +307,10 @@ def validate_model(**kwargs):
         test=True,
         prob_thresh=kwargs["prob_thresh"],
     )
-
     # check if 100% recall for new model
     qty_actual_matches = int(len(new_results) ** 0.5)
     qty_found_matches = new_results[new_results.pred_match == 1].title.nunique()
     is_100_recall = qty_found_matches == qty_actual_matches
-
     # the below exception will happen if there was no existing model present in
     # folder (in testing) important to not skip validation so that the function
     # can be propperly tested
@@ -346,13 +342,11 @@ def validate_model(**kwargs):
                 test=True,
                 prob_thresh=kwargs["prob_thresh"],
             )
-
     # check out how many false positives were generated with status quo model and new model
     sq_false_positives = len(sq_results[sq_results.pred_match == 1]) - qty_found_matches
     new_false_positives = (
         len(new_results[new_results.pred_match == 1]) - qty_found_matches
     )
-
     # pull out some stats
     sq_pred_probs = sq_results[sq_results.pred_match == 1]
     new_pred_probs = new_results[new_results.pred_match == 1]
@@ -368,7 +362,6 @@ def validate_model(**kwargs):
     new_min_prob = round(min(new_pred_probs), 3)
     sq_avg_prob = round(sum(sq_pred_probs) / len(sq_pred_probs), 3)
     new_avg_prob = round(sum(new_pred_probs) / len(new_pred_probs), 3)
-
     if not is_100_recall:
         logger.warning(
             "100% recall not acheived with new model - archiving it "
