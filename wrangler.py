@@ -190,31 +190,27 @@ def clean_title(raw):
 
 
 def wrangle(df):
-    def wrangle_coord(df):
-        clean_ops = {
-            "job_number": clean_job_number,
-            "pub_date": clean_pub_date,
-            "city": clean_city,
-            "title": clean_title,
-            "owner": clean_company_name,
-            "contractor": clean_company_name,
-        }
-        for attr in clean_ops:
-            try:
-                df[attr] = df[attr].apply(clean_ops[attr])
-            except (KeyError, AttributeError):
-                pass
-        get_address_ops = {
-            "street_number": get_street_number,
-            "street_name": get_street_name,
-        }
-        for attr in get_address_ops:
-            df[attr] = df["address"].astype("str").apply(get_address_ops[attr])
-        for attr in ["title", "owner", "contractor"]:
-            df[f"{attr}_acronyms"] = df[attr].apply(get_acronyms)
-        return df
-
-    if isinstance(df, pd.DataFrame):
-        return wrangle_coord(df)
-    else:
-        raise Exception("Need to pass in a DataFrame!")
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("Need to pass in a DataFrame!")
+    clean_ops = {
+        "job_number": clean_job_number,
+        "pub_date": clean_pub_date,
+        "city": clean_city,
+        "title": clean_title,
+        "owner": clean_company_name,
+        "contractor": clean_company_name,
+    }
+    for attr in clean_ops:
+        try:
+            df[attr] = df[attr].apply(clean_ops[attr])
+        except (KeyError, AttributeError):
+            pass
+    get_address_ops = {
+        "street_number": get_street_number,
+        "street_name": get_street_name,
+    }
+    for attr in get_address_ops:
+        df[attr] = df["address"].astype("str").apply(get_address_ops[attr])
+    for attr in ["title", "owner", "contractor"]:
+        df[f"{attr}_acronyms"] = df[attr].apply(get_acronyms)
+    return df
