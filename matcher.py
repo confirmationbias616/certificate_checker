@@ -34,6 +34,7 @@ def load_model(version="status_quo"):
     Returns:
     a trained instance of scikit-learn's RandomForestClassifier, which has been previously
     trained and saved in project's root directory.
+    
     """
     logger.debug(f"loading {version} random forest classifier")
     version = "" if version == "status_quo" else version + "_"
@@ -51,6 +52,7 @@ def load_feature_list(version="status_quo"):
 
     Returns:
     list of strings, each representing a feature (column) of the model (training data).
+    
     """
     logger.debug(f"loading {version} features for learning model")
     version = "" if version == "status_quo" else version + "_"
@@ -58,6 +60,21 @@ def load_feature_list(version="status_quo"):
         return pickle.load(input_file)
 
 
+def predict_prob(sample, version="status_quo"):
+    """Predicts probability of match (entity resolution) between company project and web
+    certificate.
+    
+    Parameters:
+     - sample (pd.Series or str): dataframe or filename of csv with root folder of a
+     table containing single row of pre-wranggled, pre-scored, and pre-built proposed match.
+     - version (str): default is `status_quo` but `new` can also be used for validating
+     newly-trained models.
+
+    Returns:
+     - probsbility of match (float value ranging from 0 to 1). Note that this does not take
+     into consideration the probability threshold, which is meant to deviate from 0.5.
+    
+    """
     if not isinstance(sample, pd.Series):
         try:
             pd.read_csv(sample).iloc[0]
@@ -73,6 +90,22 @@ def load_feature_list(version="status_quo"):
 
 
 def predict_match(prob, prob_thresh, multi_phase_proned, multi_phase_proned_thresh):
+    """Predicts whether or not there's a match (entity resolution) for a given prediction
+    probability.
+    
+    Parameters:
+     - prob (float): prediction probability provided by trained random forest classifier.
+     - prob_thresh (float): probability threshold for decision boundary.
+     - multi_phase_proned (int): (1 or 0) whether or not a project is identified as being
+     at risk of having multiple phases, which means it's more likely to be a false positive.
+     - multi_phase_proned_thresh (float): probability threshold for projects which are
+     identified as being at risk of having multiple phases, which will override the standard
+     prob_thresh. This value should be set higher than prob_thresh.
+    
+    Returns:
+     - 1 or 0 (match or not)
+    
+    """
     if multi_phase_proned:
         prob_thresh = multi_phase_proned_thresh
     if prob >= prob_thresh:
@@ -91,6 +124,14 @@ def match(
     multi_phase_proned_thresh=0.97,
     version="status_quo",
 ):
+    """General description
+    
+    Parameters:
+     - 
+
+    Returns:
+     - 
+    """
     logger.info("matching...")
     if not isinstance(company_projects, pd.DataFrame):  # company_projects == False
         open_query = "SELECT * FROM company_projects WHERE closed=0"
