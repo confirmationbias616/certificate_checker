@@ -190,6 +190,21 @@ def clean_title(raw):
 
 
 def wrangle(df):
+    """Applies custom cleaning fucntions to each column of company project entries and
+    web CSP certificates based on domain knowledge of common amiguities and filler phrases.
+    
+    Parameters:
+    df (pd.DataFrame): table from scrape function or databse extraction consisting of rows
+    representing raw input of company project entries or certificates from CSP sources.
+
+    Returns:
+    A wrangled version of the same dataframe that was passed into the function as a parameter.
+    Rows from this wrangled df are now ready to be compared against rows from other wrangled df's.
+
+    Raises:
+    TypeError: If df is not a Pandas DataFrame.
+
+    """
     if not isinstance(df, pd.DataFrame):
         raise TypeError("Need to pass in a DataFrame!")
     clean_ops = {
