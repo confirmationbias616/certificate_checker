@@ -28,7 +28,7 @@ def load_model(version="status_quo"):
     it into memory.
     
     Parameters:
-    version (str): default is `status_quo` but `new` can also be used for validating
+    `version` (str): default is `status_quo` but `new` can also be used for validating
     newly-trained models.
 
     Returns:
@@ -47,7 +47,7 @@ def load_feature_list(version="status_quo"):
     root directory and loads it into memory.
     
     Parameters:
-    version (str): default is `status_quo` but `new` can also be used for validating
+    `version` (str): default is `status_quo` but `new` can also be used for validating
     newly-trained models.
 
     Returns:
@@ -65,9 +65,9 @@ def predict_prob(sample, version="status_quo"):
     certificate.
     
     Parameters:
-     - sample (pd.Series or str): dataframe or filename of csv with root folder of a
+     - `sample` (pd.Series or str): dataframe or filename of csv with root folder of a
      table containing single row of pre-wranggled, pre-scored, and pre-built proposed match.
-     - version (str): default is `status_quo` but `new` can also be used for validating
+     - `version` (str): default is `status_quo` but `new` can also be used for validating
      newly-trained models.
 
     Returns:
@@ -94,11 +94,11 @@ def predict_match(prob, prob_thresh, multi_phase_proned, multi_phase_proned_thre
     probability.
     
     Parameters:
-     - prob (float): prediction probability provided by trained random forest classifier.
-     - prob_thresh (float): probability threshold for decision boundary.
-     - multi_phase_proned (int): (1 or 0) whether or not a project is identified as being
+     - `prob` (float): prediction probability provided by trained random forest classifier.
+     - `prob_thresh` (float): probability threshold for decision boundary.
+     - `multi_phase_proned` (int): (1 or 0) whether or not a project is identified as being
      at risk of having multiple phases, which means it's more likely to be a false positive.
-     - multi_phase_proned_thresh (float): probability threshold for projects which are
+     - `multi_phase_proned_thresh` (float): probability threshold for projects which are
      identified as being at risk of having multiple phases, which will override the standard
      prob_thresh. This value should be set higher than prob_thresh.
     
@@ -124,13 +124,41 @@ def match(
     multi_phase_proned_thresh=0.97,
     version="status_quo",
 ):
-    """General description
+    """Combines company projects and web CSP certificates in all-to-all join, wrangles the
+    rows, scores the rows as potential matches, runs each row through Random Forest model,
+    and communicates results via log and, if deemed successful, email as well.
+
+    TODO: THIS FUNCTION IS TOO LONG AND DOES WAY TOO MANY THINGS. MUST BE REFACTORED ASAP.
     
     Parameters:
-     - 
+     - `company_projects` (pd.DataFrame): specify dataframe of company projects to match
+     instead of default, which is to retreive all open projects from `company_projects` table
+     in databse.
+     - `df_web` (pd.DataFrame): specify dataframe of CSP certificates to match instead
+     of default, which is to retreive all open projects from `web_certificates` table
+     in databse according to specified timeframe.
+     - `test` (bool): whether in testing or not, will dtermine flow of operations and mute
+     emails appropriately.
+     - `since` (str of format `"yyyy-mm-dd"`): used in conjunction with `until` to specify
+     timeframe to query database for `df_web`. Only used if `df_web` not specified. Special
+     strings `"week_ago"`, `"day_ago"`, or `"now"` can be used instead.
+     - `until` (str of format `"yyyy-mm-dd"`): used in conjunction with `since` to specify
+     timeframe to query database for `df_web`. Only used if `df_web` not specified. Special
+     string `"now"` can be used instead.
+     - `prob_thresh` (float): probability threshold for decision boundary.
+     - `multi_phase_proned_thresh` (float): probability threshold for projects which are
+     identified as being at risk of having multiple phases, which will override the standard
+     prob_thresh. This value should be set higher than prob_thresh.
+     - `version` (str): default is `status_quo` but `new` can also be used for validating
+     newly-trained models.
 
     Returns:
-     - 
+     - a Pandas DataFrame containing all of certificate info, project number it was attempted
+     to be matched with, and score results. Length of dataframe should be the length of
+     `company_projects` x `df_web`. Mostly used for testing purposes.
+     - `False` if there were no CSP certificates available for timeframe specified through
+     `since` and `until`.
+
     """
     logger.info("matching...")
     if not isinstance(company_projects, pd.DataFrame):  # company_projects == False
@@ -142,7 +170,7 @@ def match(
         if since == "today":
             since = datetime.datetime.now().date()
         elif since == "day_ago":
-            since = (datetime.datetime.now() - datetime.timedelta(1)).date()
+            since = (datetime.datetime.now() - datetime.timedelta(1)).date()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
         elif since == "week_ago":
             since = (datetime.datetime.now() - datetime.timedelta(7)).date()
         else:
@@ -170,7 +198,7 @@ def match(
             logger.info(
                 f"Nothing has been collected from Daily Commercial News since {since}. Breaking out of match function."
             )
-            return 0
+            return False
     df_web = wrangle(df_web)
     comm_count = 0
     for _, company_project_row in company_projects.iterrows():
@@ -180,6 +208,7 @@ def match(
         logger.info(
             f"searching for potential match for project #{company_project_row['job_number']}..."
         )
+        results['job_number'] = company_project_row.job_number
         results["multi_phase_proned"] = results.apply(
             lambda row: 1
             if any(
