@@ -331,7 +331,7 @@ def instant_scan():
         with create_connection() as conn:
             df_web = pd.read_sql(hist_query, conn, params=[lookback_cert_count])
         results = match(company_projects=company_projects, df_web=df_web, test=False)
-        if len(results[results.pred_match == 1]) > 0:
+        if results and (len(results[results.pred_match == 1]) > 0):
             url_key = results.iloc[0].url_key
             source = results.iloc[0].source
             return redirect(
