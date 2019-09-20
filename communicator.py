@@ -2,6 +2,7 @@ import smtplib, ssl
 import datetime
 import sys
 import logging
+import pandas as pd
 import ast
 from db_tools import create_connection
 import pandas as pd
@@ -49,32 +50,36 @@ def send_email(receiver_email, message, test=False):
         logger.info("password not available -> could not send e-mail")
 
 
-def communicate(single_web_cert_df, single_project_df, test=False):
+def communicate(single_web_cert, single_project, test=False):
     """Constructs email message with info pertaining to match of company project and web
     CSP certificate. Sends email accordingly.
     
     Parameters:
-     - `single_web_cert_df` (pd.DataFrame): single-row dataframe containg info of successfully
+     - `single_web_cert` (pd.DataFrame): single-row dataframe containg info of successfully
      matched web CSP certificate.
-     - `single_project_df` (pd.DataFrame): single-row dataframe containg info of successfully
-     matched company_project.
+     - `single_project` (pd.Series): series containg info of successfully matched
+     company_project.
      - `test`: if set to `True`, will short-circuits out of function without doing anything.
     
     """
-    if (len(single_web_cert_df) > 1) or (len(single_project_df) > 1):
+    if len(single_web_cert) > 1:
         raise ValueError(
-            f"`company_projects` dataframe was suppose to conatin only 1 single row - "
-            f"it contained {len(single_project_df)} rows instead."
+            f"dataframe passed was suppose to conatin only 1 single row - "
+            f"one of them contained {len(single_project)} rows instead."
         )
-    receiver_emails_dump = single_project_df.receiver_emails_dump
+    if type(single_project) != pd.Series:
+        raise TypeError(
+            f"`single_project` was supposed to be a pandas series object type."
+        )
+    receiver_emails_dump = single_project.receiver_emails_dump
     receiver_email = ast.literal_eval(receiver_emails_dump)
-    source = single_web_cert_df.iloc[0].source
+    source = single_web_cert.iloc[0].source
     source_base_url_query = "SELECT base_url FROM base_urls WHERE source=?"
     with create_connection() as conn:
         base_url = conn.cursor().execute(source_base_url_query, [source]).fetchone()[0]
-    url_key = single_web_cert_df.iloc[0].url_key
+    url_key = single_web_cert.iloc[0].url_key
     pub_date = datetime.datetime(
-        *[int(single_web_cert_df.iloc[0].pub_date.split("-")[x]) for x in range(3)]
+        *[int(single_web_cert.iloc[0].pub_date.split("-")[x]) for x in range(3)]
     ).date()
     due_date = lambda delay: pub_date + datetime.timedelta(days=delay)
 
@@ -83,12 +88,12 @@ def communicate(single_web_cert_df, single_project_df, test=False):
         f"\n"
         f"To: {', '.join(receiver_email.values())}"
         f"\n"
-        f"Subject: Upcoming Holdback Release: #{single_project_df.job_number}"
+        f"Subject: Upcoming Holdback Release: #{single_project.job_number}"
         f"\n\n"
         f"Hi {', '.join(receiver_email.keys())},"
         f"\n\n"
-        f"It looks like your project #{single_project_df.job_number} "
-        f"({single_project_df.title.title()}) might be almost ready for holdback release!"
+        f"It looks like your project #{single_project.job_number} "
+        f"({single_project.title.title()}) might be almost ready for holdback release!"
         f"\n"
     )
     cert_msg = (
@@ -115,12 +120,12 @@ def communicate(single_web_cert_df, single_project_df, test=False):
         f"Please click on 1 of the 3 links below to submit your response "
         f"with regards to this match.\n\n"
         f"\t - link does not relate to my project:\n"
-        f"\t{link_constructor.format(single_project_df.job_number, 0, source, url_key)}\n\n"
+        f"\t{link_constructor.format(single_project.job_number, 0, source, url_key)}\n\n"
         f"\t - link is accurate match for my project:\n"
-        f"\t{link_constructor.format(single_project_df.job_number, 1, source, url_key)}\n\n"
+        f"\t{link_constructor.format(single_project.job_number, 1, source, url_key)}\n\n"
         f"\t - link is close but seems to relate to a different phase or "
         f"stage:\n"
-        f"\t{link_constructor.format(single_project_df.job_number, 2, source, url_key)}\n\n"
+        f"\t{link_constructor.format(single_project.job_number, 2, source, url_key)}\n\n"
         f"\n\n"
     )
     disclaimer_msg = (
