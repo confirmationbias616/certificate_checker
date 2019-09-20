@@ -24,7 +24,16 @@ except FileNotFoundError:  # no password if running in CI
     pass
 
 
-def send_email(receiver_email, message, test):
+def send_email(receiver_email, message, test=False):
+    """Sends an e-mail from `hbr.bot.notifier@gmail.com over SMTP protocol.
+    
+    Parameters:
+     - `receiver_email` (dict {str:str}): keys are contact names and values are contact
+     email addresses. This specifies the recipient(s) of the email.
+     - `message` (str): text contained in the email.
+     - `test`: if set to `True`, will short-circuits out of function without doing anything.
+    
+    """
     port = 465  # for SSL
     smtp_server = "smtp.gmail.com"
     sender_email = "hbr.bot.notifier"
@@ -40,88 +49,107 @@ def send_email(receiver_email, message, test):
         logger.info("password not available -> could not send e-mail")
 
 
-def communicate(web_df, company_project_row, test=False):
-    receiver_emails_dump = company_project_row.receiver_emails_dump
+def communicate(single_web_cert_df, single_project_df, test=False):
+    """Constructs email message with info pertaining to match of company project and web
+    CSP certificate. Sends email accordingly.
+    
+    Parameters:
+     - `single_web_cert_df` (pd.DataFrame): single-row dataframe containg info of successfully
+     matched web CSP certificate.
+     - `single_project_df` (pd.DataFrame): single-row dataframe containg info of successfully
+     matched company_project.
+     - `test`: if set to `True`, will short-circuits out of function without doing anything.
+    
+    """
+    if (len(single_web_cert_df) > 1) or (len(single_project_df) > 1):
+        raise ValueError(
+            f"`company_projects` dataframe was suppose to conatin only 1 single row - "
+            f"it contained {len(single_project_df)} rows instead."
+        )
+    receiver_emails_dump = single_project_df.receiver_emails_dump
     receiver_email = ast.literal_eval(receiver_emails_dump)
-    source = web_df.iloc[0].source
+    source = single_web_cert_df.iloc[0].source
     source_base_url_query = "SELECT base_url FROM base_urls WHERE source=?"
     with create_connection() as conn:
         base_url = conn.cursor().execute(source_base_url_query, [source]).fetchone()[0]
-    url_key = web_df.iloc[0].url_key
+    url_key = single_web_cert_df.iloc[0].url_key
+    pub_date = datetime.datetime(
+        *[int(single_web_cert_df.iloc[0].pub_date.split("-")[x]) for x in range(3)]
+    ).date()
+    due_date = lambda delay: pub_date + datetime.timedelta(days=delay)
 
-    def send_match():
-        pub_date = datetime.datetime(
-            *[int(web_df.iloc[0].pub_date.split("-")[x]) for x in range(3)]
-        ).date()
-        due_date = lambda delay: pub_date + datetime.timedelta(days=delay)
-
-        intro_msg = (
-            f"From: HBR Bot"
-            f"\n"
-            f"To: {', '.join(receiver_email.values())}"
-            f"\n"
-            f"Subject: Upcoming Holdback Release: #{company_project_row.job_number}"
-            f"\n\n"
-            f"Hi {', '.join(receiver_email.keys())},"
-            f"\n\n"
-            f"It looks like your project #{company_project_row.job_number} "
-            f"({company_project_row.title.title()}) might be almost ready for holdback release!"
-            f"\n"
-        )
-        cert_msg = (
-            f"Before going any further, please follow the link below to make sure the "
-            f"algorithm correctly matched project in question:\n{base_url}{url_key}\n"
-        )
-        timing_msg = (
-            f"If it's the right project, then the certificate was just published "
-            f"on {datetime.datetime.strftime(pub_date,'%B %e, %Y')}. This means a "
-            f"valid holdback release invoice could be submitted as of:\n"
-            f"A)\t{datetime.datetime.strftime(due_date(45),'%B %e, %Y')} "
-            f"if the contract was signed before October 1, 2019 or;\n"
-            f"B)\t{datetime.datetime.strftime(due_date(60),'%B %e, %Y')} "
-            f"if the contract was signed since then."
-            f"\n"
-        )
-        link_constructor = "https://www.hbr-bot.com/process_feedback?job_number={}&response={}&source={}&url_key={}"
-        feedback_msg = (
-            f"Your feedback will be required so that HBR Bot can properly "
-            f"handle this ticket, whether that means closing it out or keep "
-            f"searching for new matches. It will also help improve the "
-            f"matching algorithm for future projects.\n"
-            f"\n"
-            f"Please click on 1 of the 3 links below to submit your response "
-            f"with regards to this match.\n\n"
-            f"\t - link does not relate to my project:\n"
-            f"\t{link_constructor.format(company_project_row.job_number, 0, source, url_key)}\n\n"
-            f"\t - link is accurate match for my project:\n"
-            f"\t{link_constructor.format(company_project_row.job_number, 1, source, url_key)}\n\n"
-            f"\t - link is close but seems to relate to a different phase or "
-            f"stage:\n"
-            f"\t{link_constructor.format(company_project_row.job_number, 2, source, url_key)}\n\n"
-            f"\n\n"
-        )
-        disclaimer_msg = (
-            "Fianlly, please be aware this is a fully automated message. "
-            "The info presented above could be erroneous."
-            "\n"
-        )
-        closeout_msg = "Thanks,\n" "HBR Bot\n"
-        message = "\n".join(
-            [
-                intro_msg,
-                cert_msg,
-                timing_msg,
-                feedback_msg,
-                disclaimer_msg,
-                closeout_msg,
-            ]
-        )
-        send_email(receiver_email, message, test)
-
-    send_match()
-
+    intro_msg = (
+        f"From: HBR Bot"
+        f"\n"
+        f"To: {', '.join(receiver_email.values())}"
+        f"\n"
+        f"Subject: Upcoming Holdback Release: #{single_project_df.job_number}"
+        f"\n\n"
+        f"Hi {', '.join(receiver_email.keys())},"
+        f"\n\n"
+        f"It looks like your project #{single_project_df.job_number} "
+        f"({single_project_df.title.title()}) might be almost ready for holdback release!"
+        f"\n"
+    )
+    cert_msg = (
+        f"Before going any further, please follow the link below to make sure the "
+        f"algorithm correctly matched project in question:\n{base_url}{url_key}\n"
+    )
+    timing_msg = (
+        f"If it's the right project, then the certificate was just published "
+        f"on {datetime.datetime.strftime(pub_date,'%B %e, %Y')}. This means a "
+        f"valid holdback release invoice could be submitted as of:\n"
+        f"A)\t{datetime.datetime.strftime(due_date(45),'%B %e, %Y')} "
+        f"if the contract was signed before October 1, 2019 or;\n"
+        f"B)\t{datetime.datetime.strftime(due_date(60),'%B %e, %Y')} "
+        f"if the contract was signed since then."
+        f"\n"
+    )
+    link_constructor = "https://www.hbr-bot.com/process_feedback?job_number={}&response={}&source={}&url_key={}"
+    feedback_msg = (
+        f"Your feedback will be required so that HBR Bot can properly "
+        f"handle this ticket, whether that means closing it out or keep "
+        f"searching for new matches. It will also help improve the "
+        f"matching algorithm for future projects.\n"
+        f"\n"
+        f"Please click on 1 of the 3 links below to submit your response "
+        f"with regards to this match.\n\n"
+        f"\t - link does not relate to my project:\n"
+        f"\t{link_constructor.format(single_project_df.job_number, 0, source, url_key)}\n\n"
+        f"\t - link is accurate match for my project:\n"
+        f"\t{link_constructor.format(single_project_df.job_number, 1, source, url_key)}\n\n"
+        f"\t - link is close but seems to relate to a different phase or "
+        f"stage:\n"
+        f"\t{link_constructor.format(single_project_df.job_number, 2, source, url_key)}\n\n"
+        f"\n\n"
+    )
+    disclaimer_msg = (
+        "Fianlly, please be aware this is a fully automated message. "
+        "The info presented above could be erroneous."
+        "\n"
+    )
+    closeout_msg = "Thanks,\n" "HBR Bot\n"
+    message = "\n".join(
+        [
+            intro_msg,
+            cert_msg,
+            timing_msg,
+            feedback_msg,
+            disclaimer_msg,
+            closeout_msg,
+        ]
+    )
+    send_email(receiver_email, message, test=test)
 
 def process_as_feedback(feedback):
+    """Takes in user feedback from web app or clicked emailed link and updates the database accordingly.
+    
+    Parameters:
+    feedback (dict): request.args coming from url clicked by user to submit feedback with
+    regards to the quality of the match. User click either comes from the web app or a
+    potential match email that would have been sent out.
+    
+    """
     imap_ssl_host = "imap.gmail.com"
     imap_ssl_port = 993
     username = "hbr.bot.notifier"
