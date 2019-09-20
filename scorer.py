@@ -3,6 +3,8 @@ import numpy as np
 
 
 def compile_score(row, scoreable_attrs, style):
+    """Compiles the total score of each column in the row that was individually scored
+    against its attribute counterpart and sports the `_score` suffix."""
     scores = row[[f"{attr}_score" for attr in scoreable_attrs]]
     scores = [x / 100 for x in scores if type(x) == int]
     if style == 'multiply':
@@ -15,6 +17,10 @@ def compile_score(row, scoreable_attrs, style):
     return score
 
 def attr_score(web_str, company_project_str, match_style="full"):
+    """Compares strings from both a company project entry and web certificate entry for
+    the same attribute (column) and returns a fuzzy match score as a float ranging
+    between 0 and 1. `match_style` can be `"full"` or `"partial"`. Refer to fuzzywuzzy
+    docs for more info."""
     if web_str in [
         "",
         " ",
@@ -32,6 +38,20 @@ def attr_score(web_str, company_project_str, match_style="full"):
         return 0
 
 def build_match_score(single_project_df, web_df):
+    """Builds a possible match dataframe of one-to many relationship between specified
+    company project and all web certificates along with many added columns of engineered
+    features that the Random Forest Classifier will be looking for.
+    
+    Parameters:
+     - `single_project_df` (pd.DataFrame): specify dataframe of company project to match.
+     Must be a single-row dataframe containing only one project, due to legacy code.
+     - `web_df` (pd.DataFrame): specify dataframe of CSP certificates to match to the
+     company project.
+
+    Returns:
+     - a Pandas DataFrame containing new certificates if Test=True
+
+    """
     if len(single_project_df) > 1:
         raise ValueError(
             f"`company_projects` dataframe was suppose to conatin only 1 single row - "
