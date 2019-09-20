@@ -2,20 +2,17 @@ from fuzzywuzzy import fuzz
 import numpy as np
 
 
-def compile_score(row, scoreable_attrs):
+def compile_score(row, scoreable_attrs, style):
     scores = row[[f"{attr}_score" for attr in scoreable_attrs]]
     scores = [x / 100 for x in scores if type(x) == int]
-    countable_attrs = len([x for x in scores if x > 0])
-    total_score = sum(scores) / countable_attrs if countable_attrs > 2 else 0
-    return total_score
-
-
-def compile_score_add(row, scoreable_attrs):
-    scores = row[[f"{attr}_score" for attr in scoreable_attrs]]
-    scores = [x / 100 for x in scores if type(x) == int]
-    total_add_score = sum(scores)
-    return total_add_score
-
+    if style == 'multiply':
+        countable_attrs = len([x for x in scores if x > 0])
+        score = sum(scores) / countable_attrs if countable_attrs > 2 else 0
+    elif style =='add':
+        score = sum(scores)
+    else:
+        raise ValueError(f"style parameter {style} not recognized")
+    return score
 
 def attr_score(web_str, company_project_str, match_style="full"):
     if web_str in [
