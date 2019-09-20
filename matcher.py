@@ -2,8 +2,7 @@ import pandas as pd
 import datetime
 from wrangler import wrangle
 from communicator import communicate
-from scorer import compile_score, compile_score_add, attr_score
-from matcher_build import match_build
+from scorer import build_match_score
 import pickle
 from db_tools import create_connection
 import re
@@ -202,7 +201,7 @@ def match(
     df_web = wrangle(df_web)
     comm_count = 0
     for _, company_project_row in company_projects.iterrows():
-        results = match_build(
+        results = build_match_score(
             company_project_row.to_frame().transpose(), df_web
         )  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
         logger.info(
