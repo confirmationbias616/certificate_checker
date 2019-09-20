@@ -145,7 +145,7 @@ def train_model(prob_thresh=0.7):
     from project's root directory and saves trained model to root directory as well.
     
     Parameters:
-     - prob_thresh (float): probability threshold which the classifier will use to determine
+     - `prob_thresh` (float): probability threshold which the classifier will use to determine
      whether or not there is a match. Scikit-learn's default threshold is 0.5 but this is being
      disregarded. Note that this threshold doesn't impact the actual training of the model - 
      only its custom predictions and performance metrics.
@@ -223,9 +223,9 @@ def validate_model(**kwargs):
     Based on results, will either replace model and archive old one or just maintain status quo.
     
     Parameters:
-     - prob_thresh (float): probability threshold which the classifier will use to determine
+     - `prob_thresh` (float): probability threshold which the classifier will use to determine
      whether or not there is a match.
-     - test (bool): whether in testing or not, will dtermine flow of operations and mute emails appropriately.
+     - `test` (bool): whether in testing or not, will dtermine flow of operations and mute emails appropriately.
 
     """
     try:
