@@ -39,7 +39,7 @@ def daily_routine(exit_if_stale=False):
         validate_model(prob_thresh=prob_thresh)
     if 'match' in load_config()['daily_routine']['steps']:        
         logger.info('match')
-        match(prob_thresh=prob_thresh, test=load_config()['daily_routine']['tests'])
+        match(prob_thresh=prob_thresh, test=load_config()['daily_routine']['test'])
 
 
 if __name__ == "__main__":
