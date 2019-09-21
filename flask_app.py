@@ -329,7 +329,12 @@ def instant_scan():
         hist_query = "SELECT * FROM web_certificates ORDER BY pub_date DESC LIMIT ?"
         with create_connection() as conn:
             df_web = pd.read_sql(hist_query, conn, params=[lookback_cert_count])
-        results = match(company_projects=company_projects, df_web=df_web, test=load_config()['flask_app']['test'])
+        results = match(
+            company_projects=company_projects,
+            df_web=df_web, prob_thresh=load_config()['machine_learning']['prboability_thresholds']['general'],
+            multi_phase_proned_thresh=load_config()['machine_learning']['prboability_thresholds']['multi_phase'],
+            test=load_config()['flask_app']['test']
+        )
         if isinstance(results, pd.DataFrame) and (
             len(results[results.pred_match == 1]) > 0
         ):
