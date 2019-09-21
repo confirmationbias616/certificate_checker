@@ -119,8 +119,8 @@ def match(
     test=False,
     since="today",
     until="now",
-    prob_thresh=0.7,
-    multi_phase_proned_thresh=0.97,
+    prob_thresh=load_config()['machine_learning']['prboability_thresholds']['general'],
+    multi_phase_proned_thresh=load_config()['machine_learning']['prboability_thresholds']['multi_phase'],
     version="status_quo",
 ):
     """Combines company projects and web CSP certificates in all-to-all join, wrangles the

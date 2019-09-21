@@ -23,8 +23,7 @@ from utils import create_connection, load_config
 from test.test_setup import create_test_db
 import os
 
-
-prob_thresh = 0.7
+prob_thresh = load_config()['machine_learning']['prboability_thresholds']['general']
 
 
 @ddt

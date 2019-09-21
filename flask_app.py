@@ -17,6 +17,7 @@ import ast
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "e5ac358c-f0bf-11e5-9e39-d3b532c10a28"
 
+
 # this function works in conjunction with `dated_url_for` to make sure the browser uses
 # the latest version of css stylesheet when modified and reloaded during testing
 @app.context_processor
@@ -328,7 +329,7 @@ def instant_scan():
         hist_query = "SELECT * FROM web_certificates ORDER BY pub_date DESC LIMIT ?"
         with create_connection() as conn:
             df_web = pd.read_sql(hist_query, conn, params=[lookback_cert_count])
-        results = match(company_projects=company_projects, df_web=df_web, test=False)
+        results = match(company_projects=company_projects, df_web=df_web, test=load_config()['flask_app']['test'])
         if isinstance(results, pd.DataFrame) and (
             len(results[results.pred_match == 1]) > 0
         ):
@@ -464,4 +465,4 @@ def add_contact():
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=load_config()['flask_app']['debug'])

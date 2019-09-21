@@ -7,8 +7,6 @@ from utils import load_config
 import sys
 import logging
 
-prob_thresh = 0.7
-
 logger = logging.getLogger(__name__)
 log_handler = logging.StreamHandler(sys.stdout)
 log_handler.setFormatter(
@@ -22,21 +20,26 @@ logger.setLevel(logging.INFO)
 
 
 def daily_routine(exit_if_stale=False):
-    logger.info("initiating daily routine...")
-    logger.info("scrape ocn")
-    scrape(source="ocn")
-    logger.info("scrape dcn")
-    fruitful_scraping = scrape(source="dcn")  # returns True or False
-    if not fruitful_scraping and exit_if_stale:
-        return  # short-ciruit out since new new data has been collected
-    logger.info("build_train_set")
-    build_train_set()
-    logger.info("train_model")
-    train_model(prob_thresh=prob_thresh)
-    logger.info("match")
-    match(prob_thresh=prob_thresh)  # test=True to mute sending of e-mails
-    logger.info("validate")
-    validate_model(prob_thresh=prob_thresh)
+    logger.info('initiating daily routine...')
+    prob_thresh = load_config()['machine_learning']['prboability_thresholds']['general']
+    if 'scrape' in load_config()['daily_routine']['steps']:
+        fruitful_scraping = False
+        for source in load_config()['daily_routine']['scrape_source']:
+            logger.info(f'scrape {source}')
+            fruitful_scraping = scrape(source=source)  # bool whether or not CSP's were retreived
+        if not fruitful_scraping and load_config()['daily_routine']['exit_if_stale']:
+            return  # short-ciruit out since new new CSP's has been collected
+    if 'train' in load_config()['daily_routine']['steps']:
+        logger.info('build_train_set')
+        build_train_set()
+        logger.info('train_model')
+        train_model(prob_thresh=prob_thresh)
+    if 'validate' in load_config()['daily_routine']['steps']:        
+        logger.info('validate')
+        validate_model(prob_thresh=prob_thresh)
+    if 'match' in load_config()['daily_routine']['steps']:        
+        logger.info('match')
+        match(prob_thresh=prob_thresh, test=load_config()['daily_routine']['tests'])
 
 
 if __name__ == "__main__":
