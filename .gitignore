@@ -12,8 +12,6 @@ train_set.csv
 # ignore all Untitled documents (mostly for .ipynb's)
 Untitled*
 
-cert_count_timelog.csv
-
 # Ignore all data
 model_archive/
 Launchd/
