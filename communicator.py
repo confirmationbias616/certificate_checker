@@ -135,16 +135,10 @@ def communicate(single_web_cert, single_project, test=False):
     )
     closeout_msg = "Thanks,\n" "HBR Bot\n"
     message = "\n".join(
-        [
-            intro_msg,
-            cert_msg,
-            timing_msg,
-            feedback_msg,
-            disclaimer_msg,
-            closeout_msg,
-        ]
+        [intro_msg, cert_msg, timing_msg, feedback_msg, disclaimer_msg, closeout_msg]
     )
     send_email(receiver_email, message, test=test)
+
 
 def process_as_feedback(feedback):
     """Takes in user feedback from web app or clicked emailed link and updates the database accordingly.

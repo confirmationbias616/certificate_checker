@@ -25,7 +25,7 @@ logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
 
-def scrape(source='dcn', limit=False, since="last_record", test=False):
+def scrape(source="dcn", limit=False, since="last_record", test=False):
     """Extracts new certificates by scraping CSP websites and writes data to the web_certificates table in the database.
     
     Parameters:
@@ -66,6 +66,7 @@ def scrape(source='dcn', limit=False, since="last_record", test=False):
         }
         for key in lookup:
             lookup[key].append(company_results.get(key, np.nan))
+
     if source == "dcn":
         base_search_url = "https://canada.constructconnect.com/dcn/certificates-and-\
                 notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor="
@@ -189,7 +190,7 @@ def scrape(source='dcn', limit=False, since="last_record", test=False):
         valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
         if not valid_since_date:
             raise ValueError(
-                "`since` parameter should be in the format yyyy-mm-dd if not a "\
+                "`since` parameter should be in the format yyyy-mm-dd if not a "
                 "predefined term."
             )
     date_param_url = custom_param_url.format(since, now)
@@ -291,9 +292,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     kwargs = {}
     if args.source:
-        kwargs['source'] = args.source
+        kwargs["source"] = args.source
     if args.since:
-        kwargs['since'] = args.since
+        kwargs["since"] = args.since
     if args.limit:
-        kwargs['limit'] = args.limit
+        kwargs["limit"] = args.limit
     scrape(**kwargs)

@@ -169,7 +169,7 @@ def match(
         if since == "today":
             since = datetime.datetime.now().date()
         elif since == "day_ago":
-            since = (datetime.datetime.now() - datetime.timedelta(1)).date()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+            since = (datetime.datetime.now() - datetime.timedelta(1)).date()
         elif since == "week_ago":
             since = (datetime.datetime.now() - datetime.timedelta(7)).date()
         else:
@@ -207,7 +207,7 @@ def match(
         logger.info(
             f"searching for potential match for project #{company_project_row['job_number']}..."
         )
-        results['job_number'] = company_project_row.job_number
+        results["job_number"] = company_project_row.job_number
         results["multi_phase_proned"] = results.apply(
             lambda row: 1
             if any(
@@ -224,7 +224,10 @@ def match(
         )
         results["pred_match"] = results.apply(
             lambda row: predict_match(
-                row.pred_prob, prob_thresh, row.multi_phase_proned, multi_phase_proned_thresh
+                row.pred_prob,
+                prob_thresh,
+                row.multi_phase_proned,
+                multi_phase_proned_thresh,
             ),
             axis=1,
         )

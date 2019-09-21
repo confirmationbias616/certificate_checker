@@ -7,14 +7,15 @@ def compile_score(row, scoreable_attrs, style):
     against its attribute counterpart and sports the `_score` suffix."""
     scores = row[[f"{attr}_score" for attr in scoreable_attrs]]
     scores = [x / 100 for x in scores if type(x) == int]
-    if style == 'multiply':
+    if style == "multiply":
         countable_attrs = len([x for x in scores if x > 0])
         score = sum(scores) / countable_attrs if countable_attrs > 2 else 0
-    elif style =='add':
+    elif style == "add":
         score = sum(scores)
     else:
         raise ValueError(f"style parameter {style} not recognized")
     return score
+
 
 def attr_score(web_str, company_project_str, match_style="full"):
     """Compares strings from both a company project entry and web certificate entry for
@@ -36,6 +37,7 @@ def attr_score(web_str, company_project_str, match_style="full"):
             return fuzz.partial_ratio(web_str, company_project_str)
     except TypeError:
         return 0
+
 
 def build_match_score(single_project_df, web_df):
     """Builds a possible match dataframe of one-to many relationship between specified
@@ -76,7 +78,9 @@ def build_match_score(single_project_df, web_df):
             for attr_suffix, match_style in zip(
                 ["score", "pr_score"], ["full", "partial"]
             ):
-                possible_matches_scored[f"{attr}_{attr_suffix}"] = possible_matches_scored.apply(
+                possible_matches_scored[
+                    f"{attr}_{attr_suffix}"
+                ] = possible_matches_scored.apply(
                     lambda web_row: attr_score(
                         web_row[attr],
                         company_project_row[attr],
@@ -85,6 +89,6 @@ def build_match_score(single_project_df, web_df):
                     axis=1,
                 )
         possible_matches_scored["total_score"] = possible_matches_scored.apply(
-            lambda row: compile_score(row, scoreable_attrs, 'multiply'), axis=1
+            lambda row: compile_score(row, scoreable_attrs, "multiply"), axis=1
         )
         return possible_matches_scored

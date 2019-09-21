@@ -261,9 +261,7 @@ def summary_table():
             .set_properties(
                 **{"font-size": "10pt", "background-color": "rgb(168, 185, 191)"}
             )
-            .set_properties(subset=['action','job_number'],
-                **{"text-align": "center"}
-            )
+            .set_properties(subset=["action", "job_number"], **{"text-align": "center"})
             .hide_index()
             .apply(highlight_pending, axis=1)
         )
@@ -275,7 +273,7 @@ def summary_table():
                         "selector": "th",
                         "props": [
                             ("background-color", "rgb(122, 128, 138)"),
-                            ("color", "black")
+                            ("color", "black"),
                         ],
                     }
                 ]
@@ -284,8 +282,8 @@ def summary_table():
             .set_properties(
                 **{"font-size": "10pt", "background-color": "rgb(138, 175, 190)"}
             )
-            .set_properties(subset=['action','job_number','contacts'],
-                **{"text-align": "center"}
+            .set_properties(
+                subset=["action", "job_number", "contacts"], **{"text-align": "center"}
             )
             .hide_index()
         )
@@ -331,7 +329,9 @@ def instant_scan():
         with create_connection() as conn:
             df_web = pd.read_sql(hist_query, conn, params=[lookback_cert_count])
         results = match(company_projects=company_projects, df_web=df_web, test=False)
-        if isinstance(results, pd.DataFrame) and (len(results[results.pred_match == 1]) > 0):
+        if isinstance(results, pd.DataFrame) and (
+            len(results[results.pred_match == 1]) > 0
+        ):
             url_key = results.iloc[0].url_key
             source = results.iloc[0].source
             return redirect(
@@ -389,7 +389,9 @@ def contact_config():
                 }
             ]
         )
-        .set_properties(**{"font-size": "10pt", "background-color": "rgb(138, 175, 190)"})
+        .set_properties(
+            **{"font-size": "10pt", "background-color": "rgb(138, 175, 190)"}
+        )
         .hide_index()
     )
     return render_template(

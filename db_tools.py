@@ -34,7 +34,7 @@ def create_connection(db_name="cert_db.sqlite3"):
     return None
 
 
-def dbtables_to_csv(db_name="cert_db.sqlite3", destination=''):
+def dbtables_to_csv(db_name="cert_db.sqlite3", destination=""):
     """Writes all tables of specified SQLite3 database to separate CSV files located in
     specified destination subdirectory.
     Not specifying a destination parameter will save CSV files to current directory.
@@ -55,5 +55,5 @@ def dbtables_to_csv(db_name="cert_db.sqlite3", destination=''):
             )
 
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
     dbtables_to_csv()  # will only ever run with default parameters - no need for argparse
