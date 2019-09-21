@@ -27,7 +27,7 @@ flask_app:
 
 daily_routine:
   test: False
-  exit_if_stale: False
+  exit_if_stale: True
   scrape_source:
     - dcn
     - ocn
