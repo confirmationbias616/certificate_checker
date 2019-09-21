@@ -6,6 +6,9 @@ train_set.csv
 
 .password.txt
 
+# Ignore config parameter chnages. Uncomment this when there's a schema change to make and then comment back out afterwards.
+cert_config.yml
+
 # ignore all pickles
 *.pkl
 
