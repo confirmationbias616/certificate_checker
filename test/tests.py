@@ -19,7 +19,7 @@ from wrangler import (
 from matcher import match
 from communicator import communicate, process_as_feedback
 from ml import build_train_set, train_model, validate_model
-from db_tools import create_connection
+from utils import create_connection, load_config
 from test.test_setup import create_test_db
 import os
 

@@ -3,6 +3,7 @@ import os
 from scraper import scrape
 from matcher import match
 from ml import build_train_set, train_model, validate_model
+from utils import load_config
 import sys
 import logging
 

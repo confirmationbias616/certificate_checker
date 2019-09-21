@@ -8,7 +8,7 @@ import pickle
 from wrangler import wrangle
 from matcher import match
 from scorer import build_match_score
-from db_tools import create_connection
+from utils import create_connection, load_config
 import sys
 import logging
 import os

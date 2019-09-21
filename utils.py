@@ -1,6 +1,7 @@
 import sqlite3
 from sqlite3 import Error
 import pandas as pd
+import yaml
 import sys
 import logging
 
@@ -15,6 +16,14 @@ log_handler.setFormatter(
 )
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
+
+def load_config():
+    """Returns cert_config.yml file as a python object."""
+    with open("cert_config.yml", 'r') as stream:
+        try:
+            return (yaml.safe_load(stream))
+        except yaml.YAMLError as e:
+            logger.critical(e)
 
 
 def create_connection(db_name="cert_db.sqlite3"):

@@ -7,7 +7,7 @@ import numpy as np
 import argparse
 import progressbar
 from time import sleep
-from db_tools import create_connection
+from utils import create_connection
 import sys
 import logging
 import dateutil.parser

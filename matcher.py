@@ -4,7 +4,7 @@ from wrangler import wrangle
 from communicator import communicate
 from scorer import build_match_score
 import pickle
-from db_tools import create_connection
+from utils import create_connection, load_config
 import re
 import sys
 import logging

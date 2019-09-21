@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from db_tools import create_connection
+from utils import create_connection
 
 
 def create_test_db():
