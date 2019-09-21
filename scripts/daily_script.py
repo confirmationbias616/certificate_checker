@@ -1,3 +1,4 @@
+import add_parent_to_path
 import os
 from scraper import scrape
 from matcher import match
