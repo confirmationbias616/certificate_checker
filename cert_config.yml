@@ -28,7 +28,7 @@ flask_app:
 daily_routine:
   test: False
   exit_if_stale: False
-  scarpe_source:
+  scrape_source:
     - dcn
     - ocn
   steps:
