@@ -24,6 +24,12 @@ machine_learning:
 flask_app:
   debug: False
   test: False
+  show_summary:
+    cert_limit: 1600  # config parameter not used yet
+  instant_scan:
+    2_weeks: 750  # config parameter not used yet
+    1_month: 1500  # config parameter not used yet
+    2_months: 3000  # config parameter not used yet
 
 daily_routine:
   test: False
