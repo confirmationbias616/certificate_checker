@@ -140,7 +140,9 @@ def build_train_set():
     all_matches.to_csv("./train_set.csv", index=False)
 
 
-def train_model(prob_thresh=load_config()['machine_learning']['prboability_thresholds']['general']):
+def train_model(
+    prob_thresh=load_config()["machine_learning"]["prboability_thresholds"]["general"]
+):
     """Trains instance of scikit-learn's RandomForestClassifier model on the training dataset
     from project's root directory and saves trained model to root directory as well.
     

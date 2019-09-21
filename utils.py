@@ -17,11 +17,12 @@ log_handler.setFormatter(
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
+
 def load_config():
     """Returns cert_config.yml file as a python object."""
-    with open("cert_config.yml", 'r') as stream:
+    with open("cert_config.yml", "r") as stream:
         try:
-            return (yaml.safe_load(stream))
+            return yaml.safe_load(stream)
         except yaml.YAMLError as e:
             logger.critical(e)
 
