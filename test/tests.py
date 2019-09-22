@@ -2,6 +2,11 @@ import add_parent_to_path
 import unittest
 import pandas as pd
 import numpy as np
+import mechanize
+import requests
+from bs4 import BeautifulSoup
+import urllib
+import re
 import datetime
 from ddt import ddt, data, unpack
 from scraper import scrape
@@ -21,6 +26,7 @@ from communicator import communicate, process_as_feedback
 from ml import build_train_set, train_model, validate_model
 from utils import create_connection, load_config
 from test.test_setup import create_test_db
+from flask_app import app
 import os
 
 
@@ -207,6 +213,56 @@ class InputTests(unittest.TestCase):
         )
         self.assertEqual(len(web_df), test_limit)
         # need more assertions here to endure quality of scraped data
+
+    @data(("9999", True, True, True), ("9998", False, False, False))
+    @unpack
+    def test_input_project(
+        self,
+        test_job_number,
+        select_checkbox,
+        expected_submit_success,
+        expected_logged_success,
+    ):
+        br = mechanize.Browser()
+        base_url = "http://127.0.0.1:5000"
+        br.open(base_url)
+        br.select_form("job_entry")
+        br.form["job_number"] = test_job_number
+        for field_name in [
+            "title",
+            "city",
+            "address",
+            "contractor",
+            "owner",
+            "engineer",
+        ]:
+            br.form[field_name] = "test"
+        br.find_control("contacts").items[0].selected = select_checkbox
+        submit_success = False
+        try:
+            br.submit()
+            submit_success = True
+        except urllib.error.HTTPError:
+            pass
+        summary_html = requests.get(base_url + "/summary_table").content
+        logged_success = any(re.findall(test_job_number, str(summary_html)))
+        self.assertEqual(expected_submit_success, submit_success)
+        self.assertEqual(expected_logged_success, logged_success)
+        if (
+            expected_logged_success
+        ):  # test delete link only if project was expected to be logged.
+            expected_delete_success = True
+            summary_page_soup = BeautifulSoup(summary_html, "html.parser")
+            summary_page_links = [
+                x.get("href") for x in summary_page_soup.find_all("a")
+            ]
+            delete_link = [
+                x for x in summary_page_links if test_job_number in x and "delete" in x
+            ][0]
+            requests.get(base_url + delete_link)
+            summary_html = requests.get(base_url + "/summary_table").content
+            delete_success = not any(re.findall(test_job_number, str(summary_html)))
+            self.assertEqual(expected_delete_success, delete_success)
 
 
 class IntegrationTests(unittest.TestCase):
