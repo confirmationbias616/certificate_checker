@@ -137,4 +137,3 @@ venv.bak/
 .vscode/settings.json
 rf_model.pkl
 rf_features.pkl
-cert_db.sqlite3
