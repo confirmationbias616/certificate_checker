@@ -19,7 +19,7 @@ logger.setLevel(logging.INFO)
 
 
 def load_config():
-    """Returns cert_config.yml file as a python object."""
+    """Returns `cert_config.yml` file as a python object."""
     with open("cert_config.yml", "r") as stream:
         try:
             return yaml.safe_load(stream)
