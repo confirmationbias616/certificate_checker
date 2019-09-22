@@ -39,14 +39,14 @@ jobs:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
-        - run:
+      - run:
           name: run tests
           background: true
           command: |
             . venv/bin/activate
             python3 flask_app.py
 
-        - run:
+      - run:
           name: run tests
           command: |
             . venv/bin/activate
