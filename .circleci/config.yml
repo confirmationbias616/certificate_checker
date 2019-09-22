@@ -40,17 +40,18 @@ jobs:
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
       - run:
-          name: run tests
+          name: flask app running on local server
           background: true
           command: |
             . venv/bin/activate
             python3 flask_app.py
 
       - run:
-          name: run tests
+          name: run tests and get codecov report
           command: |
             . venv/bin/activate
             coverage run test/tests.py
+            codecov
 
       - store_artifacts:
           path: test-reports
