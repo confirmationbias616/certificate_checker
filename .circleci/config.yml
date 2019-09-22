@@ -47,8 +47,7 @@ jobs:
       - run:
           name: run tests
           command: |
-            . venv/bin/activate
-            python3 flask_app.py
+            . venv/bin/activate & python3 flask_app.py
             coverage run test/tests.py
             codecov
 
