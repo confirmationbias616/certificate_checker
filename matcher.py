@@ -190,14 +190,20 @@ def match(
                 raise ValueError(
                     "`until` parameter should be in the format yyyy-mm-dd if not a key_word"
                 )
-        hist_query = "SELECT * FROM web_certificates WHERE pub_date>=? AND pub_date<=? ORDER BY pub_date"
+        hist_query = """
+            SELECT * 
+            FROM web_certificates
+            WHERE pub_date>=? AND pub_date<=?
+            ORDER BY pub_date
+        """
         with create_connection() as conn:
             df_web = pd.read_sql(hist_query, conn, params=[since, until])
         if (
             len(df_web) == 0
         ):  # SQL query retunred nothing so no point of going any further
             logger.info(
-                f"Nothing has been collected from Daily Commercial News since {since}. Breaking out of match function."
+                f"Nothing has been collected from Daily Commercial News since {since}. "
+                f"Breaking out of match function."
             )
             return False
     df_web = wrangle(df_web)
@@ -235,12 +241,14 @@ def match(
         )
         results = results.sort_values("pred_prob", ascending=False)
         logger.info(
-            f"top 5 probabilities: {', '. join([str(round(x, 5)) for x in results.head(5).pred_prob])}"
+            f"top 5 probabilities: "
+            f"{', '. join([str(round(x, 5)) for x in results.head(5).pred_prob])}"
         )
         matches = results[results.pred_match == 1]
         if len(matches) > 0:
             logger.info(
-                f"found {len(matches)} match{'' if len(matches)==1 else 'es'}! with probability as high as {matches.iloc[0].pred_prob}"
+                f"found {len(matches)} match{'' if len(matches)==1 else 'es'}! with "
+                f"probability as high as {matches.iloc[0].pred_prob}"
             )
             logger.info("getting ready to send notification...")
             communicate(
@@ -256,7 +264,8 @@ def match(
         except NameError:
             results_master = results
     logger.info(
-        f"Done looping through {len(company_projects)} open projects. Sent {comm_count} e-mails to communicate matches as a result."
+        f"Done looping through {len(company_projects)} open projects. Sent {comm_count} "
+        f"e-mails to communicate matches as a result."
     )
     return results_master
 
