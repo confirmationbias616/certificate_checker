@@ -48,8 +48,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            coverage run test/tests.py & python3 flask_app.py
-            codecov
+            python3 flask_app.py & coverage run test/tests.py & codecov
 
       - store_artifacts:
           path: test-reports
