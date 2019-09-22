@@ -27,6 +27,13 @@ def load_config():
             logger.critical(e)
 
 
+def save_config(config):
+    """Saves updated `config` object to file as `cert_config.yml` use in conjunction with
+    load_config()"""
+    with open('cert_config.yml', 'w') as stream:
+        yaml.dump(config, stream=stream)
+
+
 def create_connection(db_name="cert_db.sqlite3"):
     """Creates a connection with specified SQLite3 database in current directory.
     Connection conveniently closes on unindent of with block.
