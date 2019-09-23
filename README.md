@@ -7,7 +7,8 @@
   time for receiving their hard-earned 10% holdback payemnts. This is
     acheived by monitoring all known commercial news websites for
     postings of CSP (Certificate of Substantial Completion) and notify
-    involved subcontractors.
+    involved subcontractors. Applicable to all construction projects in
+    Ontario, Canada.
 </P>
 <br>
 <P class="blocktext">
