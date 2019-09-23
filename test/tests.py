@@ -266,6 +266,13 @@ class InputTests(unittest.TestCase):
 
     def test_exact_match_project(self):
         scrape(source='dcn', limit=1, test=False)  # to get recent cert in database from within in case test csv's are outdated
+        build_train_set()
+        train_model(prob_thresh=prob_thresh)
+        for filename in ["rf_model.pkl", "rf_features.pkl"]:
+            try:
+                os.rename("new_" + filename, filename)
+            except FileNotFoundError:
+                pass
         get_latest_web_cert = """
             SELECT * 
             FROM web_certificates 
