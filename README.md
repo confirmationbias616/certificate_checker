@@ -2,28 +2,43 @@
 [![codecov](https://codecov.io/gh/confirmationbias616/certificate_checker/branch/master/graph/badge.svg)](https://codecov.io/gh/confirmationbias616/certificate_checker)
 [![CircleCI](https://circleci.com/gh/confirmationbias616/certificate_checker.svg?style=svg)](https://circleci.com/gh/confirmationbias616/certificate_checker)
 
-### Stay on top of your holdback releases for construction projects in Ontario!
-
-Automatically scrapes the Daily Commercial News for Certificates of Substantial Completion being posted by general contractors of Ontario, checks for possible matches with your own list of projects, and helps you stay on top of your holdback releases. 
-
----
-### Holdback Release Workflow ***Typically Seen in our Industry***
-:construction::arrow_right::office: Your work on site is almost done and the construction projects starts wrapping up.
-
-
-:crystal_ball::arrow_right::ballot_box_with_check: Some highly unpredictable amount of time passes while the GC and Owner work on closing out the project and issuing an official certificate of substantial completion.
-
-***:crystal_ball::arrow_right::rage1::no_entry::rage2::loop::arrow_right::arrow_right::arrow_right::moneybag: You eventually get paid for your hard-earned 10% holdback after having to repeatedly bug the GC and/or invoice prematurely and take a tax hit.***
-
----
-### Holdback Release Workflow ***Using this Service***
-:construction::arrow_right::office: Your work on site is almost done and the construction projects starts wrapping up.
-
-
-:crystal_ball::arrow_right::ballot_box_with_check: Some highly unpredictable amount of time passes while the GC and Owner work on closing out the project and issuing an official certificate of substantial completion.
-
-
-***:warning::arrow_right::date: This service notifies you of substantial completion certificate and advises you on valid date to release your holdback.***
-
-
-***:date::arrow_right::moneybag::arrow_right::tada: You get paid for your hard-earned 10% holdback as soon as humanly possible. Relationship with the GC remains positive. No tax hits as a result of premature invoicing.***
+<P class="blocktext">
+    The idea behind this tool is to minimize subcontractors' average wait
+  time for receiving their hard-earned 10% holdback payemnts. This is
+    acheived by monitoring all known commercial news websites for
+    postings of CSP (Certificate of Substantial Completion) and notify
+    involved subcontractors.
+</P>
+<br>
+<P class="blocktext">
+    The '<b>HBR</b>' stands for <b>H</b>old<b>b</b>ack <b>R</b>elease. The
+    word 'Bot' intends to communicate that the matching algorithm in the backend
+    makes use of machine learning technology. This means that the service will
+    automatically improve with time as it sees more data come through. For more
+    details on the tech stack, see last paragraph.
+</P>
+<br>
+<P class="blocktext">
+    To get started, simply enter your project's info in the 
+    <a href="https://hbr-bot.com">home page</a> form
+    and let HBR Bot guide you through the process. To learn more about the Lien
+    Construction Act and holdback releases in general, visit
+    <a href="https://canada.constructconnect.com/dcn/construction-act">this link<a>.</a>
+</P>
+<br>
+<P class="blocktext">
+    As for the <b>tech stack</b>, HBR Bot is written in Python and SQL. It essentially
+    consists of a machine learning model wrapped in a web app. At a high level,
+    the type of data science problem being solved here can be classified as
+    <a href='http://www.datacommunitydc.org/blog/2013/08/entity-resolution-for-big-data'>
+        Entity Resoultion</a>.
+    The machine learning model is a Scikit-Learn Random Forest and it makes use of
+    an active style of learning with human-in-the-loop validation via user feedback
+    from the web app. Due to the class imbalance issue of an initially small amount
+    of confirmed positive matches, the ML training process makes use of the SMOTE
+    algorithm. The data wrangling process utilizes the fuzzywuzzy package, which
+    applies fuzzy logic to all string mtaching. The web app is built Flask and is
+    hosted on PythonAnywhere. The database is SQLite3. The code base is version
+    controlled with Git, hosted on GitHub, and continuously integrated / automatically
+    tested on CircleCI.
+</P>
