@@ -179,7 +179,7 @@ class TestWrangleFuncs(unittest.TestCase):
 class InputTests(unittest.TestCase):
     def setUpClass():
         # the import statement below runs some code automatically
-        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
+        for filename in ["cert_db.sqlite3"]:
             try:
                 os.rename(filename, "temp_" + filename)
             except FileNotFoundError:
@@ -192,7 +192,7 @@ class InputTests(unittest.TestCase):
                 pass
 
     def tearDownClass():
-        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
+        for filename in ["cert_db.sqlite3"]:
             try:
                 os.rename("temp_" + filename, filename)
             except FileNotFoundError:
