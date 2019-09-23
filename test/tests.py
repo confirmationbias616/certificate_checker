@@ -264,6 +264,39 @@ class InputTests(unittest.TestCase):
             delete_success = not any(re.findall(test_job_number, str(summary_html)))
             self.assertEqual(expected_delete_success, delete_success)
 
+    def test_exact_match_project(self):
+        scrape(source='dcn', limit=1, test=False)  # to get recent cert in database from within in case test csv's are outdated
+        get_latest_web_cert = """
+            SELECT * 
+            FROM web_certificates 
+            ORDER BY cert_id DESC
+            LIMIT 1
+        """
+        with create_connection() as conn:
+            latest_web_cert = pd.read_sql(get_latest_web_cert, conn).iloc[0]
+        br = mechanize.Browser()
+        base_url = "http://127.0.0.1:5000"
+        br.open(base_url)
+        br.select_form("job_entry")
+        br.form["job_number"] = '9999'
+        for field_name in [
+            "title",
+            "city",
+            "address",
+            "contractor",
+            "owner",
+            "engineer",
+        ]:
+            br.form[field_name] = str(latest_web_cert[field_name])
+        br.find_control("contacts").items[0].selected = True
+        try:
+            br.submit()
+        except urllib.error.HTTPError:
+            pass
+        br.select_form(nr=0)
+        br.submit()
+        self.assertEqual(re.findall('(?<=url_key=).*', br.geturl())[0], latest_web_cert['url_key'])
+
 
 class IntegrationTests(unittest.TestCase):
     def setUp(self):
