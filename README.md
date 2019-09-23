@@ -38,7 +38,7 @@
     from the web app. Due to the class imbalance issue of an initially small amount
     of confirmed positive matches, the ML training process makes use of the SMOTE
     algorithm. The data wrangling step utilizes the fuzzywuzzy package, which
-    applies fuzzy logic to all string mtaching. The web app is built Flask and is
+    applies fuzzy logic to all string mtaching. The web app is built with Flask and is
     hosted on PythonAnywhere. The database is SQLite3. The code base is version
     controlled with Git and hosted on GitHub. It is also automatically tested and
     continuously integrated on CircleCI.
