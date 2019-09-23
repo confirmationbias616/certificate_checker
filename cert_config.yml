@@ -23,7 +23,7 @@ machine_learning:
 
 flask_app:
   debug: False
-  test: False
+  test: True
   show_summary:
     cert_limit: 1600  # config parameter not used yet
   instant_scan:
