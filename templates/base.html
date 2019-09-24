@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>HBR Bot</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static',filename='style.css') }}" rel="stylesheet" type="text/css">
+    {% block head %}{% endblock %}
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        .column[type=header] {
+            float: left;
+            width: 33.33%;
+            padding: 5px;
+            height: 60px;
+            }
+
+            /* Clear floats after the columns */
+            .row:after {
+            content: "";
+            display: table;
+            clear: both;
+            }
+    </style>
+</head>
+<body>    
+    
+    <div class="row">
+        <div class="column" type=header>
+        </div>
+        <div class="column" type=header>
+            <h2>
+                HBR Bot
+            </h2>
+        </div><br><br>
+        <div class="column" type=header align="center">
+            {% if not hide_helper_links %}
+            <a href={{ url_for('about') }}>
+                about
+            </a>&nbsp;
+            <a href={{ url_for('contact_config') }}>
+                configure contacts
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% block body %}{% endblock %}
+</body>
+<footer>
+    {% block footer %}
+    {% if (not home) or job_number%}
+    <div align="center">
+        <br><br>
+        <form action="/" method="GET">
+            <input type="submit" id="large_button" value="GO BACK"></button>
+        </form>
+    </div>
+    {% endif %}
+    {% endblock %}
+</footer>
+</html>

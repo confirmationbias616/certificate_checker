@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  <script>
+    function show_hint() {
+      document.getElementById("display_after").style = "display:block";
+      document.getElementById("display_after2").style = "display:block";
+      document.getElementById("hide_after").style = "display:none";
+      document.getElementById("hide_after2").style = "display:none";
+    }
+  </script>
+  {% endblock %}
+</head>
+<body>
+    {% block body %}
+    <P class="blocktext">
+        Your job #{{ job_number }} was successfully signed up and will be monitored on a daily basis for potential matches.
+    </P>
+    <br><br>
+    <P class="blocktext" id="hide_after">
+      Would you also like to scan the database of recently issued certificates to see if there's a match?
+    </P>
+    <div align="center">
+      <br>
+      <div id="hide_after2">
+        <div display=block>
+          <form  action="{{ url_for('instant_scan', job_number=job_number, lookback='2_weeks') }}" method="POST">
+            <input type="submit" id="large_button" value="2 WEEKS" onclick="show_hint()">
+          </form>
+          <p>(estimated scan time of 30 seconds)</p>
+        </div><br>
+        <div display=block>
+          <form id="hide_after2" action="{{ url_for('instant_scan', job_number=job_number, lookback='1_month') }}" method="POST">
+            <input type="submit" id="large_button" value="1 MONTH" onclick="show_hint()">
+          </form>
+          <p>(estimated scan time of 1 minute)</p>
+        </div><br>
+        <div display=block>
+          <form id="hide_after2" action="{{ url_for('instant_scan', job_number=job_number, lookback='2_months') }}" method="POST">
+            <input type="submit" id="large_button" value="2 MONTHS" onclick="show_hint()">
+          </form>
+          <p>(estimated scan time of 2 minutes)</p>
+        </div>
+      </div>
+    </div>
+    <P class="blocktext" id="display_after" style="display:none">
+        Depending on traffic, this scan could take a while. An email will be sent once the scan is complete - feel free to navigate away from this page.
+    </P>
+    <div align="center">
+      <img id="display_after2" style="display:none" src="https://thumbs.gfycat.com/ShadowyThornyGelada-size_restricted.gif">
+    </div>
+    <br><br>
+    {% endblock %}
+</body>
+</html>

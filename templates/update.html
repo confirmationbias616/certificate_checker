@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  {% endblock %}
+</head>
+<body>
+    {% block body %}
+    <P class="blocktext">
+      {% if recorded_change %}
+        Your change to project #{{ job_number }} was successfully recorded.
+        These updated details will be used for future matching.
+      {% else %}
+        {{recorded_change}}
+        Project #{{ job_number }} was previously logged and no changes have been detected.
+        HBR Bot will keep looking for potential matches on a daily basis.
+      {% endif %}
+    </P>
+    {% endblock %}
+</body>
+</html>
+    

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  {% endblock %}
+</head>
+<body>
+    {% block body %}
+    <br><br>
+    <div align="center">
+        <h5>
+            {{all_contacts | safe}}
+        </h5>
+        <br><br>
+        <u>
+            {% if contact %} Modify {% else %} Add {% endif %} Contact
+        </u>
+        <br><br>
+        <form action={% if contact %} "/update_contact" {% else %} "/add_contact" {% endif%} method="POST">
+            <input type="text" name="id" value="{{ contact.get('id', '') }}" hidden>
+            <input type="text" name="name" {% if contact %} value="{{ contact.get('name', '') }}" {% else %} placeholder="name" {% endif %}>
+            <input type="text" name="email_addr" {% if contact %} value="{{ contact.get('email_addr', '') }}" {% else %} placeholder="email address" {% endif %}>
+            <input type="submit" id="small_button" value="{% if contact %} Update {% else %} Add {% endif %}">
+        </form>
+    </div>
+    <br><br>
+    {% endblock %}
+</body>
+</html>
+    

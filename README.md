@@ -7,7 +7,8 @@
   time for receiving their hard-earned 10% holdback payemnts. This is
     acheived by monitoring all known commercial news websites for
     postings of CSP (Certificate of Substantial Completion) and notify
-    involved subcontractors.
+    involved subcontractors. Applicable to all construction projects in
+    Ontario, Canada.
 </P>
 <br>
 <P class="blocktext">
@@ -36,9 +37,9 @@
     an active style of learning with human-in-the-loop validation via user feedback
     from the web app. Due to the class imbalance issue of an initially small amount
     of confirmed positive matches, the ML training process makes use of the SMOTE
-    algorithm. The data wrangling process utilizes the fuzzywuzzy package, which
-    applies fuzzy logic to all string mtaching. The web app is built Flask and is
+    algorithm. The data wrangling step utilizes the fuzzywuzzy package, which
+    applies fuzzy logic to all string mtaching. The web app is built with Flask and is
     hosted on PythonAnywhere. The database is SQLite3. The code base is version
-    controlled with Git, hosted on GitHub, and continuously integrated / automatically
-    tested on CircleCI.
+    controlled with Git and hosted on GitHub. It is also automatically tested and
+    continuously integrated on CircleCI.
 </P>

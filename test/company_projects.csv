@@ -1,40 +1,49 @@
-job_number,city,address,title,owner,contractor,engineer,receiver_email,cc_email,quality,closed
-2412,Ottawa,56 Sparks St, 56 Sparks - 7th Flr. - Doherty Office Split,Doherty,RECL,GWAL,alex.roy616@gmail.com,alex.roy@dilfo.com,,0
-2414,Ottawa,"125 Sparks Street, Ottawa, Ontario",P07L-Library of Parliament Roof Repair,PWGSC,Pomerleau,J.L. RICHARDS,alex.roy@dilfo.com,,,0
-2415,Ottawa,"112 Kent Street, Ottawa, Ontario",PDV Tower B - Roof Replacement,Brookfield,Ron Eastern Construction Ltd.,GWAL,alex.roy@dilfo.com,Alex,2.0,0
-2407,Ottawa,"11 Aviation Parkway, Ottawa, Ontario",CASM Paint Booth Supply and Install,Airport,The Ingenium,GWAL,alex.roy@dilfo.com,,2.0,0
-2379,Ottawa,"40 Cassidy Road, Ottawa, Ontario, K2H 6K1",Bell High School Addition,Ottawa-Carleton District School Board (OCDSB),Laurin,GWAL,alex.roy616@icloud.com,Alex,3.0,0
-2341,Ottawa,501 Smyth Rd,TOH Stem Cell,The Ottawa Hospital,Frecon Construction,WSP,alex.roy616@icloud.com,,2.0,0
-2387,Ottawa,"2562 Del Zotto Ave., Ottawa, Ontario",DWS Building Expansion,Douglas Stalker,GNC,Goodkey,alex.roy@dilfo.com,,2,0
-2208,Ottawa,,OMCIA - CBSA PIK Project,OMCIA,PCL Constructors, ,alex.roy616@gmail.com,,,1
-2207,Ottawa,"1125 Colonel By Dr, Maintenance",Carleton U - Subways Restaurant,Carleton U,RE Hein, ,alex.roy616@gmail.com,,,1
-2206,Ottawa,29 Beechwood,BMO Beechwood,Minto,Corporate Contracting Services Ltd., ,alex.roy616@gmail.com,,,1
-2203,Ottawa,200 tremblay road,VIA Rail Ottawa Station,VIA Rail,Ellis Don, ,alex.roy616@gmail.com,,,1
-2200,Ottawa,"451 Smyth Road, Ottawa, Ontario",Roger Guindon Hall,U of O,PCL Constructors, ,alex.roy616@gmail.com,,,1
-2119,Ottawa,405 Terminal Ave,405 Terminal Ave Bldg,,Pomerleau,McKee Engineering,alex.roy@dilfo.com,,,1
-2166,Ottawa,"1 Elgin St, Ottawa, ON K1P 5W1",NAC Architectural Rejuvenation,National Arts Centre,PCL Constructors,Crossey Engineering,alex.roy@dilfo.com,,,1
-2157,Ottawa,145 Jean Jaques Lucier Private,UofO Learning Centre,University of Ottawa,Pomerleau,MMM,alex.roy@dilfo.com,,,1
-2183,Edwardsburgh/Cardinal,Edwardsburgh/Cardinal,Giant Tiger Distirbution Centre,Giant Tiger,M P Lundy,GKC Architects,alex.roy@dilfo.com,,,1
-2186,Ottawa,65 University Private,uOttawa - Morisset Satelite Chiller,U of O,Thompson Boiler Works,,alex.roy@dilfo.com,,,1
-2188,Ottawa,525 Legget Drive,Brookstreet Hotel Expansion,Brookstreet Hotel,KRP Properties,RJ Mckee,alex.roy@dilfo.com,,,1
-2226,Ottawa,160 ElginStreet,160 Elgin TFU (Hillary's and Between Friends),,EllisDon Construction,Petroff,alex.roy@dilfo.com,,,1
-2234,Ottawa,343 Preston St,"Adobe 6th and 7th Floor TFU, 343 Preston Street",Adobe,Giamberardino Contracting Inc,HOK,alex.roy@dilfo.com,,,1
-2238,Ottawa,3755 Riverside Drive,IBM Phase II,IBM,Ark Construction,McKee Engineering,alex.roy@dilfo.com,,,1
-2237,Ottawa,"10 Marie Curie, Ottawa, K1N 9A4",University of Ottawa - Marion Lab Phase II,uOttawa,Morley-Hoppner Construction,N45 Architecture Inc.,alex.roy@dilfo.com,,,1
-2300,Ottawa,"785 Goulbourn Forced Road, Ottawa, On",Kanata North Catholic Elementary School,Ottawa Catholic School Board,RE Hein Construction,BRYDEN MARTEL ARCHITECTS INCORPORATED,alex.roy@dilfo.com,,2.0,1
-2301,Ottawa,"343 Preston Street, Ottawa",Ottawa Office,Waterford,The FiA Group,Archicana,alex.roy@dilfo.com,,2.0,1
-2307,Ottawa,150 Katimavik Road,150 Katimavik Road Unit 9 Fit-Up,,Cavanagh Construction Limited,MCROBIE,alex.roy@dilfo.com,,2.0,1
-2272,Ottawa,950 Ages Drive,"PSPC 950 Ages Drive, Base Building",Dilawri Property Holding Ltd.,MP Lundy Construction,P,alex.roy@dilfo.com,,2.0,1
-2268,Ottawa,"50 Rideau, Ottawa, Ontario",Farm Boy - Rideau Centre,Farm Boy Inc,VCL Construction,MCROBIE Architects Interior Designers,alex.roy@dilfo.com,,2.0,1
-2256,Ottawa,"110 Place d'Orléans Dr, Orléans, ON K1C 2L9",Mark's Work Warehouse - Place D'Orleans,PLACE DORLEANS,PCL Constructors,SMV Architects,alex.roy@dilfo.com,,2.0,1
-2089,Ottawa,1081 Ambleside,1081 Ambleside,,S&R,CSV Architects,alex.roy@dilfo.com,,2.0,1
-2175,Ottawa,411 Legget Drive,411 Legget Drive - suite 300,Apple,KRP Porperties,IBI Group,alex.roy@dilfo.com,,2.0,1
-2092,Ottawa,333 Preston,"Sunlife TFU - 333 Preston, 8th Fl",SunLife Financial,Goven Brown,IBI Group,alex.roy@dilfo.com,,2.0,1
-2083,Ottawa,3659 Navan Road,Miracle Leauge Support Bldg,City of Ottawa,Ellis Don,HOK ,alex.roy@dilfo.com,,2.0,1
-2080,Ottawa,"15 CRESTWAY DRIVE, OTTAWA, ONTARIO",Movati - Barrhaven,Movati Athletic,R.E. Hein Construction,DAVIDSMCROBIE Architects INC,alex.roy@dilfo.com,,2.0,1
-2064,Ottawa,1035 Moodie Dr,Insultech - 1035 Moodie Dr,INSULTECH,Barbican Construction,4té,alex.roy@dilfo.com,,2.0,1
-2050,Ottawa,333 Preston,Xerox Remodel,Interprise (XEROX),Govan Brown,Atkinson Schroeter Desgin Group ASDG,alex.roy@dilfo.com,,2.0,1
-2048,Ottawa,"1500 Shea Road, Ottawa, Ontario",Goulbourn Recreation Complex:Pool,City of Ottawa,Ruiter,N45 Architecture Inc,alex.roy@dilfo.com,,2.0,1
-2045,Ottawa,1125 COLONEL BY DRIVE,MacOdrum Library HVAC Upgrades,Carleton U,Black & McDonald,Chorley   Bisset,alex.roy@dilfo.com,,2.0,1
-2038,Ottawa,501 Palladium Drive,Lockheed Martin TFU,Lockheed Martin,PCL,Goodkey Weedmark,alex.roy@dilfo.com,,2.0,1
-2034,Ottawa,"202 Henderson Avenue, Ottawa",Henderson Student Residence,University of Ottawa,RE Hein,IBI,alex.roy@dilfo.com,,2.0,1
+job_number,city,address,title,contractor,owner,engineer,closed,receiver_emails_dump
+2414,Ottawa,"125 Sparks Street, Ottawa, Ontario",P07L-Library of Parliament Roof Repair,Pomerleau,PWGSC,J.L. RICHARDS,0,{'Alex': 'alex@dilfo.com'}
+2415,Ottawa,"112 Kent Street, Ottawa, Ontario",PDV Tower B - Roof Replacement,Ron Eastern Construction Ltd.,Brookfield,GWAL,0,{'Alex': 'alex@dilfo.com'}
+2407,Ottawa,"11 Aviation Parkway, Ottawa, Ontario",CASM Paint Booth Supply and Install,The Ingenium,Airport,GWAL,0,{'Alex': 'alex@dilfo.com'}
+2379,Ottawa,"40 Cassidy Road, Ottawa, Ontario, K2H 6K1",Bell High School Addition,Laurin,Ottawa-Carleton District School Board (OCDSB),GWAL,0,{'Alex': 'alex@dilfo.com'}
+2387,Ottawa,"2562 Del Zotto Ave., Ottawa, Ontario",DWS Building Expansion,GNC,Douglas Stalker,Goodkey,1,{'Alex': 'alex@dilfo.com'}
+2208,Ottawa,,OMCIA - CBSA PIK Project,PCL Constructors,OMCIA, ,1,{'Alex': 'alex@dilfo.com'}
+2207,Ottawa,"1125 Colonel By Dr, Maintenance",Carleton U - Subways Restaurant,RE Hein,Carleton U, ,1,{'Alex': 'alex@dilfo.com'}
+2206,Ottawa,29 Beechwood,BMO Beechwood,Corporate Contracting Services Ltd.,Minto, ,1,{'Alex': 'alex@dilfo.com'}
+2203,Ottawa,200 tremblay road,VIA Rail Ottawa Station,Ellis Don,VIA Rail, ,1,{'Alex': 'alex@dilfo.com'}
+2200,Ottawa,"451 Smyth Road, Ottawa, Ontario",Roger Guindon Hall,PCL Constructors,U of O, ,1,{'Alex': 'alex@dilfo.com'}
+2119,Ottawa,405 Terminal Ave,405 Terminal Ave Bldg,Pomerleau,,McKee Engineering,1,{'Alex': 'alex@dilfo.com'}
+2166,Ottawa,"1 Elgin St, Ottawa, ON K1P 5W1",NAC Architectural Rejuvenation,PCL Constructors,National Arts Centre,Crossey Engineering,1,{'Alex': 'alex@dilfo.com'}
+2157,Ottawa,145 Jean Jaques Lucier Private,UofO Learning Centre,Pomerleau,University of Ottawa,MMM,1,{'Alex': 'alex@dilfo.com'}
+2183,Edwardsburgh/Cardinal,Edwardsburgh/Cardinal,Giant Tiger Distirbution Centre,M P Lundy,Giant Tiger,GKC Architects,1,{'Alex': 'alex@dilfo.com'}
+2186,Ottawa,65 University Private,uOttawa - Morisset Satelite Chiller,Thompson Boiler Works,U of O,,1,{'Alex': 'alex@dilfo.com'}
+2188,Ottawa,525 Legget Drive,Brookstreet Hotel Expansion,KRP Properties,Brookstreet Hotel,RJ Mckee,1,{'Alex': 'alex@dilfo.com'}
+2226,Ottawa,160 ElginStreet,160 Elgin TFU (Hillary's and Between Friends),EllisDon Construction,,Petroff,1,{'Alex': 'alex@dilfo.com'}
+2234,Ottawa,343 Preston St,"Adobe 6th and 7th Floor TFU, 343 Preston Street",Giamberardino Contracting Inc,Adobe,HOK,1,{'Alex': 'alex@dilfo.com'}
+2238,Ottawa,3755 Riverside Drive,IBM Phase II,Ark Construction,IBM,McKee Engineering,1,{'Alex': 'alex@dilfo.com'}
+2237,Ottawa,"10 Marie Curie, Ottawa, K1N 9A4",University of Ottawa - Marion Lab Phase II,Morley-Hoppner Construction,uOttawa,N45 Architecture Inc.,1,{'Alex': 'alex@dilfo.com'}
+2300,Ottawa,"785 Goulbourn Forced Road, Ottawa, On",Kanata North Catholic Elementary School,RE Hein Construction,Ottawa Catholic School Board,BRYDEN MARTEL ARCHITECTS INCORPORATED,1,{'Alex': 'alex@dilfo.com'}
+2301,Ottawa,"343 Preston Street, Ottawa",Ottawa Office,The FiA Group,Waterford,Archicana,1,{'Alex': 'alex@dilfo.com'}
+2307,Ottawa,150 Katimavik Road,150 Katimavik Road Unit 9 Fit-Up,Cavanagh Construction Limited,,MCROBIE,1,{'Alex': 'alex@dilfo.com'}
+2272,Ottawa,950 Ages Drive,"PSPC 950 Ages Drive, Base Building",MP Lundy Construction,Dilawri Property Holding Ltd.,P,1,{'Alex': 'alex@dilfo.com'}
+2268,Ottawa,"50 Rideau, Ottawa, Ontario",Farm Boy - Rideau Centre,VCL Construction,Farm Boy Inc,MCROBIE Architects Interior Designers,1,{'Alex': 'alex@dilfo.com'}
+2256,Ottawa,"110 Place d'Orléans Dr, Orléans, ON K1C 2L9",Mark's Work Warehouse - Place D'Orleans,PCL Constructors,PLACE DORLEANS,SMV Architects,1,{'Alex': 'alex@dilfo.com'}
+2089,Ottawa,1081 Ambleside,1081 Ambleside,S&R,,CSV Architects,1,{'Alex': 'alex@dilfo.com'}
+2092,Ottawa,333 Preston,"Sunlife TFU - 333 Preston, 8th Fl",Goven Brown,SunLife Financial,IBI Group,1,{'Alex': 'alex@dilfo.com'}
+2083,Ottawa,3659 Navan Road,Miracle Leauge Support Bldg,Ellis Don,City of Ottawa,HOK ,1,{'Alex': 'alex@dilfo.com'}
+2080,Ottawa,"15 CRESTWAY DRIVE, OTTAWA, ONTARIO",Movati - Barrhaven,R.E. Hein Construction,Movati Athletic,DAVIDSMCROBIE Architects INC,1,{'Alex': 'alex@dilfo.com'}
+2064,Ottawa,1035 Moodie Dr,Insultech - 1035 Moodie Dr,Barbican Construction,INSULTECH,4té,1,{'Alex': 'alex@dilfo.com'}
+2050,Ottawa,333 Preston,Xerox Remodel,Govan Brown,Interprise (XEROX),Atkinson Schroeter Desgin Group ASDG,1,{'Alex': 'alex@dilfo.com'}
+2048,Ottawa,"1500 Shea Road, Ottawa, Ontario",Goulbourn Recreation Complex:Pool,Ruiter,City of Ottawa,N45 Architecture Inc,1,{'Alex': 'alex@dilfo.com'}
+2045,Ottawa,1125 COLONEL BY DRIVE,MacOdrum Library HVAC Upgrades,Black & McDonald,Carleton U,Chorley   Bisset,1,{'Alex': 'alex@dilfo.com'}
+2038,Ottawa,501 Palladium Drive,Lockheed Martin TFU,PCL,Lockheed Martin,Goodkey Weedmark,1,{'Alex': 'alex@dilfo.com'}
+2034,Ottawa,"202 Henderson Avenue, Ottawa",Henderson Student Residence,RE Hein,University of Ottawa,IBI,1,{'Alex': 'alex@dilfo.com'}
+2376,Ottawa,401 SMYTH RD, CHEO Medical Imaging Room Renovation,Bradford,CHILDREN'S HOSPITAL OF EASTERN ONTARIO CHEO,Parkin,1,{'Alex': 'alex@dilfo.com'}
+2346,Ottawa,110 Place D'orleans drive,Place D'orleans Proposed Food Court,PCL,Place D'Orleans,TMP,0,{'Alex': 'alex@dilfo.com'}
+2175,Ottawa,411 Legget Drive,411 Legget Drive - suite 300,KRP Porperties,Apple,IBI Group,1,{'Alex': 'alex@dilfo.com'}
+2322,Ottawa,1125 Colonel By Dr.,Loeb Building Renewal - Phase Three,Fuller Construction,Carleton University,Chorley and Bisset Consulting Engineers,0,{'Alex': 'alex@dilfo.com'}
+2341,Ottawa,501 Smyth Rd,TOH Stem Cell,Frecon Construction,The Ottawa Hospital,WSP,0,{'Alex': 'alex@dilfo.com'}
+2666,Toronto,190 Simco,CLAC Fit-up,fox,,,1,"{'Alex (dilfo)': 'alex@dilfo.com', 'Alex (rare)': 'alex.roy616@me.com'}"
+2434,Ottawa,1625 Vanier Pkwy,DCC Office Fit Up,PCL,Defence Construction Canada (DCC),AECOM,0,"{'Roger': 'Roger.Whilhelm@dilfo.com', 'Alex': 'alex@dilfo.com'}"
+2429,Ottawa,"45 O'Connor Street, Ottawa, Ontario, K1P 1A4",World Exchange Plaza - Chiller Replacement,Dilfo Mechanical,IMC Realty Corporation c/o QuadReal Property Group,Goodkey Weedmark,0,{'Alex': 'alex@dilfo.com'}
+2423,Ottawa,"2390 Stevenage Drive, Ottawa, Ontario",Sysco Tannis Distribution Centre Expansion,BBS Construction,Sysco Tannis,,0,"{'Roger': 'Roger.Whilhelm@dilfo.com', 'Alex': 'alex@dilfo.com'}"
+2432,Ottawa,200 tremblay rd,VIA Rail - Renovation Work to the East and West Wings,EllisDon Construction,VIA RAIL CANADA,PROVENCHER ROY ASSOCIÉS ARCHITECTES INC.,0,"{'Roger': 'Roger.Whilhelm@dilfo.com', 'Alex': 'alex@dilfo.com'}"
+2887,Oshawa,800 taunton,RBC harmony reno,on-site construction,rbc royal bank of canada,wsp,1,{'Alex': 'alex@dilfo.com'}
+2435,Ottawa,1125 COLONEL BY DRIVE,CU MacOdrum Library Room 252A,Maddison Construction,Carleton University,Chorley and Bisset Consulting Engineers,0,"{'Roger': 'Roger.Whilhelm@dilfo.com', 'Alex': 'alex@dilfo.com'}"
