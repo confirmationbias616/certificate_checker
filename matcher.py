@@ -250,13 +250,14 @@ def match(
                 f"found {len(matches)} match{'' if len(matches)==1 else 'es'}! with "
                 f"probability as high as {matches.iloc[0].pred_prob}"
             )
-            logger.info("getting ready to send notification...")
-            communicate(
-                matches.drop(matches.index[1:]),  # sending only top result for now
-                company_project_row,
-                test=test,
-            )
-            comm_count += 1
+            if not test:
+                logger.info("getting ready to send notification...")
+                communicate(
+                    matches.drop(matches.index[1:]),  # sending only top result for now
+                    company_project_row,
+                    test=test,
+                )
+                comm_count += 1
         else:
             logger.info("didn't find any matches")
         try:
