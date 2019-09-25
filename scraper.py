@@ -170,7 +170,6 @@ def scrape(source="dcn", provided_url_key=False, limit=False, since="last_record
         [] for _ in range(8)
     ]
     now = datetime.datetime.now().date()
-    import pdb; pdb.set_trace()
     if provided_url_key:
         get_details(provided_url_key)
         print(title)
