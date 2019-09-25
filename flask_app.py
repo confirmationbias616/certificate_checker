@@ -5,6 +5,7 @@ from datetime import datetime
 from dateutil.parser import parse as parse_date
 from utils import create_connection, load_config
 from matcher import match
+from scraper import scrape
 from communicator import process_as_feedback
 import pandas as pd
 import logging
@@ -472,6 +473,35 @@ def add_contact():
                 [contact.get("name"), contact.get("email_addr"), new_contact_id],
             )
     return redirect(url_for("contact_config"))
+
+@app.route("/interact", methods=["POST", "GET"])
+def interact():
+    if request.method == "POST":
+        if request.form.get('cert_link'):
+            try:
+                url_key = request.form.get('cert_link').split('dcn/certificates-and-notices/')[1]
+                b = scrape(source='dcn', provided_url_key=url_key, test=True)
+            except IndexError:
+                try:
+                    url_key = request.form.get('cert_link').split('ontarioconstructionnews.com/certificates/')[1]
+                    b = scrape(source='ocn', provided_url_key=url_key, test=True)
+                except IndexError:
+                    pass
+            print(b)
+            try:
+                scraped_cert_info = {'cert_'+key: b.iloc[0][key] for key in ['title', 'address', 'city', 'contractor', 'owner', 'engineer']}
+            except NameError:
+                scraped_cert_info = {}
+            return redirect(url_for("interact", **{key: scraped_cert_info.get(key) for key in scraped_cert_info}, cert_link=request.form.get('cert_link')))
+        else:
+            a = pd.DataFrame({key.split('comp_')[1]: [request.form.get(key)] for key in request.form if key.startswith('comp_')})
+            a['job_number']=9999  # this attribute is required by match()
+            b = pd.DataFrame({key.split('cert_')[1]: [request.form.get(key)] for key in request.form if key.startswith('cert_')})
+            match_result = match(company_projects=a, df_web=b, test=True)
+            print(match_result.iloc[0].pred_prob)
+            return redirect(url_for("interact", **{key: request.form.get(key) for key in request.form}, pred_prob=match_result.iloc[0].pred_prob, pred_match=match_result.iloc[0].pred_match))
+    else:
+        return render_template("interact.html", interact=True, **{key: request.args.get(key) for key in request.args})
 
 
 if __name__ == "__main__":

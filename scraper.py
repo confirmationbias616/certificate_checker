@@ -25,11 +25,12 @@ logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
 
-def scrape(source="dcn", limit=False, since="last_record", test=False):
+def scrape(source="dcn", provided_url_key=False, limit=False, since="last_record", test=False):
     """Extracts new certificates by scraping CSP websites and writes data to the web_certificates table in the database.
     
     Parameters:
      - `source` (str): Specifies source webstie being scraped for CSP's. Can be either `dcn` for Daily Commercial News or `ocn` for Ontario Construction News.
+     - `provided_url_key` (str of False): provided_url_key that is to be scraped. False by default.
      - `limit` (int): Specifies a limit for the amount of certificates to be scraped. Default is no limit.
      - `since` (str): Specifies date from when to begin looking for new CSP's. Can be either `last_record` or `yyyy-mm-dd` string format.
      - `test` (bool): Set to True to cancel writing to the database and return DataFrame of scraped certificates instead.
@@ -169,6 +170,23 @@ def scrape(source="dcn", limit=False, since="last_record", test=False):
         [] for _ in range(8)
     ]
     now = datetime.datetime.now().date()
+    import pdb; pdb.set_trace()
+    if provided_url_key:
+        get_details(provided_url_key)
+        print(title)
+        return pd.DataFrame(
+            data={
+                "pub_date": pub_date,
+                "city": city,
+                "address": address,
+                "title": title,
+                "owner": owner,
+                "contractor": contractor,
+                "engineer": engineer,
+                "url_key": url_key,
+                "source": source,
+            }
+        )
     if since == "last_record":
         hist_query = """
             SELECT pub_date 
