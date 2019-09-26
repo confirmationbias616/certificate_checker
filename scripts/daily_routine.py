@@ -23,13 +23,14 @@ def daily_routine(exit_if_stale=False):
     logger.info("initiating daily routine...")
     prob_thresh = load_config()["machine_learning"]["prboability_thresholds"]["general"]
     if "scrape" in load_config()["daily_routine"]["steps"]:
-        fruitful_scraping = False
+        sources_scraped = []
         for source in load_config()["daily_routine"]["scrape_source"]:
             logger.info(f"scrape {source}")
-            fruitful_scraping = scrape(
+            source_scraped = scrape(
                 source=source
             )  # bool whether or not CSP's were retreived
-        if not fruitful_scraping and load_config()["daily_routine"]["exit_if_stale"]:
+            sources_scraped.append(source_scraped)
+        if not any(sources_scraped) and load_config()["daily_routine"]["exit_if_stale"]:
             logger.info("No new CSP certificates today. Exiting early.")
             return  # short-ciruit out since new new CSP's has been collected
     if "train" in load_config()["daily_routine"]["steps"]:
