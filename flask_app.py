@@ -498,13 +498,17 @@ def interact():
             except IndexError:
                 comp_info = {}
             return redirect(url_for("interact", **{key: scraped_cert_info.get(key) for key in scraped_cert_info}, **{key: comp_info.get(key) for key in comp_info}, cert_link=request.form.get('cert_link'), job_number=request.form.get('job_number')))
-        else:
+        elif any(request.form.values()):
+            print(request.form.values())
             a = pd.DataFrame({key.split('comp_')[1]: [request.form.get(key)] for key in request.form if key.startswith('comp_')})
             a['job_number']=9999  # this attribute is required by match()
             b = pd.DataFrame({key.split('cert_')[1]: [request.form.get(key)] for key in request.form if key.startswith('cert_')})
             match_result = match(company_projects=a, df_web=b, test=True)
             print(match_result.iloc[0].pred_prob)
             return redirect(url_for("interact", **{key: request.form.get(key) for key in request.form}, pred_prob=match_result.iloc[0].pred_prob, pred_match=match_result.iloc[0].pred_match))
+        else:
+            return redirect(url_for("interact", **{key: request.form.get(key) for key in request.form}))
+
     else:
         return render_template("interact.html", interact=True, **{key: request.args.get(key) for key in request.args})
 
