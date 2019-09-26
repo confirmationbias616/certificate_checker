@@ -489,7 +489,7 @@ def interact():
                     pass
             try:
                 scraped_cert_info = {'cert_'+key: b.iloc[0][key] for key in ['title', 'address', 'city', 'contractor', 'owner', 'engineer']}
-            except NameError:
+            except (NameError, UnboundLocalError):
                 scraped_cert_info = {}
             try:
                 with create_connection() as conn:
