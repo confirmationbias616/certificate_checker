@@ -12,12 +12,14 @@
 <body>
   {% block body %}
   <br><br>
-  <div align="center">
-    <form action="/interact" name = "get_cert_info" method="POST">
-      <input type="text" name="cert_link" size="35" {% if cert_link %}value="{{cert_link}}" {% else %}placeholder="paste link to specific CSP certificate webpage"{% endif %}>
+  <div align=center>
+    <form action="/interact" name = "get_project_info" method="POST">
+      <input type="text" name="job_number" size="35" {% if cert_link %}value="{{comp_link}}" {% else %}placeholder="enter job number for project in question"{% endif %}>
       <input type="submit" id="small_button" value="extract info">
-  </form>
+      <input type="text" name="cert_link" size="35" {% if cert_link %}value="{{cert_link}}" {% else %}placeholder="paste link to specific CSP certificate webpage"{% endif %}>
+    </form>
   </div>
+  <br><br>
   <form action="/interact" name = "interact" method="POST">
     <fieldset>
       <legend>Project Info</legend>
@@ -72,9 +74,11 @@
       <input type="submit" id="large_button" value="COMPUTE">
     </div>
     <br>
-    <fieldset>
-        <legend>Result</legend>
+    <fieldset display='inline'>
+      <legend>Result</legend>
+      <div align="center">
         {% if pred_prob %} <p>{{ pred_prob }}</p> {% endif %}
+      </div>
     </fieldset>
   </form>
   {% endblock %}

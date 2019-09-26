@@ -172,7 +172,6 @@ def scrape(source="dcn", provided_url_key=False, limit=False, since="last_record
     now = datetime.datetime.now().date()
     if provided_url_key:
         get_details(provided_url_key)
-        print(title)
         return pd.DataFrame(
             data={
                 "pub_date": pub_date,

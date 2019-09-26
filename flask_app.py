@@ -477,22 +477,27 @@ def add_contact():
 @app.route("/interact", methods=["POST", "GET"])
 def interact():
     if request.method == "POST":
-        if request.form.get('cert_link'):
+        if request.form.get('cert_link') or request.form.get('job_number'):
             try:
-                url_key = request.form.get('cert_link').split('dcn/certificates-and-notices/')[1]
+                url_key = request.form.get('cert_link').split("https://canada.constructconnect.com")[1]
                 b = scrape(source='dcn', provided_url_key=url_key, test=True)
             except IndexError:
-                try:
-                    url_key = request.form.get('cert_link').split('ontarioconstructionnews.com/certificates/')[1]
+                url_key = request.form.get('cert_link')
+                if 'ontarioconstructionnews.com' in url_key:
                     b = scrape(source='ocn', provided_url_key=url_key, test=True)
-                except IndexError:
+                else:
                     pass
-            print(b)
             try:
                 scraped_cert_info = {'cert_'+key: b.iloc[0][key] for key in ['title', 'address', 'city', 'contractor', 'owner', 'engineer']}
             except NameError:
                 scraped_cert_info = {}
-            return redirect(url_for("interact", **{key: scraped_cert_info.get(key) for key in scraped_cert_info}, cert_link=request.form.get('cert_link')))
+            try:
+                with create_connection() as conn:
+                    comp_df = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[request.form.get('job_number')])
+                comp_info = {'comp_'+key: comp_df.iloc[0][key] for key in ['title', 'address', 'city', 'contractor', 'owner', 'engineer']}
+            except IndexError:
+                comp_info = {}
+            return redirect(url_for("interact", **{key: scraped_cert_info.get(key) for key in scraped_cert_info}, **{key: comp_info.get(key) for key in comp_info}, cert_link=request.form.get('cert_link'), job_number=request.form.get('job_number')))
         else:
             a = pd.DataFrame({key.split('comp_')[1]: [request.form.get(key)] for key in request.form if key.startswith('comp_')})
             a['job_number']=9999  # this attribute is required by match()
