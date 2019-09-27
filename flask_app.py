@@ -4,6 +4,7 @@ from flask import Flask, render_template, url_for, request, redirect
 from datetime import datetime
 from dateutil.parser import parse as parse_date
 from utils import create_connection, load_config
+from wrangler import wrangle
 from matcher import match
 from scraper import scrape
 from communicator import process_as_feedback
@@ -503,9 +504,49 @@ def interact():
             a = pd.DataFrame({key.split('comp_')[1]: [request.form.get(key)] for key in request.form if key.startswith('comp_')})
             a['job_number']=9999  # this attribute is required by match()
             b = pd.DataFrame({key.split('cert_')[1]: [request.form.get(key)] for key in request.form if key.startswith('cert_')})
+            a_wrangled_df = wrangle(a)
+            b_wrangled_df = wrangle(b)
+            a_wrangled_df = (
+                    a_wrangled_df
+                    .style.set_table_styles(
+                        [
+                            {
+                                "selector": "th",
+                                "props": [
+                                    ("background-color", "rgb(122, 128, 138)"),
+                                    ("color", "black"),
+                                ],
+                            }
+                        ]
+                    )
+                    .set_table_attributes('border="1"')
+                    .set_properties(
+                        **{"font-size": "10pt", "background-color": "rgb(168, 185, 191)"}
+                    )
+                    .set_properties(subset=["action", "job_number"], **{"text-align": "center"})
+                    .hide_index()
+                )
+            b_wrangled_df = (
+                    b_wrangled_df
+                    .style.set_table_styles(
+                        [
+                            {
+                                "selector": "th",
+                                "props": [
+                                    ("background-color", "rgb(122, 128, 138)"),
+                                    ("color", "black"),
+                                ],
+                            }
+                        ]
+                    )
+                    .set_table_attributes('border="1"')
+                    .set_properties(
+                        **{"font-size": "10pt", "background-color": "rgb(168, 185, 191)"}
+                    )
+                    .hide_index()
+                )
             match_result = match(company_projects=a, df_web=b, test=True)
-            print(match_result.iloc[0].pred_prob)
-            return redirect(url_for("interact", **{key: request.form.get(key) for key in request.form}, pred_prob=match_result.iloc[0].pred_prob, pred_match=match_result.iloc[0].pred_match))
+            return redirect(url_for("interact", **{key: request.form.get(key) for key in request.form}, pred_prob=match_result.iloc[0].pred_prob, pred_match=match_result.iloc[0].pred_match, a_wrangled_df=a_wrangled_df.render(escape=False), b_wrangled_df=b_wrangled_df.render(escape=False)))
         else:
             return redirect(url_for("interact", **{key: request.form.get(key) for key in request.form}))
 

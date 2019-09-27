@@ -14,7 +14,7 @@
   <br><br>
   <div align=center>
     <form action="/interact" name = "get_project_info" method="POST">
-      <input type="text" name="job_number" size="35" {% if cert_link %}value="{{comp_link}}" {% else %}placeholder="enter job number for project in question"{% endif %}>
+      <input type="text" name="job_number" size="35" {% if job_number %}value="{{job_number}}" {% else %}placeholder="enter job number for project in question"{% endif %}>
       <input type="submit" id="small_button" value="extract info">
       <input type="text" name="cert_link" size="35" {% if cert_link %}value="{{cert_link}}" {% else %}placeholder="paste link to specific CSP certificate webpage"{% endif %}>
     </form>
@@ -74,13 +74,27 @@
       <input type="submit" id="large_button" value="COMPUTE">
     </div>
     <br>
-    <fieldset display='inline'>
+    <fieldset display='block'>
       <legend>Result</legend>
       <div align="center">
         {% if pred_prob %} <p>{{ pred_prob }}</p> {% endif %}
       </div>
     </fieldset>
   </form>
+  <div display="block"><br><br><br><br><br></div>
+  <br><br>
+  <h5>
+    Wrangled Company Info:
+  </h5>
+  <p>
+    {{a_wrangled_df | safe}}
+  </p><br>
+  <h5>
+    Wrangled CSP Info:
+  </h5>
+  <p>
+    {{b_wrangled_df | safe}}
+  </p>
   {% endblock %}
 </body>
 </html>
