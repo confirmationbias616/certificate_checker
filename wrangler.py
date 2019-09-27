@@ -238,5 +238,4 @@ def wrangle(df):
     for attr in ["title", "owner", "contractor"]:
         df[f"{attr}_acronyms"] = df[attr].apply(get_acronyms)
     df['total_string_dump'] = df.apply(concat_all_fields, axis=1)
-    df = df.drop('address', axis=1)
     return df
