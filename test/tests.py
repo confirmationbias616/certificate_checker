@@ -152,7 +152,8 @@ class TestWrangleFuncs(unittest.TestCase):
             "451",
             "smyth",
         ),
-        ("145 Jean-Jacques Lussier", "145", "jean-jacques"),
+        ("145 Jean-Jacques Lussier", "145", "jean"),
+        ("145 Jean Jacques Lussier", "145", "jean"),
         ("Edwardsburgh/Cardinal", "", ""),
     )
 
@@ -168,7 +169,7 @@ class TestWrangleFuncs(unittest.TestCase):
         output_string = get_street_name(input_string)
         self.assertEqual(desired_string2, output_string)
 
-    @data((" ", ""), ("test", "test"), ("testé", "teste"))
+    @data((" ", ""), ("test", "test"), ("testé l'apostrophe", "testelapostrophe"), ("u. of o...", "uofo"), ("PDV: Fit-Up;", "pdvfitup"))
     @unpack
     def test_clean_title(self, input_string, desired_string):
         output_string = clean_title(input_string)
