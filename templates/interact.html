@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  <link href="https://fonts.googleapis.com/css?family=Roboto+Mono&display=swap" rel="stylesheet">
+  <link href="{{ url_for('static',filename='style.css') }}" rel="stylesheet" type="text/css">
+  {% endblock %}
+</head>
+
+<body>
+  {% block body %}
+  <br><br>
+  <div align=center>
+    <form action="/interact" name = "get_project_info" method="POST">
+      <input type="text" name="job_number" size="35" {% if job_number %}value="{{job_number}}" {% else %}placeholder="enter job number for project in question"{% endif %}>
+      <input type="submit" id="small_button" value="extract info">
+      <input type="text" name="cert_link" size="35" {% if cert_link %}value="{{cert_link}}" {% else %}placeholder="paste link to specific CSP certificate webpage"{% endif %}>
+    </form>
+  </div>
+  <br><br>
+  <form action="/interact" name = "interact" method="POST">
+    <fieldset>
+      <legend>Project Info</legend>
+      <div>
+        <p2>Project Title</p2><br>
+        <input type="text" name="comp_title" size="35" {% if comp_title %}value="{{comp_title}}" {% else %}placeholder="ABC Tower D - Disruptek Office Fit-Up"{% endif %}  {% if job_number %} autofocus {% endif %}>
+      </div><br>
+      <div>
+        <p2>City</p2><br>
+        <input type="text" name="comp_city" size="12" {% if comp_city %}value="{{comp_city}}" {% else %}placeholder="Ottawa"{% endif %} >
+      </div><br>
+      <div>
+        <p2>Address</p2><br>
+        <input type="text" name="comp_address" size="20" {% if comp_address %}value="{{comp_address}}" {% else %}placeholder="123 Fake Street"{% endif %} >
+      </div><br>
+      <div>
+        <p2>General Contractor</p2><br>
+        <input type="text" name="comp_contractor" size="30" {% if comp_contractor %}value="{{comp_contractor}}" {% else %}placeholder="MegaCon Builders"{% endif %} >
+      </div><br>
+      <p2>Owner</p2><br>
+        <input type="text" name="comp_owner" size="30" {% if comp_owner %}value="{{comp_owner}}" {% else %}placeholder="ASAP Properties Inc."{% endif %}>
+      <br><br>
+      <p2>Certifier</p2><br>
+        <input type="text" name="comp_engineer" size="30" {% if comp_engineer %}value="{{comp_engineer}}" {% else %}placeholder="Superior Associates Limited"{% endif %} title="Typically, this is the architect of record.">
+    </fieldset>
+    <fieldset>
+      <legend>CSP Info</legend>
+      <div>
+        <p2>Project Title</p2><br>
+        <input type="text" name="cert_title" size="35" {% if cert_title %}value="{{cert_title}}" {% else %}placeholder="ABC Tower D - Disruptek Office Fit-Up"{% endif %}  {% if job_number %} autofocus {% endif %}>
+      </div><br>
+      <div>
+        <p2>City</p2><br>
+        <input type="text" name="cert_city" size="12" {% if cert_city %}value="{{cert_city}}" {% else %}placeholder="Ottawa"{% endif %} >
+      </div><br>
+      <div>
+        <p2>Address</p2><br>
+        <input type="text" name="cert_address" size="20" {% if cert_address %}value="{{cert_address}}" {% else %}placeholder="123 Fake Street"{% endif %} >
+      </div><br>
+      <div>
+        <p2>General Contractor</p2><br>
+        <input type="text" name="cert_contractor" size="30" {% if cert_contractor %}value="{{cert_contractor}}" {% else %}placeholder="MegaCon Builders"{% endif %} >
+      </div><br>
+      <p2>Owner</p2><br>
+        <input type="text" name="cert_owner" size="30" {% if cert_owner %}value="{{cert_owner}}" {% else %}placeholder="ASAP Properties Inc."{% endif %}>
+      <br><br>
+      <p2>Certifier</p2><br>
+        <input type="text" name="cert_engineer" size="30" {% if cert_engineer %}value="{{cert_engineer}}" {% else %}placeholder="Superior Associates Limited"{% endif %} title="Typically, this is the architect of record.">
+    </fieldset>
+    <br><br>
+    <div align="center">
+      <input type="submit" id="large_button" value="COMPUTE">
+    </div>
+    <br>
+    <fieldset display='block'>
+      <legend>Result</legend>
+      <div align="center">
+        {% if pred_prob %} <p>{{ pred_prob }}</p> {% endif %}
+      </div>
+    </fieldset>
+  </form>
+  <div display="block"><br><br><br><br><br></div>
+  <br><br>
+  <h5>
+    Wrangled Company Info:
+  </h5>
+  <p>
+    {{a_wrangled_df | safe}}
+  </p><br>
+  <h5>
+    Wrangled CSP Info:
+  </h5>
+  <p>
+    {{b_wrangled_df | safe}}
+  </p>
+  {% endblock %}
+</body>
+</html>

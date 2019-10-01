@@ -50,7 +50,7 @@
 </body>
 <footer>
     {% block footer %}
-    {% if (not home) or job_number%}
+    {% if (not interact) and (not home or job_number) %}
     <div align="center">
         <br><br>
         <form action="/" method="GET">

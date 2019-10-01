@@ -25,11 +25,14 @@ logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
 
-def scrape(source="dcn", limit=False, since="last_record", test=False):
+def scrape(
+    source="dcn", provided_url_key=False, limit=False, since="last_record", test=False
+):
     """Extracts new certificates by scraping CSP websites and writes data to the web_certificates table in the database.
     
     Parameters:
      - `source` (str): Specifies source webstie being scraped for CSP's. Can be either `dcn` for Daily Commercial News or `ocn` for Ontario Construction News.
+     - `provided_url_key` (str of False): provided_url_key that is to be scraped. False by default.
      - `limit` (int): Specifies a limit for the amount of certificates to be scraped. Default is no limit.
      - `since` (str): Specifies date from when to begin looking for new CSP's. Can be either `last_record` or `yyyy-mm-dd` string format.
      - `test` (bool): Set to True to cancel writing to the database and return DataFrame of scraped certificates instead.
@@ -43,7 +46,7 @@ def scrape(source="dcn", limit=False, since="last_record", test=False):
     # Initialize string and lambda functions based on source :
     def get_details(entry):
         entry = base_url + entry
-        url_key.append(entry.split(base_aug_url)[1])
+        url_key = entry.split(base_aug_url)[1]
         while True:
             try:
                 response = requests.get(entry)
@@ -53,66 +56,125 @@ def scrape(source="dcn", limit=False, since="last_record", test=False):
                 continue
         html = response.content
         entry_soup = BeautifulSoup(html, "html.parser")
-        pub_date.append(get_pub_date(entry_soup))
-        city.append(get_city(entry_soup))
-        address.append(get_address(entry_soup))
-        title.append(get_title(entry_soup))
-        company_soup = get_company_soup(entry_soup)
-        company_results = get_company_results(company_soup)
-        lookup = {
-            company_term["owner"]: owner,
-            company_term["contractor"]: contractor,
-            company_term["engineer"]: engineer,
-        }
-        for key in lookup:
-            lookup[key].append(company_results.get(key, np.nan))
+        if source == "dcn":
+            pub_date = entry_soup.find("time").get_text()
+            cert_type = entry_soup.find("h1").get_text()
+            if cert_type == "Certificates and Notices":
+                cert_type = (
+                    "csp"
+                )  # old style -> assume csp by default even if it might not be true
+                city = (
+                    entry_soup.find("div", {"class": "content-left"})
+                    .find("h4")
+                    .get_text()
+                )
+                address = entry_soup.find("p", {"class": "print-visible"}).get_text()
+                title = (
+                    entry_soup.find_all("section", {"class": "content"})[3]
+                    .find("p")
+                    .get_text()
+                )
+            else:
+                cert_type = (
+                    "csp"
+                    if cert_type == "Certificate of Substantial Performance"
+                    else cert_type
+                )
+                city = entry_soup.find_all("dl")[0].find("dt").get_text()
+                address = entry_soup.find_all("dl")[1].find("dt").get_text()
+                title = entry_soup.find_all("dl")[2].find("dd").get_text()
+                if address.startswith('This is to certify'):  # no address available. chnage sequence going forward
+                    address = ''
+                    title = entry_soup.find_all("dl")[1].find("dd").get_text()
+            company_results = {
+                key.get_text(): value.get_text()
+                for key, value in zip(
+                    entry_soup.find_all("dt"), entry_soup.find_all("dd")
+                )
+            }
+            owner = company_results.get("Name of owner:", company_results.get("Name of Owner", np.nan))
+            contractor = company_results.get("Name of contractor:", company_results.get("Name of Contractor", np.nan))
+            engineer = company_results.get("Name of payment certifier:", company_results.get("Name of Certifier", np.nan))
+            if engineer == np.nan:
+                engineer = company_results.get("Name of certifier:", np.nan)
+        elif source == "ocn":
+            if 'Non-Payment' in entry_soup.find("h1", {"class": "entry-title"}).get_text():
+                cert_type = 'np'
+            else:
+                cert_type = 'csp'
+            pub_date = str(
+                dateutil.parser.parse(entry_soup.find("date").get_text()).date()
+            )
+            city = entry_soup.find("h1", {"class": "entry-title"}).get_text().split(':')[0]
+            address = (
+                entry_soup.find("div", {"class": "ocn-certificate"})
+                .find("p")
+                .get_text()
+            )
+            title = (
+                entry_soup.find("h2", {"class": "ocn-heading"})
+                .find_next_sibling("p")
+                .get_text()
+            )
+            if cert_type == 'csp':
+                company_soup = entry_soup.find("div", {"class": "ocn-participant-wrap"})
+                company_results = {
+                    key.get_text(): value.get_text()
+                    for key, value in zip(
+                        company_soup.find_all("div", {"class": "participant-type"})[::2],
+                        company_soup.find_all("div", {"class": "participant-name-wrap"}),
+                    )
+                }
+                owner = company_results.get("Name of Owner", np.nan)
+                contractor = company_results.get("Name of Contractor", np.nan)
+                engineer = company_results.get("Name of Payment Certifier", np.nan)
+            elif cert_type == 'np':
+                for x in entry_soup.find_all('strong'):
+                    try:
+                        if x.get_text()=="Name of owner:":
+                            owner = x.find_parent().get_text().split(': ')[1]
+                        if x.get_text()=="Name of contractor:":
+                            contractor = x.find_parent().get_text().split(': ')[1]
+                    except AttributeError:
+                        pass
+                engineer = np.nan
+        return (
+            pub_date,
+            city,
+            address,
+            title,
+            owner,
+            contractor,
+            engineer,
+            url_key,
+            cert_type,
+            source,
+        )
 
+    pub_date, city, address, title, owner, contractor, engineer, url_key, cert_type = [
+        [] for _ in range(9)
+    ]
+    now = datetime.datetime.now().date()
     if source == "dcn":
+        base_url = "https://canada.constructconnect.com"
+        base_aug_url = (
+            "https://canada.constructconnect.com/dcn/certificates-and-notices/"
+        )
         base_search_url = "https://canada.constructconnect.com/dcn/certificates-and-\
                 notices?perpage=1000&phrase=&sort=publish_date&owner=&contractor="
         custom_param_url = "&date=custom&date_from={}&date_to={}#results"
         get_number_of_matches = lambda soup: int(
             re.compile("\d\d*").findall(
-                (soup.find("h4", {"class": "search-total h-normalize"}).get_text())
+                (soup.find("span", {"class": "search-results__total"}).get_text())
             )[0]
         )
-        get_pub_date = lambda entry_soup: entry_soup.find("time").get_text()
-        get_city = (
-            lambda entry_soup: entry_soup.find("div", {"class": "content-left"})
-            .find("h4")
-            .get_text()
-        )
-        get_address = lambda entry_soup: entry_soup.find(
-            "p", {"class": "print-visible"}
-        ).get_text()
-        get_title = (
-            lambda entry_soup: entry_soup.find_all("section", {"class": "content"})[3]
-            .find("p")
-            .get_text()
-        )
-        get_company_soup = lambda entry_soup: entry_soup.find_all(
-            "section", {"class": "content"}
-        )[4]
-        get_company_results = lambda company_soup: {
-            key.get_text(): value.get_text()
-            for key, value in zip(
-                company_soup.find_all("dt"), company_soup.find_all("dd")
-            )
-        }
-        company_term = {
-            "owner": "Name of Owner",
-            "contractor": "Name of Contractor",
-            "engineer": "Name of Certifier",
-        }
         get_entries = lambda soup: [
             x.find("a").get("href")
             for x in soup.find_all("article", {"class": "cards-item"})
         ]
-        base_url = "https://canada.constructconnect.com"
-        base_aug_url = (
-            "https://canada.constructconnect.com/dcn/certificates-and-notices/"
-        )
     elif source == "ocn":
+        base_url = ""
+        base_aug_url = "https://ontarioconstructionnews.com/certificates/"
         base_search_url = "https://ontarioconstructionnews.com/certificates/?\
             per_page=1000&certificates_page=1&search=&form_id=&owner_name_like\
                 =&contractor_name_like="
@@ -126,49 +188,28 @@ def scrape(source="dcn", limit=False, since="last_record", test=False):
                 .split(" of ")[1]
             )
         )
-        get_pub_date = lambda entry_soup: str(
-            dateutil.parser.parse(entry_soup.find("date").get_text()).date()
-        )
-        get_city = lambda entry_soup: entry_soup.find(
-            "h2", {"class": "ocn-subheading"}
-        ).get_text()
-        get_address = (
-            lambda entry_soup: entry_soup.find("div", {"class": "ocn-certificate"})
-            .find("p")
-            .get_text()
-        )
-        get_title = (
-            lambda entry_soup: entry_soup.find("h2", {"class": "ocn-heading"})
-            .find_next_sibling("p")
-            .get_text()
-        )
-        get_company_soup = lambda entry_soup: entry_soup.find(
-            "div", {"class": "ocn-participant-wrap"}
-        )
-        get_company_results = lambda company_soup: {
-            key.get_text(): value.get_text()
-            for key, value in zip(
-                company_soup.find_all("div", {"class": "participant-type"})[::2],
-                company_soup.find_all("div", {"class": "participant-name-wrap"}),
-            )
-        }
-        company_term = {
-            "owner": "Name of Owner",
-            "contractor": "Name of Contractor",
-            "engineer": "Name of Payment Certifier",
-        }
         get_entries = lambda soup: [
             x.find("a").get("href")
             for x in soup.find_all("td", {"class": "col-location"})
         ]
-        base_url = ""
-        base_aug_url = "https://ontarioconstructionnews.com/certificates/"
     else:
         raise ValueError("Must specify CSP source.")
-    pub_date, city, address, title, owner, contractor, engineer, url_key = [
-        [] for _ in range(8)
-    ]
-    now = datetime.datetime.now().date()
+    if provided_url_key:
+        details = get_details(provided_url_key)
+        return pd.DataFrame(
+            data={
+                "pub_date": details[0],
+                "city": details[1],
+                "address": details[2],
+                "title": details[3],
+                "owner": details[4],
+                "contractor": details[5],
+                "engineer": details[6],
+                "url_key": details[7],
+                "cert_type": details[8],
+                "source": [source] * len(details[0]),
+            }
+        )
     if since == "last_record":
         hist_query = """
             SELECT pub_date 
@@ -213,7 +254,11 @@ def scrape(source="dcn", limit=False, since="last_record", test=False):
     bar.start()
     entries = get_entries(soup)
     for i, entry in enumerate(entries, 1):
-        get_details(entry)
+        for cumulative, item in zip(
+            [pub_date, city, address, title, owner, contractor, engineer, url_key, cert_type],
+            get_details(entry),
+        ):
+            cumulative.append(item)
         if limit and (i >= limit):
             logger.info("limit reached - breaking out of loop.")
             break
@@ -227,6 +272,7 @@ def scrape(source="dcn", limit=False, since="last_record", test=False):
             .iloc[0]
             .cert_id
         )
+    # import pdb; pdb.set_trace()
     df_web = pd.DataFrame(
         data={
             "pub_date": pub_date,
@@ -237,7 +283,8 @@ def scrape(source="dcn", limit=False, since="last_record", test=False):
             "contractor": contractor,
             "engineer": engineer,
             "url_key": url_key,
-            "source": source,
+            "cert_type": cert_type,
+            "source": [source] * len(pub_date),
         }
     )
     df_web = df_web.sort_values("pub_date", ascending=True)
@@ -260,6 +307,7 @@ def scrape(source="dcn", limit=False, since="last_record", test=False):
         "contractor",
         "engineer",
         "url_key",
+        "cert_type",
         "source",
     ]
     query = f""" 

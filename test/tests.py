@@ -152,7 +152,8 @@ class TestWrangleFuncs(unittest.TestCase):
             "451",
             "smyth",
         ),
-        ("145 Jean-Jacques Lussier", "145", "jean-jacques"),
+        ("145 Jean-Jacques Lussier", "145", "jean"),
+        ("145 Jean Jacques Lussier", "145", "jean"),
         ("Edwardsburgh/Cardinal", "", ""),
     )
 
@@ -168,7 +169,13 @@ class TestWrangleFuncs(unittest.TestCase):
         output_string = get_street_name(input_string)
         self.assertEqual(desired_string2, output_string)
 
-    @data((" ", ""), ("test", "test"), ("testé", "teste"))
+    @data(
+        (" ", ""),
+        ("test", "test"),
+        ("testé l'apostrophe", "testelapostrophe"),
+        ("u. of o...", "uofo"),
+        ("PDV: Fit-Up;", "pdvfitup"),
+    )
     @unpack
     def test_clean_title(self, input_string, desired_string):
         output_string = clean_title(input_string)
@@ -210,6 +217,13 @@ class InputTests(unittest.TestCase):
             limit=test_limit,
             test=True,
             since=str(datetime.datetime.now().date() - datetime.timedelta(7)),
+        )
+        self.assertEqual(len(web_df), test_limit)
+        web_df = scrape(
+            source=source,
+            limit=test_limit,
+            test=True,
+            since='2019-09-01',
         )
         self.assertEqual(len(web_df), test_limit)
         # need more assertions here to endure quality of scraped data
@@ -265,7 +279,9 @@ class InputTests(unittest.TestCase):
             self.assertEqual(expected_delete_success, delete_success)
 
     def test_exact_match_project(self):
-        scrape(source='dcn', limit=1, test=False)  # to get recent cert in database from within in case test csv's are outdated
+        scrape(
+            source="dcn", limit=1, test=False
+        )  # to get recent cert in database from within in case test csv's are outdated
         build_train_set()
         train_model(prob_thresh=prob_thresh)
         for filename in ["rf_model.pkl", "rf_features.pkl"]:
@@ -285,7 +301,7 @@ class InputTests(unittest.TestCase):
         base_url = "http://127.0.0.1:5000"
         br.open(base_url)
         br.select_form("job_entry")
-        br.form["job_number"] = '9999'
+        br.form["job_number"] = "9999"
         for field_name in [
             "title",
             "city",
@@ -302,7 +318,9 @@ class InputTests(unittest.TestCase):
             pass
         br.select_form(nr=0)
         br.submit()
-        self.assertEqual(re.findall('(?<=url_key=).*', br.geturl())[0], latest_web_cert['url_key'])
+        self.assertEqual(
+            re.findall("(?<=url_key=).*", br.geturl())[0], latest_web_cert["url_key"]
+        )
 
 
 class IntegrationTests(unittest.TestCase):
