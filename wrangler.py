@@ -174,7 +174,7 @@ def get_street_name(raw):
         name = rest.split(" ")[0]
     except IndexError:
         pass
-    if '-' in name:
+    if "-" in name:
         name = rest.split("-")[0]
     if name.isalpha() or "-" in name:
         return name
@@ -187,13 +187,25 @@ def clean_title(raw):
         return ""
     raw = unidecode.unidecode(raw)
     title = raw.lower()
-    for stop in [' ', ':', '-', ':', ';', '.', "'"]:
+    for stop in [" ", ":", "-", ":", ";", ".", "'"]:
         title = "".join([word for word in title.split(stop)])
     return title
 
 
 def concat_all_fields(row):
-    return ''.join([str(x) for x in [row.title, row.city, row.owner, row.street_number, row.street_name] if x is not None])
+    return "".join(
+        [
+            str(x)
+            for x in [
+                row.title,
+                row.city,
+                row.owner,
+                row.street_number,
+                row.street_name,
+            ]
+            if x is not None
+        ]
+    )
 
 
 def wrangle(df):
@@ -237,5 +249,5 @@ def wrangle(df):
         df[attr] = df["address"].astype("str").apply(get_address_ops[attr])
     for attr in ["title", "owner", "contractor"]:
         df[f"{attr}_acronyms"] = df[attr].apply(get_acronyms)
-    df['total_string_dump'] = df.apply(concat_all_fields, axis=1)
+    df["total_string_dump"] = df.apply(concat_all_fields, axis=1)
     return df

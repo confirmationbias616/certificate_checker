@@ -30,7 +30,7 @@ def load_config():
 def save_config(config):
     """Saves updated `config` object to file as `cert_config.yml` use in conjunction with
     load_config()"""
-    with open('cert_config.yml', 'w') as stream:
+    with open("cert_config.yml", "w") as stream:
         yaml.dump(config, stream=stream)
 
 
