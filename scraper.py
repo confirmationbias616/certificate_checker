@@ -92,9 +92,9 @@ def scrape(
                     entry_soup.find_all("dt"), entry_soup.find_all("dd")
                 )
             }
-            owner = company_results.get("Name of owner:", company_results.get("Name of Owner:", np.nan))
-            contractor = company_results.get("Name of contractor:", company_results.get("Name of Contractor:", np.nan))
-            engineer = company_results.get("Name of payment certifier:", company_results.get("Name of Certifier:", np.nan))
+            owner = company_results.get("Name of owner:", company_results.get("Name of Owner", np.nan))
+            contractor = company_results.get("Name of contractor:", company_results.get("Name of Contractor", np.nan))
+            engineer = company_results.get("Name of payment certifier:", company_results.get("Name of Certifier", np.nan))
             if engineer == np.nan:
                 engineer = company_results.get("Name of certifier:", np.nan)
         elif source == "ocn":
