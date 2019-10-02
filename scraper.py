@@ -94,9 +94,7 @@ def scrape(
             }
             owner = company_results.get("Name of owner:", company_results.get("Name of Owner", np.nan))
             contractor = company_results.get("Name of contractor:", company_results.get("Name of Contractor", np.nan))
-            engineer = company_results.get("Name of payment certifier:", company_results.get("Name of Certifier", np.nan))
-            if engineer == np.nan:
-                engineer = company_results.get("Name of certifier:", np.nan)
+            engineer = company_results.get("Name of payment certifier:", company_results.get("Name of Certifier", company_results.get("Name of certifier:", np.nan)))
         elif source == "ocn":
             if 'Non-Payment' in entry_soup.find("h1", {"class": "entry-title"}).get_text():
                 cert_type = 'np'
@@ -106,17 +104,17 @@ def scrape(
                 dateutil.parser.parse(entry_soup.find("date").get_text()).date()
             )
             city = entry_soup.find("h1", {"class": "entry-title"}).get_text().split(':')[0]
-            address = (
-                entry_soup.find("div", {"class": "ocn-certificate"})
-                .find("p")
-                .get_text()
-            )
-            title = (
-                entry_soup.find("h2", {"class": "ocn-heading"})
-                .find_next_sibling("p")
-                .get_text()
-            )
             if cert_type == 'csp':
+                address = (
+                    entry_soup.find("div", {"class": "ocn-certificate"})
+                    .find("p")
+                    .get_text()
+                )
+                title = (
+                    entry_soup.find("h2", {"class": "ocn-heading"})
+                    .find_next_sibling("p")
+                    .get_text()
+                )
                 company_soup = entry_soup.find("div", {"class": "ocn-participant-wrap"})
                 company_results = {
                     key.get_text(): value.get_text()
@@ -129,6 +127,8 @@ def scrape(
                 contractor = company_results.get("Name of Contractor", np.nan)
                 engineer = company_results.get("Name of Payment Certifier", np.nan)
             elif cert_type == 'np':
+                address = entry_soup.find("h4", {"class":"ocn-subheading"}).find_next("p").get_text()
+                title = address  # temporary until we see more of these
                 for x in entry_soup.find_all('strong'):
                     try:
                         if x.get_text()=="Name of owner:":
