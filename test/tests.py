@@ -228,6 +228,19 @@ class InputTests(unittest.TestCase):
         self.assertEqual(len(web_df), test_limit)
         # need more assertions here to endure quality of scraped data
 
+    @data(("/dcn/certificates-and-notices/247FE31E-933A-4632-80FD-B98521CD0E69", "dcn", "csp", "\n  2019-10-01\n", "Regional Municipality of Metropolitan Toronto", "St. Edmund Campion Catholic School, 30 Highcastle Road, Toronto, Ontario", "Foundation Repairs", "Toronto Catholic District School Board", "Colonial Building Restoration", "TSS Building Science Inc."))
+    @unpack
+    def test_scarpe_with_provided_key(self, url_key, source, cert_type, pub_date, city, address, title, owner, contractor, engineer):
+        scraped_data = scrape(source=source, provided_url_key=url_key, test=True).iloc[0]
+        self.assertEqual(cert_type, scraped_data['cert_type'])
+        self.assertEqual(pub_date, scraped_data['pub_date'])
+        self.assertEqual(city, scraped_data['city'])
+        self.assertEqual(address, scraped_data['address'])
+        self.assertEqual(title, scraped_data['title'])
+        self.assertEqual(owner, scraped_data['owner'])
+        self.assertEqual(contractor, scraped_data['contractor'])
+        self.assertEqual(engineer, scraped_data['engineer'])
+
     @data(("9999", True, True, True), ("9998", False, False, False))
     @unpack
     def test_input_project(
