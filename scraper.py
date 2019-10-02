@@ -83,8 +83,10 @@ def scrape(
                 city = entry_soup.find_all("dl")[0].find("dt").get_text()
                 address = entry_soup.find_all("dl")[1].find("dt").get_text()
                 title = entry_soup.find_all("dl")[2].find("dd").get_text()
-                if address.startswith('This is to certify'):  # no address available. chnage sequence going forward
-                    address = ''
+                if address.startswith(
+                    "This is to certify"
+                ):  # no address available. chnage sequence going forward
+                    address = ""
                     title = entry_soup.find_all("dl")[1].find("dd").get_text()
             company_results = {
                 key.get_text(): value.get_text()
@@ -92,19 +94,34 @@ def scrape(
                     entry_soup.find_all("dt"), entry_soup.find_all("dd")
                 )
             }
-            owner = company_results.get("Name of owner:", company_results.get("Name of Owner", np.nan))
-            contractor = company_results.get("Name of contractor:", company_results.get("Name of Contractor", np.nan))
-            engineer = company_results.get("Name of payment certifier:", company_results.get("Name of Certifier", company_results.get("Name of certifier:", np.nan)))
+            owner = company_results.get(
+                "Name of owner:", company_results.get("Name of Owner", np.nan)
+            )
+            contractor = company_results.get(
+                "Name of contractor:", company_results.get("Name of Contractor", np.nan)
+            )
+            engineer = company_results.get(
+                "Name of payment certifier:",
+                company_results.get(
+                    "Name of Certifier",
+                    company_results.get("Name of certifier:", np.nan),
+                ),
+            )
         elif source == "ocn":
-            if 'Non-Payment' in entry_soup.find("h1", {"class": "entry-title"}).get_text():
-                cert_type = 'np'
+            if (
+                "Non-Payment"
+                in entry_soup.find("h1", {"class": "entry-title"}).get_text()
+            ):
+                cert_type = "np"
             else:
-                cert_type = 'csp'
+                cert_type = "csp"
             pub_date = str(
                 dateutil.parser.parse(entry_soup.find("date").get_text()).date()
             )
-            city = entry_soup.find("h1", {"class": "entry-title"}).get_text().split(':')[0]
-            if cert_type == 'csp':
+            city = (
+                entry_soup.find("h1", {"class": "entry-title"}).get_text().split(":")[0]
+            )
+            if cert_type == "csp":
                 address = (
                     entry_soup.find("div", {"class": "ocn-certificate"})
                     .find("p")
@@ -119,22 +136,30 @@ def scrape(
                 company_results = {
                     key.get_text(): value.get_text()
                     for key, value in zip(
-                        company_soup.find_all("div", {"class": "participant-type"})[::2],
-                        company_soup.find_all("div", {"class": "participant-name-wrap"}),
+                        company_soup.find_all("div", {"class": "participant-type"})[
+                            ::2
+                        ],
+                        company_soup.find_all(
+                            "div", {"class": "participant-name-wrap"}
+                        ),
                     )
                 }
                 owner = company_results.get("Name of Owner", np.nan)
                 contractor = company_results.get("Name of Contractor", np.nan)
                 engineer = company_results.get("Name of Payment Certifier", np.nan)
-            elif cert_type == 'np':
-                address = entry_soup.find("h4", {"class":"ocn-subheading"}).find_next("p").get_text()
+            elif cert_type == "np":
+                address = (
+                    entry_soup.find("h4", {"class": "ocn-subheading"})
+                    .find_next("p")
+                    .get_text()
+                )
                 title = address  # temporary until we see more of these
-                for x in entry_soup.find_all('strong'):
+                for x in entry_soup.find_all("strong"):
                     try:
-                        if x.get_text()=="Name of owner:":
-                            owner = x.find_parent().get_text().split(': ')[1]
-                        if x.get_text()=="Name of contractor:":
-                            contractor = x.find_parent().get_text().split(': ')[1]
+                        if x.get_text() == "Name of owner:":
+                            owner = x.find_parent().get_text().split(": ")[1]
+                        if x.get_text() == "Name of contractor:":
+                            contractor = x.find_parent().get_text().split(": ")[1]
                     except AttributeError:
                         pass
                 engineer = np.nan
@@ -255,7 +280,17 @@ def scrape(
     entries = get_entries(soup)
     for i, entry in enumerate(entries, 1):
         for cumulative, item in zip(
-            [pub_date, city, address, title, owner, contractor, engineer, url_key, cert_type],
+            [
+                pub_date,
+                city,
+                address,
+                title,
+                owner,
+                contractor,
+                engineer,
+                url_key,
+                cert_type,
+            ],
             get_details(entry),
         ):
             cumulative.append(item)
