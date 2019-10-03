@@ -166,7 +166,7 @@ def train_model(
         with open('results.json') as f:
             results = json.load(f)
         if results.get(datetime.datetime.now(), False):
-            results[datetime.datetime.now().date()].update({'features' : X.columns})
+            results[datetime.datetime.now().date()].update({'features' : list(X.columns)})
         else:
             results.update({datetime.datetime.now().date():{
                 'features' : X.columns,
