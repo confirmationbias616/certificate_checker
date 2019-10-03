@@ -165,7 +165,7 @@ def train_model(
     if not load_config()["daily_routine"]["test"]:  # log results only if not in testing env (production only)
         with open('results.json') as f:
             results = json.load(f)
-        if results.get(datetime.now(), False):
+        if results.get(datetime.datetime.now(), False):
             results[datetime.datetime.now().date()].update({'features' : X.columns})
         else:
             results.update({datetime.datetime.now().date():{
