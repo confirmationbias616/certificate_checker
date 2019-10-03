@@ -1,1 +1,5 @@
-{"test": "test"}
+{
+    "fruit": "Apple",
+    "size": "Large",
+    "color": "Red"
+}
