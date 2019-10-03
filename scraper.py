@@ -307,7 +307,6 @@ def scrape(
             .iloc[0]
             .cert_id
         )
-    # import pdb; pdb.set_trace()
     df_web = pd.DataFrame(
         data={
             "pub_date": pub_date,
