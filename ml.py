@@ -162,7 +162,7 @@ def train_model(
     df = pd.read_csv("./train_set.csv")
     X = df[[x for x in df.columns if x.endswith("_score")]]
     save_feature_list(X.columns)
-    if not test:  # log results only if not in testing env (production only)
+    if not load_config()["daily_routine"]["test"]:  # log results only if not in testing env (production only)
         with open('results.json') as f:
             results = json.load(f)
         if results.get(datetime.now(), False):
