@@ -376,7 +376,7 @@ def validate_model(**kwargs):
     new_min_prob = round(min(new_pred_probs), 3)
     sq_avg_prob = round(sum(sq_pred_probs) / len(sq_pred_probs), 3)
     new_avg_prob = round(sum(new_pred_probs) / len(new_pred_probs), 3)
-    if not test:  # log results only if not in testing env (production only)
+    if not load_config()["daily_routine"]["test"]:  # log results only if not in testing env (production only)
         with open('results.json') as f:
             results = json.load(f)
         results.update({datetime.datetime.now().date():{
