@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from flask import Flask, render_template, url_for, request, redirect
-from datetime import datetime
+import datetime
 from dateutil.parser import parse as parse_date
 from utils import create_connection, load_config
 from wrangler import wrangle
@@ -238,7 +238,7 @@ def summary_table():
 
         def highlight_pending(s):
             days_old = (
-                datetime.now().date()
+                datetime.datetime.now().date()
                 - parse_date(re.findall("\d{4}-\d{2}-\d{2}", s.pub_date)[0]).date()
             ).days
             if days_old < 60:  # fresh - within lien period
