@@ -1,4 +1,5 @@
 import os
+import shutil
 import pandas as pd
 from utils import create_connection
 
@@ -13,5 +14,9 @@ def create_test_db():
     os.rename(
         abs_dir_path + "test/test_cert_db.sqlite3",
         abs_dir_path + "test_cert_db.sqlite3",
+    )
+    shutil.copy(
+        abs_dir_path + "test/results.json",
+        abs_dir_path + "results.json",
     )
     os.chdir(abs_dir_path)

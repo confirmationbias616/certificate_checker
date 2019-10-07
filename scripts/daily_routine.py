@@ -37,7 +37,7 @@ def daily_routine(exit_if_stale=False):
         logger.info("build_train_set")
         build_train_set()
         logger.info("train_model")
-        train_model(prob_thresh=prob_thresh)
+        train_model(prob_thresh=prob_thresh, test=load_config()["daily_routine"]["test"])
     if "validate" in load_config()["daily_routine"]["steps"]:
         logger.info("validate")
         validate_model(prob_thresh=prob_thresh)
@@ -47,7 +47,7 @@ def daily_routine(exit_if_stale=False):
 
 
 if __name__ == "__main__":
-    for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
+    for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl", "results.json"]:
         try:
             os.rename("temp_" + filename, filename)
         except:

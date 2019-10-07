@@ -184,22 +184,21 @@ class TestWrangleFuncs(unittest.TestCase):
 
 @ddt
 class InputTests(unittest.TestCase):
-    def setUpClass():
-        # the import statement below runs some code automatically
-        for filename in ["cert_db.sqlite3"]:
+    def setUp(self):
+        for filename in ["cert_db.sqlite3", "results.json"]:
             try:
                 os.rename(filename, "temp_" + filename)
             except FileNotFoundError:
                 pass
         create_test_db()
-        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
+        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl", "results.json"]:
             try:
                 os.rename("test_" + filename, filename)
             except FileNotFoundError:
                 pass
 
-    def tearDownClass():
-        for filename in ["cert_db.sqlite3"]:
+    def tearDown(self):
+        for filename in ["cert_db.sqlite3", "results.json"]:
             try:
                 os.rename("temp_" + filename, filename)
             except FileNotFoundError:
@@ -360,21 +359,20 @@ class InputTests(unittest.TestCase):
 
 class IntegrationTests(unittest.TestCase):
     def setUp(self):
-        # the import statement below runs some code automatically
-        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
+        for filename in ["cert_db.sqlite3", "results.json"]:
             try:
                 os.rename(filename, "temp_" + filename)
             except FileNotFoundError:
                 pass
         create_test_db()
-        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
+        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl", "results.json"]:
             try:
                 os.rename("test_" + filename, filename)
             except FileNotFoundError:
                 pass
 
     def tearDown(self):
-        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
+        for filename in ["cert_db.sqlite3", "results.json"]:
             try:
                 os.rename("temp_" + filename, filename)
             except FileNotFoundError:
@@ -522,7 +520,7 @@ class IntegrationTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
+    for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl", "results.json"]:
         try:
             os.rename("temp_" + filename, filename)
         except:
