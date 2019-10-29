@@ -26,7 +26,7 @@ logger.setLevel(logging.INFO)
 
 
 def scrape(
-    source="dcn", provided_url_key=False, limit=False, since="last_record", test=False
+    source="dcn", provided_url_key=False, limit=False, since="last_record", until="now", test=False
 ):
     """Extracts new certificates by scraping CSP websites and writes data to the web_certificates table in the database.
     
@@ -35,6 +35,7 @@ def scrape(
      - `provided_url_key` (str of False): provided_url_key that is to be scraped. False by default.
      - `limit` (int): Specifies a limit for the amount of certificates to be scraped. Default is no limit.
      - `since` (str): Specifies date from when to begin looking for new CSP's. Can be either `last_record` or `yyyy-mm-dd` string format.
+     - `until` (str): Specifies date for when to end the search for new CSP's. Can be either `now` or `yyyy-mm-dd` string format.
      - `test` (bool): Set to True to cancel writing to the database and return DataFrame of scraped certificates instead.
 
     Returns:
@@ -179,7 +180,15 @@ def scrape(
     pub_date, city, address, title, owner, contractor, engineer, url_key, cert_type = [
         [] for _ in range(9)
     ]
-    now = datetime.datetime.now().date()
+    if until == "now":
+        until = datetime.datetime.now()
+    else:
+        try:
+            until = re.findall("\d{4}-\d{2}-\d{2}", until)[0]
+        except KeyError:
+            raise ValueError(
+                "`until` parameter should be in the format yyyy-mm-dd if not a key_word"
+            )
     if source == "dcn":
         base_url = "https://canada.constructconnect.com"
         base_aug_url = (
@@ -259,7 +268,7 @@ def scrape(
                 "`since` parameter should be in the format yyyy-mm-dd if not a "
                 "predefined term."
             )
-    date_param_url = custom_param_url.format(since, now)
+    date_param_url = custom_param_url.format(since, until)
     response = requests.get(base_search_url + date_param_url)
     html = response.content
     soup = BeautifulSoup(html, "html.parser")
@@ -371,12 +380,17 @@ if __name__ == "__main__":
     parser.add_argument(
         "--since", type=str, help="date from when to begin looking for new CSP's"
     )
+    parser.add_argument(
+        "--until", type=str, help="date for when to stop search for new CSP's"
+    )
     args = parser.parse_args()
     kwargs = {}
     if args.source:
         kwargs["source"] = args.source
     if args.since:
         kwargs["since"] = args.since
+    if args.since:
+        kwargs["until"] = args.until
     if args.limit:
         kwargs["limit"] = args.limit
     scrape(**kwargs)
