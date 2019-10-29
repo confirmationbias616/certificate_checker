@@ -369,7 +369,7 @@ if __name__ == "__main__":
         help="limits the amount of certificates to be scraped. Default is no limit.",
     )
     parser.add_argument(
-        "--since", type=str, help="datefrom when to begin looking for new CSP's"
+        "--since", type=str, help="date from when to begin looking for new CSP's"
     )
     args = parser.parse_args()
     kwargs = {}
