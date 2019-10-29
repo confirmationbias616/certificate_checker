@@ -218,7 +218,7 @@ class InputTests(unittest.TestCase):
             since=str(datetime.datetime.now().date() - datetime.timedelta(7)),
         )
         self.assertEqual(len(web_df), test_limit)
-        web_df = scrape(source=source, limit=test_limit, test=True, since="2019-09-01")
+        web_df = scrape(source=source, limit=test_limit, test=True, since="2019-09-17")
         self.assertEqual(len(web_df), test_limit)
         # need more assertions here to endure quality of scraped data
 
