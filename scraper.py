@@ -181,7 +181,7 @@ def scrape(
         [] for _ in range(9)
     ]
     if until == "now":
-        until = datetime.datetime.now()
+        until = datetime.datetime.now().date()
     else:
         try:
             until = re.findall("\d{4}-\d{2}-\d{2}", until)[0]
