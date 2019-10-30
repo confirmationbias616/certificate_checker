@@ -1,8 +1,12 @@
 cert_env
 *.sqlite3
 train_set.csv
+results.json
 
 .password.txt
+
+# ignore all vscode config files
+.vscode*
 
 # ignore all pickles
 *.pkl
