@@ -2,15 +2,7 @@ cert_env
 *.sqlite3
 train_set.csv
 
-# ignore results.json except the dummy file in test folder
-results.json
-!test/results.json
-
 .password.txt
-
-# ignore most of the time - comment out when structure of yml changes and should be
-# synced across dev & prod environments
-cert_config.yml
 
 # ignore all vscode config files
 .vscode*
