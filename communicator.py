@@ -82,7 +82,8 @@ def communicate(single_web_cert, single_project, test=False):
         *[int(single_web_cert.iloc[0].pub_date.split("-")[x]) for x in range(3)]
     ).date()
     due_date = lambda delay: pub_date + datetime.timedelta(days=delay)
-
+    with create_connection() as conn:
+        project_title = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[single_project.job_number]).iloc[0].title
     intro_msg = (
         f"From: HBR Bot"
         f"\n"
@@ -93,7 +94,7 @@ def communicate(single_web_cert, single_project, test=False):
         f"Hi {', '.join(receiver_email.keys())},"
         f"\n\n"
         f"It looks like your project #{single_project.job_number} "
-        f"({single_project.title.title()}) might be almost ready for holdback release!"
+        f"({project_title}) might be almost ready for holdback release!"
         f"\n"
     )
     cert_msg = (
