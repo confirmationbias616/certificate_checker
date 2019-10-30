@@ -1,7 +1,10 @@
 cert_env
 *.sqlite3
 train_set.csv
+
+# ignore results.json except the dummy file in test folder
 results.json
+!test/results.json
 
 .password.txt
 
