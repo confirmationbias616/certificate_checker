@@ -5,6 +5,10 @@ results.json
 
 .password.txt
 
+# ignore most of the time - comment out when structure of yml changes and should be
+# synced across dev & prod environments
+cert_config.yml
+
 # ignore all vscode config files
 .vscode*
 
