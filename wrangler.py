@@ -139,7 +139,7 @@ def get_street_number(raw):
     if raw == " ":
         return ""
     try:
-        number = re.findall(" ?(\d+) \w", raw)[0]
+        number = re.findall(" ?(\d+) \w", raw)[-1]
     except IndexError:
         return ""
     try:
@@ -155,7 +155,7 @@ def get_street_name(raw):
     raw = raw.lower()
     raw = unidecode.unidecode(raw)
     try:
-        num = re.findall(" ?(\d+) \w", raw)[0]
+        num = re.findall(" ?(\d+) \w", raw)[-1]
     except IndexError:
         return ""
     rest = re.findall(f"{num} (.*)", raw)[0]

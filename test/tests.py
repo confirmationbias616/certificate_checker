@@ -155,6 +155,7 @@ class TestWrangleFuncs(unittest.TestCase):
         ("145 Jean-Jacques Lussier", "145", "jean"),
         ("145 Jean Jacques Lussier", "145", "jean"),
         ("Edwardsburgh/Cardinal", "", ""),
+        ("35 and 45 Holland Avenue", "45", "holland"),
     )
 
     @data(*address_test_data)
