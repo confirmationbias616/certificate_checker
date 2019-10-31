@@ -542,7 +542,6 @@ def interact():
                 )
             )
         elif any(form.values()):
-            print(form.values())
             a = pd.DataFrame(
                 {
                     key.split("comp_")[1]: [form.get(key)]
@@ -600,6 +599,7 @@ def interact():
                 .hide_index()
             )
             match_result = match(company_projects=a, df_web=b, test=True)
+            print(match_result)
             return redirect(
                 url_for(
                     "interact",
