@@ -604,6 +604,7 @@ def interact():
             pred_match = match_result.pred_match
             a_wrangled_df = a_wrangled_df.render(escape=False)
             b_wrangled_df = b_wrangled_df.render(escape=False)
+            print({key: form.get(key) for key in form})
             return redirect(
                 url_for(
                     "interact",
