@@ -479,14 +479,21 @@ def add_contact():
 @app.route("/interact", methods=["POST", "GET"])
 def interact():
     if request.method == "POST":
-        if request.form.get("cert_link") or request.form.get("job_number"):
+        
+        form = dict(request.form)
+        if [
+            True for value in form.values() if type(value) == list
+        ]:  # strange little fix
+            form = {key: form[key][0] for key in form.keys()}
+        
+        if form.get("cert_link") or form.get("job_number"):
             try:
-                url_key = request.form.get("cert_link").split(
+                url_key = form.get("cert_link").split(
                     "https://canada.constructconnect.com"
                 )[1]
                 b = scrape(source="dcn", provided_url_key=url_key, test=True)
             except IndexError:
-                url_key = request.form.get("cert_link")
+                url_key = form.get("cert_link")
                 if "ontarioconstructionnews.com" in url_key:
                     b = scrape(source="ocn", provided_url_key=url_key, test=True)
                 else:
@@ -510,7 +517,7 @@ def interact():
                     comp_df = pd.read_sql(
                         "SELECT * FROM company_projects WHERE job_number=?",
                         conn,
-                        params=[request.form.get("job_number")],
+                        params=[form.get("job_number")],
                     )
                 comp_info = {
                     "comp_" + key: comp_df.iloc[0][key]
@@ -530,24 +537,24 @@ def interact():
                     "interact",
                     **{key: scraped_cert_info.get(key) for key in scraped_cert_info},
                     **{key: comp_info.get(key) for key in comp_info},
-                    cert_link=request.form.get("cert_link"),
-                    job_number=request.form.get("job_number"),
+                    cert_link=form.get("cert_link"),
+                    job_number=form.get("job_number"),
                 )
             )
-        elif any(request.form.values()):
-            print(request.form.values())
+        elif any(form.values()):
+            print(form.values())
             a = pd.DataFrame(
                 {
-                    key.split("comp_")[1]: [request.form.get(key)]
-                    for key in request.form
+                    key.split("comp_")[1]: [form.get(key)]
+                    for key in form
                     if key.startswith("comp_")
                 }
             )
             a["job_number"] = 9999  # this attribute is required by match()
             b = pd.DataFrame(
                 {
-                    key.split("cert_")[1]: [request.form.get(key)]
-                    for key in request.form
+                    key.split("cert_")[1]: [form.get(key)]
+                    for key in form
                     if key.startswith("cert_")
                 }
             )
@@ -596,7 +603,7 @@ def interact():
             return redirect(
                 url_for(
                     "interact",
-                    **{key: request.form.get(key) for key in request.form},
+                    **{key: form.get(key) for key in form},
                     pred_prob=match_result.iloc[0].pred_prob,
                     pred_match=match_result.iloc[0].pred_match,
                     a_wrangled_df=a_wrangled_df.render(escape=False),
@@ -606,7 +613,7 @@ def interact():
         else:
             return redirect(
                 url_for(
-                    "interact", **{key: request.form.get(key) for key in request.form}
+                    "interact", **{key: form.get(key) for key in form}
                 )
             )
 
