@@ -630,6 +630,7 @@ def interact():
         return render_template(
             "interact.html",
             interact=True,
+            **{key: request.args.get(key) for key in request.args},
         )
 
 
