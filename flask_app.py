@@ -549,6 +549,7 @@ def interact():
                     if key.startswith("comp_")
                 }
             )
+            print(a)
             a["job_number"] = 9999  # this attribute is required by match()
             b = pd.DataFrame(
                 {
