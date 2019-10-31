@@ -598,9 +598,7 @@ def interact():
                 )
                 .hide_index()
             )
-            print('testing 123...')
-            match_result = match(company_projects=a, df_web=b, test=True)
-            print(match_result)
+            match_result = match(company_projects=a, df_web=b, test=True).reindex()
             return redirect(
                 url_for(
                     "interact",
