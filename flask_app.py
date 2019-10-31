@@ -599,12 +599,10 @@ def interact():
                 .hide_index()
             )
             match_result = match(company_projects=a, df_web=b, test=True).iloc[0]
-            print(form)
             pred_prob = match_result.pred_prob
             pred_match = match_result.pred_match
             a_wrangled_df = a_wrangled_df.render(escape=False)
             b_wrangled_df = b_wrangled_df.render(escape=False)
-            print({key: form.get(key) for key in form})
             return redirect(
                 url_for(
                     "interact",
@@ -623,6 +621,8 @@ def interact():
             )
 
     else:
+        print("should disply pred result")
+        print(request.args)
         return render_template(
             "interact.html",
             interact=True,
