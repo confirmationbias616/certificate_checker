@@ -264,6 +264,7 @@ def match(
             results_master = results_master.append(results)
         except NameError:
             results_master = results
+    print(results_master)
     logger.info(
         f"Done looping through {len(company_projects)} open projects. Sent {comm_count} "
         f"e-mails to communicate matches as a result."
