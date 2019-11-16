@@ -1,4 +1,4 @@
-cert_env
+cert_env*
 *.sqlite3
 train_set.csv
 
