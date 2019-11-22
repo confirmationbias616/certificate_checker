@@ -493,7 +493,6 @@ def interact():
                 )[1]
                 b = scrape(source="dcn", provided_url_key=url_key, test=True)
             except IndexError:
-                print("THERE'S A PROBLEM HERE 0")
                 url_key = form.get("cert_link")
                 if "ontarioconstructionnews.com" in url_key:
                     b = scrape(source="ocn", provided_url_key=url_key, test=True)
@@ -512,7 +511,6 @@ def interact():
                     ]
                 }
             except (NameError, UnboundLocalError):
-                print("THERE'S A PROBLEM HERE 1")
                 scraped_cert_info = {}
             try:
                 with create_connection() as conn:
@@ -533,7 +531,6 @@ def interact():
                     ]
                 }
             except IndexError:
-                print("THERE'S A PROBLEM HERE 2")
                 comp_info = {}
             return redirect(
                 url_for(
@@ -552,7 +549,6 @@ def interact():
                     if key.startswith("comp_")
                 }
             )
-            print(a)
             a["job_number"] = 9999  # this attribute is required by match()
             b = pd.DataFrame(
                 {
@@ -625,8 +621,6 @@ def interact():
             )
 
     else:
-        print("should disply pred result")
-        print(request.args)
         return render_template(
             "interact.html",
             interact=True,
