@@ -9,6 +9,7 @@ results.json
 # ignore cahces
 cache*
 
+# ignore passwords and API keys
 .password.txt
 .api_key.txt
 
