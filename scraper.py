@@ -8,6 +8,7 @@ import argparse
 import progressbar
 from time import sleep
 from utils import create_connection
+from geocoder import geocode
 import sys
 import logging
 import dateutil.parser
@@ -338,12 +339,19 @@ def scrape(
     df_web["pub_date"] = df_web.pub_date.apply(
         lambda x: re.findall("\d{4}-\d{2}-\d{2}", x)[0]
     )
+    logger.info("Fetching geocode information...")
+    df_web = geocode(df_web)
     if test:
         return df_web
     attrs = [
         "cert_id",
         "pub_date",
         "city",
+        "address_lat",
+        "address_lng",
+        "city_lat",
+        "city_lng",
+        "city_size",
         "address",
         "title",
         "owner",
