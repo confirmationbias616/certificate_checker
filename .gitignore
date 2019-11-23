@@ -7,6 +7,7 @@ results.json
 !test/results.json
 
 .password.txt
+.api_key.txt
 
 # ignore all vscode config files
 .vscode*
