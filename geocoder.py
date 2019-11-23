@@ -3,7 +3,7 @@ import requests
 import json
 import numpy as np
 from statistics import mean
-from functools import lru_cache
+
 
 try:
     with open(".api_key.txt") as file:
@@ -11,12 +11,26 @@ try:
 except FileNotFoundError:  # no key if running in CI
     pass
 
+def persistant_cache(file_name):
+    def decorator(original_func):
+        try:
+            cache = json.load(open(file_name, 'r'))
+        except (IOError, ValueError):
+            cache = {}
+        def new_func(param):
+            if param not in cache:
+                cache[param] = original_func(param)
+                json.dump(cache, open(file_name, 'w'), indent=4)
+            return cache[param]
+        return new_func
+    return decorator
+
 def api_call(address_param):
     api_request = "https://maps.googleapis.com/maps/api/geocode/json?address={}&bounds=41.6765559,-95.1562271|56.931393,-74.3206479&key={}"
     response = requests.get(api_request.format(address_param, api_key))
     return json.loads(response.content)
 
-@lru_cahce()
+@persistant_cache('cache_geocode_address.json')
 def get_address_latlng(address_input):
     if address_input == '':
         return {}
@@ -25,7 +39,7 @@ def get_address_latlng(address_input):
         return info['results'][0]['geometry']['location']
     return {}  
 
-@lru_cache()
+@persistant_cache('cache_geocode_city.json')
 def get_city_latlng(city_input):
     if city_input == '':
         return {}

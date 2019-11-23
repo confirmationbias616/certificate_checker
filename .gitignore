@@ -6,6 +6,9 @@ train_set.csv
 results.json
 !test/results.json
 
+# ignore cahces
+cache*
+
 .password.txt
 .api_key.txt
 
