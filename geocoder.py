@@ -16,6 +16,7 @@ def api_call(address_param):
     response = requests.get(api_request.format(address_param, api_key))
     return json.loads(response.content)
 
+@lru_cahce()
 def get_address_latlng(address_input):
     if address_input == '':
         return {}
@@ -24,6 +25,7 @@ def get_address_latlng(address_input):
         return info['results'][0]['geometry']['location']
     return {}  
 
+@lru_cache()
 def get_city_latlng(city_input):
     if city_input == '':
         return {}
