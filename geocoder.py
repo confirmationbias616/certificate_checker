@@ -28,17 +28,17 @@ def persistant_cache(file_name):
     return decorator
 
 def api_call(address_param):
-    api_request = "https://maps.googleapis.com/maps/api/geocode/json?address={}&bounds=41.6765559,-95.1562271|56.931393,-74.3206479&key={}"
+    api_request = "https://maps.googleapis.com/maps/api/geocode/json?address={}, Ontario, Canada&bounds=41.6765559,-95.1562271|56.931393,-74.3206479&key={}"
     response = requests.get(api_request.format(address_param, api_key))
     return json.loads(response.content)
 
 @persistant_cache('cache_geocode_address.json')
-def get_address_latlng(address_input):
+def get_address_latlng(address_input, city_input):
     if not address_input:
         return {}
     if address_input == 'null':
         return
-    info = api_call(address_input)
+    info = api_call(f"{address_input}, {city_input}")
     if info['status'] == 'OK':
         return info['results'][0]['geometry']['location']
     return {}  
@@ -68,7 +68,7 @@ def get_city_size(bounds):
 def geocode(df, retry_na=False):
     if (not retry_na) and ('address' not in df.columns or 'city' not in df.columns):
         raise ValueError("Input DataFrame does not contain all required columns (`city` and `address`)")
-    df['address_latlng'] = df.address.apply(lambda x: get_address_latlng(x))
+    df['address_latlng'] = df.apply(lambda row: get_address_latlng(row.address, row.city), axis=0)
     df['city_latlng_size'] = df.city.apply(lambda x: get_city_latlng(x))
     df['address_lat'] = df.address_latlng.apply(lambda x: x.get('lat', np.nan))
     df['address_lng'] = df.address_latlng.apply(lambda x: x.get('lng', np.nan))
