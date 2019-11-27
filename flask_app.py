@@ -8,12 +8,14 @@ from wrangler import wrangle
 from matcher import match
 from scraper import scrape
 from communicator import process_as_feedback
+from geocoder import geocode
 import pandas as pd
 import logging
 import sys
 import os
 import re
 import ast
+import folium
 
 
 app = Flask(__name__)
@@ -34,6 +36,12 @@ def dated_url_for(endpoint, **values):
             file_path = os.path.join(app.root_path, endpoint, filename)
             values["q"] = int(os.stat(file_path).st_mtime)
     return url_for(endpoint, **values)
+
+
+def write_company_project(df, conn):
+    df = df.drop_duplicates(subset="job_number", keep="last")
+    df = geocode(df, retry_na=True)
+    df.to_sql("company_projects", conn, if_exists="replace", index=False)
 
 
 @app.route("/", methods=["POST", "GET"])
@@ -84,15 +92,14 @@ def index():
         df = pd.read_sql("SELECT * FROM company_projects", conn)
         df = df.append(new_entry, ignore_index=True)
         if not was_prev_logged:
-            df.to_sql("company_projects", conn, if_exists="replace", index=False)
+            write_company_project(df, conn)
             return render_template(
                 "signup_confirmation.html", job_number=new_entry["job_number"]
             )
         recorded_change = (
             True if any(list(df.duplicated(subset="job_number"))) else False
         )
-        df = df.drop_duplicates(subset="job_number", keep="last")
-        df.to_sql("company_projects", conn, if_exists="replace", index=False)
+        write_company_project(df, conn)
         return render_template(
             "update.html",
             job_number=new_entry["job_number"],
@@ -627,6 +634,135 @@ def interact():
             **{key: request.args.get(key) for key in request.args},
         )
 
+@app.route('/map')
+def map():
+    closed_query = """
+        SELECT
+            company_projects.job_number,
+            company_projects.city,
+            company_projects.address,
+            company_projects.title,
+            company_projects.owner,
+            company_projects.contractor,
+            company_projects.engineer,
+            attempted_matches.url_key,
+            web.pub_date,
+            (base_urls.base_url || attempted_matches.url_key) AS link,
+            web.source,
+            web.address_lat,
+            web.address_lng
+        FROM (SELECT * FROM web_certificates ORDER BY cert_id DESC LIMIT 16000) as web
+        LEFT JOIN
+            attempted_matches
+        ON
+            web.url_key = attempted_matches.url_key
+        LEFT JOIN
+            company_projects
+        ON
+            attempted_matches.job_number=company_projects.job_number
+        LEFT JOIN
+            base_urls
+        ON
+            base_urls.source=web.source
+        WHERE
+            company_projects.closed=1
+        AND
+            attempted_matches.ground_truth=1
+    """
+    open_query = """
+        SELECT
+            company_projects.job_number,
+            company_projects.city,
+            company_projects.address,
+            company_projects.title,
+            company_projects.owner,
+            company_projects.contractor,
+            company_projects.engineer,
+            company_projects.receiver_emails_dump,
+            company_projects.address_lat,
+            company_projects.address_lng
+        FROM company_projects
+        WHERE
+            company_projects.closed=0
+    """
+    with create_connection() as conn:
+        df_cp_open = pd.read_sql(open_query, conn)
+        df_cp_closed = pd.read_sql(closed_query, conn)
+        df_wc = pd.read_sql("SELECT web_certificates.*, (base_urls.base_url || web_certificates.url_key) AS link FROM web_certificates JOIN base_urls ON web_certificates.source=base_urls.source ORDER BY cert_id DESC LIMIT 50", conn)
+    df_cp_open.dropna(axis=0, subset=['address_lat'], inplace=True)
+    df_cp_closed.dropna(axis=0, subset=['address_lat'], inplace=True)
+    df_wc.dropna(axis=0, subset=['address_lat'], inplace=True)
+    start_coords = (df_cp_open.address_lat.mean(), df_cp_open.address_lng.mean())
+    m = folium.Map(location=start_coords, zoom_start=8, min_zoom=7, height='100%')
+    
+    feature_group = folium.FeatureGroup(name='Closed Projects')
+    for _, row in df_cp_closed.iterrows():
+        popup=folium.map.Popup(html=f"""
+            <h5>#{row.job_number} - {row.title}</h5><br>
+            <p>
+                <b>Contractor</b>: {row.contractor}
+            </p>
+            <p>
+                <b>Owner</b>: {row.owner}
+            </p>
+            <p>
+                <b>Certificate source</b>: <a href="{row.link}" "target="_blank">{row.source}</a>
+            </p>
+        """, max_width='300')
+        folium.Marker(
+            [row.address_lat, row.address_lng],
+            popup=popup,
+            tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
+            icon=folium.Icon(prefix='fa', icon='check', color='darkgreen')
+        ).add_to(feature_group)
+    feature_group.add_to(m)
+
+    feature_group = folium.FeatureGroup(name='Open Projects')
+    for _, row in df_cp_open.iterrows():
+        popup=folium.map.Popup(html=f"""
+            <h5>#{row.job_number} - {row.title}</h5><br>
+            <p>
+                <b>Contractor</b>: {row.contractor}
+            </p>
+            <p>
+                <b>Owner</b>: {row.owner}
+            </p>
+        """, max_width='300')
+        folium.Marker(
+            [row.address_lat, row.address_lng],
+            popup=popup,
+            tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
+            icon=folium.Icon(prefix='fa', icon='search', color='orange')
+        ).add_to(feature_group)
+    feature_group.add_to(m)
+
+    feature_group = folium.FeatureGroup(name="Web CSP's")
+    for _, row in df_wc.iterrows():
+        popup=folium.map.Popup(html=f"""
+            <h5>{row.title}</h5><br>
+            <p>
+                <b>Date published</b>: {row.pub_date}
+            </p>
+            <p>
+                <b>Contractor</b>: {row.contractor}
+            </p>
+            <p>
+                <b>Owner</b>: {row.owner}
+            </p>
+            <p>
+                <b>Certificate source</b>: <a href="{row.link}" "target="_blank">{row.source}</a>
+            </p>
+        """, max_width='300')
+        folium.Marker(
+            [row.address_lat, row.address_lng],
+            popup=popup,
+            tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
+            icon=folium.Icon(prefix='fa', icon='share-alt',)
+        ).add_to(feature_group)
+    feature_group.add_to(m)
+    folium.LayerControl(collapsed=False).add_to(m)
+
+    return m._repr_html_()
 
 if __name__ == "__main__":
     app.run(debug=load_config()["flask_app"]["debug"])
