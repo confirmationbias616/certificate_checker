@@ -32,8 +32,10 @@ def api_call(address_param):
 
 @persistant_cache('cache_geocode_address.json')
 def get_address_latlng(address_input):
-    if address_input == '':
+    if not address_input:
         return {}
+    if address_input == 'null':
+        return
     info = api_call(address_input)
     if info['status'] == 'OK':
         return info['results'][0]['geometry']['location']
@@ -41,7 +43,7 @@ def get_address_latlng(address_input):
 
 @persistant_cache('cache_geocode_city.json')
 def get_city_latlng(city_input):
-    if city_input == '':
+    if not city_input:
         return {}
     info = api_call(city_input)
     if info['status'] == 'OK':
