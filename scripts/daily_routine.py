@@ -37,7 +37,7 @@ def daily_routine(exit_if_stale=False):
         logger.info("build_train_set")
         build_train_set()
         logger.info("train_model")
-        train_model(prob_thresh=prob_thresh, test=load_config()["daily_routine"]["test"])
+        train_model(prob_thresh=prob_thresh)
     if "validate" in load_config()["daily_routine"]["steps"]:
         logger.info("validate")
         validate_model(prob_thresh=prob_thresh)
