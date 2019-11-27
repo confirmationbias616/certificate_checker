@@ -1,8 +1,10 @@
+import argparse
 import pandas as pd
 import requests
 import json
 import numpy as np
 from statistics import mean
+from utils import create_connection
 
 
 try:
@@ -63,8 +65,8 @@ def get_city_size(bounds):
     area = abs(lat_diff * lng_diff)
     return area
 
-def geocode(df):
-    if 'address' not in df.columns or 'city' not in df.columns:
+def geocode(df, retry_na=False):
+    if (not retry_na) and ('address' not in df.columns or 'city' not in df.columns):
         raise ValueError("Input DataFrame does not contain all required columns (`city` and `address`)")
     df['address_latlng'] = df.address.apply(lambda x: get_address_latlng(x))
     df['city_latlng_size'] = df.city.apply(lambda x: get_city_latlng(x))
@@ -76,3 +78,74 @@ def geocode(df):
     df.drop(['address_latlng', 'city_latlng_size'], axis=1, inplace=True)
     return df
 
+def update_db_table(table_name, start_date=None, end_date=None):
+    update_geo_data = """
+        UPDATE {}
+        SET address_lat = ?,
+            address_lng = ?,
+            city_lat = ?,
+            city_lng = ?,
+            city_size = ?
+        WHERE {} = ?
+    """
+    if table_name == 'company_projects':
+        fetch_jobs = """
+            SELECT * from company_projects ORDER BY job_number DESC
+        """
+        match_id = 'job_number'
+        limit_params = []
+        update_geo_data = update_geo_data.format(table_name, match_id)
+    elif table_name == 'web_certificates':
+        fetch_jobs = """
+            SELECT * from web_certificates WHERE pub_date BETWEEN ? AND ? ORDER BY cert_id DESC
+        """
+        match_id = 'url_key'
+        limit_params = [start_date, end_date]
+        update_geo_data = update_geo_data.format(table_name, match_id)
+    else:
+        raise ValueError("Invalid input `table_name`. Choice of `web_certificates` or `company_projects`")
+    with create_connection() as conn:
+        df = pd.read_sql(fetch_jobs, conn, params=limit_params)
+    for i, row in df.iterrows():
+        if any([True if str(x) not in ['nan', 'None']  else False for x in row.loc[['address_lat', 'city_lat']]]):
+            print(f"Job {row.loc[match_id]} already has geo data - skipping out")
+            continue 
+        row = pd.DataFrame(row).transpose()
+        row = geocode(row)
+        with create_connection() as conn:
+            conn.cursor().execute(update_geo_data, [
+                row.loc[i, 'address_lat'],
+                row.loc[i, 'address_lng'],
+                row.loc[i, 'city_lat'],
+                row.loc[i, 'city_lng'],
+                row.loc[i, 'city_size'],
+                row.loc[i, match_id]
+            ])
+        print(f"Job {row.loc[i, match_id]} has been updated with geo data")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('table_name',
+        type=str,
+        help="pass in the name of a table containg text columns for `city` and `address` and it will be rewritten with geocode data",
+    )
+    parser.add_argument(
+        "-s",
+        "--start_date",
+        nargs='?',
+        type=str,
+        help="limits the amount of jobs to process, starting with the latest one.",
+    )
+    parser.add_argument(
+        "-e",
+        "--end_date",
+        nargs='?',
+        type=str,
+        help="limits the amount of jobs to process, starting with the latest one.",
+    )
+    args = parser.parse_args()
+    try:
+        update_db_table(args.table_name, args.start_date, args.end_date)
+        
+    except AttributeError:
+        update_db_table(args.table_name)
