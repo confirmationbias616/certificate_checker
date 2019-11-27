@@ -1,7 +1,7 @@
 import add_parent_to_path
 import shutil
 import datetime
-import dateutil
+import dateutil.parser
 from os import listdir
 import re
 
