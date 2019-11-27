@@ -32,7 +32,6 @@ def api_call(address_param):
     response = requests.get(api_request.format(address_param, api_key))
     return json.loads(response.content)
 
-@persistant_cache('cache_geocode_address.json')
 def get_address_latlng(address_input, city_input):
     if not address_input:
         return {}
