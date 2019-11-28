@@ -16,6 +16,7 @@ import os
 import re
 import ast
 import folium
+from folium.plugins import MarkerCluster
 
 
 app = Flask(__name__)
@@ -708,7 +709,7 @@ def map():
     df_wc.dropna(axis=0, subset=['address_lat'], inplace=True)
     start_coords = (df_cp_open.address_lat.mean(), df_cp_open.address_lng.mean())
     m = folium.Map(location=start_coords, zoom_start=8, min_zoom=7, height='100%')
-    
+    mc = MarkerCluster()
     feature_group = folium.FeatureGroup(name='Closed Projects')
     for _, row in df_cp_closed.iterrows():
         popup=folium.map.Popup(html=f"""
@@ -767,12 +768,12 @@ def map():
                 <b>Certificate source</b>: <a href="{row.link}" "target="_blank">{row.source}</a>
             </p>
         """, max_width='300')
-        folium.Marker(
+        mc.add_child(folium.Marker(
             [row.address_lat, row.address_lng],
             popup=popup,
             tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
             icon=folium.Icon(prefix='fa', icon='share-alt',)
-        ).add_to(feature_group)
+        ))
     feature_group.add_to(m)
     folium.LayerControl(collapsed=False).add_to(m)
 
