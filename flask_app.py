@@ -713,67 +713,162 @@ def map():
     feature_group = folium.FeatureGroup(name='Closed Projects')
     for _, row in df_cp_closed.iterrows():
         popup=folium.map.Popup(html=f"""
-            <h5>#{row.job_number} - {row.title}</h5><br>
-            <p>
-                <b>Contractor</b>: {row.contractor}
-            </p>
-            <p>
-                <b>Owner</b>: {row.owner}
-            </p>
-            <p>
-                <b>Certificate source</b>: <a href="{row.link}" "target="_blank">{row.source}</a>
-            </p>
+            <style>
+                h5 {{
+                    text-align: center;
+                }}
+                h6 {{
+                    text-align: center;
+                    color: gray;
+                }}
+                table {{
+                    border-collapse:separate; 
+                    border-spacing:1em;
+                }}  
+                th {{
+                    text-align: right;
+                    vertical-align: top;
+                }}
+                td {{
+                    text-align: left;
+                    vertical-align: top;
+
+                }}
+            </style>
+            <h5 style="text-align: center">#{row.job_number} - {row.title}</h5>
+            <hr>
+            <table style="width:100%">
+                <tr>
+                    <th><b>Date published</b></th>
+                    <td>{row.pub_date}</td>
+                </tr>
+                <tr>
+                    <th><b>Contractor</b></th> 
+                    <td>{row.contractor}</td> 
+                </tr>
+                <tr>
+                    <th><b>Owner</b></th>
+                    <td>{row.owner}</td>
+                </tr>
+                <tr>
+                    <th><b>Certificate</b></th>
+                    <td><a href="{row.link}" "target="_blank">{'Daily Commercial News' if row.source == 'dcn' else 'Ontario Construction News'}</a></td>
+                </tr>
+            </table>
+            <hr>
+            <h6><em>Closed Project (already matched with a CSP)</em></h6>
         """, max_width='300')
         folium.Marker(
             [row.address_lat, row.address_lng],
             popup=popup,
             tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
-            icon=folium.Icon(prefix='fa', icon='check', color='darkgreen')
+            icon=folium.Icon(prefix='fa', icon='check', color='gray')
         ).add_to(feature_group)
     feature_group.add_to(m)
 
     feature_group = folium.FeatureGroup(name='Open Projects')
     for _, row in df_cp_open.iterrows():
         popup=folium.map.Popup(html=f"""
-            <h5>#{row.job_number} - {row.title}</h5><br>
-            <p>
-                <b>Contractor</b>: {row.contractor}
-            </p>
-            <p>
-                <b>Owner</b>: {row.owner}
-            </p>
+            <style>
+                h5 {{
+                    text-align: center;
+                }}
+                h6 {{
+                    text-align: center;
+                    color: gray;
+                }}
+                table {{
+                    border-collapse:separate; 
+                    border-spacing:1em;
+                }}  
+                th {{
+                    text-align: right;
+                    vertical-align: top;
+                }}
+                td {{
+                    text-align: left;
+                    vertical-align: top;
+
+                }}
+            </style>
+            <h5 style="text-align: center">#{row.job_number} - {row.title}</h5>
+            <hr>
+            <table style="width:100%">
+                <tr>
+                    <th><b>Contractor</b></th> 
+                    <td>{row.contractor}</td> 
+                </tr>
+                <tr>
+                    <th><b>Owner</b></th>
+                    <td>{row.owner}</td>
+                </tr>
+            </table>
+            <hr>
+            <h6><em>Open Project (pending CSP match)</em></h6>
         """, max_width='300')
         folium.Marker(
             [row.address_lat, row.address_lng],
             popup=popup,
             tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
-            icon=folium.Icon(prefix='fa', icon='search', color='orange')
+            icon=folium.Icon(prefix='fa', icon='search', color='black')
         ).add_to(feature_group)
     feature_group.add_to(m)
 
     feature_group = folium.FeatureGroup(name="Web CSP's")
     for _, row in df_wc.iterrows():
         popup=folium.map.Popup(html=f"""
-            <h5>{row.title}</h5><br>
-            <p>
-                <b>Date published</b>: {row.pub_date}
-            </p>
-            <p>
-                <b>Contractor</b>: {row.contractor}
-            </p>
-            <p>
-                <b>Owner</b>: {row.owner}
-            </p>
-            <p>
-                <b>Certificate source</b>: <a href="{row.link}" "target="_blank">{row.source}</a>
-            </p>
+            <style>
+                h5 {{
+                    text-align: center;
+                }}
+                h6 {{
+                    text-align: center;
+                    color: gray;
+                }}
+                table {{
+                    border-collapse:separate; 
+                    border-spacing:1em;
+                }}  
+                th {{
+                    text-align: right;
+                    vertical-align: top;
+                }}
+                td {{
+                    text-align: left;
+                    vertical-align: top;
+
+                }}
+            </style>
+            <h5>{row.title}</h5>
+            <hr>
+            <table style="width:100%">
+                <tr>
+                    <th><b>Date published</b></th>
+                    <td>{row.pub_date}</td>
+                </tr>
+                <tr>
+                    <th><b>Contractor</b></th> 
+                    <td>{row.contractor}</td> 
+                </tr>
+                <tr>
+                    <th><b>Owner</b></th>
+                    <td>{row.owner}</td>
+                </tr>
+                <tr>
+                    <th><b>Certificate</b></th>
+                    <td><a href="{row.link}" "target="_blank">{'Daily Commercial News' if row.source == 'dcn' else 'Ontario Construction News'}</a></td>
+                </tr>
+            </table>
+            <hr>
+            <h6><em>Web Certificate of Substantial Performance</em></h6>
         """, max_width='300')
         mc.add_child(folium.Marker(
             [row.address_lat, row.address_lng],
             popup=popup,
             tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
-            icon=folium.Icon(prefix='fa', icon='share-alt',)
+            icon=folium.Icon(prefix='fa', icon='circle', color='green')
         ))
+    feature_group.add_child(mc)
     feature_group.add_to(m)
     folium.LayerControl(collapsed=False).add_to(m)
 
