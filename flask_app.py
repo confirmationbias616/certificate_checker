@@ -685,10 +685,24 @@ def map():
         WHERE
             company_projects.closed=0
     """
+    web_query = """
+        SELECT 
+            web_certificates.*, 
+            (base_urls.base_url || web_certificates.url_key) AS link
+        FROM 
+            web_certificates
+        JOIN 
+            base_urls
+        ON 
+            web_certificates.source=base_urls.source
+        ORDER BY 
+            cert_id
+        DESC LIMIT 350
+    """
     with create_connection() as conn:
         df_cp_open = pd.read_sql(open_query, conn)
         df_cp_closed = pd.read_sql(closed_query, conn)
-        df_wc = pd.read_sql("SELECT web_certificates.*, (base_urls.base_url || web_certificates.url_key) AS link FROM web_certificates JOIN base_urls ON web_certificates.source=base_urls.source ORDER BY cert_id DESC LIMIT 50", conn)
+        df_wc = pd.read_sql(web_query, conn)
     df_cp_open.dropna(axis=0, subset=['address_lat'], inplace=True)
     df_cp_closed.dropna(axis=0, subset=['address_lat'], inplace=True)
     df_wc.dropna(axis=0, subset=['address_lat'], inplace=True)
