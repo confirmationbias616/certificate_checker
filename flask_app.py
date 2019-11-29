@@ -698,6 +698,8 @@ def map():
             base_urls
         ON 
             web_certificates.source=base_urls.source
+        WHERE
+            cert_type = "csp"
         ORDER BY 
             cert_id
         DESC LIMIT 350
