@@ -30,25 +30,28 @@ def persistant_cache(file_name):
 def api_call(address_param):
     api_request = "https://maps.googleapis.com/maps/api/geocode/json?address={}, Ontario, Canada&bounds=41.6765559,-95.1562271|56.931393,-74.3206479&key={}"
     response = requests.get(api_request.format(address_param, api_key))
-    return json.loads(response.content)
+    results_list = json.loads(response.content)['results']
+    print(len(results_list))
+    for result in results_list:
+        if 'Ontario' in str(result):
+            return result
+    return {}
 
 def get_address_latlng(address_input, city_input):
-    if not address_input:
+    if (not address_input) or (address_input == 'null'):
         return {}
-    if address_input == 'null':
-        return
     info = api_call(f"{address_input}, {city_input}")
-    if info['status'] == 'OK':
-        return info['results'][0]['geometry']['location']
-    return {}  
+    if info:
+        return info['geometry']['location']
+    return {}
 
 @persistant_cache('cache_geocode_city.json')
 def get_city_latlng(city_input):
-    if not city_input:
-        return {}
+    if (not city_input) or (city_input == 'null'):
+        return {}, np.nan
     info = api_call(city_input)
-    if info['status'] == 'OK':
-        bounds = info['results'][0]['geometry']['viewport']
+    if info:
+        bounds = info['geometry']['viewport']
         return get_city_centre(bounds), get_city_size(bounds)
     return {}, np.nan
 
