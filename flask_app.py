@@ -706,11 +706,11 @@ def map():
         df_cp_open = pd.read_sql(open_query, conn)
         df_cp_closed = pd.read_sql(closed_query, conn)
         df_wc = pd.read_sql(web_query, conn)
-    m = folium.Map(location=start_coords, zoom_start=8, min_zoom=7, height='100%')
     df_cp_open.dropna(axis=0, subset=['lat'], inplace=True)
     df_cp_closed.dropna(axis=0, subset=['lat'], inplace=True)
     df_wc.dropna(axis=0, subset=['lat'], inplace=True)
     start_coords = (df_cp_open.lat.mean(), df_cp_open.lng.mean())
+    m = folium.Map(location=start_coords, zoom_start=8, min_zoom=4, height='100%')
     mc = MarkerCluster()
     feature_group = folium.FeatureGroup(name='Closed Projects')
     for _, row in df_cp_closed.iterrows():
