@@ -650,8 +650,8 @@ def map():
             web.pub_date,
             (base_urls.base_url || attempted_matches.url_key) AS link,
             web.source,
-            web.address_lat,
-            web.address_lng
+            COALESCE(web.address_lat, web.city_lat) as lat,
+            COALESCE(web.address_lng, web.city_lng) as lng
         FROM (SELECT * FROM web_certificates ORDER BY cert_id DESC LIMIT 16000) as web
         LEFT JOIN
             attempted_matches
@@ -680,8 +680,8 @@ def map():
             company_projects.contractor,
             company_projects.engineer,
             company_projects.receiver_emails_dump,
-            company_projects.address_lat,
-            company_projects.address_lng
+            COALESCE(company_projects.address_lat, company_projects.city_lat) as lat,
+            COALESCE(company_projects.address_lng, company_projects.city_lng) as lng
         FROM company_projects
         WHERE
             company_projects.closed=0
@@ -689,7 +689,9 @@ def map():
     web_query = """
         SELECT 
             web_certificates.*, 
-            (base_urls.base_url || web_certificates.url_key) AS link
+            (base_urls.base_url || web_certificates.url_key) AS link,
+            COALESCE(web_certificates.address_lat, web_certificates.city_lat) as lat,
+            COALESCE(web_certificates.address_lng, web_certificates.city_lng) as lng
         FROM 
             web_certificates
         JOIN 
@@ -704,11 +706,11 @@ def map():
         df_cp_open = pd.read_sql(open_query, conn)
         df_cp_closed = pd.read_sql(closed_query, conn)
         df_wc = pd.read_sql(web_query, conn)
-    df_cp_open.dropna(axis=0, subset=['address_lat'], inplace=True)
-    df_cp_closed.dropna(axis=0, subset=['address_lat'], inplace=True)
-    df_wc.dropna(axis=0, subset=['address_lat'], inplace=True)
-    start_coords = (df_cp_open.address_lat.mean(), df_cp_open.address_lng.mean())
     m = folium.Map(location=start_coords, zoom_start=8, min_zoom=7, height='100%')
+    df_cp_open.dropna(axis=0, subset=['lat'], inplace=True)
+    df_cp_closed.dropna(axis=0, subset=['lat'], inplace=True)
+    df_wc.dropna(axis=0, subset=['lat'], inplace=True)
+    start_coords = (df_cp_open.lat.mean(), df_cp_open.lng.mean())
     mc = MarkerCluster()
     feature_group = folium.FeatureGroup(name='Closed Projects')
     for _, row in df_cp_closed.iterrows():
@@ -759,7 +761,7 @@ def map():
             <h6><em>Closed Project (already matched with a CSP)</em></h6>
         """, max_width='300')
         folium.Marker(
-            [row.address_lat, row.address_lng],
+            [row.lat, row.lng],
             popup=popup,
             tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
             icon=folium.Icon(prefix='fa', icon='check', color='gray')
@@ -807,7 +809,7 @@ def map():
             <h6><em>Open Project (pending CSP match)</em></h6>
         """, max_width='300')
         folium.Marker(
-            [row.address_lat, row.address_lng],
+            [row.lat, row.lng],
             popup=popup,
             tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
             icon=folium.Icon(prefix='fa', icon='search', color='black')
@@ -863,7 +865,7 @@ def map():
             <h6><em>Web Certificate of Substantial Performance</em></h6>
         """, max_width='300')
         mc.add_child(folium.Marker(
-            [row.address_lat, row.address_lng],
+            [row.lat, row.lng],
             popup=popup,
             tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
             icon=folium.Icon(prefix='fa', icon='circle', color='green')
