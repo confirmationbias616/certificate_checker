@@ -2,6 +2,8 @@ cert_env*
 *.sqlite3
 train_set.csv
 
+templates/map_widget.html
+
 # ignore results.json except the dummy file in test folder
 results.json
 !test/results.json

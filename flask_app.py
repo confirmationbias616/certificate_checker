@@ -635,8 +635,30 @@ def interact():
             **{key: request.args.get(key) for key in request.args},
         )
 
-@app.route('/map')
+@app.route('/rewind', methods=["POST", "GET"])
+def rewind():
+    interval = 5
+    end_date = request.args.get('start_date')
+    start_date = str(parse_date(request.args.get('start_date')).date() - datetime.timedelta(interval))
+    start_coords_lat = request.args.get('start_coords_lat')
+    start_coords_lng = request.args.get('start_coords_lng')
+    start_zoom = request.args.get('start_zoom', 4)
+    return redirect(url_for("map", home=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom))
+
+@app.route('/forward', methods=["POST", "GET"])
+def forward():
+    interval = 5
+    start_date = request.args.get('end_date')
+    end_date = str(parse_date(request.args.get('end_date')).date() + datetime.timedelta(interval))
+    return redirect(url_for("map", home=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom))
+
+@app.route('/map', methods=["POST", "GET"])
 def map():
+    # if request.method == "POST":
+    #     return redirect(url_for("map", home=True, start_date=start_date, end_date=end_date))
+    today = datetime.datetime.now().date()
+    end_date = request.args.get('end_date', str(today))
+    start_date = request.args.get('start_date', str(today-datetime.timedelta(3)))
     closed_query = """
         SELECT
             company_projects.job_number,
@@ -702,7 +724,7 @@ def map():
             cert_type = "csp"
         ORDER BY 
             cert_id
-        DESC LIMIT 350
+        DESC LIMIT 10000
     """
     with create_connection() as conn:
         df_cp_open = pd.read_sql(open_query, conn)
@@ -711,8 +733,14 @@ def map():
     df_cp_open.dropna(axis=0, subset=['lat'], inplace=True)
     df_cp_closed.dropna(axis=0, subset=['lat'], inplace=True)
     df_wc.dropna(axis=0, subset=['lat'], inplace=True)
-    start_coords = (df_cp_open.lat.mean(), df_cp_open.lng.mean())
-    m = folium.Map(location=start_coords, zoom_start=8, min_zoom=4, height='100%')
+    def select_df_wc_window(start_date, end_date):
+        return df_wc[(start_date<=df_wc.pub_date) & (df_wc.pub_date<end_date)]
+    df_wc_win = select_df_wc_window(start_date, end_date)
+    start_coords_lat = request.args.get('start_coords_lat', df_cp_open.lat.mean())
+    start_coords_lng = request.args.get('start_coords_lng', df_cp_open.lng.mean())
+    start_zoom = request.args.get('start_zoom', 7)
+    m = folium.Map(location=(start_coords_lat, start_coords_lng), zoom_start=start_zoom, min_zoom=5, height='78%')
+    print(m.get_bounds())
     mc = MarkerCluster()
     feature_group = folium.FeatureGroup(name='Closed Projects')
     for _, row in df_cp_closed.iterrows():
@@ -819,7 +847,7 @@ def map():
     feature_group.add_to(m)
 
     feature_group = folium.FeatureGroup(name="Web CSP's")
-    for _, row in df_wc.iterrows():
+    for _, row in df_wc_win.iterrows():
         popup=folium.map.Popup(html=f"""
             <style>
                 h5 {{
@@ -876,7 +904,12 @@ def map():
     feature_group.add_to(m)
     folium.LayerControl(collapsed=False).add_to(m)
 
-    return m._repr_html_()
+    m.save('templates/map_widget.html')
+    return render_template('map.html', home=True, start_date=start_date, end_date=end_date)
+
+
+
+    # return m._repr_html_()
 
 if __name__ == "__main__":
     app.run(debug=load_config()["flask_app"]["debug"])

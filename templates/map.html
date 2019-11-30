@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  {% endblock %}
+</head>
+<body>
+    {% block body %}
+    <p align="center"> displaying certificates from {{ start_date }} to {{ end_date }}  :)</p>
+    <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom) }}" name = "change_date" method="POST">
+        <input type="submit" id="large_button" value="OLDER">
+    </form>
+    <form action="{{ url_for('forward', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom) }}" name = "change_date" method="POST">
+        <input type="submit" id="large_button" value="NEWER">
+    </form>
+    <br>
+    {% include "map_widget.html" %}
+    {% endblock %}
+</body>
+</html>
+    
