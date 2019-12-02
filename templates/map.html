@@ -16,15 +16,13 @@
         </form>
         </div>
     </div>
+    <hr>
     <div style="width: 100%; text-align: center;">
         <div style="display: inline-block">
-        <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
-            <input type="submit" id="large_button" value="<" style="width: 2em">
+        <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            <input type="submit" id="small_button" value="<- older" style="width: 10em">
         </form>
-        <p align="center" style ='float: left; padding: 5px;'>displaying {{ cert_count }} records from {{ start_date }} to {{ end_date }}</p>
-        <form action="{{ url_for('forward', start_date=start_date, end_date=end_date) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
-            <input type="submit" id="large_button" value=">" style="width: 2em">
-        </form>
+        <p align="center" style ='float: left; padding: 5px;'>displaying {{ cert_count }} records from <strong>{{ start_date }}</strong> to <strong>{{ end_date }}</strong></p>
         </div>
     </div>
     {% include "map_widget.html" %}

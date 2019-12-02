@@ -651,11 +651,10 @@ def interact():
 
 @app.route('/rewind', methods=["POST", "GET"])
 def rewind():
-    end_date = request.args.get('start_date')
+    end_date = str(parse_date(request.args.get('start_date')).date() - datetime.timedelta(1))
     start_coords_lat = request.args.get('start_coords_lat')
     start_coords_lng = request.args.get('start_coords_lng')
     start_zoom = request.args.get('start_zoom', 7)
-    return redirect(url_for("map", home=True, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom))
 
 #NEED TO UPDATE TO MATCH REWIND
 @app.route('/forward', methods=["POST", "GET"])
@@ -664,6 +663,8 @@ def forward():
     start_date = request.args.get('end_date')
     end_date = str(parse_date(request.args.get('end_date')).date() + datetime.timedelta(interval))
     return redirect(url_for("map", home=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom))
+    region_size = request.args.get('region_size', 500)
+    return redirect(url_for("map", home=True, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size))
 
 @app.route('/set_location', methods=["POST", "GET"])
 def set_location():
@@ -755,7 +756,8 @@ def map():
     """
     get_lat = float(request.args.get('start_coords_lat', 45.41117))
     get_lng = float(request.args.get('start_coords_lng', -75.69812))
-    pad = (float(request.args.get('region_size', 10000)) ** 0.5)/1.3
+    region_size = request.args.get('region_size', 500)
+    pad = (float(region_size) ** 0.5)/1.3
     print(pad)
     with create_connection() as conn:
         df_cp_open = pd.read_sql(open_query, conn)
@@ -766,10 +768,10 @@ def map():
     df_wc.dropna(axis=0, subset=['lat'], inplace=True)
     today = datetime.datetime.now().date()
     end_date = request.args.get('end_date', str(today))
-    non_specified_start_date = list(df_wc.head(100).pub_date)[-1] if len(df_wc) else '1800-01-01'
+    non_specified_start_date = list(df_wc[df_wc.pub_date <= end_date].head(100).pub_date)[-1] if len(df_wc) else '1800-01-01'
     start_date = request.args.get('start_date', non_specified_start_date)
     def select_df_wc_window(start_date, end_date):
-        return df_wc[(start_date<=df_wc.pub_date) & (df_wc.pub_date<end_date)]
+        return df_wc[(start_date <= df_wc.pub_date) & (df_wc.pub_date <= end_date)]
     df_wc_win = select_df_wc_window(start_date, end_date)
     start_coords_lat = request.args.get('start_coords_lat', df_cp_open.lat.mean())
     start_coords_lng = request.args.get('start_coords_lng', df_cp_open.lng.mean())
@@ -939,7 +941,7 @@ def map():
     folium.LayerControl(collapsed=False).add_to(m)
 
     m.save('templates/map_widget.html')
-    return render_template('map.html', home=True, start_date=start_date, end_date=end_date, cert_count=len(df_wc_win))
+    return render_template('map.html', home=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc_win))
 
 
 
