@@ -769,7 +769,7 @@ def map():
     start_coords_lat = request.args.get('start_coords_lat', df_cp_open.lat.mean())
     start_coords_lng = request.args.get('start_coords_lng', df_cp_open.lng.mean())
     start_zoom = request.args.get('start_zoom', 7)
-    m = folium.Map(location=(start_coords_lat, start_coords_lng), zoom_start=start_zoom, min_zoom=5, height='73%')
+    m = folium.Map(location=(start_coords_lat, start_coords_lng), zoom_start=start_zoom, min_zoom=5, height='71%')
     mc = MarkerCluster()
     feature_group = folium.FeatureGroup(name='Closed Projects')
     for _, row in df_cp_closed.iterrows():
