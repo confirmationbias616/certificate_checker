@@ -655,14 +655,6 @@ def rewind():
     start_coords_lat = request.args.get('start_coords_lat')
     start_coords_lng = request.args.get('start_coords_lng')
     start_zoom = request.args.get('start_zoom', 7)
-
-#NEED TO UPDATE TO MATCH REWIND
-@app.route('/forward', methods=["POST", "GET"])
-def forward():
-    interval = 5
-    start_date = request.args.get('end_date')
-    end_date = str(parse_date(request.args.get('end_date')).date() + datetime.timedelta(interval))
-    return redirect(url_for("map", home=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom))
     region_size = request.args.get('region_size', 500)
     return redirect(url_for("map", home=True, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size))
 
