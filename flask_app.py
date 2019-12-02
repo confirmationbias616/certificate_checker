@@ -22,6 +22,7 @@ from geocoder import get_city_latlng
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "e5ac358c-f0bf-11e5-9e39-d3b532c10a28"
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 # list of tuples determining which upper limit of region size (left) should correspond
 # to which level of zoom (right) for the follium map
