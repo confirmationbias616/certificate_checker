@@ -17,11 +17,25 @@ import re
 import ast
 import folium
 from folium.plugins import MarkerCluster
+from geocoder import get_city_latlng
 
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "e5ac358c-f0bf-11e5-9e39-d3b532c10a28"
 
+# list of tuples determining which upper limit of region size (left) should correspond
+# to which level of zoom (right) for the follium map
+zoom_params = (
+    (0.0002, 16),
+    (0.001, 15),
+    (0.005, 14),
+    (0.01, 13),
+    (0.1, 12),
+    (0.5, 11),
+    (1, 10),
+    (2.5, 8.5),
+    (5, 8)
+)
 
 # this function works in conjunction with `dated_url_for` to make sure the browser uses
 # the latest version of css stylesheet when modified and reloaded during testing
@@ -637,14 +651,13 @@ def interact():
 
 @app.route('/rewind', methods=["POST", "GET"])
 def rewind():
-    interval = 5
     end_date = request.args.get('start_date')
-    start_date = str(parse_date(request.args.get('start_date')).date() - datetime.timedelta(interval))
     start_coords_lat = request.args.get('start_coords_lat')
     start_coords_lng = request.args.get('start_coords_lng')
-    start_zoom = request.args.get('start_zoom', 4)
-    return redirect(url_for("map", home=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom))
+    start_zoom = request.args.get('start_zoom', 7)
+    return redirect(url_for("map", home=True, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom))
 
+#NEED TO UPDATE TO MATCH REWIND
 @app.route('/forward', methods=["POST", "GET"])
 def forward():
     interval = 5
@@ -652,13 +665,19 @@ def forward():
     end_date = str(parse_date(request.args.get('end_date')).date() + datetime.timedelta(interval))
     return redirect(url_for("map", home=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom))
 
+@app.route('/set_location', methods=["POST", "GET"])
+def set_location():
+    region = request.form.get('region')
+    start_coords, region_size = get_city_latlng(region)
+    for size, zoom_level in zoom_params:
+        if region_size < size:
+            start_zoom = zoom_level
+            break
+        start_zoom = 7
+    return redirect(url_for("map", home=True, start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size))
+
 @app.route('/map', methods=["POST", "GET"])
 def map():
-    # if request.method == "POST":
-    #     return redirect(url_for("map", home=True, start_date=start_date, end_date=end_date))
-    today = datetime.datetime.now().date()
-    end_date = request.args.get('end_date', str(today))
-    start_date = request.args.get('start_date', str(today-datetime.timedelta(3)))
     closed_query = """
         SELECT
             company_projects.job_number,
@@ -722,25 +741,40 @@ def map():
             web_certificates.source=base_urls.source
         WHERE
             cert_type = "csp"
+        AND
+            lat > ?
+        AND
+            lat < ?
+        AND
+            lng > ?
+        AND
+            lng < ?
         ORDER BY 
             cert_id
         DESC LIMIT 10000
     """
+    get_lat = float(request.args.get('start_coords_lat', 45.41117))
+    get_lng = float(request.args.get('start_coords_lng', -75.69812))
+    pad = (float(request.args.get('region_size', 10000)) ** 0.5)/1.3
+    print(pad)
     with create_connection() as conn:
         df_cp_open = pd.read_sql(open_query, conn)
         df_cp_closed = pd.read_sql(closed_query, conn)
-        df_wc = pd.read_sql(web_query, conn)
+        df_wc = pd.read_sql(web_query, conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad])
     df_cp_open.dropna(axis=0, subset=['lat'], inplace=True)
     df_cp_closed.dropna(axis=0, subset=['lat'], inplace=True)
     df_wc.dropna(axis=0, subset=['lat'], inplace=True)
+    today = datetime.datetime.now().date()
+    end_date = request.args.get('end_date', str(today))
+    non_specified_start_date = list(df_wc.head(100).pub_date)[-1] if len(df_wc) else '1800-01-01'
+    start_date = request.args.get('start_date', non_specified_start_date)
     def select_df_wc_window(start_date, end_date):
         return df_wc[(start_date<=df_wc.pub_date) & (df_wc.pub_date<end_date)]
     df_wc_win = select_df_wc_window(start_date, end_date)
     start_coords_lat = request.args.get('start_coords_lat', df_cp_open.lat.mean())
     start_coords_lng = request.args.get('start_coords_lng', df_cp_open.lng.mean())
     start_zoom = request.args.get('start_zoom', 7)
-    m = folium.Map(location=(start_coords_lat, start_coords_lng), zoom_start=start_zoom, min_zoom=5, height='78%')
-    print(m.get_bounds())
+    m = folium.Map(location=(start_coords_lat, start_coords_lng), zoom_start=start_zoom, min_zoom=5, height='73%')
     mc = MarkerCluster()
     feature_group = folium.FeatureGroup(name='Closed Projects')
     for _, row in df_cp_closed.iterrows():
@@ -897,7 +931,7 @@ def map():
         mc.add_child(folium.Marker(
             [row.lat, row.lng],
             popup=popup,
-            tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
+            tooltip=f"{str(row.title)[:25]}{'...' if len(str(row.title)) >= 25 else ''}",
             icon=folium.Icon(prefix='fa', icon='circle', color='green')
         ))
     feature_group.add_child(mc)
@@ -905,7 +939,7 @@ def map():
     folium.LayerControl(collapsed=False).add_to(m)
 
     m.save('templates/map_widget.html')
-    return render_template('map.html', home=True, start_date=start_date, end_date=end_date)
+    return render_template('map.html', home=True, start_date=start_date, end_date=end_date, cert_count=len(df_wc_win))
 
 
 
