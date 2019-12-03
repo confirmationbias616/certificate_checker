@@ -686,7 +686,8 @@ def map():
             (base_urls.base_url || attempted_matches.url_key) AS link,
             web.source,
             COALESCE(web.address_lat, web.city_lat) as lat,
-            COALESCE(web.address_lng, web.city_lng) as lng
+            COALESCE(web.address_lng, web.city_lng) as lng,
+            base_urls.long_name as source_name
         FROM (SELECT * FROM web_certificates ORDER BY cert_id DESC LIMIT 16000) as web
         LEFT JOIN
             attempted_matches
@@ -726,7 +727,8 @@ def map():
             web_certificates.*, 
             (base_urls.base_url || web_certificates.url_key) AS link,
             COALESCE(web_certificates.address_lat, web_certificates.city_lat) as lat,
-            COALESCE(web_certificates.address_lng, web_certificates.city_lng) as lng
+            COALESCE(web_certificates.address_lng, web_certificates.city_lng) as lng,
+            base_urls.long_name as source_name
         FROM 
             web_certificates
         JOIN 
@@ -814,7 +816,7 @@ def map():
                 </tr>
                 <tr>
                     <th><b>Certificate</b></th>
-                    <td><a href="{row.link}" "target="_blank">{'Daily Commercial News' if row.source == 'dcn' else 'Ontario Construction News'}</a></td>
+                    <td><a href="{row.link}" "target="_blank">{row.source_name}</a></td>
                 </tr>
             </table>
             <hr>
@@ -918,7 +920,7 @@ def map():
                 </tr>
                 <tr>
                     <th><b>Certificate</b></th>
-                    <td><a href="{row.link}" "target="_blank">{'Daily Commercial News' if row.source == 'dcn' else 'Ontario Construction News'}</a></td>
+                    <td><a href="{row.link}" "target="_blank">{row.source_name}</a></td>
                 </tr>
             </table>
             <hr>
