@@ -28,17 +28,18 @@
 <body>    
     
     <div class="row">
-        <div class="column" type=header>
-        </div>
+        {% if not map %}
         <div class="column" type=header>
             <h2>
                 <a href={{ url_for('index') }} style="text-decoration:none; color:inherit">
                     HBR Bot
                 </a>
             </h2>
-        </div><br><br>
-        <div class="column" type=header align="center">
+            </div><br>
+            {% endif %}
+            <br>
             {% if not hide_helper_links %}
+        <div class="column" type=header align="center">
             <a href={{ url_for('about') }}>
                 about
             </a>&nbsp;
@@ -48,14 +49,14 @@
             <a href={{ url_for('map') }}>
                 interactive map
             </a>
-            {% endif %}
         </div>
+        {% endif %}
     </div>
     {% block body %}{% endblock %}
 </body>
 <footer>
     {% block footer %}
-    {% if (not interact) and (not home or job_number) %}
+    {% if (not interact) and (not home or job_number or map) %}
     <div align="center">
         <br><br>
         <form action="/" method="GET">

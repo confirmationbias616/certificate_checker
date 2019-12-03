@@ -821,7 +821,7 @@ def map():
             </table>
             <hr>
             <h6><em>Closed Project (already matched with a CSP)</em></h6>
-        """, max_width='300')
+        """, max_width='250')
         folium.Marker(
             [row.lat, row.lng],
             popup=popup,
@@ -869,7 +869,7 @@ def map():
             </table>
             <hr>
             <h6><em>Open Project (pending CSP match)</em></h6>
-        """, max_width='300')
+        """, max_width='250')
         folium.Marker(
             [row.lat, row.lng],
             popup=popup,
@@ -925,7 +925,7 @@ def map():
             </table>
             <hr>
             <h6><em>Web Certificate of Substantial Performance</em></h6>
-        """, max_width='300')
+        """, max_width='250')
         mc.add_child(folium.Marker(
             [row.lat, row.lng],
             popup=popup,
@@ -934,10 +934,10 @@ def map():
         ))
     feature_group.add_child(mc)
     feature_group.add_to(m)
-    folium.LayerControl(collapsed=False).add_to(m)
+    folium.LayerControl(collapsed=True).add_to(m)
 
     m.save('templates/map_widget.html')
-    return render_template('map.html', home=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc_win))
+    return render_template('map.html', map=True, hide_helper_links=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc_win))
 
 
 
