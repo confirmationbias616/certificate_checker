@@ -12,6 +12,7 @@ from geocoder import geocode
 import sys
 import logging
 import dateutil.parser
+from dateutil.parser import parse as parse_date
 
 
 logger = logging.getLogger(__name__)
@@ -165,6 +166,27 @@ def scrape(
                     except AttributeError:
                         pass
                 engineer = np.nan
+        elif source == "l2b":
+            cert_type_text = entry_soup.find("h2").get_text()
+            cert_type = ("csp" if "Form 9" in cert_type_text else cert_type_text)
+            attr_pairs = {}
+            fields = entry_soup.find_all('p', {'class':'mb-25'})
+            for field in fields:
+                try:
+                    attr_pair = [s for s in re.findall('[^\t^\n^\r]*', field.get_text()) if s]
+                    attr_pairs.update({attr_pair[0]: attr_pair[1]})
+                except IndexError:
+                    pass
+            response = requests.get(base_url)
+            html = response.content
+            soup = BeautifulSoup(html, "html.parser")
+            pub_date = [str(parse_date(entry.find_all('td')[1].get_text()).date()) for entry in soup.find('tbody').find_all('tr') if url_key in str(entry)][0]
+            city = attr_pairs.get('Where the Premises is Situated', np.nan)
+            address = attr_pairs.get('Where the Premises is Located', np.nan)
+            title = attr_pairs.get('This is to certify that the contract for the following improvement', np.nan)
+            owner = attr_pairs.get('Name of Owner', np.nan)
+            contractor = attr_pairs.get('Name of Contractor', np.nan)
+            engineer = attr_pairs.get('Name of Payment Certifier', np.nan)
         return (
             pub_date,
             city,
@@ -227,6 +249,15 @@ def scrape(
             x.find("a").get("href")
             for x in soup.find_all("td", {"class": "col-location"})
         ]
+    elif source == "l2b":
+        base_url = "https://certificates.link2build.ca/"
+        base_aug_url = "Search/Detail/"
+        base_search_url = "https://certificates.link2build.ca/"
+        custom_param_url = ""
+        until = str(until)
+        get_entries = lambda soup: [
+            entry.find('a').get('href') for entry in soup.find('tbody').find_all('tr') if parse_date(since) <= parse_date(entry.find_all('td')[1].get_text()) <= parse_date(until)]
+        get_number_of_matches = lambda soup: len(get_entries(soup))
     else:
         raise ValueError("Must specify CSP source.")
     if provided_url_key:
@@ -337,7 +368,7 @@ def scrape(
     ]
     # make date into actual datetime object
     df_web["pub_date"] = df_web.pub_date.apply(
-        lambda x: re.findall("\d{4}-\d{2}-\d{2}", x)[0]
+        lambda x: str(parse_date(str(x)).date()) if (x and str(x) != 'nan') else np.nan
     )
     logger.info("Fetching geocode information...")
     df_web = geocode(df_web)
