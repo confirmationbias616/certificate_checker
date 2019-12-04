@@ -753,7 +753,6 @@ def map():
     get_lng = float(request.args.get('start_coords_lng', -75.69812))
     region_size = request.args.get('region_size', 500)
     pad = (float(region_size) ** 0.5)/1.3
-    print(pad)
     with create_connection() as conn:
         df_cp_open = pd.read_sql(open_query, conn)
         df_cp_closed = pd.read_sql(closed_query, conn)
