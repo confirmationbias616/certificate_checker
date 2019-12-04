@@ -28,7 +28,6 @@
 <body>    
     
     <div class="row">
-        {% if not map %}
         <div class="column" type=header>
             <h2>
                 <a href={{ url_for('index') }} style="text-decoration:none; color:inherit">
@@ -36,7 +35,6 @@
                 </a>
             </h2>
             </div><br>
-            {% endif %}
             <br>
             {% if not hide_helper_links %}
         <div class="column" type=header align="center">
