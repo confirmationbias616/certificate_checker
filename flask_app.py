@@ -762,8 +762,8 @@ def map():
     df_wc.dropna(axis=0, subset=['lat'], inplace=True)
     today = datetime.datetime.now().date()
     end_date = request.args.get('end_date', str(today))
-    rows_remaining = df_wc[df_wc.pub_date <= end_date]
-    non_specified_start_date = list(rows_remaining.head(100).pub_date)[-1] if len(rows_remaining) else '1800-01-01'
+    rows_remaining = df_wc[df_wc.pub_date <= end_date].sort_values('pub_date', ascending=False).head(200)
+    non_specified_start_date = list(rows_remaining.pub_date)[-1] if len(rows_remaining) else '1800-01-01'
     start_date = request.args.get('start_date', non_specified_start_date)
     def select_df_wc_window(start_date, end_date):
         return df_wc[(start_date <= df_wc.pub_date) & (df_wc.pub_date <= end_date)]
