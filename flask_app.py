@@ -35,7 +35,6 @@ zoom_params = (
     (0.5, 11),
     (1, 10),
     (2.5, 8.5),
-    (5, 8)
 )
 
 # this function works in conjunction with `dated_url_for` to make sure the browser uses
@@ -655,7 +654,7 @@ def rewind():
     end_date = str(parse_date(request.args.get('start_date')).date() - datetime.timedelta(1))
     start_coords_lat = request.args.get('start_coords_lat')
     start_coords_lng = request.args.get('start_coords_lng')
-    start_zoom = request.args.get('start_zoom', 7)
+    start_zoom = request.args.get('start_zoom', 6)
     region_size = request.args.get('region_size', 500)
     return redirect(url_for("map", home=True, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size))
 
@@ -667,7 +666,7 @@ def set_location():
         if region_size < size:
             start_zoom = zoom_level
             break
-        start_zoom = 7
+        start_zoom = 5
     return redirect(url_for("map", home=True, start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size))
 
 @app.route('/map', methods=["POST", "GET"])
@@ -770,7 +769,7 @@ def map():
     df_wc_win = select_df_wc_window(start_date, end_date)
     start_coords_lat = request.args.get('start_coords_lat', df_cp_open.lat.mean())
     start_coords_lng = request.args.get('start_coords_lng', df_cp_open.lng.mean())
-    start_zoom = request.args.get('start_zoom', 7)
+    start_zoom = request.args.get('start_zoom', 6)
     m = folium.Map(location=(start_coords_lat, start_coords_lng), zoom_start=start_zoom, min_zoom=5, height='71%')
     mc = MarkerCluster()
     feature_group = folium.FeatureGroup(name='Closed Projects')
