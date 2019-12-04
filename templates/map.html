@@ -19,10 +19,14 @@
     <hr>
     <div style="width: 100%; text-align: center;">
         <div style="display: inline-block">
-        <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
-            <input type="submit" id="small_button" value="<- older" style="width: 5em">
-        </form>
-        <p align="center" style ='float: left; padding: 5px;'><strong>{{ cert_count }}</strong> CSP's from <strong>{{ start_date }}</strong> to <strong>{{ end_date }}</strong></p>
+        {% if cert_count %}
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+                <input type="submit" id="small_button" value="<- older" style="width: 5em">
+            </form>
+            <p align="center" style ='float: left; padding: 5px;'><strong>{{ cert_count }}</strong> CSP's from <strong>{{ start_date }}</strong> to <strong>{{ end_date }}</strong></p>
+        {% else %}
+            <p align="center" style ='float: left; padding: 5px;'><strong>Entirety of CSP history (> yr2000) has been explored for this region.</strong></p>
+        {% endif %}
         </div>
     </div>
     {% include "map_widget.html" %}
