@@ -274,6 +274,7 @@ def scrape(
         base_aug_url = "Search/Detail/"
         base_search_url = "https://certificates.link2build.ca/"
         custom_param_url = ""
+        since = str(since)
         until = str(until)
         get_entries = lambda soup: [
             entry.find('a').get('href') for entry in soup.find('tbody').find_all('tr') if parse_date(since) <= parse_date(entry.find_all('td')[1].get_text()) <= parse_date(until)]
