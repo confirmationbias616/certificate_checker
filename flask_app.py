@@ -935,7 +935,7 @@ def map():
     folium.LayerControl(collapsed=True).add_to(m)
 
     m.save('templates/map_widget.html')
-    return render_template('map.html', map=True, hide_helper_links=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc_win))
+    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc_win))
 
 
 
