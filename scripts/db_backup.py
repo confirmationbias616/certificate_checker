@@ -31,7 +31,7 @@ for filename, extension in [['cert_db', '.sqlite3'], ['cache_geocode_city', '.js
         print(f"could not copy {filename} to day_3")
     try:
         shutil.move(
-            f"./db_backup/1_day/{filename}{extensionf}", f"./db_backup/2_day/{filename}{extension}"
+            f"./db_backup/1_day/{filename}{extension}", f"./db_backup/2_day/{filename}{extension}"
         )
         print(f"copied {filename} to day_2")
     except FileNotFoundError:
