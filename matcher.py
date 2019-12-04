@@ -8,6 +8,7 @@ from utils import create_connection, load_config
 import re
 import sys
 import logging
+import argparse
 
 
 logger = logging.getLogger(__name__)
@@ -277,4 +278,22 @@ def match(
 
 
 if __name__ == "__main__":
-    match()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--since", type=str, help="date from when to begin looking for matches"
+    )
+    parser.add_argument(
+        "--until", type=str, help="date for when to stop search for matches"
+    )
+    parser.add_argument(
+        "--job_number", type=str, help="date for when to stop search for matches"
+    )
+    args = parser.parse_args()
+    kwargs = {}
+    if args.since:
+        kwargs["since"] = args.since
+    if args.since:
+        kwargs["until"] = args.until
+    if args.since:
+        kwargs["job_number"] = args.job_number
+    match(**kwargs)
