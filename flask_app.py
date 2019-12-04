@@ -815,7 +815,7 @@ def map():
                     <td>{row.owner}</td>
                 </tr>
                 <tr>
-                    <th><b>Certificate</b></th>
+                    <th><b>Source</b></th>
                     <td><a href="{row.link}" "target="_blank">{row.source_name}</a></td>
                 </tr>
             </table>
@@ -919,7 +919,7 @@ def map():
                     <td>{row.owner}</td>
                 </tr>
                 <tr>
-                    <th><b>Certificate</b></th>
+                    <th><b>Source</b></th>
                     <td><a href="{row.link}" "target="_blank">{row.source_name}</a></td>
                 </tr>
             </table>
