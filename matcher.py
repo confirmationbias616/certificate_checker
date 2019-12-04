@@ -241,7 +241,7 @@ def match(
         )
         results = results.sort_values("pred_prob", ascending=False)
         logger.info(
-            f"top 5 probabilities: "
+            f"top 5 probabilities for project #{company_project_row['job_number']}: "
             f"{', '. join([str(round(x, 5)) for x in results.head(5).pred_prob])}"
         )
         matches = results[results.pred_match == 1]
