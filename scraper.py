@@ -116,6 +116,11 @@ def scrape(
                 in entry_soup.find("h1", {"class": "entry-title"}).get_text()
             ):
                 cert_type = "np"
+            elif (
+                "Notice of Termination"
+                in entry_soup.find("h2", {"class": "ocn-heading"}).find_next_sibling("p").get_text()
+            ):
+                cert_type = "term"    
             else:
                 cert_type = "csp"
             pub_date = str(
@@ -154,6 +159,21 @@ def scrape(
                 address = (
                     entry_soup.find("h4", {"class": "ocn-subheading"})
                     .find_next("p")
+                    .get_text()
+                )
+                title = address  # temporary until we see more of these
+                for x in entry_soup.find_all("strong"):
+                    try:
+                        if x.get_text() == "Name of owner:":
+                            owner = x.find_parent().get_text().split(": ")[1]
+                        if x.get_text() == "Name of contractor:":
+                            contractor = x.find_parent().get_text().split(": ")[1]
+                    except AttributeError:
+                        pass
+                engineer = np.nan
+            elif cert_type == "term":
+                address = (
+                    entry_soup.find("h1", {"class": "entry-title"})
                     .get_text()
                 )
                 title = address  # temporary until we see more of these
