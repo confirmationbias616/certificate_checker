@@ -925,7 +925,7 @@ def map():
             </table>
             <hr>
             <h6><em>Web Certificate of Substantial Performance</em></h6>
-        """, max_width='250')
+        """, max_width='250', max_height='200')
         mc.add_child(folium.Marker(
             [row.lat, row.lng],
             popup=popup,
