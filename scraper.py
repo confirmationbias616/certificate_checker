@@ -336,17 +336,17 @@ def scrape(
         widgets=[progressbar.Bar("=", "[", "]"), " ", progressbar.Percentage()],
     )
     bar.start()
+    logged_key_query = """
+        SELECT url_key 
+        FROM web_certificates 
+        WHERE source=? 
+    """
     with create_connection() as conn:
-        logged_url_keys = list(pd.read_sql(hist_query, conn, params=[source]).url_key)
+        logged_url_keys = list(pd.read_sql(logged_key_query, conn, params=[source]).url_key)
     entries = get_entries(soup)
     for i, entry in enumerate(entries, 1):
         entry = base_url + entry
         url_key = entry.split(base_aug_url)[1]
-        hist_query = """
-            SELECT url_key 
-            FROM web_certificates 
-            WHERE source=? 
-        """
         if url_key in logged_url_keys:
             logger.info(f"entry for {url_key} was already logged - continuing with the next one (if any)...")
             continue
