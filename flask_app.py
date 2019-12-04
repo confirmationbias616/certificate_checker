@@ -821,7 +821,7 @@ def map():
             </table>
             <hr>
             <h6><em>Closed Project (already matched with a CSP)</em></h6>
-        """, max_width='250')
+        """, max_width='250', max_height='200')
         folium.Marker(
             [row.lat, row.lng],
             popup=popup,
@@ -869,7 +869,7 @@ def map():
             </table>
             <hr>
             <h6><em>Open Project (pending CSP match)</em></h6>
-        """, max_width='250')
+        """, max_width='250', max_height='200')
         folium.Marker(
             [row.lat, row.lng],
             popup=popup,
