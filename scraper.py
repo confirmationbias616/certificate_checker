@@ -346,10 +346,9 @@ def scrape(
         logged_url_keys = list(pd.read_sql(logged_key_query, conn, params=[source]).url_key)
     entries = get_entries(soup)
     for i, entry in enumerate(entries, 1):
-        entry = base_url + entry
-        url_key = entry.split(base_aug_url)[1]
-        if url_key in logged_url_keys:
-            logger.info(f"entry for {url_key} was already logged - continuing with the next one (if any)...")
+        check_url_key = (base_url + entry).split(base_aug_url)[1]
+        if check_url_key in logged_url_keys:
+            logger.info(f"entry for {check_url_key} was already logged - continuing with the next one (if any)...")
             continue
         for cumulative, item in zip(
             [
