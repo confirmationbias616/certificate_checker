@@ -232,6 +232,28 @@ def scrape(
             raise ValueError(
                 "`until` parameter should be in the format yyyy-mm-dd if not a key_word"
             )
+    if since == "last_record":
+        hist_query = """
+            SELECT pub_date 
+            FROM web_certificates 
+            WHERE source=? 
+            ORDER BY pub_date DESC LIMIT 1
+        """
+        with create_connection() as conn:
+            cur = conn.cursor()
+            cur.execute(hist_query, [source])
+            last_date = cur.fetchone()[0]
+            ld_year = int(last_date[:4])
+            ld_month = int(last_date[5:7])
+            ld_day = int(last_date[8:])
+            since = datetime.datetime(ld_year, ld_month, ld_day).date()
+    else:
+        valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
+        if not valid_since_date:
+            raise ValueError(
+                "`since` parameter should be in the format yyyy-mm-dd if not a "
+                "predefined term."
+            )
     if source == "dcn":
         base_url = "https://canada.constructconnect.com"
         base_aug_url = (
@@ -297,28 +319,6 @@ def scrape(
                 "source": [source] * len(details[0]),
             }
         )
-    if since == "last_record":
-        hist_query = """
-            SELECT pub_date 
-            FROM web_certificates 
-            WHERE source=? 
-            ORDER BY pub_date DESC LIMIT 1
-        """
-        with create_connection() as conn:
-            cur = conn.cursor()
-            cur.execute(hist_query, [source])
-            last_date = cur.fetchone()[0]
-            ld_year = int(last_date[:4])
-            ld_month = int(last_date[5:7])
-            ld_day = int(last_date[8:])
-            since = datetime.datetime(ld_year, ld_month, ld_day).date()
-    else:
-        valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
-        if not valid_since_date:
-            raise ValueError(
-                "`since` parameter should be in the format yyyy-mm-dd if not a "
-                "predefined term."
-            )
     date_param_url = custom_param_url.format(since, until)
     response = requests.get(base_search_url + date_param_url)
     html = response.content
