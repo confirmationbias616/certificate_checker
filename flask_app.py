@@ -27,9 +27,9 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 # list of tuples determining which upper limit of region size (left) should correspond
 # to which level of zoom (right) for the follium map
 zoom_params = (
-    (0.0002, 16),
-    (0.001, 15),
-    (0.005, 14),
+    (0.0002, 15),
+    (0.001, 13),
+    (0.005, 13),
     (0.01, 13),
     (0.1, 12),
     (0.5, 11),
