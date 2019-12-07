@@ -651,23 +651,26 @@ def interact():
 
 @app.route('/rewind', methods=["POST", "GET"])
 def rewind():
+    limit_daily = request.args.get('limit_daily')
+    location_string = request.args.get('location_string')
     end_date = str(parse_date(request.args.get('start_date')).date() - datetime.timedelta(1))
     start_coords_lat = request.args.get('start_coords_lat')
     start_coords_lng = request.args.get('start_coords_lng')
     start_zoom = request.args.get('start_zoom', 6)
     region_size = request.args.get('region_size', 500)
-    return redirect(url_for("map", home=True, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size))
+    return redirect(url_for("map", home=True, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string))
 
 @app.route('/set_location', methods=["POST", "GET"])
 def set_location():
-    region = request.form.get('region')
-    start_coords, region_size = get_city_latlng(region)
+    location_string = request.form.get('location_string')
+    limit_daily = request.form.get('limit_daily')
+    start_coords, region_size = get_city_latlng(location_string)
     for size, zoom_level in zoom_params:
         if region_size < size:
             start_zoom = zoom_level
             break
         start_zoom = 5
-    return redirect(url_for("map", home=True, start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size))
+    return redirect(url_for("map", home=True, start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string))
 
 @app.route('/map', methods=["POST", "GET"])
 def map():
@@ -759,10 +762,16 @@ def map():
     df_cp_open.dropna(axis=0, subset=['lat'], inplace=True)
     df_cp_closed.dropna(axis=0, subset=['lat'], inplace=True)
     df_wc.dropna(axis=0, subset=['lat'], inplace=True)
+    location_string = request.args.get('location_string')
     today = datetime.datetime.now().date()
     end_date = request.args.get('end_date', str(today))
-    rows_remaining = df_wc[df_wc.pub_date <= end_date].sort_values('pub_date', ascending=False).head(200)
-    non_specified_start_date = list(rows_remaining.pub_date)[-1] if len(rows_remaining) else '2000-01-01'
+    limit_daily = request.args.get('limit_daily')
+    if limit_daily:
+        rows_remaining = df_wc[df_wc.pub_date <= end_date].sort_values('pub_date', ascending=False).head(1)
+        non_specified_start_date = list(rows_remaining.pub_date)[0] if len(rows_remaining) else '2000-01-01'
+    else:
+        rows_remaining = df_wc[df_wc.pub_date <= end_date].sort_values('pub_date', ascending=False).head(200)
+        non_specified_start_date = list(rows_remaining.pub_date)[-1] if len(rows_remaining) else '2000-01-01'
     start_date = request.args.get('start_date', non_specified_start_date)
     def select_df_wc_window(start_date, end_date):
         return df_wc[(start_date <= df_wc.pub_date) & (df_wc.pub_date <= end_date)]
@@ -935,7 +944,7 @@ def map():
     folium.LayerControl(collapsed=True).add_to(m)
 
     m.save('templates/map_widget.html')
-    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc_win))
+    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc_win), limit_daily=limit_daily, location_string=location_string)
 
 
 
