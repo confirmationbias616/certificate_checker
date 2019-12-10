@@ -958,8 +958,5 @@ def map():
     return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc_win), limit_daily=limit_daily, location_string=location_string)
 
 
-
-    # return m._repr_html_()
-
 if __name__ == "__main__":
     app.run(debug=load_config()["flask_app"]["debug"])
