@@ -27,9 +27,25 @@
     <div style="width: 100%; text-align: center;">
         <div style="display: inline-block">
         {% if cert_count %}
+            {% if limit_daily %}
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='y', location_string=location_string) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+                    <input type="submit" id="small_button" value="<- 1y" style="width: 5em">
+            </form>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='m', location_string=location_string) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+                    <input type="submit" id="small_button" value="<- 1m" style="width: 5em">
+            </form>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='w', location_string=location_string) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+                    <input type="submit" id="small_button" value="<- 1w" style="width: 5em">
+            </form>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='d', location_string=location_string) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+                    <input type="submit" id="small_button" value="<- 1d" style="width: 5em">
+            </form>
+            {% else %}
             <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
                 <input type="submit" id="small_button" value="<- older" style="width: 5em">
             </form>
+            {% endif %}
+            
             <p align="center" style ='float: left; padding: 5px;'><strong>{{ cert_count }}</strong> CSP's for <strong>{{ start_date }}</strong>{% if not limit_daily %} to <strong>{{ end_date }}</strong>{% endif %}</p>
         {% else %}
             <p align="center" style ='float: left; padding: 5px;'><strong>Entirety of CSP history (> yr2000) has been explored for this region.</strong></p>

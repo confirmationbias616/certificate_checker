@@ -3,6 +3,7 @@
 from flask import Flask, render_template, url_for, request, redirect
 import datetime
 from dateutil.parser import parse as parse_date
+import dateutil.relativedelta
 from utils import create_connection, load_config
 from wrangler import wrangle
 from matcher import match
@@ -653,7 +654,17 @@ def interact():
 def rewind():
     limit_daily = request.args.get('limit_daily')
     location_string = request.args.get('location_string')
-    end_date = str(parse_date(request.args.get('start_date')).date() - datetime.timedelta(1))
+    skip = request.args.get('skip')
+    if skip == 'd':
+        end_date = str(parse_date(request.args.get('start_date')).date() - dateutil.relativedelta.relativedelta(days=1))
+    elif skip == 'w':
+        end_date = str(parse_date(request.args.get('start_date')).date() - dateutil.relativedelta.relativedelta(weeks=1))
+    elif skip == 'm':
+        end_date = str(parse_date(request.args.get('start_date')).date() - dateutil.relativedelta.relativedelta(months=1))
+    elif skip == 'y':
+        end_date = str(parse_date(request.args.get('start_date')).date() - dateutil.relativedelta.relativedelta(years=1))
+    else:
+        end_date = str(parse_date(request.args.get('start_date')).date() - dateutil.relativedelta.relativedelta(days=1))
     start_coords_lat = request.args.get('start_coords_lat')
     start_coords_lng = request.args.get('start_coords_lng')
     start_zoom = request.args.get('start_zoom', 6)
