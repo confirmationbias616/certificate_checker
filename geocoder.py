@@ -68,6 +68,8 @@ def get_city_size(bounds):
     return area
 
 def geocode(df, retry_na=False):
+    if not len(df):
+        return df
     if (not retry_na) and ('address' not in df.columns or 'city' not in df.columns):
         raise ValueError("Input DataFrame does not contain all required columns (`city` and `address`)")
     df['address_latlng'] = df.apply(lambda row: get_address_latlng(row.address, row.city), axis=1)
