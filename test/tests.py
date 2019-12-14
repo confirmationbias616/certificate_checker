@@ -210,7 +210,7 @@ class InputTests(unittest.TestCase):
 
     @data(("dcn",), ("ocn",))
     @unpack
-    def test_scarpe(self, source):
+    def test_scrape(self, source):
         test_limit = 3
         web_df = scrape(
             source=source,
