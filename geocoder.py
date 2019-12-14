@@ -31,7 +31,6 @@ def api_call(address_param):
     api_request = "https://maps.googleapis.com/maps/api/geocode/json?address={}, Ontario, Canada&bounds=41.6765559,-95.1562271|56.931393,-74.3206479&key={}"
     response = requests.get(api_request.format(address_param, api_key))
     results_list = json.loads(response.content)['results']
-    print(len(results_list))
     for result in results_list:
         if 'Ontario' in str(result):
             return result
