@@ -208,7 +208,7 @@ class InputTests(unittest.TestCase):
                 except FileNotFoundError:
                     pass
 
-    @data(("dcn",), ("ocn",))
+    @data(("dcn",), ("ocn",), ("l2b",))
     @unpack
     def test_scrape(self, source):
         test_limit = 3
