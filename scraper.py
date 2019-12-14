@@ -347,7 +347,7 @@ def scrape(
     entries = get_entries(soup)
     for i, entry in enumerate(entries, 1):
         check_url_key = (base_url + entry).split(base_aug_url)[1]
-        if check_url_key in logged_url_keys:
+        if not test and check_url_key in logged_url_keys:
             logger.info(f"entry for {check_url_key} was already logged - continuing with the next one (if any)...")
             continue
         for cumulative, item in zip(
