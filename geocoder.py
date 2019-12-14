@@ -11,7 +11,7 @@ try:
     with open(".api_key.txt") as file:
         api_key = file.read()
 except FileNotFoundError:  # no key if running in CI
-    pass
+    api_key = None
 
 def persistant_cache(file_name):
     def decorator(original_func):
@@ -28,6 +28,8 @@ def persistant_cache(file_name):
     return decorator
 
 def api_call(address_param):
+    if not api_key:
+        return {}
     api_request = "https://maps.googleapis.com/maps/api/geocode/json?address={}, Ontario, Canada&bounds=41.6765559,-95.1562271|56.931393,-74.3206479&key={}"
     response = requests.get(api_request.format(address_param, api_key))
     results_list = json.loads(response.content)['results']
