@@ -1,6 +1,5 @@
 import add_parent_to_path
 import os
-from scraper import scrape
 from matcher import match
 from ml import build_train_set, train_model, validate_model
 from utils import load_config
@@ -22,20 +21,6 @@ logger.setLevel(logging.INFO)
 def daily_routine(exit_if_stale=False):
     logger.info("initiating daily routine...")
     prob_thresh = load_config()["machine_learning"]["prboability_thresholds"]["general"]
-    if "scrape" in load_config()["daily_routine"]["steps"]:
-        try:
-            sources_scraped = []
-            for source in load_config()["daily_routine"]["scrape_source"]:
-                logger.info(f"scrape {source}")
-                source_scraped = scrape(
-                    source=source
-                )  # bool whether or not CSP's were retreived
-                sources_scraped.append(source_scraped)
-            if not any(sources_scraped) and load_config()["daily_routine"]["exit_if_stale"]:
-                logger.info("No new CSP certificates today. Exiting early.")
-                return  # short-ciruit out since new new CSP's has been collected
-        except Exception as e:
-            logger.critical(e)
     if "train" in load_config()["daily_routine"]["steps"]:
         try:
             logger.info("build_train_set")
