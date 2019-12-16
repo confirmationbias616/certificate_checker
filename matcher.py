@@ -208,7 +208,7 @@ def match(
             len(df_web) == 0
         ):  # SQL query retunred nothing so no point of going any further
             logger.info(
-                f"Nothing has been collected from Daily Commercial News since {since}. "
+                f"No new CSP's have been collected since last time `match()` was called ({since}). "
                 f"Breaking out of match function."
             )
             return False
