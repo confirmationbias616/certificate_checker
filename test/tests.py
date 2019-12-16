@@ -484,7 +484,7 @@ class IntegrationTests(unittest.TestCase):
         )
         sample_web = pd.DataFrame(
             {
-                "cert_id": "99998"
+                "cert_id": "99998",
                 "pub_date": "2019-03-06",
                 "city": "Ottawa-Carleton",
                 "address": "2562 Del Zotto Avenue, Gloucester, Ontario",
