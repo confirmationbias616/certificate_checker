@@ -4,6 +4,8 @@ import pandas as pd
 import yaml
 import sys
 import logging
+import json
+import datetime
 
 
 logger = logging.getLogger(__name__)
@@ -25,6 +27,26 @@ def load_config():
             return yaml.safe_load(stream)
         except yaml.YAMLError as e:
             logger.critical(e)
+
+
+def load_results():
+    """Returns `results.json` file as a python object."""
+    today_date = str(datetime.datetime.now().date())
+    with open('results.json') as f:
+        return json.load(f)
+
+
+def update_results(new_results):
+    """Updates `results.json` by updating dictionary located at key for today's date with whatever
+    dictionary is passed in."""
+    today_date = str(datetime.datetime.now().date())
+    results = load_results()
+    if results.get(today_date, False):
+        results[today_date].update(new_results)
+    else:
+        results.update({today_date : new_results})
+    with open('results.json', 'w') as f:
+        json.dump(results, f, sort_keys=True, indent=2)  
 
 
 def save_config(config):
