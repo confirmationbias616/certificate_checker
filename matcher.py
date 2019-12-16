@@ -144,7 +144,7 @@ def match(
      emails appropriately.
      - `since` (str of format `"yyyy-mm-dd"`): used in conjunction with `until` to specify
      timeframe to query database for `df_web`. Only used if `df_web` not specified. Special
-     strings `"week_ago"`, `"day_ago"`, or `"now"` can be used instead.
+     strings `"week_ago"`, `"day_ago"`, or `"today"` can be used instead.
      - `until` (str of format `"yyyy-mm-dd"`): used in conjunction with `since` to specify
      timeframe to query database for `df_web`. Only used if `df_web` not specified. Special
      string `"now"` can be used instead.
