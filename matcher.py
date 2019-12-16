@@ -4,7 +4,7 @@ from wrangler import wrangle
 from communicator import communicate
 from scorer import build_match_score
 import pickle
-from utils import create_connection, load_config
+from utils import create_connection, load_config, update_results
 import re
 import sys
 import logging
@@ -211,6 +211,10 @@ def match(
                 f"No new CSP's have been collected since last time `match()` was called ({since}). "
                 f"Breaking out of match function."
             )
+            update_results({
+                'match summary': 'nothing new to match', 
+                'noteworthy matches' : {}
+            })
             return False
     df_web = wrangle(df_web)
     comm_count = 0
@@ -274,6 +278,10 @@ def match(
         f"Done looping through {len(company_projects)} open projects. Sent {comm_count} "
         f"e-mails to communicate matches as a result."
     )
+    update_results({
+        'match summary': f"matched {comm_count} out of {len(company_projects)} projects and {int(len(results_master)/len(company_projects))} CSP's",
+        'noteworthy matches' : results_master[results_master.pred_prob > 0.5][['cert_id','job_number', 'pred_prob', 'pred_match']].to_dict()
+    })
     return results_master
 
 
