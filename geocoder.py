@@ -34,7 +34,7 @@ def api_call(address_param):
     response = requests.get(api_request.format(address_param, api_key))
     results_list = json.loads(response.content)['results']
     for result in results_list:
-        if 'Ontario' in str(result):
+        if 'Ontario' in str(result) or 'ontario' in str(result):
             return result
     return {}
 
@@ -74,7 +74,7 @@ def geocode(df, retry_na=False):
     if (not retry_na) and ('address' not in df.columns or 'city' not in df.columns):
         raise ValueError("Input DataFrame does not contain all required columns (`city` and `address`)")
     df['address_latlng'] = df.apply(lambda row: get_address_latlng(row.address, row.city), axis=1)
-    df['city_latlng_size'] = df.city.apply(lambda x: get_city_latlng(x))
+    df['city_latlng_size'] = df.city.apply(lambda x: get_city_latlng(x.title()))
     df['address_lat'] = df.address_latlng.apply(lambda x: x.get('lat', np.nan))
     df['address_lng'] = df.address_latlng.apply(lambda x: x.get('lng', np.nan))
     df['city_lat'] = df.city_latlng_size.apply(lambda x: x[0].get('lat', np.nan))

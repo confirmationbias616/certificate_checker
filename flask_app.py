@@ -675,7 +675,7 @@ def rewind():
 def set_location():
     location_string = request.form.get('location_string')
     limit_daily = request.form.get('limit_daily')
-    start_coords, region_size = get_city_latlng(location_string)
+    start_coords, region_size = get_city_latlng(location_string.title())
     if not start_coords:
         location_string = 'location not found - try again'
         start_coords, region_size = get_city_latlng('ontario')
