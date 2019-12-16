@@ -469,6 +469,7 @@ class IntegrationTests(unittest.TestCase):
         # test single sample
         sample_company = pd.DataFrame(
             {
+                "cert_id": "99999",
                 "job_number": "2387",
                 "city": "Ottawa",
                 "address": "2562 Del Zotto Ave., Ottawa, Ontario",
