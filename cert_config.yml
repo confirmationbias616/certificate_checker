@@ -36,6 +36,7 @@ daily_routine:
   scrape_source:
     - dcn
     - ocn
+    - l2b
   steps:
     - scrape
     - train
