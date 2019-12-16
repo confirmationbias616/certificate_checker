@@ -392,6 +392,8 @@ def scrape(
             "source": [source] * len(pub_date),
         }
     )
+    if not len(df_web):
+        return False
     df_web = df_web.sort_values("pub_date", ascending=True)
     df_web["cert_id"] = [
         int(x) for x in range(last_cert_id + 1, last_cert_id + 1 + len(df_web))
