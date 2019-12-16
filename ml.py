@@ -5,11 +5,10 @@ from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import KFold
 from sklearn.metrics import f1_score
 import pickle
-import json
 from wrangler import wrangle
 from matcher import match
 from scorer import build_match_score
-from utils import create_connection, load_config
+from utils import create_connection, load_config, update_results
 import sys
 import logging
 import os
@@ -163,16 +162,7 @@ def train_model(
     X = df[[x for x in df.columns if x.endswith("_score")]]
     save_feature_list(X.columns)
     feature_list = list(X.columns)
-    with open('results.json') as f:
-        results = json.load(f)
-    if results.get(datetime.datetime.now(), False):
-        results[datetime.datetime.now().date()].update({'features' : feature_list})
-    else:
-        results.update({str(datetime.datetime.now().date()):{
-            'features' : feature_list,
-        }})
-    with open('results.json', 'w') as f:
-        json.dump(results, f, sort_keys=True, indent=2)
+    update_results({'features' : feature_list})
     y = df[["ground_truth"]]
     clf = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)
     sm = SMOTE(random_state=42, ratio=1)
@@ -376,9 +366,7 @@ def validate_model(**kwargs):
     new_min_prob = round(min(new_pred_probs), 3)
     sq_avg_prob = round(sum(sq_pred_probs) / len(sq_pred_probs), 3)
     new_avg_prob = round(sum(new_pred_probs) / len(new_pred_probs), 3)
-    with open('results.json') as f:
-        results = json.load(f)
-    results.update({str(datetime.datetime.now().date()):{
+    update_results({
         "100% recall acheived" : is_100_recall,
         'minimum probability required for status quo model' : sq_min_prob,
         'minimum probability required for new model' : new_min_prob,
@@ -386,9 +374,7 @@ def validate_model(**kwargs):
         'average probability required for new model' : new_avg_prob,
         'false positives with status quo' : sq_false_positives,
         'false positives with new' : new_false_positives,
-    }})
-    with open('results.json', 'w') as f:
-        json.dump(results, f, sort_keys=True, indent=2)
+    })
     if not is_100_recall:
         logger.warning(
             "100% recall not acheived with new model - archiving it "
