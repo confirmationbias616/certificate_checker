@@ -18,7 +18,7 @@ logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
 
-def daily_routine(exit_if_stale=False):
+def daily_routine():
     logger.info("initiating daily routine...")
     prob_thresh = load_config()["machine_learning"]["prboability_thresholds"]["general"]
     if "train" in load_config()["daily_routine"]["steps"]:
