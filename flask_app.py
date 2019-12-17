@@ -677,7 +677,7 @@ def set_location():
     limit_daily = request.form.get('limit_daily')
     start_coords, region_size = get_city_latlng(location_string.title())
     if not start_coords:
-        location_string = 'location not found - try again'
+        location_string = 'Ontario'
         start_coords, region_size = get_city_latlng('ontario')
     for size, zoom_level in zoom_params:
         if region_size < size:
