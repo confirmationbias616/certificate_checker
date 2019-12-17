@@ -14,6 +14,8 @@
             <div style="display: inline-block">
                 <input type="text" name="location_string" size="20" {% if location_string %} value="{{ location_string }}"" {% endif %} placeholder="Focus on specific region" autofocus style="float: left; border: 1px solid black">
                 &emsp;
+                <input type="text" name="text_search" size="20" {% if text_search %} value="{{ text_search }}"" {% endif %} placeholder="List one or many keywords" autofocus style="float: left; border: 1px solid black">
+                &emsp;
                 <input type="submit" id="small_button" value="Explore!" style="width: 6em;" >
             </div>
             <div>
@@ -29,20 +31,20 @@
         <div style="display: inline-block">
         {% if cert_count %}
             {% if limit_daily %}
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='y', location_string=location_string) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='y', location_string=location_string, text_search=text_search) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
                     <input type="submit" id="small_button" value="<- 1y" style="width: 5em">
             </form>
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='m', location_string=location_string) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='m', location_string=location_string, text_search=text_search) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
                     <input type="submit" id="small_button" value="<- 1m" style="width: 5em">
             </form>
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='w', location_string=location_string) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='w', location_string=location_string, text_search=text_search) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
                     <input type="submit" id="small_button" value="<- 1w" style="width: 5em">
             </form>
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='d', location_string=location_string) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='d', location_string=location_string, text_search=text_search) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
                     <input type="submit" id="small_button" value="<- 1d" style="width: 5em">
             </form>
             {% else %}
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
                 <input type="submit" id="small_button" value="<- older" style="width: 5em">
             </form>
             {% endif %}
