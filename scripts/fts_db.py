@@ -16,7 +16,10 @@ create_fts = """
 """
 populate_fts = """
     INSERT INTO cert_search
-    SELECT cert_id, title || ' ' || owner || ' ' || contractor || ' ' || city as text FROM web_certificates;
+    SELECT 
+        cert_id, 
+        title || ' ' || owner || ' ' || contractor || ' ' || city || ' ' || engineer as text 
+    FROM web_certificates;
 """
 
 def update_fts():
