@@ -4,7 +4,7 @@ from wrangler import wrangle
 from communicator import communicate
 from scorer import build_match_score
 import pickle
-from utils import create_connection, load_config, update_results
+from utils import create_connection, load_config, load_last_recorded, update_results
 import re
 import sys
 import logging
@@ -120,6 +120,7 @@ def match(
     test=False,
     since="today",
     until="now",
+    only_fresh_web_certs=False,
     prob_thresh=load_config()["machine_learning"]["prboability_thresholds"]["general"],
     multi_phase_proned_thresh=load_config()["machine_learning"][
         "prboability_thresholds"
@@ -148,6 +149,9 @@ def match(
      - `until` (str of format `"yyyy-mm-dd"`): used in conjunction with `since` to specify
      timeframe to query database for `df_web`. Only used if `df_web` not specified. Special
      string `"now"` can be used instead.
+     - `only_fresh_web_certs` (bool): if True, will only run match for web certificates not
+     previously run through this function. figuring out "fresh" data is done by looking at
+     results.json for last logged attempted cert_id.
      - `prob_thresh` (float): probability threshold for decision boundary.
      - `multi_phase_proned_thresh` (float): probability threshold for projects which are
      identified as being at risk of having multiple phases, which will override the standard
@@ -166,7 +170,9 @@ def match(
 
     """
     logger.info("matching...")
+    record_results = False
     if not isinstance(company_projects, pd.DataFrame):  # company_projects == False
+        record_results = True
         open_query = "SELECT * FROM company_projects WHERE closed=0"
         with create_connection() as conn:
             company_projects = pd.read_sql(open_query, conn)
@@ -174,6 +180,7 @@ def match(
         company_projects = company_projects[company_projects.job_number == job_number]
     company_projects = wrangle(company_projects)
     if not isinstance(df_web, pd.DataFrame):  # df_web == False
+        record_results = True
         if since == "today":
             since = datetime.datetime.now().date()
         elif since == "day_ago":
@@ -204,6 +211,8 @@ def match(
         """
         with create_connection() as conn:
             df_web = pd.read_sql(hist_query, conn, params=[since, until])
+        if only_fresh_web_certs:
+            df_web = df_web[df_web.cert_id > load_last_recorded('last_cert_id_matched')]
         if (
             len(df_web) == 0
         ):  # SQL query retunred nothing so no point of going any further
@@ -216,6 +225,9 @@ def match(
                 'noteworthy matches' : {}
             })
             return False
+        update_results({
+            'last_cert_id_matched': list(sorted(df_web.cert_id))[-1]
+        })
     df_web = wrangle(df_web)
     comm_count = 0
     for _, company_project_row in company_projects.iterrows():
@@ -278,10 +290,11 @@ def match(
         f"Done looping through {len(company_projects)} open projects. Sent {comm_count} "
         f"e-mails to communicate matches as a result."
     )
-    update_results({
-        'match summary': f"matched {comm_count} out of {len(company_projects)} projects and {int(len(results_master)/len(company_projects))} CSP's",
-        'noteworthy matches' : results_master[results_master.pred_prob > 0.5][['cert_id','job_number', 'pred_prob', 'pred_match']].to_dict()
-    })
+    if record_results:
+        update_results({
+            'match summary': f"matched {comm_count} out of {len(company_projects)} projects and {int(len(results_master)/len(company_projects))} CSP's",
+            'noteworthy matches' : results_master[results_master.pred_prob > 0.5][['cert_id','job_number', 'pred_prob', 'pred_match']].to_dict()
+        })
     return results_master
 
 
@@ -300,8 +313,10 @@ if __name__ == "__main__":
     kwargs = {}
     if args.since:
         kwargs["since"] = args.since
-    if args.since:
+    if args.until:
         kwargs["until"] = args.until
-    if args.since:
+    if args.only_fresh_web_certs:
+        kwargs["only_fresh_web_certs"] = args.only_fresh_web_certs
+    if args.job_number:
         kwargs["job_number"] = args.job_number
     match(**kwargs)

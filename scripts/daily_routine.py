@@ -36,12 +36,12 @@ def daily_routine():
         except Exception as e:
             logger.critical(e)
     if "match" in load_config()["daily_routine"]["steps"]:
-        try:
-            logger.info("match")
-            last_run = sorted(list(load_results().keys()))[-1]
-            match(since=last_run, prob_thresh=prob_thresh, test=load_config()["daily_routine"]["test"])
-        except Exception as e:
-            logger.critical(e)
+        #try:
+        logger.info("match")
+        #last_run = sorted(list(load_results().keys()))[-1]
+        match(since='day_ago', only_fresh_web_certs=True, prob_thresh=prob_thresh, test=load_config()["daily_routine"]["test"])
+        #except Exception as e:
+            #logger.critical(e)
 
 
 if __name__ == "__main__":
