@@ -778,13 +778,18 @@ def map():
     region_size = request.args.get('region_size', 500)
     pad = (float(region_size) ** 0.5)/1.3
     text_search = request.args.get('text_search', None)
-    with create_connection() as conn:
-        df_cp_open = pd.read_sql(open_query, conn)
-        df_cp_closed = pd.read_sql(closed_query, conn)
-        if text_search:
-            df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, text_search])
-        else:
-            df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad])
+    while True:
+        try:
+            with create_connection() as conn:
+                df_cp_open = pd.read_sql(open_query, conn)
+                df_cp_closed = pd.read_sql(closed_query, conn)
+                if text_search:
+                    df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, text_search])
+                else:
+                    df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad])
+                break
+        except pd.io.sql.DatabaseError:
+            logger.info('Database is locked. Retrying SQL queries...')
     df_cp_open.dropna(axis=0, subset=['lat'], inplace=True)
     df_cp_closed.dropna(axis=0, subset=['lat'], inplace=True)
     df_wc.dropna(axis=0, subset=['lat'], inplace=True)

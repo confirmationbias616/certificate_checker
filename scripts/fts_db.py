@@ -19,15 +19,14 @@ populate_fts = """
     SELECT cert_id, title || ' ' || owner || ' ' || contractor || ' ' || city as text FROM web_certificates;
 """
 
-def create_or_update_fts():
-    try:
-        with create_connection() as conn:
-            conn.cursor().execute(drop_fts)
-    except sqlite3.OperationalError:
-        pass
+def update_fts():
     with create_connection() as conn:
+        try:
+            conn.cursor().execute(drop_fts)  # drop fts table if existing so it can be rewritten
+        except sqlite3.OperationalError:
+            pass
         conn.cursor().execute(create_fts)
         conn.cursor().execute(populate_fts)
 
 if __name__ == "__main__":
-    create_or_update_fts()
+    update_fts()
