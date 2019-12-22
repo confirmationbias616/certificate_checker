@@ -21,6 +21,17 @@ from folium.plugins import MarkerCluster
 from geocoder import get_city_latlng
 
 
+logger = logging.getLogger(__name__)
+log_handler = logging.StreamHandler(sys.stdout)
+log_handler.setFormatter(
+    logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s "
+        "- line %(lineno)d"
+    )
+)
+logger.addHandler(log_handler)
+logger.setLevel(logging.INFO)
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "e5ac358c-f0bf-11e5-9e39-d3b532c10a28"
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -787,6 +798,7 @@ def map():
                     df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, text_search])
                 else:
                     df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad])
+                logger.info('SQL queries successful!')
                 break
         except pd.io.sql.DatabaseError:
             logger.info('Database is locked. Retrying SQL queries...')
