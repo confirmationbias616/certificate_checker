@@ -35,6 +35,13 @@ def load_results():
         return json.load(f)
 
 
+def load_last_recorded(key):
+    """Returns last known recorded value of input `key`."""
+    results = load_results()
+    last_recorded_date = sorted(list(results.keys()))[-1]
+    return results[last_recorded_date][key]
+
+
 def update_results(new_results):
     """Updates `results.json` by updating dictionary located at key for today's date with whatever
     dictionary is passed in."""
