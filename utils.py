@@ -31,7 +31,6 @@ def load_config():
 
 def load_results():
     """Returns `results.json` file as a python object."""
-    today_date = str(datetime.datetime.now().date())
     with open('results.json') as f:
         return json.load(f)
 
