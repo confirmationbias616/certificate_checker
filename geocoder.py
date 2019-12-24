@@ -96,7 +96,7 @@ def geocode(df, retry_na=False):
     df.drop(['address_latlng', 'city_latlng_size'], axis=1, inplace=True)
     return df
 
-def update_db_table(table_name, start_date=None, end_date=None):
+def geo_update_db_table(table_name, start_date=None, end_date=None, limit=None):
     update_geo_data = """
         UPDATE {}
         SET address_lat = ?,
@@ -122,6 +122,8 @@ def update_db_table(table_name, start_date=None, end_date=None):
         update_geo_data = update_geo_data.format(table_name, match_id)
     else:
         raise ValueError("Invalid input `table_name`. Choice of `web_certificates` or `company_projects`")
+    if limit:
+        fetch_jobs = fetch_jobs + f" LIMIT {limit}"
     with create_connection() as conn:
         df = pd.read_sql(fetch_jobs, conn, params=limit_params)
     for i, row in df.iterrows():
