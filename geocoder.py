@@ -1,4 +1,6 @@
 import argparse
+import logging
+import sys
 import pandas as pd
 import requests
 import json
@@ -6,6 +8,17 @@ import numpy as np
 from statistics import mean
 from utils import create_connection
 
+
+logger = logging.getLogger(__name__)
+log_handler = logging.StreamHandler(sys.stdout)
+log_handler.setFormatter(
+    logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s "
+        "- line %(lineno)d"
+    )
+)
+logger.addHandler(log_handler)
+logger.setLevel(logging.INFO)
 
 try:
     with open(".api_key.txt") as file:
@@ -113,7 +126,7 @@ def update_db_table(table_name, start_date=None, end_date=None):
         df = pd.read_sql(fetch_jobs, conn, params=limit_params)
     for i, row in df.iterrows():
         if any([True if str(x) not in ['nan', 'None']  else False for x in row.loc[['address_lat', 'city_lat']]]):
-            print(f"Job {row.loc[match_id]} already has geo data - skipping out")
+            logger.info(f"Job {row.loc[match_id]} already has geo data - skipping out")
             continue 
         row = pd.DataFrame(row).transpose()
         row = geocode(row)
@@ -126,7 +139,7 @@ def update_db_table(table_name, start_date=None, end_date=None):
                 row.loc[i, 'city_size'],
                 row.loc[i, match_id]
             ])
-        print(f"Job {row.loc[i, match_id]} has been updated with geo data")
+        logger.info(f"Job {row.loc[i, match_id]} has been updated with geo data")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
