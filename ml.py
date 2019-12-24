@@ -71,7 +71,7 @@ def build_train_set():
         LEFT JOIN
             base_urls
         ON
-            base_urls.source=web_certificates.source
+            base_urls.source = web_certificates.source
         WHERE 
             company_projects.closed=1
         AND
@@ -97,7 +97,7 @@ def build_train_set():
         LEFT JOIN
             base_urls
         ON
-            base_urls.source=web_certificates.source
+            base_urls.source = web_certificates.source
         WHERE 
             company_projects.closed=1
         AND
@@ -265,7 +265,7 @@ def validate_model(**kwargs):
         LEFT JOIN
             base_urls
         ON
-            base_urls.source=web_certificates.source
+            base_urls.source = web_certificates.source
         WHERE 
             company_projects.closed=1
         AND
@@ -291,7 +291,7 @@ def validate_model(**kwargs):
         LEFT JOIN
             base_urls
         ON
-            base_urls.source=web_certificates.source
+            base_urls.source = web_certificates.source
         WHERE 
             company_projects.closed=1
         AND
