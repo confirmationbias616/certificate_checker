@@ -6,7 +6,9 @@ import re
 
 def clean_job_number(raw):
     try:
-        job_number = re.findall("\d{4}", str(raw))[0]
+        job_number = ''.join(re.findall('\w+', raw))
+        for c in ['#', ' ', '/', '.', ',']:
+            job_number.replace(c, '')
         return job_number
     except IndexError:
         return ""
