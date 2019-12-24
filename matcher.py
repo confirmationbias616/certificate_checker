@@ -125,7 +125,6 @@ def match(
         "prboability_thresholds"
     ]["multi_phase"],
     version="status_quo",
-    job_number = False
 ):
     """Combines company projects and web CSP certificates in all-to-all join, wrangles the
     rows, scores the rows as potential matches, runs each row through Random Forest model,
@@ -154,8 +153,6 @@ def match(
      prob_thresh. This value should be set higher than prob_thresh.
      - `version` (str): default is `status_quo` but `new` can also be used for validating
      newly-trained models.
-     - `job_number` (str): default is `False` to search all but a project number can be passed
-     through instead to only search a for that specific project.
 
     Returns:
      - a Pandas DataFrame containing all of certificate info, project number it was attempted
@@ -170,8 +167,6 @@ def match(
         open_query = "SELECT * FROM company_projects WHERE closed=0"
         with create_connection() as conn:
             company_projects = pd.read_sql(open_query, conn)
-    if job_number:
-        company_projects = company_projects[company_projects.job_number == job_number]
     company_projects = wrangle(company_projects)
     if not isinstance(df_web, pd.DataFrame):  # df_web == False
         if since == "today":
@@ -293,15 +288,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--until", type=str, help="date for when to stop search for matches"
     )
-    parser.add_argument(
-        "--job_number", type=str, help="date for when to stop search for matches"
-    )
     args = parser.parse_args()
     kwargs = {}
     if args.since:
         kwargs["since"] = args.since
     if args.since:
         kwargs["until"] = args.until
-    if args.since:
-        kwargs["job_number"] = args.job_number
     match(**kwargs)
