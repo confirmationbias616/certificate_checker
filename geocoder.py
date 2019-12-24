@@ -165,7 +165,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     try:
-        update_db_table(args.table_name, args.start_date, args.end_date)
+        geo_update_db_table(args.table_name, args.start_date, args.end_date)
         
     except AttributeError:
-        update_db_table(args.table_name)
+        geo_update_db_table(args.table_name)
