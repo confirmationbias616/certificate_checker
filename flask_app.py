@@ -9,7 +9,7 @@ from wrangler import wrangle
 from matcher import match
 from scraper import scrape
 from communicator import process_as_feedback
-from geocoder import geocode
+from geocoder import geocode, geo_update_db_table
 import pandas as pd
 import logging
 import sys
@@ -71,6 +71,8 @@ def write_company_project(df, conn):
     df.to_sql("company_projects", conn, if_exists="replace", index=False)
 
 
+company_id = 1  # temporarily det company_id to until we get authentication set up.
+
 @app.route("/", methods=["POST", "GET"])
 def index():
     all_contacts_query = "SELECT * FROM contacts"
@@ -99,9 +101,9 @@ def index():
         with create_connection() as conn:
             try:
                 row = pd.read_sql(
-                    "SELECT * FROM company_projects WHERE job_number=?",
+                    "SELECT * FROM company_projects WHERE job_number=? and company_id=?",
                     conn,
-                    params=[new_entry["job_number"]],
+                    params=[new_entry["job_number"], company_id],
                 ).iloc[0]
                 was_prev_closed = row.closed
                 if not was_prev_closed:  # case where `closed` column is empty
@@ -116,21 +118,24 @@ def index():
             return redirect(
                 url_for("already_matched", job_number=new_entry["job_number"])
             )
-        df = pd.read_sql("SELECT * FROM company_projects", conn)
-        df = df.append(new_entry, ignore_index=True)
+        if was_prev_logged:
+            with create_connection() as conn:
+                conn.cursor().execute(f"""
+                    DELETE FROM company_projects WHERE job_number=? AND company_id=?
+                """, [new_entry["job_number"], company_id])
+        with create_connection() as conn:
+            conn.cursor().execute(f"""
+                INSERT INTO company_projects (company_id, {', '.join(list(new_entry.keys()))}) VALUES ({company_id}, {','.join(['?']*len(new_entry))})
+            """, list(new_entry.values()))
+        geo_update_db_table('company_projects', limit=1)
         if not was_prev_logged:
-            write_company_project(df, conn)
             return render_template(
                 "signup_confirmation.html", job_number=new_entry["job_number"]
             )
-        recorded_change = (
-            True if any(list(df.duplicated(subset="job_number"))) else False
-        )
-        write_company_project(df, conn)
         return render_template(
             "update.html",
             job_number=new_entry["job_number"],
-            recorded_change=recorded_change,
+            recorded_change=True,
         )
     else:
         try:
@@ -151,13 +156,13 @@ def already_matched():
     job_number = request.args.get("job_number")
     link_query = """
         SELECT
-            (base_urls.base_url || attempted_matches.url_key) AS link
+            (base_urls.base_url || web_certificates.url_key) AS link
         FROM
             attempted_matches
         LEFT JOIN
             web_certificates
         ON
-            web_certificates.url_key = attempted_matches.url_key
+            web_certificates.cert_id = attempted_matches.cert_id
         LEFT JOIN
             base_urls
         ON
@@ -165,10 +170,12 @@ def already_matched():
         WHERE
             job_number=?
         AND
+            company_id=?
+        AND
             attempted_matches.ground_truth = 1
     """
     with create_connection() as conn:
-        link = conn.cursor().execute(link_query, [job_number]).fetchone()[0]
+        link = conn.cursor().execute(link_query, [job_number, company_id]).fetchone()[0]
     return render_template("already_matched.html", link=link, job_number=job_number)
 
 
@@ -176,6 +183,8 @@ def already_matched():
 def potential_match():
     if request.method == "POST":
         return redirect(url_for("index"))
+    project_id = request.args.get("project_id")
+    cert_id = request.args.get("cert_id")
     job_number = request.args.get("job_number")
     url_key = request.args.get("url_key")
     source = request.args.get("source")
@@ -184,6 +193,8 @@ def potential_match():
         base_url = conn.cursor().execute(source_base_url_query, [source]).fetchone()[0]
     return render_template(
         "potential_match.html",
+        project_id=project_id,
+        cert_id=cert_id,
         job_number=job_number,
         base_url=base_url,
         url_key=url_key,
@@ -195,6 +206,7 @@ def potential_match():
 def summary_table():
     closed_query = """
             SELECT
+                company_projects.project_id,
                 company_projects.job_number,
                 company_projects.city,
                 company_projects.address,
@@ -202,57 +214,51 @@ def summary_table():
                 company_projects.owner,
                 company_projects.contractor,
                 company_projects.engineer,
-                attempted_matches.url_key,
+                web.url_key,
                 web.pub_date,
-                (base_urls.base_url || attempted_matches.url_key) AS link
+                (base_urls.base_url || web.url_key) AS link
             FROM (SELECT * FROM web_certificates ORDER BY cert_id DESC LIMIT 16000) as web
             LEFT JOIN
                 attempted_matches
             ON
-                web.url_key = attempted_matches.url_key
+                web.cert_id = attempted_matches.cert_id
             LEFT JOIN
                 company_projects
             ON
-                attempted_matches.job_number=company_projects.job_number
+                attempted_matches.project_id = company_projects.project_id
             LEFT JOIN
                 base_urls
             ON
-                base_urls.source=web.source
+                base_urls.source = web.source
             WHERE
                 company_projects.closed=1
+            AND
+                company_id=?
             AND
                 attempted_matches.ground_truth=1
         """
     open_query = """
-            SELECT
-                company_projects.job_number,
-                company_projects.city,
-                company_projects.address,
-                company_projects.title,
-                company_projects.owner,
-                company_projects.contractor,
-                company_projects.engineer,
-                company_projects.receiver_emails_dump
+            SELECT *
             FROM company_projects
-            WHERE
-                company_projects.closed=0
+            WHERE company_projects.closed=0
+            AND company_id=?
         """
     with create_connection() as conn:
         pd.set_option("display.max_colwidth", -1)
-        df_closed = pd.read_sql(closed_query, conn).sort_values(
+        df_closed = pd.read_sql(closed_query, conn, params=[company_id]).sort_values(
             "job_number", ascending=False
         )
         df_closed["job_number"] = df_closed.apply(
             lambda row: f"""<a href="{row.link}">{row.job_number}</a>""", axis=1
         )
         df_closed = df_closed.drop("url_key", axis=1)
-        df_open = pd.read_sql(open_query, conn).sort_values(
+        df_open = pd.read_sql(open_query, conn, params=[company_id]).sort_values(
             "job_number", ascending=False
         )
         df_open["action"] = df_open.apply(
             lambda row: (
                 f"""<a href="{url_for('index', **row)}">modify</a> / """
-                f"""<a href="{url_for('delete_job', job_number=row.job_number)}">delete</a>"""
+                f"""<a href="{url_for('delete_job', project_id=row.project_id)}">delete</a>"""
             ),
             axis=1,
         )
@@ -335,16 +341,16 @@ def summary_table():
 def delete_job():
     delete_job_query = """
             DELETE FROM company_projects
-            WHERE job_number=?
+            WHERE project_id=?
         """
     delete_match_query = """
             DELETE FROM attempted_matches
-            WHERE job_number=?
+            WHERE project_id=?
         """
-    job_number = request.args.get("job_number")
+    project_id = request.args.get("project_id")
     with create_connection() as conn:
-        conn.cursor().execute(delete_job_query, [job_number])
-        conn.cursor().execute(delete_match_query, [job_number])
+        conn.cursor().execute(delete_job_query, [project_id])
+        conn.cursor().execute(delete_match_query, [project_id])
     return redirect(url_for("summary_table"))
 
 
@@ -359,9 +365,9 @@ def instant_scan():
             lookback_cert_count = 1500
         else:  # also applies for `2_weeks`
             lookback_cert_count = 750
-        company_query = "SELECT * FROM company_projects WHERE job_number=?"
+        company_query = "SELECT * FROM company_projects WHERE job_number=? AND company_id=?"
         with create_connection() as conn:
-            company_projects = pd.read_sql(company_query, conn, params=[job_number])
+            company_projects = pd.read_sql(company_query, conn, params=[job_number, company_id])
         hist_query = "SELECT * FROM web_certificates ORDER BY pub_date DESC LIMIT ?"
         with create_connection() as conn:
             df_web = pd.read_sql(hist_query, conn, params=[lookback_cert_count])
@@ -381,12 +387,15 @@ def instant_scan():
         ):
             url_key = results.iloc[0].url_key
             source = results.iloc[0].source
+            cert_id = results.iloc[0].cert_id
             return redirect(
                 url_for(
                     "potential_match",
+                    project_id=company_projects.iloc[0].project_id,
                     job_number=job_number,
                     source=source,
                     url_key=url_key,
+                    cert_id=cert_id
                 )
             )
         return render_template("nothing_yet.html", job_number=job_number)
@@ -398,6 +407,8 @@ def process_feedback():
     status = process_as_feedback(request.args)
     return render_template(
         "thanks_for_feedback.html",
+        project_id=request.args["project_id"],
+        cert_id=request.args["cert_id"],
         job_number=request.args["job_number"],
         response=request.args["response"],
         status=status,
@@ -549,9 +560,9 @@ def interact():
             try:
                 with create_connection() as conn:
                     comp_df = pd.read_sql(
-                        "SELECT * FROM company_projects WHERE job_number=?",
+                        "SELECT * FROM company_projects WHERE job_number=? AND company_id=?",
                         conn,
-                        params=[form.get("job_number")],
+                        params=[form.get("job_number"), company_id],
                     )
                 comp_info = {
                     "comp_" + key: comp_df.iloc[0][key]
@@ -711,9 +722,9 @@ def map():
             company_projects.owner,
             company_projects.contractor,
             company_projects.engineer,
-            attempted_matches.url_key,
+            web.url_key,
             web.pub_date,
-            (base_urls.base_url || attempted_matches.url_key) AS link,
+            (base_urls.base_url || web.url_key) AS link,
             web.source,
             COALESCE(web.address_lat, web.city_lat) as lat,
             COALESCE(web.address_lng, web.city_lng) as lng,
@@ -722,15 +733,15 @@ def map():
         LEFT JOIN
             attempted_matches
         ON
-            web.url_key = attempted_matches.url_key
+            web.cert_id = attempted_matches.cert_id
         LEFT JOIN
             company_projects
         ON
-            attempted_matches.job_number=company_projects.job_number
+            attempted_matches.project_id = company_projects.project_id
         LEFT JOIN
             base_urls
         ON
-            base_urls.source=web.source
+            base_urls.source = web.source
         WHERE
             company_projects.closed=1
         AND

@@ -83,7 +83,7 @@ def communicate(single_web_cert, single_project, test=False):
     ).date()
     due_date = lambda delay: pub_date + datetime.timedelta(days=delay)
     with create_connection() as conn:
-        project_title = pd.read_sql("SELECT * FROM company_projects WHERE job_number=?", conn, params=[single_project.job_number]).iloc[0].title
+        project_title = pd.read_sql("SELECT * FROM company_projects WHERE project_id=?", conn, params=[single_project.project_id]).iloc[0].title
     intro_msg = (
         f"From: HBR Bot"
         f"\n"
@@ -111,7 +111,7 @@ def communicate(single_web_cert, single_project, test=False):
         f"if the contract was signed since then."
         f"\n"
     )
-    link_constructor = "https://www.hbr-bot.com/process_feedback?job_number={}&response={}&source={}&url_key={}"
+    link_constructor = "https://www.hbr-bot.com/process_feedback?project_id={}&job_number={}&response={}&source={}&cert_id={}"
     feedback_msg = (
         f"Your feedback will be required so that HBR Bot can properly "
         f"handle this ticket, whether that means closing it out or keep "
@@ -121,12 +121,12 @@ def communicate(single_web_cert, single_project, test=False):
         f"Please click on 1 of the 3 links below to submit your response "
         f"with regards to this match.\n\n"
         f"\t - link does not relate to my project:\n"
-        f"\t{link_constructor.format(single_project.job_number, 0, source, url_key)}\n\n"
+        f"\t{link_constructor.format(single_project.project_id, single_project.job_number, 0, source, single_web_cert.iloc[0].cert_id)}\n\n"
         f"\t - link is accurate match for my project:\n"
-        f"\t{link_constructor.format(single_project.job_number, 1, source, url_key)}\n\n"
+        f"\t{link_constructor.format(single_project.project_id, single_project.job_number, 1, source, single_web_cert.iloc[0].cert_id)}\n\n"
         f"\t - link is close but seems to relate to a different phase or "
         f"stage:\n"
-        f"\t{link_constructor.format(single_project.job_number, 2, source, url_key)}\n\n"
+        f"\t{link_constructor.format(single_project.project_id, single_project.job_number, 2, source, single_web_cert.iloc[0].cert_id)}\n\n"
         f"\n\n"
     )
     disclaimer_msg = (
@@ -153,18 +153,19 @@ def process_as_feedback(feedback):
     imap_ssl_host = "imap.gmail.com"
     imap_ssl_port = 993
     username = "hbr.bot.notifier"
+    project_id = feedback["project_id"]
     job_number = feedback["job_number"]
     response = int(feedback["response"])
     source = feedback["source"]
-    url_key = feedback["url_key"]
+    cert_id = feedback["cert_id"]
     logger.info(f"got feedback `{response}` for job #`{job_number}`")
     with create_connection() as conn:
         try:
             was_prev_closed = (
                 pd.read_sql(
-                    "SELECT * FROM company_projects WHERE job_number=?",
+                    "SELECT * FROM company_projects WHERE project_id=?",
                     conn,
-                    params=[job_number],
+                    params=[project_id],
                 )
                 .iloc[0]
                 .closed
@@ -180,30 +181,30 @@ def process_as_feedback(feedback):
         )
         return "already_closed"
     if response == 1:
-        logger.info(f"got feeback that url key {url_key} from {source} was correct")
+        logger.info(f"got feeback that cert_id {cert_id} from {source} was correct")
         update_status_query = (
-            "UPDATE company_projects SET closed = 1 WHERE job_number = ?"
+            "UPDATE company_projects SET closed = 1 WHERE project_id = ?"
         )
         with create_connection() as conn:
-            conn.cursor().execute(update_status_query, [job_number])
+            conn.cursor().execute(update_status_query, [project_id])
         logger.info(
             f"updated company_projects to show `closed` status for job #{job_number}"
         )
     with create_connection() as conn:
         df = pd.read_sql("SELECT * FROM attempted_matches", conn)
         match_dict_input = {
-            "job_number": job_number,
-            "url_key": url_key,
+            "project_id": project_id,
+            "cert_id": cert_id,
             "ground_truth": 1 if response == 1 else 0,
             "multi_phase": 1 if response == 2 else 0,
             "log_date": str(datetime.datetime.now().date()),
             "validate": 0,
         }
         df = df.append(match_dict_input, ignore_index=True)
-        df = df.drop_duplicates(subset=["job_number", "url_key"], keep="last")
+        df = df.drop_duplicates(subset=["project_id", "cert_id"], keep="last")
         df.to_sql("attempted_matches", conn, if_exists="replace", index=False)
         logger.info(
-            f"URL key `{url_key}` from {source} was a "
+            f"cert_id`{cert_id}` from {source} was a "
             f"{'successful match' if response == 1 else 'mis-match'} for job "
-            f"#{job_number}"
+            f"#{project_id}"
         )

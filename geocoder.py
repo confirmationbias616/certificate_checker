@@ -108,16 +108,16 @@ def geo_update_db_table(table_name, start_date=None, end_date=None, limit=None):
     """
     if table_name == 'company_projects':
         fetch_jobs = """
-            SELECT * from company_projects ORDER BY job_number DESC
+            SELECT * from company_projects ORDER BY project_id DESC
         """
-        match_id = 'job_number'
+        match_id = 'project_id'
         limit_params = []
         update_geo_data = update_geo_data.format(table_name, match_id)
     elif table_name == 'web_certificates':
         fetch_jobs = """
             SELECT * from web_certificates WHERE pub_date BETWEEN ? AND ? ORDER BY cert_id DESC
         """
-        match_id = 'url_key'
+        match_id = 'cert_id'
         limit_params = [start_date, end_date]
         update_geo_data = update_geo_data.format(table_name, match_id)
     else:

@@ -22,7 +22,7 @@ from wrangler import (
     wrangle,
 )
 from matcher import match
-from communicator import communicate, process_as_feedback
+from communicator import communicate
 from ml import build_train_set, train_model, validate_model
 from utils import create_connection, load_config
 from test.test_setup import create_test_db
@@ -394,15 +394,15 @@ class IntegrationTests(unittest.TestCase):
             LEFT JOIN
                 attempted_matches
             ON
-                web_certificates.url_key = attempted_matches.url_key
+                web_certificates.cert_id = attempted_matches.cert_id
             LEFT JOIN
                 company_projects
             ON
-                attempted_matches.job_number=company_projects.job_number
+                attempted_matches.project_id = company_projects.project_id
             LEFT JOIN
                 base_urls
             ON
-                base_urls.source=web_certificates.source
+                base_urls.source = web_certificates.source
             WHERE 
                 company_projects.closed=1
             AND
@@ -420,15 +420,15 @@ class IntegrationTests(unittest.TestCase):
             LEFT JOIN
                 attempted_matches
             ON
-                web_certificates.url_key = attempted_matches.url_key
+                web_certificates.cert_id = attempted_matches.cert_id
             LEFT JOIN
                 company_projects
             ON
-                attempted_matches.job_number=company_projects.job_number
+                attempted_matches.project_id = company_projects.project_id
             LEFT JOIN
                 base_urls
             ON
-                base_urls.source=web_certificates.source
+                base_urls.source = web_certificates.source
             WHERE 
                 company_projects.closed=1
             AND
@@ -470,6 +470,7 @@ class IntegrationTests(unittest.TestCase):
         sample_company = pd.DataFrame(
             {
                 "cert_id": "99999",
+                "project_id": "99999",
                 "job_number": "2387",
                 "city": "Ottawa",
                 "address": "2562 Del Zotto Ave., Ottawa, Ontario",

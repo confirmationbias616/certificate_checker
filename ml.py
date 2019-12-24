@@ -63,11 +63,11 @@ def build_train_set():
         LEFT JOIN
             attempted_matches
         ON
-            web_certificates.url_key = attempted_matches.url_key
+            web_certificates.cert_id = attempted_matches.cert_id
         LEFT JOIN
             company_projects
         ON
-            attempted_matches.job_number=company_projects.job_number
+            attempted_matches.project_id = company_projects.project_id
         LEFT JOIN
             base_urls
         ON
@@ -89,11 +89,11 @@ def build_train_set():
         LEFT JOIN
             attempted_matches
         ON
-            web_certificates.url_key = attempted_matches.url_key
+            web_certificates.cert_id = attempted_matches.cert_id
         LEFT JOIN
             company_projects
         ON
-            attempted_matches.job_number=company_projects.job_number
+            attempted_matches.project_id = company_projects.project_id
         LEFT JOIN
             base_urls
         ON
@@ -246,22 +246,22 @@ def validate_model(**kwargs):
             company_projects.contractor,
             company_projects.engineer,
             company_projects.receiver_emails_dump,
-            attempted_matches.url_key,
+            web_certificates.url_key,
             attempted_matches.ground_truth,
             attempted_matches.multi_phase,
             web_certificates.pub_date,
             web_certificates.source,
-            (base_urls.base_url || attempted_matches.url_key) AS link
+            (base_urls.base_url || web_certificates.url_key) AS link
         FROM
             web_certificates
         LEFT JOIN
             attempted_matches
         ON
-            web_certificates.url_key = attempted_matches.url_key
+            web_certificates.cert_id = attempted_matches.cert_id
         LEFT JOIN
             company_projects
         ON
-            attempted_matches.job_number=company_projects.job_number
+            attempted_matches.project_id = company_projects.project_id
         LEFT JOIN
             base_urls
         ON
@@ -283,11 +283,11 @@ def validate_model(**kwargs):
         LEFT JOIN
             attempted_matches
         ON
-            web_certificates.url_key = attempted_matches.url_key
+            web_certificates.cert_id = attempted_matches.cert_id
         LEFT JOIN
             company_projects
         ON
-            attempted_matches.job_number=company_projects.job_number
+            attempted_matches.project_id = company_projects.project_id
         LEFT JOIN
             base_urls
         ON
