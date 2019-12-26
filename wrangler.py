@@ -5,6 +5,7 @@ import re
 
 
 def clean_job_number(raw):
+    raw = str(raw)
     try:
         job_number = ''.join(re.findall('\w+', raw))
         for c in ['#', ' ', '/', '.', ',']:
