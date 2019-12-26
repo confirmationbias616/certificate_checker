@@ -286,7 +286,7 @@ class InputTests(unittest.TestCase):
             "owner",
             "engineer",
         ]:
-            br.form[field_name] = "test"
+            br.form[field_name] = f"test_{test_job_number}"
         br.find_control("contacts").items[0].selected = select_checkbox
         submit_success = False
         try:
@@ -295,7 +295,7 @@ class InputTests(unittest.TestCase):
         except urllib.error.HTTPError:
             pass
         summary_html = requests.get(base_url + "/summary_table").content
-        logged_success = any(re.findall(test_job_number, str(summary_html)))
+        logged_success = any(re.findall(f"test_{test_job_number}", str(summary_html)))
         self.assertEqual(expected_submit_success, submit_success)
         self.assertEqual(expected_logged_success, logged_success)
         if (
@@ -306,12 +306,19 @@ class InputTests(unittest.TestCase):
             summary_page_links = [
                 x.get("href") for x in summary_page_soup.find_all("a")
             ]
+            get_new_project_id = """
+                SELECT * 
+                FROM company_projects 
+                WHERE job_number = ?
+            """
+            with create_connection() as conn:
+                test_project_id = pd.read_sql(get_new_project_id, conn, params=[test_job_number]).iloc[0].project_id
             delete_link = [
-                x for x in summary_page_links if test_job_number in x and "delete" in x
+                x for x in summary_page_links if str(test_project_id) in x and "delete" in x
             ][0]
             requests.get(base_url + delete_link)
             summary_html = requests.get(base_url + "/summary_table").content
-            delete_success = not any(re.findall(test_job_number, str(summary_html)))
+            delete_success = not any(re.findall(f"test_{test_job_number}", str(summary_html)))
             self.assertEqual(expected_delete_success, delete_success)
 
     def test_exact_match_project(self):
