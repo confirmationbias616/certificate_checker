@@ -655,8 +655,8 @@ def interact():
                     **{key: form.get(key) for key in form},
                     pred_prob=pred_prob,
                     pred_match=pred_match,
-                    #a_wrangled_df=a_wrangled_df,
-                    #b_wrangled_df=b_wrangled_df,
+                    a_wrangled_df=a_wrangled_df,
+                    b_wrangled_df=b_wrangled_df,
                 )
             )
         else:
