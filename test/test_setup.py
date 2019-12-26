@@ -11,6 +11,58 @@ def create_test_db():
     for csv_table_name in csv_file_names:
         with create_connection(db_name="test_cert_db.sqlite3") as conn:
             pd.read_csv(csv_table_name).to_sql(csv_table_name[:-4], conn, index=False)
+    # Execute migration scripts below to modify on newly populated tables
+    with create_connection(db_name="test_cert_db.sqlite3") as conn:
+        conn.cursor().executescript("""
+            PRAGMA foreign_keys=off;
+            ALTER TABLE company_projects RENAME TO old_table;
+            CREATE TABLE company_projects (
+                project_id INTEGER PRIMARY KEY,
+                job_number TEXT,
+                city TEXT,
+                address TEXT,
+                title TEXT,
+                contractor TEXT,
+                owner TEXT,
+                engineer TEXT,
+                closed INTEGER,
+                receiver_emails_dump TEXT,
+                address_lat REAL,
+                address_lng REAL, 
+                city_lat REAL,
+                city_lng REAL,
+                city_size REAL,
+                company_id INTEGER
+            );
+            INSERT INTO company_projects SELECT * FROM old_table;
+            DROP TABLE old_table;
+            PRAGMA foreign_keys=on;
+        """)
+        conn.cursor().executescript("""
+            PRAGMA foreign_keys=off;
+            ALTER TABLE web_certificates RENAME TO old_table;
+            CREATE TABLE web_certificates (
+                cert_id INT PRIMARY KEY NOT NULL,
+                pub_date TEXT,
+                city TEXT,
+                address TEXT,
+                title TEXT,
+                owner TEXT,
+                contractor TEXT,
+                engineer TEXT,
+                url_key TEXT,
+                source VARCHAR DEFAULT "dcn",
+                cert_type VARCHAR DEFAULT "csp",
+                address_lat REAL,
+                address_lng REAL,
+                city_lat REAL,
+                city_lng REAL,
+                city_size REAL
+            );
+            INSERT INTO web_certificates SELECT * FROM old_table;
+            DROP TABLE old_table;
+            PRAGMA foreign_keys=on;
+        """)
     os.rename(
         abs_dir_path + "test/test_cert_db.sqlite3",
         abs_dir_path + "test_cert_db.sqlite3",
