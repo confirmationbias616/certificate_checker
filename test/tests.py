@@ -262,7 +262,9 @@ class InputTests(unittest.TestCase):
         self.assertEqual(contractor, scraped_data["contractor"])
         self.assertEqual(engineer, scraped_data["engineer"])
 
-    @data(("9999", True, True, True), ("9998", False, False, False))
+    @data(
+        ("9979", True, True, True), 
+        ("9978", False, False, False))
     @unpack
     def test_input_project(
         self,
