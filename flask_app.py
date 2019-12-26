@@ -643,6 +643,7 @@ def interact():
                 )
                 .hide_index()
             )
+            b['cert_id'] = 999999
             match_result = match(company_projects=a, df_web=b, test=True).iloc[0]
             pred_prob = match_result.pred_prob
             pred_match = match_result.pred_match
