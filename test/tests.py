@@ -354,8 +354,8 @@ class InputTests(unittest.TestCase):
             pass
         br.select_form(nr=0)
         br.submit()
-        self.assertEqual(
-            re.findall("(?<=url_key=).*", br.geturl())[0], latest_web_cert["url_key"]
+        self.assertTrue(
+            latest_web_cert["url_key"] in br.geturl()
         )
 
 
