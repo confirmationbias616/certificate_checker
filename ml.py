@@ -126,8 +126,8 @@ def build_train_set():
             test_company_row.to_frame().transpose()
         )  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
         rand_web_df = rand_web_df.sample(n=len(test_company_projects), random_state=i)
-        close_matches = build_match_score(test_company_row, test_web_df)
-        random_matches = build_match_score(test_company_row, rand_web_df)
+        close_matches = build_match_score(test_company_row, test_web_df, use_fresh_certs_only=False)
+        random_matches = build_match_score(test_company_row, rand_web_df, use_fresh_certs_only=False)
         matches = close_matches.append(random_matches)
         matches["ground_truth"] = matches.url_key.apply(
             lambda x: 1 if x == test_company_row.url_key.iloc[0] else 0

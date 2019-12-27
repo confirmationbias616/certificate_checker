@@ -32,7 +32,8 @@ def create_test_db():
                 city_lat REAL,
                 city_lng REAL,
                 city_size REAL,
-                company_id INTEGER
+                company_id INTEGER,
+                last_cert_id_check INTEGER
             );
             INSERT INTO company_projects SELECT * FROM old_table;
             DROP TABLE old_table;
