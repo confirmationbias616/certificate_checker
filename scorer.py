@@ -54,8 +54,8 @@ def use_fresh_certs_only(single_project_row, web_df):
     
     """
     try:
-        possible_matches_scored = web_df[web_df.cert_id > int(company_project_row.last_cert_id_check)]
-    except TypeError:  # last_cert_id_check was `NULL`
+        possible_matches_scored = web_df[web_df.cert_id > int(single_project_row.last_cert_id_check)]
+    except (TypeError, ValueError):  # last_cert_id_check was `NULL`
         possible_matches_scored = web_df
     update_query = """ 
         UPDATE company_projects 
