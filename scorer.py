@@ -1,5 +1,6 @@
 from fuzzywuzzy import fuzz
 import numpy as np
+from utils import create_connection
 
 
 def compile_score(row, scoreable_attrs, style):
@@ -57,11 +58,12 @@ def use_fresh_certs_only(single_project_row, web_df):
     except TypeError:  # last_cert_id_check was `NULL`
         possible_matches_scored = web_df
     update_query = """ 
-        INSERT INTO company_projects 
-        last_cert_id_check VALUES ?
+        UPDATE company_projects 
+        SET last_cert_id_check=?
+        WHERE project_id=?
     """
     with create_connection() as conn:
-        conn.cursor().execute(update_query, [max(possible_matches_scored.cert_id)])
+        conn.cursor().execute(update_query, [max(possible_matches_scored.cert_id), single_project_row.project_id])
     return web_df
 
 def build_match_score(single_project_df, web_df, fresh_cert_limit=True):
