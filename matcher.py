@@ -143,10 +143,12 @@ def match(
      emails appropriately.
      - `since` (str of format `"yyyy-mm-dd"`): used in conjunction with `until` to specify
      timeframe to query database for `df_web`. Only used if `df_web` not specified. Special
-     strings `"week_ago"`, `"day_ago"`, or `"today"` can be used instead.
+     strings `"week_ago"`, `"day_ago"`, or `"today"` can be used instead. Range is inclusive
+     of date specified.
      - `until` (str of format `"yyyy-mm-dd"`): used in conjunction with `since` to specify
      timeframe to query database for `df_web`. Only used if `df_web` not specified. Special
-     string `"now"` can be used instead.
+     string `"now"` can be used instead. Range is inclusive
+     of date specified.
      - `prob_thresh` (float): probability threshold for decision boundary.
      - `multi_phase_proned_thresh` (float): probability threshold for projects which are
      identified as being at risk of having multiple phases, which will override the standard
