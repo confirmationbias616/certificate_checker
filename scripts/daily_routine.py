@@ -3,6 +3,8 @@ import os
 from matcher import match
 from ml import build_train_set, train_model, validate_model
 from utils import load_config, load_results
+import datetime
+from dateutil.parser import parse as parse_date
 import sys
 import logging
 
@@ -39,7 +41,11 @@ def daily_routine():
         try:
             logger.info("match")
             last_run = sorted(list(load_results().keys()))[-1]
-            match(since=last_run, prob_thresh=prob_thresh, test=load_config()["daily_routine"]["test"])
+            if (datetime.datetime.now() - parse_date(last_run.date())).days < 2:
+                since = str((datetime.datetime.now()-datetime.timedelta(2)).date())
+            else:
+                since = last_run
+            match(since=since, prob_thresh=prob_thresh, test=load_config()["daily_routine"]["test"])
         except Exception as e:
             logger.critical(e)
 
