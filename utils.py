@@ -78,6 +78,12 @@ def create_connection(db_name="cert_db.sqlite3"):
         logger.critical(e)
     return None
 
+def custom_query(query):
+    """Run custom SQL query against cert_db.sqlite3"""
+    with create_connection() as conn:
+        result =  pd.read_sql(query, conn)
+    print(result)
+    return result
 
 def dbtables_to_csv(db_name="cert_db.sqlite3", destination=""):
     """Writes all tables of specified SQLite3 database to separate CSV files located in
