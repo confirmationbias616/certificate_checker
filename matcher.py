@@ -215,7 +215,7 @@ def match(
     comm_count = 0
     for _, company_project_row in company_projects.iterrows():
         results = build_match_score(
-            company_project_row.to_frame().transpose(), df_web, fresh_cert_limit=test
+            company_project_row.to_frame().transpose(), df_web, fresh_cert_limit=(not test)
         )  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
         logger.info(
             f"searching for potential match for project #{company_project_row['job_number']}..."
