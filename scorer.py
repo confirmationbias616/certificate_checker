@@ -39,8 +39,8 @@ def attr_score(web_str, company_project_str, match_style="full"):
         return 0
 
 def use_fresh_certs_only(single_project_row, web_df):
-     """if True, `last_cert_id_check` will be read for assembling only fresh
-     web certificates for given project and databse will be updated afterwards as well.
+    """if True, `last_cert_id_check` will be read for assembling only fresh
+    web certificates for given project and databse will be updated afterwards as well.
     
     Parameters:
      - `single_project_row` (pd.Series): row of company project to match.
@@ -50,7 +50,8 @@ def use_fresh_certs_only(single_project_row, web_df):
     Returns:
      - a Pandas DataFrame containing fresh certificates for given project. This will 
      be a subset of initial `web_df` input.
-     """
+    
+    """
     try:
         possible_matches_scored = web_df[web_df.cert_id > int(company_project_row.last_cert_id_check)]
     except TypeError:  # last_cert_id_check was `NULL`
