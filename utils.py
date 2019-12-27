@@ -98,7 +98,7 @@ def dbtables_to_csv(db_name="cert_db.sqlite3", destination=""):
             .execute("SELECT name FROM sqlite_master WHERE type='table';")
             .fetchall()
         )
-    table_names = [x[0] for x in table_names]
+    table_names = [x[0] for x in table_names if 'cert_search' not in x[0]]
     open_query = "SELECT * FROM {}"
     for table in table_names:
         with create_connection(db_name) as conn:
@@ -120,6 +120,6 @@ if __name__ == "__main__":
     if args.custom_query:
         custom_query(args.custom_query)
     elif args.update_test_csv_files:
-        update_test_csv_files(destination="./test")
+        dbtables_to_csv(destination="./test")
     else:
         parser.error('No action requested, add argument according to --help')
