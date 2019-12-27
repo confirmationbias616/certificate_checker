@@ -1,4 +1,4 @@
-"source","base_url"
-"dcn","https://canada.constructconnect.com/dcn/certificates-and-notices/"
-"ocn","https://ontarioconstructionnews.com/certificates/"
-"l2b","https://certificates.link2build.ca/Search/Detail/"
+source,base_url,long_name
+dcn,https://canada.constructconnect.com/dcn/certificates-and-notices/,Daily Commercial News
+ocn,https://ontarioconstructionnews.com/certificates/,Ontario Construction News
+l2b,https://certificates.link2build.ca/Search/Detail/,Link2Build
