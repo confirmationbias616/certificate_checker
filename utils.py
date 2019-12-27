@@ -6,6 +6,7 @@ import sys
 import logging
 import json
 import datetime
+import argparse
 
 
 logger = logging.getLogger(__name__)
@@ -107,4 +108,18 @@ def dbtables_to_csv(db_name="cert_db.sqlite3", destination=""):
 
 
 if __name__ == "__main__":
-    dbtables_to_csv()  # will only ever run with default parameters - no need for argparse
+    parser = argparse.ArgumentParser(description='Call specific utility fucntion.')
+    parser.add_argument('--custom_query', type=str, help="""
+        Run custom SQL query against cert_db.sqlite3
+    """)
+    parser.add_argument('--update_test_csv_files',  action='store_true', help="""
+        Writes all tables of specified SQLite3 database to separate CSV files located in
+        `./test` subdirectory.
+    """)
+    args = parser.parse_args()
+    if args.custom_query:
+        custom_query(args.custom_query)
+    elif args.update_test_csv_files:
+        update_test_csv_files(destination="./test")
+    else:
+        parser.error('No action requested, add argument according to --help')
