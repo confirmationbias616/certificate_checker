@@ -362,7 +362,7 @@ class InputTests(unittest.TestCase):
         br.select_form(nr=0)
         br.submit()
         self.assertTrue(
-            latest_web_cert["url_key"] in br.geturl()
+            latest_web_cert["url_key"].replace("/","") in br.geturl()
         )
 
 
