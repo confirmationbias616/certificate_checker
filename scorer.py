@@ -103,6 +103,8 @@ def build_match_score(single_project_df, web_df, fresh_cert_limit=True):
     ):  # nescessary even when company_projects is single row because it's still DataFrame instead of Series
         if fresh_cert_limit:
             possible_matches_scored = use_fresh_certs_only(company_project_row, web_df)
+        else:
+            possible_matches_scored = web_df
         for attr in scoreable_attrs:
             for attr_suffix, match_style in zip(
                 ["score", "pr_score"], ["full", "partial"]
