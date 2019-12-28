@@ -9,7 +9,7 @@ from wrangler import wrangle
 from matcher import match
 from scraper import scrape
 from communicator import process_as_feedback
-from geocoder import geocode, geo_update_db_table
+from geocoder import geocode, geo_update_db_table, get_city_latlng
 import pandas as pd
 import logging
 import sys
@@ -18,7 +18,6 @@ import re
 import ast
 import folium
 from folium.plugins import MarkerCluster
-from geocoder import get_city_latlng
 
 
 logger = logging.getLogger(__name__)
