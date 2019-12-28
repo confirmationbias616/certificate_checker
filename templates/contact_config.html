@@ -21,7 +21,7 @@
         <form action={% if contact %} "/update_contact" {% else %} "/add_contact" {% endif%} method="POST">
             <input type="text" name="id" value="{{ contact.get('id', '') }}" hidden>
             <input type="text" name="name" {% if contact %} value="{{ contact.get('name', '') }}" {% else %} placeholder="name" {% endif %}>
-            <input type="text" name="email_addr" {% if contact %} value="{{ contact.get('email_addr', '') }}" {% else %} placeholder="email address" {% endif %}>
+            <input type="text" name="email_address" {% if contact %} value="{{ contact.get('email_address', '') }}" {% else %} placeholder="email address" {% endif %}>
             <input type="submit" id="small_button" value="{% if contact %} Update {% else %} Add {% endif %}">
         </form>
     </div>

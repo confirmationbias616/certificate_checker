@@ -75,7 +75,7 @@ def index():
     if request.method == "POST":
         selected_contact_ids = request.form.getlist("contacts")
         selected_contacts_query = (
-            f"SELECT name, email_addr FROM contacts WHERE id in "
+            f"SELECT name, email_address FROM contacts WHERE id in "
             f"({','.join('?'*len(selected_contact_ids))})"
         )
         with create_connection() as conn:
@@ -83,7 +83,7 @@ def index():
                 selected_contacts_query, conn, params=[*selected_contact_ids]
             )
         receiver_emails_dump = str(
-            {row["name"]: row["email_addr"] for _, row in selected_contacts.iterrows()}
+            {row["name"]: row["email_address"] for _, row in selected_contacts.iterrows()}
         )
         new_entry = dict(request.form)
         new_entry.pop("contacts")  # useless
@@ -433,7 +433,7 @@ def contact_config():
         ),
         axis=1,
     )
-    all_contacts = all_contacts[["name", "email_addr", "action"]]
+    all_contacts = all_contacts[["name", "email_address", "action"]]
     all_contacts = (
         all_contacts.style.set_table_attributes('border="1"')
         .set_table_styles(
@@ -478,11 +478,11 @@ def update_contact():
     contact = request.args
     add_contact_query = """
         INSERT INTO contacts
-        (name, email_addr, id) VALUES(?, ?, ?)
+        (name, email_address, id) VALUES(?, ?, ?)
     """
     update_contact_query = """
         UPDATE contacts
-        SET name = ?,  email_addr = ?
+        SET name = ?,  email_address = ?
         WHERE id=?
     """
     if request.method == "POST":
@@ -490,7 +490,7 @@ def update_contact():
         with create_connection() as conn:
             conn.cursor().execute(
                 update_contact_query,
-                [contact.get("name"), contact.get("email_addr"), contact.get("id")],
+                [contact.get("name"), contact.get("email_address"), contact.get("id")],
             )
     return redirect(url_for("contact_config", **contact))
 
@@ -505,7 +505,7 @@ def add_contact():
         contact_ids = pd.read_sql(get_contact_ids, conn).sort_values("id")
     add_contact_query = """
         INSERT INTO contacts
-        (name, email_addr, id) VALUES(?, ?, ?)
+        (name, email_address, id) VALUES(?, ?, ?)
     """
     if request.method == "POST":
         contact = request.form
@@ -516,7 +516,7 @@ def add_contact():
         with create_connection() as conn:
             conn.cursor().execute(
                 add_contact_query,
-                [contact.get("name"), contact.get("email_addr"), new_contact_id],
+                [contact.get("name"), contact.get("email_address"), new_contact_id],
             )
     return redirect(url_for("contact_config"))
 
