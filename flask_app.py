@@ -264,21 +264,13 @@ def summary_table():
             "job_number", ascending=False
         )
     pd.set_option("display.max_colwidth", -1)
-    df_closed["job_number"] = df_closed.apply(
-        lambda row: f"""<a href="{row.link}">{row.job_number}</a>""", axis=1
-    )
-    df_closed = df_closed.drop("url_key", axis=1)
-    df_open["action"] = df_open.apply(
-        lambda row: (
-            f"""<a href="{url_for('index', **row)}">modify</a> / """
-            f"""<a href="{url_for('delete_job', project_id=row.project_id)}">delete</a>"""
-        ),
-        axis=1,
-    )
-    df_open["contacts"] = df_open.apply(
-        lambda row: ", ".join(ast.literal_eval(row.receiver_emails_dump).keys()),
-        axis=1,
-    )
+    if not len(df_closed):
+        df_closed = None
+    else:
+        df_closed["job_number"] = df_closed.apply(
+            lambda row: f"""<a href="{row.link}">{row.job_number}</a>""", axis=1
+        )
+        df_closed = df_closed.drop("url_key", axis=1)
         df_closed = (
             df_closed[["pub_date"] + col_order]
             .style.set_table_styles(
@@ -299,6 +291,21 @@ def summary_table():
             .set_properties(subset=["action", "job_number"], **{"text-align": "center"})
             .hide_index()
             .apply(highlight_pending, axis=1)
+        )
+        df_closed = df_closed.render(escape=False)
+    if not len(df_open):
+        df_open = None
+    else:
+        df_open["action"] = df_open.apply(
+            lambda row: (
+                f"""<a href="{url_for('index', **row)}">modify</a> / """
+                f"""<a href="{url_for('delete_job', project_id=row.project_id)}">delete</a>"""
+            ),
+            axis=1,
+        )
+        df_open["contacts"] = df_open.apply(
+            lambda row: ", ".join(ast.literal_eval(row.receiver_emails_dump).keys()),
+            axis=1,
         )
         df_open = (
             df_open[["action"] + col_order + ["contacts"]]
@@ -322,10 +329,11 @@ def summary_table():
             )
             .hide_index()
         )
+        df_open = df_open.render(escape=False)
     return render_template(
         "summary_table.html",
-        df_closed=df_closed.render(escape=False),
-        df_open=df_open.render(escape=False),
+        df_closed=df_closed,
+        df_open=df_open,
     )
 
 
