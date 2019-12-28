@@ -477,10 +477,6 @@ def delete_contact():
 @app.route("/update_contact", methods=["POST", "GET"])
 def update_contact():
     contact = request.args
-    add_contact_query = """
-        INSERT INTO contacts
-        (name, email_address, id) VALUES(?, ?, ?)
-    """
     update_contact_query = """
         UPDATE contacts
         SET name = ?,  email_address = ?
