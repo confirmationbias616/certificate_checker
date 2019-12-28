@@ -198,6 +198,25 @@ def potential_match():
 
 @app.route("/summary_table")
 def summary_table():
+    def highlight_pending(s):
+        days_old = (
+            datetime.datetime.now().date()
+            - parse_date(re.findall("\d{4}-\d{2}-\d{2}", s.pub_date)[0]).date()
+        ).days
+        if days_old < 60:  # fresh - within lien period
+            row_colour = "rgb(97, 62, 143)"
+        else:
+            row_colour = ""
+        return [f"color: {row_colour}" for i in range(len(s))]
+    col_order = [
+        "job_number",
+        "title",
+        "contractor",
+        "engineer",
+        "owner",
+        "address",
+        "city",
+    ]
     closed_query = """
             SELECT
                 company_projects.project_id,
@@ -260,27 +279,6 @@ def summary_table():
         lambda row: ", ".join(ast.literal_eval(row.receiver_emails_dump).keys()),
         axis=1,
     )
-    col_order = [
-        "job_number",
-        "title",
-        "contractor",
-        "engineer",
-        "owner",
-        "address",
-        "city",
-    ]
-
-        def highlight_pending(s):
-            days_old = (
-                datetime.datetime.now().date()
-                - parse_date(re.findall("\d{4}-\d{2}-\d{2}", s.pub_date)[0]).date()
-            ).days
-            if days_old < 60:  # fresh - within lien period
-                row_colour = "rgb(97, 62, 143)"
-            else:
-                row_colour = ""
-            return [f"color: {row_colour}" for i in range(len(s))]
-
         df_closed = (
             df_closed[["pub_date"] + col_order]
             .style.set_table_styles(
