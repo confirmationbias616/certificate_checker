@@ -65,12 +65,6 @@ def dated_url_for(endpoint, **values):
     return url_for(endpoint, **values)
 
 
-def write_company_project(df, conn):
-    df = df.drop_duplicates(subset="job_number", keep="last")
-    df = geocode(df, retry_na=True)
-    df.to_sql("company_projects", conn, if_exists="replace", index=False)
-
-
 company_id = 1  # temporarily det company_id to until we get authentication set up.
 
 @app.route("/", methods=["POST", "GET"])
