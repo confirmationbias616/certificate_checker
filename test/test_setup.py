@@ -64,6 +64,19 @@ def create_test_db():
             DROP TABLE old_table;
             PRAGMA foreign_keys=on;
         """)
+        conn.cursor().executescript("""
+            PRAGMA foreign_keys=off;
+            ALTER TABLE contacts RENAME TO old_table;
+            CREATE TABLE contacts (
+                id INTEGER PRIMARY KEY,
+                company_id INTEGER NOT NULL,
+                name TEXT,
+                email_address TEXT
+            );
+            INSERT INTO contacts SELECT * FROM old_table;
+            DROP TABLE old_table;
+            PRAGMA foreign_keys=on;
+        """)
     os.rename(
         abs_dir_path + "test/test_cert_db.sqlite3",
         abs_dir_path + "test_cert_db.sqlite3",
