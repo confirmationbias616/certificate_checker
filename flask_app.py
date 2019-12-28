@@ -747,6 +747,8 @@ def map():
             company_projects.closed=1
         AND
             attempted_matches.ground_truth=1
+        AND
+            company_id=?
     """
     open_query = """
         SELECT
@@ -763,6 +765,8 @@ def map():
         FROM company_projects
         WHERE
             company_projects.closed=0
+        AND
+            company_id=?
     """
     web_query = """
         SELECT 
@@ -804,8 +808,8 @@ def map():
     while True:
         try:
             with create_connection() as conn:
-                df_cp_open = pd.read_sql(open_query, conn)
-                df_cp_closed = pd.read_sql(closed_query, conn)
+                df_cp_open = pd.read_sql(open_query, conn, params=[company_id])
+                df_cp_closed = pd.read_sql(closed_query, conn, params=[company_id])
                 if text_search:
                     df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, text_search])
                 else:
