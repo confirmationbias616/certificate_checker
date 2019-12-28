@@ -69,18 +69,18 @@ company_id = 1  # temporarily det company_id to until we get authentication set 
 
 @app.route("/", methods=["POST", "GET"])
 def index():
-    all_contacts_query = "SELECT * FROM contacts"
+    all_contacts_query = "SELECT * FROM contacts WHERE company_id=?"
     with create_connection() as conn:
-        all_contacts = pd.read_sql(all_contacts_query, conn)
+        all_contacts = pd.read_sql(all_contacts_query, conn, params=[company_id])
     if request.method == "POST":
         selected_contact_ids = request.form.getlist("contacts")
         selected_contacts_query = (
             f"SELECT name, email_address FROM contacts WHERE id in "
-            f"({','.join('?'*len(selected_contact_ids))})"
+            f"({','.join('?'*len(selected_contact_ids))}) AND company_id=?"
         )
         with create_connection() as conn:
             selected_contacts = pd.read_sql(
-                selected_contacts_query, conn, params=[*selected_contact_ids]
+                selected_contacts_query, conn, params=[*selected_contact_ids, company_id]
             )
         receiver_emails_dump = str(
             {row["name"]: row["email_address"] for _, row in selected_contacts.iterrows()}
@@ -423,9 +423,9 @@ def about():
 @app.route("/contact_config", methods=["POST", "GET"])
 def contact_config():
     contact = request.args
-    all_contacts_query = "SELECT * FROM contacts"
+    all_contacts_query = "SELECT * FROM contacts WHERE company_id=?"
     with create_connection() as conn:
-        all_contacts = pd.read_sql(all_contacts_query, conn)
+        all_contacts = pd.read_sql(all_contacts_query, conn, params=[company_id])
     all_contacts["action"] = all_contacts.apply(
         lambda row: (
             f"""<a href="{url_for('update_contact', **row)}">modify</a> /"""
@@ -466,10 +466,11 @@ def delete_contact():
     delete_contact_query = """
             DELETE FROM contacts
             WHERE id=?
+            AND company_id=?
         """
     contact = request.args
     with create_connection() as conn:
-        conn.cursor().execute(delete_contact_query, [contact.get("id")])
+        conn.cursor().execute(delete_contact_query, [contact.get("id"), company_id])
     return redirect(url_for("contact_config"))
 
 
@@ -484,13 +485,14 @@ def update_contact():
         UPDATE contacts
         SET name = ?,  email_address = ?
         WHERE id=?
+        AND company_id=?
     """
     if request.method == "POST":
         contact = request.form
         with create_connection() as conn:
             conn.cursor().execute(
                 update_contact_query,
-                [contact.get("name"), contact.get("email_address"), contact.get("id")],
+                [contact.get("name"), contact.get("email_address"), contact.get("id"), company_id],
             )
     return redirect(url_for("contact_config", **contact))
 
@@ -498,25 +500,16 @@ def update_contact():
 @app.route("/add_contact", methods=["POST", "GET"])
 def add_contact():
     contact = request.args
-    get_contact_ids = """
-        SELECT id FROM contacts
-    """
-    with create_connection() as conn:
-        contact_ids = pd.read_sql(get_contact_ids, conn).sort_values("id")
     add_contact_query = """
         INSERT INTO contacts
-        (name, email_address, id) VALUES(?, ?, ?)
+        (company_id, name, email_address) VALUES(?, ?, ?)
     """
     if request.method == "POST":
         contact = request.form
-        if len(contact_ids):
-            new_contact_id = int(contact_ids.iloc[-1] + 1)
-        else:
-            new_contact_id = 1
         with create_connection() as conn:
             conn.cursor().execute(
                 add_contact_query,
-                [contact.get("name"), contact.get("email_address"), new_contact_id],
+                [company_id, contact.get("name"), contact.get("email_address")],
             )
     return redirect(url_for("contact_config"))
 
