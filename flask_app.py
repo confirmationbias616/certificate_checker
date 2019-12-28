@@ -426,35 +426,39 @@ def contact_config():
     all_contacts_query = "SELECT * FROM contacts WHERE company_id=?"
     with create_connection() as conn:
         all_contacts = pd.read_sql(all_contacts_query, conn, params=[company_id])
-    all_contacts["action"] = all_contacts.apply(
-        lambda row: (
-            f"""<a href="{url_for('update_contact', **row)}">modify</a> /"""
-            f""" <a href="{url_for('delete_contact', **row)}">delete</a>"""
-        ),
-        axis=1,
-    )
-    all_contacts = all_contacts[["name", "email_address", "action"]]
-    all_contacts = (
-        all_contacts.style.set_table_attributes('border="1"')
-        .set_table_styles(
-            [
-                {
-                    "selector": "th",
-                    "props": [
-                        ("background-color", "rgb(122, 128, 138)"),
-                        ("color", "black"),
-                    ],
-                }
-            ]
+    if not len(all_contacts):
+        all_contacts = None
+    else:
+        all_contacts["action"] = all_contacts.apply(
+            lambda row: (
+                f"""<a href="{url_for('update_contact', **row)}">modify</a> /"""
+                f""" <a href="{url_for('delete_contact', **row)}">delete</a>"""
+            ),
+            axis=1,
         )
-        .set_properties(
-            **{"font-size": "10pt", "background-color": "rgb(138, 175, 190)"}
+        all_contacts = all_contacts[["name", "email_address", "action"]]
+        all_contacts = (
+            all_contacts.style.set_table_attributes('border="1"')
+            .set_table_styles(
+                [
+                    {
+                        "selector": "th",
+                        "props": [
+                            ("background-color", "rgb(122, 128, 138)"),
+                            ("color", "black"),
+                        ],
+                    }
+                ]
+            )
+            .set_properties(
+                **{"font-size": "10pt", "background-color": "rgb(138, 175, 190)"}
+            )
+            .hide_index()
         )
-        .hide_index()
-    )
+        all_contacts = all_contacts.render(escape=False)
     return render_template(
         "contact_config.html",
-        all_contacts=all_contacts.render(escape=False),
+        all_contacts=all_contacts,
         contact=contact,
         config=True,
         hide_helper_links=True,
