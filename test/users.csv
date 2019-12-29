@@ -1,3 +1,6 @@
-id,name,account_type
-1,test_main,full
-2,test_secondary,full
+id,name,email,profile_pic,account_type
+110201850279289037818,Dilfo,dilfo.hb.release@gmail.com,https://lh5.googleusercontent.com/-mYRi0gdvLBw/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3rds-z9W4vyer7Muf3URJ31lXcCdGQ/photo.jpg,full
+102875460575866288635,Alex,alex.roy616@gmail.com,https://lh3.googleusercontent.com/a-/AAuE7mCnfW5wjrUQS4q4yCvuuWhHk-r84zwwk5pKj0qabA,full
+1,test_main,12,,full
+2,test_secondary,34,,full
+108565356427012241569,Alex,Alex.roy@dilfo.com,https://lh3.googleusercontent.com/-wxGuaOfy7xA/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3rc2JQJ7HLdLaGHmJyMQ6kie_G5Mug/photo.jpg,
