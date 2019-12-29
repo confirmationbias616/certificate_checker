@@ -29,7 +29,7 @@ from flask_login import (
 )
 from oauthlib.oauth2 import WebApplicationClient
 import requests
-from db import init_db_command
+# from db import init_db_command
 from user import User
 
 
@@ -67,13 +67,6 @@ GOOGLE_DISCOVERY_URL = (
 # https://flask-login.readthedocs.io/en/latest
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-# Naive database setup
-try:
-    init_db_command()
-except sqlite3.OperationalError:
-    # Assume it's already been created
-    pass
 
 # Flask-Login helper to retrieve a user from our db
 @login_manager.user_loader
