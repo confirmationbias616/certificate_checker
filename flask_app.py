@@ -50,10 +50,15 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = "e5ac358c-f0bf-11e5-9e39-d3b532c10a28"
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-with open(".oauth_cred.json") as f:
-    cred = json.load(f)
-GOOGLE_CLIENT_ID = cred.get("GOOGLE_CLIENT_ID", None)
-GOOGLE_CLIENT_SECRET = cred.get("GOOGLE_CLIENT_SECRET", None)
+try:
+    with open(".oauth_cred.json") as f:
+        cred = json.load(f)
+    GOOGLE_CLIENT_ID = cred.get("GOOGLE_CLIENT_ID", None)
+    GOOGLE_CLIENT_SECRET = cred.get("GOOGLE_CLIENT_SECRET", None)
+    client = WebApplicationClient(GOOGLE_CLIENT_ID)  # OAuth 2 client setup
+except FileNotFoundError:  # CI server
+    company_id = 1  # to enable tests
+
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 )
@@ -69,9 +74,6 @@ try:
 except sqlite3.OperationalError:
     # Assume it's already been created
     pass
-
-# OAuth 2 client setup
-client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
 # Flask-Login helper to retrieve a user from our db
 @login_manager.user_loader

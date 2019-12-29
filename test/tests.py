@@ -294,7 +294,7 @@ class InputTests(unittest.TestCase):
             submit_success = True
         except urllib.error.HTTPError:
             pass
-        summary_html = requests.get(base_url + "/summary_table").content
+        summary_html = requests.get(base_url + "/summary_table" + "?company_id=1").content
         logged_success = any(re.findall(f"test_{test_job_number}", str(summary_html)))
         self.assertEqual(expected_submit_success, submit_success)
         self.assertEqual(expected_logged_success, logged_success)
