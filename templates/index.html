@@ -13,12 +13,18 @@
   {% block body %}
   <br><br>
   <div align="center">
-    <form action="/summary_table" method="GET">
+    <!-- <form action="{{ url_for('summary_table', company_id=company_id) }}" method="GET">
       {% if not job_number %}
         <input type="submit" id="large_button" value="SHOW SUMMARY"></button>
         <br><br><br>
       {% endif %}
-    </form>
+    </form> -->
+    {% if not job_number %}
+    <a href="{{ url_for('summary_table', company_id=company_id) }}">
+      project summary
+    </a>
+    <br><br><br>
+    {% endif %}
   </div>
   <form action="/" name = "job_entry" method="POST" onsubmit="return(validate())">
     <div align="center">

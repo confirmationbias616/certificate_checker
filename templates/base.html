@@ -41,12 +41,21 @@
             <a href={{ url_for('about') }}>
                 about
             </a>&nbsp;
-            <a href={{ url_for('contact_config') }}>
+            <a href={{ url_for('contact_config', company_id=company_id) }}>
                 configure contacts
             </a>&nbsp;
-            <a href={{ url_for('map') }}>
+            <a href={{ url_for('map', company_id=company_id) }}>
                 interactive map
             </a>
+            {% if username %}
+            <a href={{ url_for('logout', company_id=company_id) }}>
+                logged in as {{ username }}
+            </a>
+            {% else %}
+            <a href={{ url_for('login', company_id=company_id) }}>
+                login
+            </a>
+            {% endif %}
         </div>
         {% endif %}
     </div>

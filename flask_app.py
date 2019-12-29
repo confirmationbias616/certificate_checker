@@ -18,6 +18,19 @@ import re
 import ast
 import folium
 from folium.plugins import MarkerCluster
+import json
+import sqlite3
+from flask_login import (
+    LoginManager,
+    current_user,
+    login_required,
+    login_user,
+    logout_user,
+)
+from oauthlib.oauth2 import WebApplicationClient
+import requests
+from db import init_db_command
+from user import User
 
 
 logger = logging.getLogger(__name__)
@@ -32,8 +45,41 @@ logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
 app = Flask(__name__)
+
+# trick from SO for properly relaoding CSS
 app.config["SECRET_KEY"] = "e5ac358c-f0bf-11e5-9e39-d3b532c10a28"
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+with open(".oauth_cred.json") as f:
+    cred = json.load(f)
+GOOGLE_CLIENT_ID = cred.get("GOOGLE_CLIENT_ID", None)
+GOOGLE_CLIENT_SECRET = cred.get("GOOGLE_CLIENT_SECRET", None)
+GOOGLE_DISCOVERY_URL = (
+    "https://accounts.google.com/.well-known/openid-configuration"
+)
+
+# User session management setup
+# https://flask-login.readthedocs.io/en/latest
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+# Naive database setup
+try:
+    init_db_command()
+except sqlite3.OperationalError:
+    # Assume it's already been created
+    pass
+
+# OAuth 2 client setup
+client = WebApplicationClient(GOOGLE_CLIENT_ID)
+
+# Flask-Login helper to retrieve a user from our db
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
+
+def get_google_provider_cfg():
+    return requests.get(GOOGLE_DISCOVERY_URL).json()
 
 # list of tuples determining which upper limit of region size (left) should correspond
 # to which level of zoom (right) for the follium map
@@ -64,10 +110,15 @@ def dated_url_for(endpoint, **values):
     return url_for(endpoint, **values)
 
 
-company_id = 1  # temporarily det company_id to until we get authentication set up.
-
 @app.route("/", methods=["POST", "GET"])
 def index():
+    # if not current_user.is_authenticated:
+    #     return '<a class="button" href="/login">Google Login</a>'
+    username = current_user.name if current_user.is_authenticated else None
+    if current_user.is_authenticated:
+        company_id = current_user.id
+    else:
+        company_id = 1  # temporarily det company_id to until we get authentication set up.
     all_contacts_query = "SELECT * FROM contacts WHERE company_id=?"
     with create_connection() as conn:
         all_contacts = pd.read_sql(all_contacts_query, conn, params=[company_id])
@@ -109,7 +160,11 @@ def index():
                 was_prev_logged = 0
         if was_prev_closed:
             return redirect(
-                url_for("already_matched", job_number=new_entry["job_number"])
+                url_for("already_matched",
+                job_number=new_entry["job_number"],
+                username=username,
+                company_id=company_id,
+                )
             )
         if was_prev_logged:
             with create_connection() as conn:
@@ -118,17 +173,22 @@ def index():
                 """, [new_entry["job_number"], company_id])
         with create_connection() as conn:
             conn.cursor().execute(f"""
-                INSERT INTO company_projects (company_id, {', '.join(list(new_entry.keys()))}) VALUES ({company_id}, {','.join(['?']*len(new_entry))})
-            """, list(new_entry.values()))
+                INSERT INTO company_projects (company_id, {', '.join(list(new_entry.keys()))}) VALUES (?, {','.join(['?']*len(new_entry))})
+            """, [company_id] + list(new_entry.values()))
         geo_update_db_table('company_projects', limit=1)
         if not was_prev_logged:
             return render_template(
-                "signup_confirmation.html", job_number=new_entry["job_number"]
+                "signup_confirmation.html", 
+                job_number=new_entry["job_number"],
+                username=username,
+                company_id=company_id,
             )
         return render_template(
             "update.html",
             job_number=new_entry["job_number"],
             recorded_change=True,
+            username=username,
+            company_id=company_id,
         )
     else:
         try:
@@ -136,11 +196,97 @@ def index():
                 "index.html",
                 home=True,
                 all_contacts=all_contacts,
-                **{key: request.args.get(key) for key in request.args},
+                **{key: request.args.get(key) for key in request.args if key != 'company_id'},
+                username=username,
+                company_id=company_id,
             )
         except NameError:
-            return render_template("index.html", home=True, all_contacts=all_contacts)
+            return render_template("index.html", home=True, all_contacts=all_contacts, username=username, company_id=company_id)
 
+
+@app.route("/login")
+def login():
+    # Find out what URL to hit for Google login
+    google_provider_cfg = get_google_provider_cfg()
+    authorization_endpoint = google_provider_cfg["authorization_endpoint"]
+
+    # Use library to construct the request for Google login and provide
+    # scopes that let you retrieve user's profile from Google
+    request_uri = client.prepare_request_uri(
+        authorization_endpoint,
+        redirect_uri=request.base_url + "/callback",
+        scope=["openid", "email", "profile"],
+    )
+    return redirect(request_uri)
+
+
+@app.route("/login/callback")
+def callback():
+    # Get authorization code Google sent back to you
+    code = request.args.get("code")
+
+    # Find out what URL to hit to get tokens that allow you to ask for
+    # things on behalf of a user
+    google_provider_cfg = get_google_provider_cfg()
+    token_endpoint = google_provider_cfg["token_endpoint"]
+
+    # Prepare and send request to get tokens! Yay tokens!
+    token_url, headers, body = client.prepare_token_request(
+        token_endpoint,
+        authorization_response=request.url,
+        redirect_url=request.base_url,
+        code=code,
+    )
+    token_response = requests.post(
+        token_url,
+        headers=headers,
+        data=body,
+        auth=(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET),
+    )
+
+    # Parse the tokens!
+    client.parse_request_body_response(json.dumps(token_response.json()))
+
+    # Now that we have tokens (yay) let's find and hit URL
+    # from Google that gives you user's profile information,
+    # including their Google Profile Image and Email
+    userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
+    uri, headers, body = client.add_token(userinfo_endpoint)
+    userinfo_response = requests.get(uri, headers=headers, data=body)
+
+    # We want to make sure their email is verified.
+    # The user authenticated with Google, authorized our
+    # app, and now we've verified their email through Google!
+    if userinfo_response.json().get("email_verified"):
+        unique_id = userinfo_response.json()["sub"]
+        users_email = userinfo_response.json()["email"]
+        picture = userinfo_response.json()["picture"]
+        users_name = userinfo_response.json()["given_name"]
+    else:
+        return "User email not available or not verified by Google.", 400
+
+    # Create a user in our db with the information provided
+    # by Google
+    user = User(
+        id_=unique_id, name=users_name, email=users_email, profile_pic=picture
+    )
+
+    # Doesn't exist? Add to database
+    if not User.get(unique_id):
+        User.create(unique_id, users_name, users_email, picture)
+
+    # Begin user session by logging the user in
+    login_user(user)
+
+    # Send user back to homepage
+    return redirect(url_for("index"))
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("index"))
 
 @app.route("/already_matched", methods=["POST", "GET"])
 def already_matched():
@@ -256,10 +402,10 @@ def summary_table():
             AND company_id=?
         """
     with create_connection() as conn:
-        df_closed = pd.read_sql(closed_query, conn, params=[company_id]).sort_values(
+        df_closed = pd.read_sql(closed_query, conn, params=[request.args.get('company_id')]).sort_values(
             "job_number", ascending=False
         )
-        df_open = pd.read_sql(open_query, conn, params=[company_id]).sort_values(
+        df_open = pd.read_sql(open_query, conn, params=[request.args.get('company_id')]).sort_values(
             "job_number", ascending=False
         )
     pd.set_option("display.max_colwidth", -1)
@@ -333,6 +479,7 @@ def summary_table():
         "summary_table.html",
         df_closed=df_closed,
         df_open=df_open,
+        company_id=request.args.get("company_id")
     )
 
 
@@ -366,7 +513,7 @@ def instant_scan():
             lookback_cert_count = 750
         company_query = "SELECT * FROM company_projects WHERE job_number=? AND company_id=?"
         with create_connection() as conn:
-            company_projects = pd.read_sql(company_query, conn, params=[job_number, company_id])
+            company_projects = pd.read_sql(company_query, conn, params=[job_number, request.args.get("company_id")])
         hist_query = "SELECT * FROM web_certificates ORDER BY pub_date DESC LIMIT ?"
         with create_connection() as conn:
             df_web = pd.read_sql(hist_query, conn, params=[lookback_cert_count])
@@ -424,14 +571,14 @@ def contact_config():
     contact = request.args
     all_contacts_query = "SELECT * FROM contacts WHERE company_id=?"
     with create_connection() as conn:
-        all_contacts = pd.read_sql(all_contacts_query, conn, params=[company_id])
+        all_contacts = pd.read_sql(all_contacts_query, conn, params=[contact.get('company_id')])
     if not len(all_contacts):
         all_contacts = None
     else:
         all_contacts["action"] = all_contacts.apply(
             lambda row: (
-                f"""<a href="{url_for('update_contact', **row)}">modify</a> /"""
-                f""" <a href="{url_for('delete_contact', **row)}">delete</a>"""
+                f"""<a href="{url_for('update_contact', update=True, id=row['id'], name=row['name'], email_address=row['email_address'], company_id=contact.get('company_id'))}">modify</a> /"""
+                f"""<a href="{url_for('delete_contact', id=row['id'], name=row['name'], email_address=row['email_address'], company_id=contact.get('company_id'))}">delete</a>"""
             ),
             axis=1,
         )
@@ -458,9 +605,9 @@ def contact_config():
     return render_template(
         "contact_config.html",
         all_contacts=all_contacts,
-        contact=contact,
         config=True,
         hide_helper_links=True,
+        **contact,
     )
 
 
@@ -473,8 +620,8 @@ def delete_contact():
         """
     contact = request.args
     with create_connection() as conn:
-        conn.cursor().execute(delete_contact_query, [contact.get("id"), company_id])
-    return redirect(url_for("contact_config"))
+        conn.cursor().execute(delete_contact_query, [contact.get("id"), contact.get("company_id")])
+    return redirect(url_for("contact_config", **contact))
 
 
 @app.route("/update_contact", methods=["POST", "GET"])
@@ -491,7 +638,7 @@ def update_contact():
         with create_connection() as conn:
             conn.cursor().execute(
                 update_contact_query,
-                [contact.get("name"), contact.get("email_address"), contact.get("id"), company_id],
+                [contact.get("name"), contact.get("email_address"), contact.get("id"), contact.get("company_id")],
             )
     return redirect(url_for("contact_config", **contact))
 
@@ -508,9 +655,9 @@ def add_contact():
         with create_connection() as conn:
             conn.cursor().execute(
                 add_contact_query,
-                [company_id, contact.get("name"), contact.get("email_address")],
+                [contact.get("company_id"), contact.get("name"), contact.get("email_address")],
             )
-    return redirect(url_for("contact_config"))
+    return redirect(url_for("contact_config", **contact))
 
 
 @app.route("/interact", methods=["POST", "GET"])
@@ -800,8 +947,8 @@ def map():
     while True:
         try:
             with create_connection() as conn:
-                df_cp_open = pd.read_sql(open_query, conn, params=[company_id])
-                df_cp_closed = pd.read_sql(closed_query, conn, params=[company_id])
+                df_cp_open = pd.read_sql(open_query, conn, params=[request.args.get("company_id")])
+                df_cp_closed = pd.read_sql(closed_query, conn, params=[request.args.get("company_id")])
                 if text_search:
                     df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, text_search])
                 else:
@@ -999,4 +1146,7 @@ def map():
 
 
 if __name__ == "__main__":
-    app.run(debug=load_config()["flask_app"]["debug"])
+    if load_config()["flask_app"]["adhoc_ssl"]:
+        app.run(debug=load_config()["flask_app"]["debug"], ssl_context="adhoc")
+    else:
+        app.run(debug=load_config()["flask_app"]["debug"])

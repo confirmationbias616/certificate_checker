@@ -32,7 +32,7 @@ def create_test_db():
                 city_lat REAL,
                 city_lng REAL,
                 city_size REAL,
-                company_id INTEGER,
+                company_id TEXT NOT NULL,
                 last_cert_id_check INTEGER
             );
             INSERT INTO company_projects SELECT * FROM old_table;
@@ -69,7 +69,7 @@ def create_test_db():
             ALTER TABLE contacts RENAME TO old_table;
             CREATE TABLE contacts (
                 id INTEGER PRIMARY KEY,
-                company_id INTEGER NOT NULL,
+                company_id TEXT NOT NULL,
                 name TEXT,
                 email_address TEXT
             );
