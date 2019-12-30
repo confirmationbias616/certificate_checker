@@ -1138,8 +1138,17 @@ def map():
     feature_group.add_child(mc)
     feature_group.add_to(m)
     folium.LayerControl(collapsed=True).add_to(m)
-
     m.save('templates/map_widget.html')
+    with open('templates/map_widget.html', 'r+') as f:
+        html = f.read()
+        for line in [
+            """<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>""",
+            """<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"/>""",
+        ]:
+            html = html.replace(line,'')
+        f.seek(0)
+        f.write(html)
+        f.truncate()
     return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc_win), limit_daily=limit_daily, location_string=location_string, text_search=text_search)
 
 
