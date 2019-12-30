@@ -47,13 +47,13 @@
             <a href={{ url_for('map', company_id=company_id) }}>
                 interactive map
             </a>
-            {% if username %}
+            {% if company_id %}
             <a href={{ url_for('logout', company_id=company_id) }}>
-                logged in as {{ username }}
+                log out
             </a>
             {% else %}
             <a href={{ url_for('login', company_id=company_id) }}>
-                login
+                log in
             </a>
             {% endif %}
         </div>
