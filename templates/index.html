@@ -12,34 +12,13 @@
 <body>
   {% block body %}
   <br><br>
-  <div align="center">
-    <!-- <form action="{{ url_for('summary_table', company_id=company_id) }}" method="GET">
-      {% if not job_number %}
-        <input type="submit" id="large_button" value="SHOW SUMMARY"></button>
-        <br><br><br>
-      {% endif %}
-    </form> -->
-    {% if not job_number %}
-    <a href="{{ url_for('summary_table', company_id=company_id) }}">
-      project summary
-    </a>
-    <br><br><br>
-    {% endif %}
-  </div>
   <form action="/" name = "job_entry" method="POST" onsubmit="return(validate())">
-    <div align="center">
-        <input type="submit" id="large_button" value="SUBMIT">
-        {% if not job_number %}
-          <input type="reset" id="large_button" value="RESET">
-        {% endif %}
-    </div>
-    <br><br>
     <fieldset>
       <legend>{% if job_number %}Adjust{% else %}New{% endif %} Project Info</legend>
       <span>   *</span><span style="font-size:90%"><i> denotes a required field</i><br><br></span>
       <div class="required">
         <p2>Subcontract Job #</p2><br>
-        <input type="text" name="job_number" size="6" {% if job_number %}value="{{job_number}}" {% else %}placeholder="2567"{% endif %} pattern="2\d{3}" {% if job_number %} readonly title="Cannot modify project number once it has been set." {% else %} autofocus required title="4-digit number (2###)"{% endif %}>
+        <input type="text" name="job_number" size="6" {% if job_number %}value="{{job_number}}" {% else %}placeholder="2567"{% endif %} pattern="[A-Za-z0-9\-]+" {% if job_number %} readonly title="Cannot modify project number once it has been set." {% else %} autofocus required title="only alphanumerical characters and dashes (-) are accepted"{% endif %}>
       </div><br>
       <div class="required">
         <p2>Project Title</p2><br>
@@ -84,8 +63,16 @@
             ^^^
           </p>
         {% endif %}
-      </fieldset>
+    </fieldset>
     <!-- <img src="https://thumbs.gfycat.com/ShadowyThornyGelada-size_restricted.gif"> -->
+    <div align="center">
+      <br><br>
+      <input type="submit" id="large_button" value="SUBMIT">
+      <br><br>
+      {% if not job_number %}
+        <input type="reset" id="large_button" value="RESET">
+      {% endif %}
+    </div>
   </form>
   <script type = "text/javascript">
     function validate() {

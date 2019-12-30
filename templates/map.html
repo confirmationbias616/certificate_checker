@@ -8,7 +8,7 @@
 </head>
 <body>
     {% block body %}
-    <hr>
+    &nbsp;
     <div style="width: 100%; text-align: center;">
         <form action="{{ url_for('set_location') }}" name = "set_location" method="POST">
             <div style="display: inline-block">
@@ -26,7 +26,7 @@
             </div>
         </form>
     </div>
-    <hr>
+    <hr style="border: 1px solid var(--outline);">
     <div style="width: 100%; text-align: center;">
         <div style="display: inline-block">
         {% if cert_count %}

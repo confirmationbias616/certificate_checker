@@ -25,41 +25,37 @@
             }
     </style>
 </head>
-<body>    
-    
-    <div class="row">
-        <div class="column" type=header>
-            <h2>
-                <a href={{ url_for('index') }} style="text-decoration:none; color:inherit">
-                    HBR Bot
-                </a>
-            </h2>
-            </div><br>
-            <br>
-            {% if not hide_helper_links %}
-        <div class="column" type=header align="center">
-            <a href={{ url_for('about') }}>
-                about
-            </a>&nbsp;
-            <a href={{ url_for('contact_config', company_id=company_id) }}>
-                configure contacts
-            </a>&nbsp;
-            <a href={{ url_for('map', company_id=company_id) }}>
-                interactive map
-            </a>
-            {% if company_id %}
-            <a href={{ url_for('logout', company_id=company_id) }}>
-                log out
-            </a>
-            {% else %}
-            <a href={{ url_for('login', company_id=company_id) }}>
-                log in
-            </a>
-            {% endif %}
-        </div>
+<body>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <div class="topnav" id="myTopnav">
+        <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+            <i class="fa fa-bars"></i>
+        </a>
+        <a class="title" href={{ url_for('index') }}><strong>HBR Bot</strong></a>
+        {% if company_id %}
+        <a href={{ url_for('logout', company_id=company_id) }}><i>log out</i></a>
+        {% else %}
+        <a href={{ url_for('login', company_id=company_id) }}><i>log in</i></a>
         {% endif %}
+        <a class="spacer">|</a>
+        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'about' %} class="active" {% endif %} href={{ url_for('about') }}>about</a>
+        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'contact_config' %} class="active" {% endif %} href={{ url_for('contact_config', company_id=company_id) }}>configure contacts</a>
+        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'summary_table' %} class="active" {% endif %} href={{ url_for('summary_table', company_id=company_id) }}>projects</a>
+        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'map' %} class="active" {% endif %} href={{ url_for('map', company_id=company_id) }}>map</a>
     </div>
     {% block body %}{% endblock %}
+
+    <script>
+        function myFunction() {
+          var x = document.getElementById("myTopnav");
+          if (x.className === "topnav") {
+            x.className += " responsive";
+          } else {
+            x.className = "topnav";
+          }
+        }
+    </script>
 </body>
 <footer>
     {% block footer %}
