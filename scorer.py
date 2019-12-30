@@ -1,5 +1,6 @@
 from fuzzywuzzy import fuzz
 import numpy as np
+from utils import create_connection
 
 
 def compile_score(row, scoreable_attrs, style):
@@ -38,8 +39,34 @@ def attr_score(web_str, company_project_str, match_style="full"):
     except TypeError:
         return 0
 
+def use_fresh_certs_only(single_project_row, web_df):
+    """if True, `last_cert_id_check` will be read for assembling only fresh
+    web certificates for given project and databse will be updated afterwards as well.
+    
+    Parameters:
+     - `single_project_row` (pd.Series): row of company project to match.
+     - `web_df` (pd.DataFrame): dataframe of CSP certificates to match to the
+     company project.
 
-def build_match_score(single_project_df, web_df):
+    Returns:
+     - a Pandas DataFrame containing fresh certificates for given project. This will 
+     be a subset of initial `web_df` input.
+    
+    """
+    try:
+        possible_matches_scored = web_df[web_df.cert_id > int(single_project_row.last_cert_id_check)]
+    except (TypeError, ValueError):  # last_cert_id_check was `NULL`
+        possible_matches_scored = web_df
+    update_query = """ 
+        UPDATE company_projects 
+        SET last_cert_id_check=?
+        WHERE project_id=?
+    """
+    with create_connection() as conn:
+        conn.cursor().execute(update_query, [max(possible_matches_scored.cert_id), single_project_row.project_id])
+    return web_df
+
+def build_match_score(single_project_df, web_df, fresh_cert_limit=True):
     """Builds a possible match dataframe of one-to many relationship between specified
     company project and all web certificates along with many added columns of engineered
     features that the Random Forest Classifier will be looking for.
@@ -49,6 +76,7 @@ def build_match_score(single_project_df, web_df):
      Must be a single-row dataframe containing only one project, due to legacy code.
      - `web_df` (pd.DataFrame): specify dataframe of CSP certificates to match to the
      company project.
+     - `fresh_cert_limit` (bool): specify whether or not to apply `use_fresh_certs_only()`
 
     Returns:
      - a Pandas DataFrame containing new certificates if Test=True
@@ -67,13 +95,16 @@ def build_match_score(single_project_df, web_df):
         "city",
         "owner",
     ]
-    possible_matches_scored = web_df  # renaming for clarity
     for (
         _,
         company_project_row,
     ) in (
         single_project_df.iterrows()
     ):  # nescessary even when company_projects is single row because it's still DataFrame instead of Series
+        if fresh_cert_limit:
+            possible_matches_scored = use_fresh_certs_only(company_project_row, web_df)
+        else:
+            possible_matches_scored = web_df
         for attr in scoreable_attrs:
             for attr_suffix, match_style in zip(
                 ["score", "pr_score"], ["full", "partial"]

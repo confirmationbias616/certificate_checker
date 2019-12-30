@@ -4,6 +4,9 @@ import pandas as pd
 import yaml
 import sys
 import logging
+import json
+import datetime
+import argparse
 
 
 logger = logging.getLogger(__name__)
@@ -25,6 +28,32 @@ def load_config():
             return yaml.safe_load(stream)
         except yaml.YAMLError as e:
             logger.critical(e)
+
+
+def load_results():
+    """Returns `results.json` file as a python object."""
+    with open('results.json') as f:
+        return json.load(f)
+
+
+def load_last_recorded(key):
+    """Returns last known recorded value of input `key`."""
+    results = load_results()
+    last_recorded_date = sorted(list(results.keys()))[-1]
+    return results[last_recorded_date][key]
+
+
+def update_results(new_results):
+    """Updates `results.json` by updating dictionary located at key for today's date with whatever
+    dictionary is passed in."""
+    today_date = str(datetime.datetime.now().date())
+    results = load_results()
+    if results.get(today_date, False):
+        results[today_date].update(new_results)
+    else:
+        results.update({today_date : new_results})
+    with open('results.json', 'w') as f:
+        json.dump(results, f, sort_keys=True, indent=2)  
 
 
 def save_config(config):
@@ -50,6 +79,12 @@ def create_connection(db_name="cert_db.sqlite3"):
         logger.critical(e)
     return None
 
+def custom_query(query):
+    """Run custom SQL query against cert_db.sqlite3"""
+    with create_connection() as conn:
+        result =  pd.read_sql(query, conn)
+    print(result)
+    return result
 
 def dbtables_to_csv(db_name="cert_db.sqlite3", destination=""):
     """Writes all tables of specified SQLite3 database to separate CSV files located in
@@ -63,7 +98,7 @@ def dbtables_to_csv(db_name="cert_db.sqlite3", destination=""):
             .execute("SELECT name FROM sqlite_master WHERE type='table';")
             .fetchall()
         )
-    table_names = [x[0] for x in table_names]
+    table_names = [x[0] for x in table_names if 'cert_search' not in x[0]]
     open_query = "SELECT * FROM {}"
     for table in table_names:
         with create_connection(db_name) as conn:
@@ -73,4 +108,18 @@ def dbtables_to_csv(db_name="cert_db.sqlite3", destination=""):
 
 
 if __name__ == "__main__":
-    dbtables_to_csv()  # will only ever run with default parameters - no need for argparse
+    parser = argparse.ArgumentParser(description='Call specific utility fucntion.')
+    parser.add_argument('--custom_query', type=str, help="""
+        Run custom SQL query against cert_db.sqlite3
+    """)
+    parser.add_argument('--update_test_csv_files',  action='store_true', help="""
+        Writes all tables of specified SQLite3 database to separate CSV files located in
+        `./test` subdirectory.
+    """)
+    args = parser.parse_args()
+    if args.custom_query:
+        custom_query(args.custom_query)
+    elif args.update_test_csv_files:
+        dbtables_to_csv(destination="./test")
+    else:
+        parser.error('No action requested, add argument according to --help')

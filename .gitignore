@@ -1,8 +1,23 @@
-cert_env
+cert_env*
 *.sqlite3
 train_set.csv
 
+templates/map_widget.html
+
+# ignore results.json except the dummy file in test folder
+results.json
+!test/results.json
+
+# ignore cahces
+cache*
+
+# ignore passwords and API keys
 .password.txt
+.api_key.txt
+.oauth_cred.json
+
+# ignore all vscode config files
+.vscode*
 
 # ignore all pickles
 *.pkl

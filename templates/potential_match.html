@@ -17,17 +17,17 @@
     <div align=center>
       <br>
       <div display=block>
-        <form  action="{{ url_for('process_feedback', job_number=job_number, response=1, url_key=url_key, source=source) }}" method="POST">
+        <form  action="{{ url_for('process_feedback', project_id=project_id, cert_id=cert_id, job_number=job_number, response=1, source=source) }}" method="POST">
           <input type="submit" id="large_button" value="THIS IS THE ONE!" onclick="show_hint()">
         </form>
       </div><br>
       <div display=block>
-        <form  action="{{ url_for('process_feedback', job_number=job_number, response=0, url_key=url_key) }}" method="POST">
+        <form  action="{{ url_for('process_feedback', project_id=project_id, cert_id=cert_id, job_number=job_number, response=0, source=source) }}" method="POST">
           <input type="submit" id="large_button" value="NOPE, WRONG PROJECT :(" onclick="show_hint()">
         </form>
       </div><br>
       <div display=block>
-        <form  action="{{ url_for('process_feedback', job_number=job_number, response=2, url_key=url_key) }}" method="POST">
+        <form  action="{{ url_for('process_feedback', project_id=project_id, cert_id=cert_id, job_number=job_number, response=2, source=source) }}" method="POST">
           <input type="submit" id="large_button" value="MULTI-PHASE - NOT QUITE RIGHT" onclick="show_hint()">
         </form> 
       </div><br>

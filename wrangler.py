@@ -5,8 +5,11 @@ import re
 
 
 def clean_job_number(raw):
+    raw = str(raw)
     try:
-        job_number = re.findall("\d{4}", str(raw))[0]
+        job_number = ''.join(re.findall('\w+', raw))
+        for c in ['#', ' ', '/', '.', ',']:
+            job_number.replace(c, '')
         return job_number
     except IndexError:
         return ""
@@ -139,7 +142,7 @@ def get_street_number(raw):
     if raw == " ":
         return ""
     try:
-        number = re.findall(" ?(\d+) \w", raw)[0]
+        number = re.findall(" ?(\d+) \w", raw)[-1]
     except IndexError:
         return ""
     try:
@@ -155,7 +158,7 @@ def get_street_name(raw):
     raw = raw.lower()
     raw = unidecode.unidecode(raw)
     try:
-        num = re.findall(" ?(\d+) \w", raw)[0]
+        num = re.findall(" ?(\d+) \w", raw)[-1]
     except IndexError:
         return ""
     rest = re.findall(f"{num} (.*)", raw)[0]

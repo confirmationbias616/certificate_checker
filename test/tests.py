@@ -22,7 +22,7 @@ from wrangler import (
     wrangle,
 )
 from matcher import match
-from communicator import communicate, process_as_feedback
+from communicator import communicate
 from ml import build_train_set, train_model, validate_model
 from utils import create_connection, load_config
 from test.test_setup import create_test_db
@@ -38,7 +38,6 @@ class TestWrangleFuncs(unittest.TestCase):
     @data(
         (" ", ""),
         ("\n  #2404\n", "2404"),
-        ("no. 2404", "2404"),
         ("# 2404", "2404"),
         ("#2404", "2404"),
         ("2404", "2404"),
@@ -155,6 +154,7 @@ class TestWrangleFuncs(unittest.TestCase):
         ("145 Jean-Jacques Lussier", "145", "jean"),
         ("145 Jean Jacques Lussier", "145", "jean"),
         ("Edwardsburgh/Cardinal", "", ""),
+        ("35 and 45 Holland Avenue", "45", "holland"),
     )
 
     @data(*address_test_data)
@@ -184,22 +184,21 @@ class TestWrangleFuncs(unittest.TestCase):
 
 @ddt
 class InputTests(unittest.TestCase):
-    def setUpClass():
-        # the import statement below runs some code automatically
-        for filename in ["cert_db.sqlite3"]:
+    def setUp(self):
+        for filename in ["cert_db.sqlite3", "results.json"]:
             try:
                 os.rename(filename, "temp_" + filename)
             except FileNotFoundError:
                 pass
         create_test_db()
-        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
+        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl", "results.json"]:
             try:
                 os.rename("test_" + filename, filename)
             except FileNotFoundError:
                 pass
 
-    def tearDownClass():
-        for filename in ["cert_db.sqlite3"]:
+    def tearDown(self):
+        for filename in ["cert_db.sqlite3", "results.json"]:
             try:
                 os.rename("temp_" + filename, filename)
             except FileNotFoundError:
@@ -208,9 +207,9 @@ class InputTests(unittest.TestCase):
                 except FileNotFoundError:
                     pass
 
-    @data(("dcn",), ("ocn",))
+    @data(("dcn",), ("ocn",), ("l2b",))
     @unpack
-    def test_scarpe(self, source):
+    def test_scrape(self, source):
         test_limit = 3
         web_df = scrape(
             source=source,
@@ -219,7 +218,7 @@ class InputTests(unittest.TestCase):
             since=str(datetime.datetime.now().date() - datetime.timedelta(7)),
         )
         self.assertEqual(len(web_df), test_limit)
-        web_df = scrape(source=source, limit=test_limit, test=True, since="2019-09-01")
+        web_df = scrape(source=source, limit=test_limit, test=True, since="2019-09-17")
         self.assertEqual(len(web_df), test_limit)
         # need more assertions here to endure quality of scraped data
 
@@ -263,7 +262,9 @@ class InputTests(unittest.TestCase):
         self.assertEqual(contractor, scraped_data["contractor"])
         self.assertEqual(engineer, scraped_data["engineer"])
 
-    @data(("9999", True, True, True), ("9998", False, False, False))
+    @data(
+        ("9979", True, True, True), 
+        ("9978", False, False, False))
     @unpack
     def test_input_project(
         self,
@@ -285,7 +286,7 @@ class InputTests(unittest.TestCase):
             "owner",
             "engineer",
         ]:
-            br.form[field_name] = "test"
+            br.form[field_name] = f"test_{test_job_number}"
         br.find_control("contacts").items[0].selected = select_checkbox
         submit_success = False
         try:
@@ -293,8 +294,8 @@ class InputTests(unittest.TestCase):
             submit_success = True
         except urllib.error.HTTPError:
             pass
-        summary_html = requests.get(base_url + "/summary_table").content
-        logged_success = any(re.findall(test_job_number, str(summary_html)))
+        summary_html = requests.get(base_url + "/summary_table" + "?company_id=1").content
+        logged_success = any(re.findall(f"test_{test_job_number}", str(summary_html)))
         self.assertEqual(expected_submit_success, submit_success)
         self.assertEqual(expected_logged_success, logged_success)
         if (
@@ -305,12 +306,19 @@ class InputTests(unittest.TestCase):
             summary_page_links = [
                 x.get("href") for x in summary_page_soup.find_all("a")
             ]
+            get_new_project_id = """
+                SELECT * 
+                FROM company_projects 
+                WHERE job_number = ?
+            """
+            with create_connection() as conn:
+                test_project_id = pd.read_sql(get_new_project_id, conn, params=[test_job_number]).iloc[0].project_id
             delete_link = [
-                x for x in summary_page_links if test_job_number in x and "delete" in x
+                x for x in summary_page_links if str(test_project_id) in x and "delete" in x
             ][0]
             requests.get(base_url + delete_link)
             summary_html = requests.get(base_url + "/summary_table").content
-            delete_success = not any(re.findall(test_job_number, str(summary_html)))
+            delete_success = not any(re.findall(f"test_{test_job_number}", str(summary_html)))
             self.assertEqual(expected_delete_success, delete_success)
 
     def test_exact_match_project(self):
@@ -353,28 +361,27 @@ class InputTests(unittest.TestCase):
             pass
         br.select_form(nr=0)
         br.submit()
-        self.assertEqual(
-            re.findall("(?<=url_key=).*", br.geturl())[0], latest_web_cert["url_key"]
+        self.assertTrue(
+            latest_web_cert["url_key"].replace("/","") in br.geturl()
         )
 
 
 class IntegrationTests(unittest.TestCase):
     def setUp(self):
-        # the import statement below runs some code automatically
-        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
+        for filename in ["cert_db.sqlite3", "results.json"]:
             try:
                 os.rename(filename, "temp_" + filename)
             except FileNotFoundError:
                 pass
         create_test_db()
-        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
+        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl", "results.json"]:
             try:
                 os.rename("test_" + filename, filename)
             except FileNotFoundError:
                 pass
 
     def tearDown(self):
-        for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
+        for filename in ["cert_db.sqlite3", "results.json"]:
             try:
                 os.rename("temp_" + filename, filename)
             except FileNotFoundError:
@@ -395,15 +402,15 @@ class IntegrationTests(unittest.TestCase):
             LEFT JOIN
                 attempted_matches
             ON
-                web_certificates.url_key = attempted_matches.url_key
+                web_certificates.cert_id = attempted_matches.cert_id
             LEFT JOIN
                 company_projects
             ON
-                attempted_matches.job_number=company_projects.job_number
+                attempted_matches.project_id = company_projects.project_id
             LEFT JOIN
                 base_urls
             ON
-                base_urls.source=web_certificates.source
+                base_urls.source = web_certificates.source
             WHERE 
                 company_projects.closed=1
             AND
@@ -421,15 +428,15 @@ class IntegrationTests(unittest.TestCase):
             LEFT JOIN
                 attempted_matches
             ON
-                web_certificates.url_key = attempted_matches.url_key
+                web_certificates.cert_id = attempted_matches.cert_id
             LEFT JOIN
                 company_projects
             ON
-                attempted_matches.job_number=company_projects.job_number
+                attempted_matches.project_id = company_projects.project_id
             LEFT JOIN
                 base_urls
             ON
-                base_urls.source=web_certificates.source
+                base_urls.source = web_certificates.source
             WHERE 
                 company_projects.closed=1
             AND
@@ -470,6 +477,8 @@ class IntegrationTests(unittest.TestCase):
         # test single sample
         sample_company = pd.DataFrame(
             {
+                "cert_id": "99999",
+                "project_id": "99999",
                 "job_number": "2387",
                 "city": "Ottawa",
                 "address": "2562 Del Zotto Ave., Ottawa, Ontario",
@@ -484,6 +493,7 @@ class IntegrationTests(unittest.TestCase):
         )
         sample_web = pd.DataFrame(
             {
+                "cert_id": "99998",
                 "pub_date": "2019-03-06",
                 "city": "Ottawa-Carleton",
                 "address": "2562 Del Zotto Avenue, Gloucester, Ontario",
@@ -522,7 +532,7 @@ class IntegrationTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl"]:
+    for filename in ["cert_db.sqlite3", "rf_model.pkl", "rf_features.pkl", "results.json"]:
         try:
             os.rename("temp_" + filename, filename)
         except:

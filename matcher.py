@@ -4,10 +4,11 @@ from wrangler import wrangle
 from communicator import communicate
 from scorer import build_match_score
 import pickle
-from utils import create_connection, load_config
+from utils import create_connection, load_config, update_results
 import re
 import sys
 import logging
+import argparse
 
 
 logger = logging.getLogger(__name__)
@@ -142,10 +143,12 @@ def match(
      emails appropriately.
      - `since` (str of format `"yyyy-mm-dd"`): used in conjunction with `until` to specify
      timeframe to query database for `df_web`. Only used if `df_web` not specified. Special
-     strings `"week_ago"`, `"day_ago"`, or `"now"` can be used instead.
+     strings `"week_ago"`, `"day_ago"`, or `"today"` can be used instead. Range is inclusive
+     of date specified.
      - `until` (str of format `"yyyy-mm-dd"`): used in conjunction with `since` to specify
      timeframe to query database for `df_web`. Only used if `df_web` not specified. Special
-     string `"now"` can be used instead.
+     string `"now"` can be used instead. Range is inclusive
+     of date specified.
      - `prob_thresh` (float): probability threshold for decision boundary.
      - `multi_phase_proned_thresh` (float): probability threshold for projects which are
      identified as being at risk of having multiple phases, which will override the standard
@@ -202,15 +205,19 @@ def match(
             len(df_web) == 0
         ):  # SQL query retunred nothing so no point of going any further
             logger.info(
-                f"Nothing has been collected from Daily Commercial News since {since}. "
+                f"No new CSP's have been collected since last time `match()` was called ({since}). "
                 f"Breaking out of match function."
             )
+            update_results({
+                'match summary': 'nothing new to match', 
+                'noteworthy matches' : {}
+            })
             return False
     df_web = wrangle(df_web)
     comm_count = 0
     for _, company_project_row in company_projects.iterrows():
         results = build_match_score(
-            company_project_row.to_frame().transpose(), df_web
+            company_project_row.to_frame().transpose(), df_web, fresh_cert_limit=(not test)
         )  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
         logger.info(
             f"searching for potential match for project #{company_project_row['job_number']}..."
@@ -241,7 +248,7 @@ def match(
         )
         results = results.sort_values("pred_prob", ascending=False)
         logger.info(
-            f"top 5 probabilities: "
+            f"top 5 probabilities for project #{company_project_row['job_number']}: "
             f"{', '. join([str(round(x, 5)) for x in results.head(5).pred_prob])}"
         )
         matches = results[results.pred_match == 1]
@@ -268,8 +275,25 @@ def match(
         f"Done looping through {len(company_projects)} open projects. Sent {comm_count} "
         f"e-mails to communicate matches as a result."
     )
+    update_results({
+        'match summary': f"matched {comm_count} out of {len(company_projects)} projects and {int(len(results_master)/len(company_projects))} CSP's",
+        'noteworthy matches' : results_master[results_master.pred_prob > 0.5][['cert_id','job_number', 'pred_prob', 'pred_match']].to_dict()
+    })
     return results_master
 
 
 if __name__ == "__main__":
-    match()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--since", type=str, help="date from when to begin looking for matches"
+    )
+    parser.add_argument(
+        "--until", type=str, help="date for when to stop search for matches"
+    )
+    args = parser.parse_args()
+    kwargs = {}
+    if args.since:
+        kwargs["since"] = args.since
+    if args.since:
+        kwargs["until"] = args.until
+    match(**kwargs)

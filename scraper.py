@@ -8,9 +8,11 @@ import argparse
 import progressbar
 from time import sleep
 from utils import create_connection
+from geocoder import geocode
 import sys
 import logging
 import dateutil.parser
+from dateutil.parser import parse as parse_date
 
 
 logger = logging.getLogger(__name__)
@@ -26,7 +28,7 @@ logger.setLevel(logging.INFO)
 
 
 def scrape(
-    source="dcn", provided_url_key=False, limit=False, since="last_record", test=False
+    source="dcn", provided_url_key=False, limit=False, since="last_record", until="now", test=False
 ):
     """Extracts new certificates by scraping CSP websites and writes data to the web_certificates table in the database.
     
@@ -35,6 +37,7 @@ def scrape(
      - `provided_url_key` (str of False): provided_url_key that is to be scraped. False by default.
      - `limit` (int): Specifies a limit for the amount of certificates to be scraped. Default is no limit.
      - `since` (str): Specifies date from when to begin looking for new CSP's. Can be either `last_record` or `yyyy-mm-dd` string format.
+     - `until` (str): Specifies date for when to end the search for new CSP's. Can be either `now` or `yyyy-mm-dd` string format.
      - `test` (bool): Set to True to cancel writing to the database and return DataFrame of scraped certificates instead.
 
     Returns:
@@ -113,6 +116,11 @@ def scrape(
                 in entry_soup.find("h1", {"class": "entry-title"}).get_text()
             ):
                 cert_type = "np"
+            elif (
+                "Notice of Termination"
+                in entry_soup.find("h2", {"class": "ocn-heading"}).find_next_sibling("p").get_text()
+            ):
+                cert_type = "term"    
             else:
                 cert_type = "csp"
             pub_date = str(
@@ -163,6 +171,42 @@ def scrape(
                     except AttributeError:
                         pass
                 engineer = np.nan
+            elif cert_type == "term":
+                address = (
+                    entry_soup.find("h1", {"class": "entry-title"})
+                    .get_text()
+                )
+                title = address  # temporary until we see more of these
+                for x in entry_soup.find_all("strong"):
+                    try:
+                        if x.get_text() == "Name of owner:":
+                            owner = x.find_parent().get_text().split(": ")[1]
+                        if x.get_text() == "Name of contractor:":
+                            contractor = x.find_parent().get_text().split(": ")[1]
+                    except AttributeError:
+                        pass
+                engineer = np.nan
+        elif source == "l2b":
+            cert_type_text = entry_soup.find("h2").get_text()
+            cert_type = ("csp" if "Form 9" in cert_type_text else cert_type_text)
+            attr_pairs = {}
+            fields = entry_soup.find_all('p', {'class':'mb-25'})
+            for field in fields:
+                try:
+                    attr_pair = [s for s in re.findall('[^\t^\n^\r]*', field.get_text()) if s]
+                    attr_pairs.update({attr_pair[0]: attr_pair[1]})
+                except IndexError:
+                    pass
+            response = requests.get(base_url)
+            html = response.content
+            soup = BeautifulSoup(html, "html.parser")
+            pub_date = [str(parse_date(entry.find_all('td')[1].get_text()).date()) for entry in soup.find('tbody').find_all('tr') if url_key in str(entry)][0]
+            city = attr_pairs.get('Where the Premises is Situated', np.nan)
+            address = attr_pairs.get('Where the Premises is Located', np.nan)
+            title = attr_pairs.get('This is to certify that the contract for the following improvement', np.nan)
+            owner = attr_pairs.get('Name of Owner', np.nan)
+            contractor = attr_pairs.get('Name of Contractor', np.nan)
+            engineer = attr_pairs.get('Name of Payment Certifier', np.nan)
         return (
             pub_date,
             city,
@@ -179,7 +223,37 @@ def scrape(
     pub_date, city, address, title, owner, contractor, engineer, url_key, cert_type = [
         [] for _ in range(9)
     ]
-    now = datetime.datetime.now().date()
+    if until == "now":
+        until = datetime.datetime.now().date()
+    else:
+        try:
+            until = re.findall("\d{4}-\d{2}-\d{2}", until)[0]
+        except KeyError:
+            raise ValueError(
+                "`until` parameter should be in the format yyyy-mm-dd if not a key_word"
+            )
+    if since == "last_record":
+        hist_query = """
+            SELECT pub_date 
+            FROM web_certificates 
+            WHERE source=? 
+            ORDER BY pub_date DESC LIMIT 1
+        """
+        with create_connection() as conn:
+            cur = conn.cursor()
+            cur.execute(hist_query, [source])
+            last_date = cur.fetchone()[0]
+            ld_year = int(last_date[:4])
+            ld_month = int(last_date[5:7])
+            ld_day = int(last_date[8:])
+            since = datetime.datetime(ld_year, ld_month, ld_day).date()
+    else:
+        valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
+        if not valid_since_date:
+            raise ValueError(
+                "`since` parameter should be in the format yyyy-mm-dd if not a "
+                "predefined term."
+            )
     if source == "dcn":
         base_url = "https://canada.constructconnect.com"
         base_aug_url = (
@@ -217,6 +291,16 @@ def scrape(
             x.find("a").get("href")
             for x in soup.find_all("td", {"class": "col-location"})
         ]
+    elif source == "l2b":
+        base_url = "https://certificates.link2build.ca/"
+        base_aug_url = "Search/Detail/"
+        base_search_url = "https://certificates.link2build.ca/"
+        custom_param_url = ""
+        since = str(since)
+        until = str(until)
+        get_entries = lambda soup: [
+            entry.find('a').get('href') for entry in soup.find('tbody').find_all('tr') if parse_date(since) <= parse_date(entry.find_all('td')[1].get_text()) <= parse_date(until)]
+        get_number_of_matches = lambda soup: len(get_entries(soup))
     else:
         raise ValueError("Must specify CSP source.")
     if provided_url_key:
@@ -235,31 +319,7 @@ def scrape(
                 "source": [source] * len(details[0]),
             }
         )
-    if since == "last_record":
-        hist_query = """
-            SELECT pub_date 
-            FROM web_certificates 
-            WHERE source=? 
-            ORDER BY pub_date DESC LIMIT 1
-        """
-        with create_connection() as conn:
-            cur = conn.cursor()
-            cur.execute(hist_query, [source])
-            last_date = cur.fetchone()[0]
-            ld_year = int(last_date[:4])
-            ld_month = int(last_date[5:7])
-            ld_day = int(last_date[8:])
-            since = (
-                datetime.datetime(ld_year, ld_month, ld_day) + datetime.timedelta(1)
-            ).date()
-    else:
-        valid_since_date = re.search("\d{4}-\d{2}-\d{2}", since)
-        if not valid_since_date:
-            raise ValueError(
-                "`since` parameter should be in the format yyyy-mm-dd if not a "
-                "predefined term."
-            )
-    date_param_url = custom_param_url.format(since, now)
+    date_param_url = custom_param_url.format(since, until)
     response = requests.get(base_search_url + date_param_url)
     html = response.content
     soup = BeautifulSoup(html, "html.parser")
@@ -277,8 +337,19 @@ def scrape(
         widgets=[progressbar.Bar("=", "[", "]"), " ", progressbar.Percentage()],
     )
     bar.start()
+    logged_key_query = """
+        SELECT url_key 
+        FROM web_certificates 
+        WHERE source=? 
+    """
+    with create_connection() as conn:
+        logged_url_keys = list(pd.read_sql(logged_key_query, conn, params=[source]).url_key)
     entries = get_entries(soup)
     for i, entry in enumerate(entries, 1):
+        check_url_key = (base_url + entry).split(base_aug_url)[1]
+        if not test and check_url_key in logged_url_keys:
+            logger.info(f"entry for {check_url_key} was already logged - continuing with the next one (if any)...")
+            continue
         for cumulative, item in zip(
             [
                 pub_date,
@@ -307,7 +378,6 @@ def scrape(
             .iloc[0]
             .cert_id
         )
-    # import pdb; pdb.set_trace()
     df_web = pd.DataFrame(
         data={
             "pub_date": pub_date,
@@ -322,20 +392,29 @@ def scrape(
             "source": [source] * len(pub_date),
         }
     )
+    if not len(df_web):
+        return False
     df_web = df_web.sort_values("pub_date", ascending=True)
     df_web["cert_id"] = [
         int(x) for x in range(last_cert_id + 1, last_cert_id + 1 + len(df_web))
     ]
     # make date into actual datetime object
     df_web["pub_date"] = df_web.pub_date.apply(
-        lambda x: re.findall("\d{4}-\d{2}-\d{2}", x)[0]
+        lambda x: str(parse_date(str(x)).date()) if (x and str(x) != 'nan') else np.nan
     )
+    logger.info("Fetching geocode information...")
+    df_web = geocode(df_web)
     if test:
         return df_web
     attrs = [
         "cert_id",
         "pub_date",
         "city",
+        "address_lat",
+        "address_lng",
+        "city_lat",
+        "city_lng",
+        "city_size",
         "address",
         "title",
         "owner",
@@ -370,7 +449,10 @@ if __name__ == "__main__":
         help="limits the amount of certificates to be scraped. Default is no limit.",
     )
     parser.add_argument(
-        "--since", type=str, help="datefrom when to begin looking for new CSP's"
+        "--since", type=str, help="date from when to begin looking for new CSP's"
+    )
+    parser.add_argument(
+        "--until", type=str, help="date for when to stop search for new CSP's"
     )
     args = parser.parse_args()
     kwargs = {}
@@ -378,6 +460,8 @@ if __name__ == "__main__":
         kwargs["source"] = args.source
     if args.since:
         kwargs["since"] = args.since
+    if args.since:
+        kwargs["until"] = args.until
     if args.limit:
         kwargs["limit"] = args.limit
     scrape(**kwargs)

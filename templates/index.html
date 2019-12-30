@@ -13,12 +13,18 @@
   {% block body %}
   <br><br>
   <div align="center">
-    <form action="/summary_table" method="GET">
+    <!-- <form action="{{ url_for('summary_table', company_id=company_id) }}" method="GET">
       {% if not job_number %}
         <input type="submit" id="large_button" value="SHOW SUMMARY"></button>
         <br><br><br>
       {% endif %}
-    </form>
+    </form> -->
+    {% if not job_number %}
+    <a href="{{ url_for('summary_table', company_id=company_id) }}">
+      project summary
+    </a>
+    <br><br><br>
+    {% endif %}
   </div>
   <form action="/" name = "job_entry" method="POST" onsubmit="return(validate())">
     <div align="center">
@@ -63,7 +69,7 @@
         {% if all_contacts|length %}
           {% for _, contact in all_contacts.iterrows() %}
             <ul>
-              <input type="checkbox" id="id_{{contact['id']}}" name="contacts" value="{{contact['id']}}" {% if receiver_emails_dump and contact['email_addr'] in receiver_emails_dump %} checked {% endif %}>
+              <input type="checkbox" id="id_{{contact['id']}}" name="contacts" value="{{contact['id']}}" {% if receiver_emails_dump and contact['email_address'] in receiver_emails_dump %} checked {% endif %}>
               <label for="id_{{contact['id']}}">{{contact['name']}}</label>
             </ul>
           {% endfor %}

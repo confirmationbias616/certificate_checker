@@ -8,7 +8,7 @@ import pickle
 from wrangler import wrangle
 from matcher import match
 from scorer import build_match_score
-from utils import create_connection, load_config
+from utils import create_connection, load_config, update_results
 import sys
 import logging
 import os
@@ -63,15 +63,15 @@ def build_train_set():
         LEFT JOIN
             attempted_matches
         ON
-            web_certificates.url_key = attempted_matches.url_key
+            web_certificates.cert_id = attempted_matches.cert_id
         LEFT JOIN
             company_projects
         ON
-            attempted_matches.job_number=company_projects.job_number
+            attempted_matches.project_id = company_projects.project_id
         LEFT JOIN
             base_urls
         ON
-            base_urls.source=web_certificates.source
+            base_urls.source = web_certificates.source
         WHERE 
             company_projects.closed=1
         AND
@@ -89,15 +89,15 @@ def build_train_set():
         LEFT JOIN
             attempted_matches
         ON
-            web_certificates.url_key = attempted_matches.url_key
+            web_certificates.cert_id = attempted_matches.cert_id
         LEFT JOIN
             company_projects
         ON
-            attempted_matches.job_number=company_projects.job_number
+            attempted_matches.project_id = company_projects.project_id
         LEFT JOIN
             base_urls
         ON
-            base_urls.source=web_certificates.source
+            base_urls.source = web_certificates.source
         WHERE 
             company_projects.closed=1
         AND
@@ -126,8 +126,8 @@ def build_train_set():
             test_company_row.to_frame().transpose()
         )  # .iterows returns a pd.Series for every row so this turns it back into a dataframe to avoid breaking any methods downstream
         rand_web_df = rand_web_df.sample(n=len(test_company_projects), random_state=i)
-        close_matches = build_match_score(test_company_row, test_web_df)
-        random_matches = build_match_score(test_company_row, rand_web_df)
+        close_matches = build_match_score(test_company_row, test_web_df, fresh_cert_limit=False)
+        random_matches = build_match_score(test_company_row, rand_web_df, fresh_cert_limit=False)
         matches = close_matches.append(random_matches)
         matches["ground_truth"] = matches.url_key.apply(
             lambda x: 1 if x == test_company_row.url_key.iloc[0] else 0
@@ -161,6 +161,8 @@ def train_model(
     df = pd.read_csv("./train_set.csv")
     X = df[[x for x in df.columns if x.endswith("_score")]]
     save_feature_list(X.columns)
+    feature_list = list(X.columns)
+    update_results({'features' : feature_list})
     y = df[["ground_truth"]]
     clf = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)
     sm = SMOTE(random_state=42, ratio=1)
@@ -244,26 +246,26 @@ def validate_model(**kwargs):
             company_projects.contractor,
             company_projects.engineer,
             company_projects.receiver_emails_dump,
-            attempted_matches.url_key,
+            web_certificates.url_key,
             attempted_matches.ground_truth,
             attempted_matches.multi_phase,
             web_certificates.pub_date,
             web_certificates.source,
-            (base_urls.base_url || attempted_matches.url_key) AS link
+            (base_urls.base_url || web_certificates.url_key) AS link
         FROM
             web_certificates
         LEFT JOIN
             attempted_matches
         ON
-            web_certificates.url_key = attempted_matches.url_key
+            web_certificates.cert_id = attempted_matches.cert_id
         LEFT JOIN
             company_projects
         ON
-            attempted_matches.job_number=company_projects.job_number
+            attempted_matches.project_id = company_projects.project_id
         LEFT JOIN
             base_urls
         ON
-            base_urls.source=web_certificates.source
+            base_urls.source = web_certificates.source
         WHERE 
             company_projects.closed=1
         AND
@@ -281,15 +283,15 @@ def validate_model(**kwargs):
         LEFT JOIN
             attempted_matches
         ON
-            web_certificates.url_key = attempted_matches.url_key
+            web_certificates.cert_id = attempted_matches.cert_id
         LEFT JOIN
             company_projects
         ON
-            attempted_matches.job_number=company_projects.job_number
+            attempted_matches.project_id = company_projects.project_id
         LEFT JOIN
             base_urls
         ON
-            base_urls.source=web_certificates.source
+            base_urls.source = web_certificates.source
         WHERE 
             company_projects.closed=1
         AND
@@ -364,6 +366,15 @@ def validate_model(**kwargs):
     new_min_prob = round(min(new_pred_probs), 3)
     sq_avg_prob = round(sum(sq_pred_probs) / len(sq_pred_probs), 3)
     new_avg_prob = round(sum(new_pred_probs) / len(new_pred_probs), 3)
+    update_results({
+        "100% recall acheived" : is_100_recall,
+        'minimum probability required for status quo model' : sq_min_prob,
+        'minimum probability required for new model' : new_min_prob,
+        'average probability required for status quo model' : sq_avg_prob,
+        'average probability required for new model' : new_avg_prob,
+        'false positives with status quo' : sq_false_positives,
+        'false positives with new' : new_false_positives,
+    })
     if not is_100_recall:
         logger.warning(
             "100% recall not acheived with new model - archiving it "

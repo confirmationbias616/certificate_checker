@@ -3,14 +3,14 @@ machine_learning:
 
   prboability_thresholds:
     general: 0.7
-    multi_phase: 0.95
+    multi_phase: 0.92
 
   guardrail_metrics:
     max_number_of_false_positives: 0  # config parameter not used yet
     min_recall: 0.95  # config parameter not used yet
     min_precision: 0.9  # config parameter not used yet
     min_f1_score: 0  # config parameter not used yet
-  
+
   exclude_features:  # config parameter not used yet
     # - bla
     # - bla
@@ -23,7 +23,8 @@ machine_learning:
 
 flask_app:
   debug: False
-  test: True
+  adhoc_ssl: False
+  test: False
   show_summary:
     cert_limit: 1600  # config parameter not used yet
   instant_scan:
@@ -33,12 +34,11 @@ flask_app:
 
 daily_routine:
   test: False
-  exit_if_stale: True
   scrape_source:
     - dcn
     - ocn
+    - l2b
   steps:
-    - scrape
     - train
     - validate
     - match
