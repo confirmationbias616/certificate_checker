@@ -50,6 +50,7 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = "e5ac358c-f0bf-11e5-9e39-d3b532c10a28"
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
+set_default_company_id = False
 try:
     with open(".oauth_cred.json") as f:
         cred = json.load(f)
@@ -57,7 +58,7 @@ try:
     GOOGLE_CLIENT_SECRET = cred.get("GOOGLE_CLIENT_SECRET", None)
     client = WebApplicationClient(GOOGLE_CLIENT_ID)  # OAuth 2 client setup
 except FileNotFoundError:  # CI server
-    company_id = 1  # to enable tests
+    set_default_company_id = True  # to enable tests on CI server
 
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
@@ -112,8 +113,10 @@ def index():
     username = current_user.name if current_user.is_authenticated else None
     if current_user.is_authenticated:
         company_id = current_user.id
-    else:
-        company_id = 1  # temporarily det company_id to until we get authentication set up.
+    elif set_default_company_id:  # for CI server
+        company_id = 1
+    else:  # for for dev and prod servers
+        company_id = None
     all_contacts_query = "SELECT * FROM contacts WHERE company_id=?"
     with create_connection() as conn:
         all_contacts = pd.read_sql(all_contacts_query, conn, params=[company_id])
