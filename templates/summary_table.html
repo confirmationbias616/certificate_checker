@@ -8,18 +8,21 @@
 </head>
 <body>
     {% block body %}
-    <h3>
-      Actively searching for:
-    </h3>
-    <p>
-      {{df_open | safe}}
-    </p><br>
-    <h3>
-      Already matched:
-    </h3>
-    <p>
-      {{df_closed | safe}}
-    </p>
+    <div style="margin-left: 10px; margin-right: 10px;">
+      <h3>
+        Actively searching for:
+      </h3>
+      <p>
+        {{df_open | safe}}
+      </p>
+      <br>
+      <h3>
+        Already matched:
+      </h3>
+      <p>
+        {{df_closed | safe}}
+      </p>
+    </div>
     <p align="center" style="color:rgb(85, 82, 88)"><i>assuming 60-day lien period:</i>  <span style="color:rgb(97, 62, 143)">lien period still in effect</span>  --  <span style="color:black">lien period expired</span></p>
     {% endblock %}
 </body>
