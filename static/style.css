@@ -120,7 +120,7 @@
     P.blocktext {
       margin-left: auto;
       margin-right: auto;
-      width: 33em
+      width: 70%
     }
     input[id=large_button]:hover { 
       box-shadow: -3px -3px 6px var(--highlight);
