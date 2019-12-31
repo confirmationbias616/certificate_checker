@@ -177,7 +177,7 @@
       transition: box-shadow 0.5s;
       background-color: var(--fieldset);
       float: left;
-      width: 45%;
+      width: 40%;
       margin: 0.8%;
       padding: 2;
       box-sizing: 2px border-box;
