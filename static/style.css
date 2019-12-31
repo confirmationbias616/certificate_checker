@@ -16,19 +16,20 @@
     /* Style the links inside the navigation bar */
     .topnav a.title {
       float: left;
-      color: #f2f2f2;
+      color: var(--background);
       text-align: center;
       padding: 14px 16px;
       text-decoration: none;
-      font-size: 17px;
+      font-size: 20px;
     }
     .topnav a {
       float: right;
       color: #f2f2f2;
       text-align: center;
+      vertical-align: middle;
       padding: 14px 16px;
       text-decoration: none;
-      font-size: 17px;
+      font-size: 18px;
     }
 
     /* Change the color of links on hover */
@@ -59,12 +60,8 @@
       display: none;
     }
 
-
-
-
-
     /* When the screen is less than 600 pixels wide, hide all links, except for the first one ("Home"). Show the link that contains should open and close the topnav (.icon) */
-    @media screen and (max-width: 900px) {
+    @media screen and (max-width: 869px) {
       .topnav a:not(.title) {display: none;}
       .topnav a.icon {
         float: right;
@@ -73,7 +70,7 @@
     }
 
     /* The "responsive" class is added to the topnav with JavaScript when the user clicks on the icon. This class makes the topnav look good on small screens (display the links vertically instead of horizontally) */
-    @media screen and (max-width: 900px) {
+    @media screen and (max-width: 869px) {
       .topnav.responsive {position: relative;}
       .topnav.responsive a.icon {
         position: absolute;
@@ -87,20 +84,14 @@
       }
     } 
 
-
-
-
-
-
-
-
-
     body {
       background-color: var(--background);
       font-family: 'Montserrat', sans-serif;
-      font-size: 100%;
-      margin-left:80px;
-      margin-right:80px;
+      /* font-size: 100%; */
+      margin-left:0px;
+      margin-right:0px;
+      margin-top:0px;
+      margin-bottom:0px;
     }
     h2 {
       font-family: 'Montserrat', sans-serif; 
