@@ -42,7 +42,7 @@
 
     /* Add a color to the active/current link */
     .topnav a.active {
-      background-color: var(--background);
+      background-color: var(--fieldset);
       color: var(--outline);
     }
 
