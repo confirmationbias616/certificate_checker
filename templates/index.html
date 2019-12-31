@@ -11,6 +11,7 @@
 
 <body>
   {% block body %}
+  <div style="margin-left: 10%; margin-right: 10%;">
   <br><br>
   <form action="/" name = "job_entry" method="POST" onsubmit="return(validate())">
     <fieldset>
@@ -74,6 +75,7 @@
       {% endif %}
     </div>
   </form>
+</div>
   <script type = "text/javascript">
     function validate() {
       var checked = false;

@@ -16,7 +16,7 @@
     /* Style the links inside the navigation bar */
     .topnav a.title {
       float: left;
-      color: var(--background);
+      color: var(--fieldset);
       text-align: center;
       padding: 14px 16px;
       text-decoration: none;
@@ -34,8 +34,8 @@
 
     /* Change the color of links on hover */
     .topnav a:hover {
-      background-color: var(--fieldset);
-      color: var(--highlight);
+      background-color: var(--highlight);
+      color: var(--outline);
     }
 
     /* Add a color to the active/current link */
@@ -47,12 +47,20 @@
     /* Add a color to the active/current link */
     .topnav a.spacer {
       background-color: var(--outline);
-      color: #f2f2f2;
+      color: var(--fieldset);
     }
 
     .topnav a.spacer:hover {
       background-color: var(--outline);
-      color: #f2f2f2;
+      color: var(--fieldset);
+    }
+    .topnav a.title:hover {
+      background-color: var(--outline);
+      color:var(--highlight);
+    }
+    .topnav a.icon:hover {
+      background-color: var(--outline);
+      color:var(--highlight);
     }
 
     /* Hide the link that should open and close the topnav on small screens */
@@ -62,7 +70,7 @@
     }
 
     /* When the screen is less than 600 pixels wide, hide all links, except for the first one ("Home"). Show the link that contains should open and close the topnav (.icon) */
-    @media screen and (max-width: 869px) {
+    @media screen and (max-width: 769px) {
       .topnav a:not(.title) {display: none;}
       .topnav a.icon {
         float: right;
@@ -71,7 +79,7 @@
     }
 
     /* The "responsive" class is added to the topnav with JavaScript when the user clicks on the icon. This class makes the topnav look good on small screens (display the links vertically instead of horizontally) */
-    @media screen and (max-width: 869px) {
+    @media screen and (max-width: 769px) {
       .topnav.responsive {position: relative;}
       .topnav.responsive a.icon {
         position: absolute;
@@ -117,7 +125,7 @@
       font-size: 100%;
       padding-left: 1%;
     }
-    P.blocktext {
+    .blocktext {
       margin-left: auto;
       margin-right: auto;
       width: 70%
@@ -143,7 +151,7 @@
       transition: box-shadow 0.5s;
       font-family: 'Montserrat', sans-serif;
       font-size: 120%;
-      width: 300px;
+      width: 120px;
       height: 2em;
       margin-right:10px;
       margin-left:10px;
