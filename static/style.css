@@ -35,7 +35,7 @@
     /* Change the color of links on hover */
     .topnav a:hover {
       background-color: var(--item);
-      color: black;
+      color: var(--outline);
     }
 
     /* Add a color to the active/current link */
@@ -58,6 +58,7 @@
     /* Hide the link that should open and close the topnav on small screens */
     .topnav .icon {
       display: none;
+      font-size: 20px;
     }
 
     /* When the screen is less than 600 pixels wide, hide all links, except for the first one ("Home"). Show the link that contains should open and close the topnav (.icon) */
