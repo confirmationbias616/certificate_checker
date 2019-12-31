@@ -44,10 +44,10 @@
         <a href={{ url_for('login', company_id=company_id) }}><i>log in</i></a>
         {% endif %}
         <a class="spacer">|</a>
-        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'about' %} class="active" {% endif %} href={{ url_for('about') }}>about</a>
         <a {% if self._TemplateReference__context.name.rstrip('.html') == 'contact_config' %} class="active" {% endif %} href={{ url_for('contact_config', company_id=company_id) }}>configure contacts</a>
         <a {% if self._TemplateReference__context.name.rstrip('.html') == 'summary_table' %} class="active" {% endif %} href={{ url_for('summary_table', company_id=company_id) }}>projects</a>
         <a {% if self._TemplateReference__context.name.rstrip('.html') == 'map' %} class="active" {% endif %} href={{ url_for('map', company_id=company_id) }}>map</a>
+        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'about' %} class="active" {% endif %} href={{ url_for('about') }}>about</a>
     </div>
     {% block body %}{% endblock %}
 
