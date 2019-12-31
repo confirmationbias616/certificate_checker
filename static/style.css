@@ -178,8 +178,8 @@
       background-color: var(--fieldset);
       float: left;
       width: 180px;
-      margin: 0.8%;
-      padding: 2;
+      margin: 8px;
+      padding: 12px;
       box-sizing: 2px border-box;
       border: 2px dashed var(--outline);
       box-shadow: -5px -5px 5px grey;
