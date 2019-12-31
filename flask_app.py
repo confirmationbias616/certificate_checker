@@ -977,6 +977,9 @@ def map():
     start_coords_lng = request.args.get('start_coords_lng', df_cp_open.lng.mean())
     m = folium.Map(location=(get_lat, get_lng), zoom_start=start_zoom, min_zoom=5, height='71%')
     folium.TileLayer('stamentoner').add_to(m)
+    folium.TileLayer('cartodbdark_matter').add_to(m)
+    folium.TileLayer('cartodbpositron').add_to(m)
+    folium.TileLayer('stamenwatercolor').add_to(m)
     mc = MarkerCluster()
     feature_group = folium.FeatureGroup(name='Closed Projects')
     for _, row in df_cp_closed.iterrows():
