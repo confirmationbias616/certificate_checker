@@ -34,8 +34,8 @@
 
     /* Change the color of links on hover */
     .topnav a:hover {
-      background-color: var(--item);
-      color: var(--outline);
+      background-color: var(--fieldset);
+      color: var(--highlight);
     }
 
     /* Add a color to the active/current link */
