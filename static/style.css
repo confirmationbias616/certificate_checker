@@ -15,6 +15,7 @@
 
     /* Style the links inside the navigation bar */
     .topnav a.title {
+      transition: color 0.5s;
       float: left;
       color: var(--fieldset);
       text-align: center;
@@ -23,6 +24,7 @@
       font-size: 20px;
     }
     .topnav a {
+      transition: color 0.5s;
       float: right;
       color: #f2f2f2;
       text-align: center;
@@ -65,6 +67,7 @@
 
     /* Hide the link that should open and close the topnav on small screens */
     .topnav .icon {
+      transition: 0.5s;
       display: none;
       font-size: 20px;
     }
