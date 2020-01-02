@@ -128,7 +128,7 @@ def geo_update_db_table(table_name, start_date=None, end_date=None, limit=None):
         df = pd.read_sql(fetch_jobs, conn, params=limit_params)
     for i, row in df.iterrows():
         if any([True if str(x) not in ['nan', 'None']  else False for x in row.loc[['address_lat', 'city_lat']]]):
-            logger.info(f"Job {row.loc[match_id]} ({row.loc['pub_date']}) already has geo data - skipping out")
+            logger.info(f"Job {row.loc[match_id]} ({row.pub_date.iloc[0]}) already has geo data - skipping out")
             continue 
         row = pd.DataFrame(row).transpose()
         row = geocode(row)
@@ -141,7 +141,7 @@ def geo_update_db_table(table_name, start_date=None, end_date=None, limit=None):
                 row.loc[i, 'city_size'],
                 row.loc[i, match_id]
             ])
-        logger.info(f"Job {row.loc[i, match_id]} ({row.loc['pub_date']})  has been updated with geo data")
+        logger.info(f"Job {row.loc[i, match_id]} ({row.pub_date.iloc[0]})  has been updated with geo data")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
