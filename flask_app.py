@@ -985,12 +985,14 @@ def map():
     for _, row in df_cp_closed.iterrows():
         popup=folium.map.Popup(html=f"""
             <style>
+                h4 {{
+                    text-align: center;
+                    font-family: 'Montserrat', sans-serif
+                }}
                 h5 {{
                     text-align: center;
-                }}
-                h6 {{
-                    text-align: center;
-                    color: gray;
+                    color: rgb(104, 76, 141);
+                    font-family: 'Montserrat', sans-serif
                 }}
                 table {{
                     border-collapse:separate; 
@@ -1003,11 +1005,12 @@ def map():
                 td {{
                     text-align: left;
                     vertical-align: top;
-
+                    font-family: 'Montserrat', sans-serif;
+                    font-size: 90%;
                 }}
             </style>
-            <h5 style="text-align: center">#{row.job_number} - {row.title}</h5>
-            <hr>
+            <h4>{row.title}</h4>
+            <hr style="border: 1px solid black">
             <table style="width:100%">
                 <tr>
                     <th><b>Date published</b></th>
@@ -1026,8 +1029,8 @@ def map():
                     <td><a href="{row.link}" "target="_blank">{row.source_name}</a></td>
                 </tr>
             </table>
-            <hr>
-            <h6><em>Closed Project (already matched with a CSP)</em></h6>
+            <hr style="border: 1px solid black">
+            <h5><em>Web Certificate of Substantial Performance</em></h5>
         """, max_width='250', max_height='200')
         folium.Marker(
             [row.lat, row.lng],
@@ -1041,12 +1044,13 @@ def map():
     for _, row in df_cp_open.iterrows():
         popup=folium.map.Popup(html=f"""
             <style>
-                h5 {{
+                h4 {{
                     text-align: center;
                 }}
-                h6 {{
+                h5 {{
                     text-align: center;
-                    color: gray;
+                    color: rgb(104, 76, 141);
+                    font-family: 'Montserrat', sans-serif
                 }}
                 table {{
                     border-collapse:separate; 
@@ -1055,15 +1059,18 @@ def map():
                 th {{
                     text-align: right;
                     vertical-align: top;
+                    font-family: 'Montserrat', sans-serif;
+                    font-size: 90%;
                 }}
                 td {{
                     text-align: left;
                     vertical-align: top;
-
+                    font-family: 'Montserrat', sans-serif;
+                    font-size: 90%;
                 }}
             </style>
-            <h5 style="text-align: center">#{row.job_number} - {row.title}</h5>
-            <hr>
+            <h4>{row.title}</h4>
+            <hr style="border: 1px solid black">
             <table style="width:100%">
                 <tr>
                     <th><b>Contractor</b></th> 
@@ -1074,8 +1081,8 @@ def map():
                     <td>{row.owner}</td>
                 </tr>
             </table>
-            <hr>
-            <h6><em>Open Project (pending CSP match)</em></h6>
+            <hr style="border: 1px solid black">
+            <h5><em>Web Certificate of Substantial Performance</em></h5>
         """, max_width='250', max_height='200')
         folium.Marker(
             [row.lat, row.lng],
@@ -1089,12 +1096,14 @@ def map():
     for _, row in df_wc_win.iterrows():
         popup=folium.map.Popup(html=f"""
             <style>
+                h4 {{
+                    text-align: center;
+                    font-family: 'Montserrat', sans-serif
+                }}
                 h5 {{
                     text-align: center;
-                }}
-                h6 {{
-                    text-align: center;
-                    color: gray;
+                    color: rgb(104, 76, 141);
+                    font-family: 'Montserrat', sans-serif
                 }}
                 table {{
                     border-collapse:separate; 
@@ -1103,15 +1112,18 @@ def map():
                 th {{
                     text-align: right;
                     vertical-align: top;
+                    font-family: 'Montserrat', sans-serif;
+                    font-size: 90%;
                 }}
                 td {{
                     text-align: left;
                     vertical-align: top;
-
+                    font-family: 'Montserrat', sans-serif;
+                    font-size: 90%;
                 }}
             </style>
-            <h5>{row.title}</h5>
-            <hr>
+            <h4>{row.title}</h4>
+            <hr style="border: 1px solid black">
             <table style="width:100%">
                 <tr>
                     <th><b>Date published</b></th>
@@ -1130,8 +1142,8 @@ def map():
                     <td><a href="{row.link}" "target="_blank">{row.source_name}</a></td>
                 </tr>
             </table>
-            <hr>
-            <h6><em>Web Certificate of Substantial Performance</em></h6>
+            <hr style="border: 1px solid black">
+            <h5><em>Web Certificate of Substantial Performance</em></h5>
         """, max_width='250', max_height='200')
         mc.add_child(folium.Marker(
             [row.lat, row.lng],
