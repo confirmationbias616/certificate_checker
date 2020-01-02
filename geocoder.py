@@ -115,7 +115,7 @@ def geo_update_db_table(table_name, start_date=None, end_date=None, limit=None):
         update_geo_data = update_geo_data.format(table_name, match_id)
     elif table_name == 'web_certificates':
         fetch_jobs = """
-            SELECT * from web_certificates WHERE pub_date BETWEEN ? AND ? ORDER BY cert_id DESC
+            SELECT * from web_certificates WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date DESC
         """
         match_id = 'cert_id'
         limit_params = [start_date, end_date]
@@ -128,7 +128,7 @@ def geo_update_db_table(table_name, start_date=None, end_date=None, limit=None):
         df = pd.read_sql(fetch_jobs, conn, params=limit_params)
     for i, row in df.iterrows():
         if any([True if str(x) not in ['nan', 'None']  else False for x in row.loc[['address_lat', 'city_lat']]]):
-            logger.info(f"Job {row.loc[match_id]} already has geo data - skipping out")
+            logger.info(f"Job {row.loc[match_id]} ({row.loc['pub_date']}) already has geo data - skipping out")
             continue 
         row = pd.DataFrame(row).transpose()
         row = geocode(row)
@@ -141,7 +141,7 @@ def geo_update_db_table(table_name, start_date=None, end_date=None, limit=None):
                 row.loc[i, 'city_size'],
                 row.loc[i, match_id]
             ])
-        logger.info(f"Job {row.loc[i, match_id]} has been updated with geo data")
+        logger.info(f"Job {row.loc[i, match_id]} ({row.loc['pub_date']})  has been updated with geo data")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -163,9 +163,16 @@ if __name__ == "__main__":
         type=str,
         help="limits the amount of jobs to process, starting with the latest one.",
     )
+    parser.add_argument(
+        "-l",
+        "--limit",
+        nargs='?',
+        type=str,
+        help="limits the amount of jobs to process, starting with the latest one.",
+    )
     args = parser.parse_args()
     try:
-        geo_update_db_table(args.table_name, args.start_date, args.end_date)
+        geo_update_db_table(args.table_name, args.start_date, args.end_date, limit=args.limit)
         
     except AttributeError:
         geo_update_db_table(args.table_name)
