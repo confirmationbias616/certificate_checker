@@ -126,6 +126,11 @@ def index():
         session['company_id'] = 1
     else:  # for for dev and prod servers
         session['company_id'] = None
+    return redirect(url_for("map"))
+
+
+@app.route("/project_entry", methods=["POST", "GET"])
+def project_entry():
     all_contacts_query = "SELECT * FROM contacts WHERE company_id=?"
     with create_connection() as conn:
         all_contacts = pd.read_sql(all_contacts_query, conn, params=[session.get('company_id')])
@@ -194,13 +199,13 @@ def index():
     else:
         try:
             return render_template(
-                "index.html",
+                "project_entry.html",
                 home=True,
                 all_contacts=all_contacts,
                 **{key: request.args.get(key) for key in request.args},
             )
         except NameError:
-            return render_template("index.html", home=True, all_contacts=all_contacts, username=username)
+            return render_template("project_entry.html", home=True, all_contacts=all_contacts)
 
 
 @app.route("/login")

@@ -32,10 +32,13 @@
         <a href={{ url_for('login') }}><i>log in</i></a>
         {% endif %}
         <a class="spacer">|</a>
-        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'contact_config' %} class="active" {% endif %} href={{ url_for('contact_config') }}>configure contacts</a>
-        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'summary_table' %} class="active" {% endif %} href={{ url_for('summary_table') }}>projects</a>
-        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'map' %} class="active" {% endif %} href={{ url_for('map') }}>map</a>
+        {% if session.get("company_id") %}
+            <a {% if self._TemplateReference__context.name.rstrip('.html') == 'contact_config' %} class="active" {% endif %} href={{ url_for('contact_config') }}>configure contacts</a>
+            <a {% if self._TemplateReference__context.name.rstrip('.html') == 'project_entry' %} class="active" {% endif %} href={{ url_for('project_entry') }}>project entry</a>
+            <a {% if self._TemplateReference__context.name.rstrip('.html') == 'summary_table' %} class="active" {% endif %} href={{ url_for('summary_table') }}>projects</a>
+        {% endif %}
         <a {% if self._TemplateReference__context.name.rstrip('.html') == 'about' %} class="active" {% endif %} href={{ url_for('about') }}>about</a>
+        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'map' %} class="active" {% endif %} href={{ url_for('map') }}>map</a>
     </div>
     <hr style="border: 2px solid black; margin:0px">
     {% block body %}{% endblock %}
