@@ -55,13 +55,5 @@
 </body>
 <footer>
     {% block footer %}{% endblock %}
-    {% if (not interact) and (not home or job_number or map) %}
-    <div align="center">
-        <br><br>
-        <form action="/" method="GET">
-            <input type="submit" id="large_button" value="GO BACK"></button>
-        </form>
-    </div>
-    {% endif %}
 </footer>
 </html>

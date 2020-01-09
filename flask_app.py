@@ -200,12 +200,11 @@ def project_entry():
         try:
             return render_template(
                 "project_entry.html",
-                home=True,
                 all_contacts=all_contacts,
                 **{key: request.args.get(key) for key in request.args},
             )
         except NameError:
-            return render_template("project_entry.html", home=True, all_contacts=all_contacts)
+            return render_template("project_entry.html", all_contacts=all_contacts)
 
 
 @app.route("/login")
@@ -835,7 +834,7 @@ def rewind():
     start_coords_lng = request.args.get('start_coords_lng')
     start_zoom = request.args.get('start_zoom', 6)
     region_size = request.args.get('region_size', 500)
-    return redirect(url_for("map", home=True, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search))
+    return redirect(url_for("map", end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search))
 
 @app.route('/set_location', methods=["POST", "GET"])
 def set_location():
@@ -852,7 +851,7 @@ def set_location():
             start_zoom = zoom_level
             break
         start_zoom = 5
-    return redirect(url_for("map", home=True, start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search))
+    return redirect(url_for("map", start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search))
 
 @app.route('/map', methods=["POST", "GET"])
 def map():
