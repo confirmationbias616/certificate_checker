@@ -46,14 +46,19 @@ logger.setLevel(logging.INFO)
 
 app = Flask(__name__)
 
+try:
+    with open(".secret.json") as f:
+        app.config['SECRET_KEY'] = json.load(f)["flask_session_key"]
+except FileNotFoundError:  # no password if running in CI
+    app.config['SECRET_KEY'] = "JUSTTESTING"
+
 # trick from SO for properly relaoding CSS
-app.config["SECRET_KEY"] = "e5ac358c-f0bf-11e5-9e39-d3b532c10a28"
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 set_default_company_id = False
 try:
-    with open(".oauth_cred.json") as f:
-        cred = json.load(f)
+    with open(".secret.json") as f:
+        cred = json.load(f)["oauth_cred"]
     GOOGLE_CLIENT_ID = cred.get("GOOGLE_CLIENT_ID", None)
     GOOGLE_CLIENT_SECRET = cred.get("GOOGLE_CLIENT_SECRET", None)
     client = WebApplicationClient(GOOGLE_CLIENT_ID)  # OAuth 2 client setup

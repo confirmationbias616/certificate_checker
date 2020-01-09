@@ -12,9 +12,7 @@ results.json
 cache*
 
 # ignore passwords and API keys
-.password.txt
-.api_key.txt
-.oauth_cred.json
+.secret.json
 
 # ignore all vscode config files
 .vscode*

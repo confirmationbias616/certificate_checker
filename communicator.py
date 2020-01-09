@@ -6,6 +6,7 @@ import pandas as pd
 import ast
 from utils import create_connection
 import pandas as pd
+import json
 
 
 logger = logging.getLogger(__name__)
@@ -19,8 +20,8 @@ log_handler.setFormatter(
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 try:
-    with open(".password.txt") as file:
-        password = file.read()
+    with open(".secret.json") as f:
+        password = json.load(f)["gmail_password"]
 except FileNotFoundError:  # no password if running in CI
     pass
 
