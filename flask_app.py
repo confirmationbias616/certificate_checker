@@ -117,11 +117,8 @@ def dated_url_for(endpoint, **values):
             values["q"] = int(os.stat(file_path).st_mtime)
     return url_for(endpoint, **values)
 
-
 @app.route("/", methods=["POST", "GET"])
 def index():
-    # if not current_user.is_authenticated:
-    #     return '<a class="button" href="/login">Google Login</a>'
     username = current_user.name if current_user.is_authenticated else None
     if current_user.is_authenticated:
         session['company_id'] = current_user.id
