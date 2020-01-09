@@ -169,7 +169,6 @@ def index():
             return redirect(
                 url_for("already_matched",
                 job_number=new_entry["job_number"],
-                username=username,
                 )
             )
         if was_prev_logged:
@@ -186,13 +185,11 @@ def index():
             return render_template(
                 "signup_confirmation.html", 
                 job_number=new_entry["job_number"],
-                username=username,
             )
         return render_template(
             "update.html",
             job_number=new_entry["job_number"],
             recorded_change=True,
-            username=username,
         )
     else:
         try:
@@ -201,7 +198,6 @@ def index():
                 home=True,
                 all_contacts=all_contacts,
                 **{key: request.args.get(key) for key in request.args},
-                username=username,
             )
         except NameError:
             return render_template("index.html", home=True, all_contacts=all_contacts, username=username)
