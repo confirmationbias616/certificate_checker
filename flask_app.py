@@ -1187,7 +1187,7 @@ def map():
         for line in [
             """<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>""",
             """<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"/>""",
-        ]:
+        ]:  # delete in folium-generated html that interfere with this project's `style.css`.
             html = html.replace(line,'')
         f.seek(0)
         f.write(html)
