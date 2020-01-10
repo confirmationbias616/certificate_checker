@@ -1189,6 +1189,10 @@ def map():
             """<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"/>""",
         ]:  # delete in folium-generated html that interfere with this project's `style.css`.
             html = html.replace(line,'')
+        html = html.replace(
+            """font-awesome/4.6.3/css/font-awesome.min.css""", 
+            """font-awesome/4.7.0/css/font-awesome.min.css"""
+        )  # update font-awesome in folium-generated html to match this project's `style.css`.
         f.seek(0)
         f.write(html)
         f.truncate()
