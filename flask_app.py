@@ -122,6 +122,7 @@ def index():
     username = current_user.name if current_user.is_authenticated else None
     if current_user.is_authenticated:
         session['company_id'] = current_user.id
+        session['company_name'] = current_user.name
     elif set_default_company_id:  # for CI server
         session['company_id'] = 1
     else:  # for for dev and prod servers

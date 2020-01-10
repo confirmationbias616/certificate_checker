@@ -13,6 +13,13 @@
       overflow: hidden;
     }
 
+    .welcome_banner {
+      background-color: var(--highlight);
+      text-align: right;
+      padding: 10
+      font-size: 14px;
+    }
+
     /* Style the links inside the navigation bar */
     .topnav a.title {
       transition: color 0.5s;

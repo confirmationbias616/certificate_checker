@@ -20,7 +20,13 @@
 </head>
 <body>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <hr style="border: 2px solid var(--highlight); margin:0px">
+    {% if session.get('company_name') %} 
+        <div class="welcome_banner">
+            <p style="margin-right:20px; margin-top:0px; margin-bottom:0px"><i>User : {{session.get('company_name')}}</i></p>
+        </div>
+    {% else %}
+        <hr style="border: 2px solid var(--highlight); margin:0px">
+    {% endif %}
     <div class="topnav" id="myTopnav">
         <a href="javascript:void(0);" class="icon" onclick="myFunction()">
             <i class="fa fa-bars"></i>
