@@ -42,13 +42,13 @@
 
     /* Change the color of links on hover */
     .topnav a:hover {
-      background-color: var(--highlight);
+      background-color: var(--fieldset);
       color: var(--outline);
     }
 
     /* Add a color to the active/current link */
     .topnav a.active {
-      background-color: var(--fieldset);
+      background-color: var(--highlight);
       color: var(--outline);
     }
 
