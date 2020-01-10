@@ -7,7 +7,6 @@
     }
     .required:after { content:" *"; }
 
-    /* Style the navigation */
     .topnav {
       background-color: var(--outline);
       overflow: hidden;

@@ -973,9 +973,6 @@ def map():
                 limit_count = 200
             if text_search:
                 df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, text_search, end_date,limit_count*2])
-                print(text_search)
-                print(len(df_wc))
-                print(end_date)
             else:
                 df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date,limit_count*2])
         if len(df_wc) > 200:
