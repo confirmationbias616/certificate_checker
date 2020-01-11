@@ -448,7 +448,7 @@ def summary_table():
     else:
         df_open["action"] = df_open.apply(
             lambda row: (
-                f"""<a href="{url_for('index', **row)}">modify</a> / """
+                f"""<a href="{url_for('project_entry', **row)}">modify</a> / """
                 f"""<a href="{url_for('delete_job', project_id=row.project_id)}">delete</a>"""
             ),
             axis=1,
