@@ -21,11 +21,9 @@ logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
 try:
-    with open(".api_key.txt") as file:
-        api_key = file.read()
     with open(".secret.json") as f:
-        password = json.load(f)["geo_api_key"]
-except FileNotFoundError:  # no key if running in CI
+        api_key = json.load(f)["geo_api_key"]
+except FileNotFoundError:  # no `.secret.json` file if running in CI
     api_key = None
 
 def persistant_cache(file_name):
