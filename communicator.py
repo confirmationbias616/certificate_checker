@@ -22,7 +22,7 @@ logger.setLevel(logging.INFO)
 try:
     with open(".secret.json") as f:
         password = json.load(f)["gmail_password"]
-except FileNotFoundError:  # no password if running in CI
+except FileNotFoundError:  # no `.secret.json` file if running in CI
     pass
 
 

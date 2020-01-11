@@ -54,7 +54,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 try:
     with open(".secret.json") as f:
         app.config['SECRET_KEY'] = json.load(f)["flask_session_key"]
-except FileNotFoundError:  # no password if running in CI
+except FileNotFoundError:  # no `.secret.json` file if running in CI
     app.config['SECRET_KEY'] = "JUSTTESTING"
 
 Session(app)
