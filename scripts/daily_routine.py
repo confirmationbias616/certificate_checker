@@ -41,7 +41,7 @@ def daily_routine():
         try:
             logger.info("match")
             last_run = sorted(list(load_results().keys()))[-1]
-            if (datetime.datetime.now() - parse_date(last_run.date())).days < 2:
+            if (datetime.datetime.now() - parse_date(last_run)).days < 2:
                 since = str((datetime.datetime.now()-datetime.timedelta(2)).date())
             else:
                 since = last_run
