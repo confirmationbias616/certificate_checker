@@ -12,16 +12,20 @@
       <h3>
         Actively searching for:
       </h3>
+      <div class="scrolldf">
       <p>
         {{df_open | safe}}
       </p>
+      </div>
       <br>
       <h3>
         Already matched:
       </h3>
+      <div class="scrolldf">
       <p>
         {{df_closed | safe}}
       </p>
+      </div>
     </div>
     <p align="center" style="color:rgb(85, 82, 88)"><i>assuming 60-day lien period:</i>  <span style="color:rgb(97, 62, 143)">lien period still in effect</span>  --  <span style="color:black">lien period expired</span></p>
     {% endblock %}

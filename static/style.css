@@ -12,6 +12,11 @@
       overflow: hidden;
     }
 
+    .scrolldf {
+      overflow: auto;
+      white-space: nowrap;
+    }
+
     .welcome_banner {
       background-color: var(--highlight);
       text-align: right;
