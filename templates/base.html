@@ -10,14 +10,6 @@
     <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <style>footer {width: 100%;height:130px;padding: 0;}</style>
-    <!-- <style>
-        /* Clear floats after the columns */
-        .row:after {
-        content: "";
-        display: table;
-        clear: both;
-        }
-    </style> -->
 </head>
 <body>
     {% if session.get('company_name') %} 
@@ -30,12 +22,12 @@
         <div class="advertise_banner_container">
             <div class="advertise_banner">
                 <span class="welcome_banner_text">
-                    Tired of manually searching for your CSP's? &nbsp;&nbsp;&nbsp;
+                    <b>Tired of manually searching for CSP's?</b>
                 </span>
             </div>
             <div class="advertise_banner">
                 <span class="welcome_banner_text">
-                    <b><a href="{{ url_for('about')}}">Sign up for our notification service!</a></b>
+                    <b><a href="{{ url_for('about')}}">Sign up to receive notifications!</a></b>
                 </span>
             </div>
         </div>
