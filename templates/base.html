@@ -22,9 +22,23 @@
 <body>
     {% if session.get('company_name') %} 
         <div class="welcome_banner">
-            <p style="margin-right:20px; margin-top:0px; margin-bottom:0px"><i class="fa fa-user-circle"></i><i>  {{session.get('company_name')}}</i></p>
+            <p class="welcome_banner_text">
+                <i class="fa fa-user-circle"></i><i>  {{session.get('company_name')}}</i>
+            </p>
         </div>
     {% else %}
+        <div class="advertise_banner_container">
+            <div class="advertise_banner">
+                <span class="welcome_banner_text">
+                    Tired of manually searching for your CSP's? &nbsp;&nbsp;&nbsp;
+                </span>
+            </div>
+            <div class="advertise_banner">
+                <span class="welcome_banner_text">
+                    <b><a href="{{ url_for('about')}}">Sign up here</a> for our notification service!</b>
+                </span>
+            </div>
+        </div>
         <hr style="border: 2px solid var(--highlight); margin:0px">
     {% endif %}
     <div class="topnav" id="myTopnav">

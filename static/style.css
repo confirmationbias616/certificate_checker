@@ -20,9 +20,23 @@
     .welcome_banner {
       background-color: var(--highlight);
       text-align: right;
-      padding: 10
+      padding: 10;
       font-size: 14px;
     }
+    .welcome_banner_text{
+      margin-right:20px; margin-top:0px; margin-bottom:0px
+    }
+
+    .advertise_banner_container{
+      background-color: white;
+      display: flex;
+      justify-content: center;
+    }
+    .advertise_banner {
+      font-size: 16px;
+      display: inline;
+    }
+
 
     /* Style the links inside the navigation bar */
     .topnav a.title {
