@@ -79,6 +79,9 @@
       background-color: var(--highlight);
       color: var(--outline);
     }
+    .topnav a.active:hover {
+      color: #f2f2f2;
+    }
 
     /* Add a color to the active/current link */
     .topnav a.spacer {
