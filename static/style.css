@@ -31,12 +31,19 @@
 
     .advertise_banner_container{
       background-color: rgb(254, 255, 217);
-      display: flex;
+      /* display: flex; */
       justify-content: center;
     }
     .advertise_banner {
-      padding: 10px;
-      font-size: 2vw;
+      padding: 0.2vw;
+      font-size: 2.5vw;
+      text-align: center
+    }
+    .advertise_banner_text a{
+      color: var(--highlight);
+    }
+    .advertise_banner_text a:hover{
+      color: var(--fieldset);
     }
 
 
