@@ -274,7 +274,7 @@ class InputTests(unittest.TestCase):
         expected_logged_success,
     ):
         br = mechanize.Browser()
-        base_url = "http://127.0.0.1:5000"
+        base_url = "http://127.0.0.1:5000/project_entry"
         br.open(base_url)
         br.select_form("job_entry")
         br.form["job_number"] = test_job_number
@@ -341,7 +341,7 @@ class InputTests(unittest.TestCase):
         with create_connection() as conn:
             latest_web_cert = pd.read_sql(get_latest_web_cert, conn).iloc[0]
         br = mechanize.Browser()
-        base_url = "http://127.0.0.1:5000"
+        base_url = "http://127.0.0.1:5000/project_entry"
         br.open(base_url)
         br.select_form("job_entry")
         br.form["job_number"] = "9999"
