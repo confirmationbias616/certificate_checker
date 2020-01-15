@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, session
+from flask_session import Session
 import datetime
 from dateutil.parser import parse as parse_date
 import dateutil.relativedelta
@@ -46,11 +47,17 @@ logger.setLevel(logging.INFO)
 
 app = Flask(__name__)
 
+#set up Flask-Sessions
+app.config.from_object(__name__)
+app.config['SESSION_TYPE'] = 'filesystem'
+
 try:
     with open(".secret.json") as f:
         app.config['SECRET_KEY'] = json.load(f)["flask_session_key"]
-except FileNotFoundError:  # no password if running in CI
+except FileNotFoundError:  # no `.secret.json` file if running in CI
     app.config['SECRET_KEY'] = "JUSTTESTING"
+
+Session(app)
 
 # trick from SO for properly relaoding CSS
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -110,21 +117,24 @@ def dated_url_for(endpoint, **values):
             values["q"] = int(os.stat(file_path).st_mtime)
     return url_for(endpoint, **values)
 
-
 @app.route("/", methods=["POST", "GET"])
 def index():
-    # if not current_user.is_authenticated:
-    #     return '<a class="button" href="/login">Google Login</a>'
     username = current_user.name if current_user.is_authenticated else None
     if current_user.is_authenticated:
-        company_id = current_user.id
+        session['company_id'] = current_user.id
+        session['company_name'] = current_user.name
     elif set_default_company_id:  # for CI server
-        company_id = 1
+        session['company_id'] = 1
     else:  # for for dev and prod servers
-        company_id = None
+        session['company_id'] = None
+    return redirect(url_for("map"))
+
+
+@app.route("/project_entry", methods=["POST", "GET"])
+def project_entry():
     all_contacts_query = "SELECT * FROM contacts WHERE company_id=?"
     with create_connection() as conn:
-        all_contacts = pd.read_sql(all_contacts_query, conn, params=[company_id])
+        all_contacts = pd.read_sql(all_contacts_query, conn, params=[session.get('company_id')])
     if request.method == "POST":
         selected_contact_ids = request.form.getlist("contacts")
         selected_contacts_query = (
@@ -133,7 +143,7 @@ def index():
         )
         with create_connection() as conn:
             selected_contacts = pd.read_sql(
-                selected_contacts_query, conn, params=[*selected_contact_ids, company_id]
+                selected_contacts_query, conn, params=[*selected_contact_ids, session.get('company_id')]
             )
         receiver_emails_dump = str(
             {row["name"]: row["email_address"] for _, row in selected_contacts.iterrows()}
@@ -150,7 +160,7 @@ def index():
                 row = pd.read_sql(
                     "SELECT * FROM company_projects WHERE job_number=? and company_id=?",
                     conn,
-                    params=[new_entry["job_number"], company_id],
+                    params=[new_entry["job_number"], session.get('company_id')],
                 ).iloc[0]
                 was_prev_closed = row.closed
                 if not was_prev_closed:  # case where `closed` column is empty
@@ -165,46 +175,37 @@ def index():
             return redirect(
                 url_for("already_matched",
                 job_number=new_entry["job_number"],
-                username=username,
-                company_id=company_id,
                 )
             )
         if was_prev_logged:
             with create_connection() as conn:
                 conn.cursor().execute(f"""
                     DELETE FROM company_projects WHERE job_number=? AND company_id=?
-                """, [new_entry["job_number"], company_id])
+                """, [new_entry["job_number"], session.get('company_id')])
         with create_connection() as conn:
             conn.cursor().execute(f"""
                 INSERT INTO company_projects (company_id, {', '.join(list(new_entry.keys()))}) VALUES (?, {','.join(['?']*len(new_entry))})
-            """, [company_id] + list(new_entry.values()))
+            """, [session.get('company_id')] + list(new_entry.values()))
         geo_update_db_table('company_projects', limit=1)
         if not was_prev_logged:
             return render_template(
                 "signup_confirmation.html", 
                 job_number=new_entry["job_number"],
-                username=username,
-                company_id=company_id,
             )
         return render_template(
             "update.html",
             job_number=new_entry["job_number"],
             recorded_change=True,
-            username=username,
-            company_id=company_id,
         )
     else:
         try:
             return render_template(
-                "index.html",
-                home=True,
+                "project_entry.html",
                 all_contacts=all_contacts,
-                **{key: request.args.get(key) for key in request.args if key != 'company_id'},
-                username=username,
-                company_id=company_id,
+                **{key: request.args.get(key) for key in request.args},
             )
         except NameError:
-            return render_template("index.html", home=True, all_contacts=all_contacts, username=username, company_id=company_id)
+            return render_template("project_entry.html", all_contacts=all_contacts)
 
 
 @app.route("/login")
@@ -289,6 +290,7 @@ def callback():
 @login_required
 def logout():
     logout_user()
+    session.clear()
     return redirect(url_for("index"))
 
 @app.route("/already_matched", methods=["POST", "GET"])
@@ -317,7 +319,7 @@ def already_matched():
             attempted_matches.ground_truth = 1
     """
     with create_connection() as conn:
-        link = conn.cursor().execute(link_query, [job_number, company_id]).fetchone()[0]
+        link = conn.cursor().execute(link_query, [job_number, session.get('company_id')]).fetchone()[0]
     return render_template("already_matched.html", link=link, job_number=job_number)
 
 
@@ -405,10 +407,10 @@ def summary_table():
             AND company_id=?
         """
     with create_connection() as conn:
-        df_closed = pd.read_sql(closed_query, conn, params=[request.args.get('company_id')]).sort_values(
+        df_closed = pd.read_sql(closed_query, conn, params=[session.get('company_id')]).sort_values(
             "job_number", ascending=False
         )
-        df_open = pd.read_sql(open_query, conn, params=[request.args.get('company_id')]).sort_values(
+        df_open = pd.read_sql(open_query, conn, params=[session.get('company_id')]).sort_values(
             "job_number", ascending=False
         )
     pd.set_option("display.max_colwidth", -1)
@@ -446,7 +448,7 @@ def summary_table():
     else:
         df_open["action"] = df_open.apply(
             lambda row: (
-                f"""<a href="{url_for('index', **row)}">modify</a> / """
+                f"""<a href="{url_for('project_entry', **row)}">modify</a> / """
                 f"""<a href="{url_for('delete_job', project_id=row.project_id)}">delete</a>"""
             ),
             axis=1,
@@ -482,7 +484,6 @@ def summary_table():
         "summary_table.html",
         df_closed=df_closed,
         df_open=df_open,
-        company_id=request.args.get("company_id")
     )
 
 
@@ -516,7 +517,7 @@ def instant_scan():
             lookback_cert_count = 750
         company_query = "SELECT * FROM company_projects WHERE job_number=? AND company_id=?"
         with create_connection() as conn:
-            company_projects = pd.read_sql(company_query, conn, params=[job_number, request.args.get("company_id")])
+            company_projects = pd.read_sql(company_query, conn, params=[job_number, session.get('company_id')])
         hist_query = "SELECT * FROM web_certificates ORDER BY pub_date DESC LIMIT ?"
         with create_connection() as conn:
             df_web = pd.read_sql(hist_query, conn, params=[lookback_cert_count])
@@ -574,14 +575,14 @@ def contact_config():
     contact = request.args
     all_contacts_query = "SELECT * FROM contacts WHERE company_id=?"
     with create_connection() as conn:
-        all_contacts = pd.read_sql(all_contacts_query, conn, params=[contact.get('company_id')])
+        all_contacts = pd.read_sql(all_contacts_query, conn, params=[session.get('company_id')])
     if not len(all_contacts):
         all_contacts = None
     else:
         all_contacts["action"] = all_contacts.apply(
             lambda row: (
-                f"""<a href="{url_for('update_contact', update=True, id=row['id'], name=row['name'], email_address=row['email_address'], company_id=contact.get('company_id'))}">modify</a> /"""
-                f"""<a href="{url_for('delete_contact', id=row['id'], name=row['name'], email_address=row['email_address'], company_id=contact.get('company_id'))}">delete</a>"""
+                f"""<a href="{url_for('update_contact', update=True, id=row['id'], name=row['name'], email_address=row['email_address'])}">modify</a> /"""
+                f"""<a href="{url_for('delete_contact', id=row['id'], name=row['name'], email_address=row['email_address'])}">delete</a>"""
             ),
             axis=1,
         )
@@ -623,7 +624,7 @@ def delete_contact():
         """
     contact = request.args
     with create_connection() as conn:
-        conn.cursor().execute(delete_contact_query, [contact.get("id"), contact.get("company_id")])
+        conn.cursor().execute(delete_contact_query, [contact.get("id"), session.get('company_id')])
     return redirect(url_for("contact_config", **contact))
 
 
@@ -641,7 +642,7 @@ def update_contact():
         with create_connection() as conn:
             conn.cursor().execute(
                 update_contact_query,
-                [contact.get("name"), contact.get("email_address"), contact.get("id"), contact.get("company_id")],
+                [contact.get("name"), contact.get("email_address"), contact.get("id"), session.get('company_id')],
             )
     return redirect(url_for("contact_config", **contact))
 
@@ -658,7 +659,7 @@ def add_contact():
         with create_connection() as conn:
             conn.cursor().execute(
                 add_contact_query,
-                [contact.get("company_id"), contact.get("name"), contact.get("email_address")],
+                [session.get('company_id'), contact.get("name"), contact.get("email_address")],
             )
     return redirect(url_for("contact_config", **contact))
 
@@ -704,7 +705,7 @@ def interact():
                     comp_df = pd.read_sql(
                         "SELECT * FROM company_projects WHERE job_number=? AND company_id=?",
                         conn,
-                        params=[form.get("job_number"), company_id],
+                        params=[form.get("job_number"), session.get('company_id')],
                     )
                 comp_info = {
                     "comp_" + key: comp_df.iloc[0][key]
@@ -835,7 +836,7 @@ def rewind():
     start_coords_lng = request.args.get('start_coords_lng')
     start_zoom = request.args.get('start_zoom', 6)
     region_size = request.args.get('region_size', 500)
-    return redirect(url_for("map", home=True, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search, company_id=request.args.get("company_id")))
+    return redirect(url_for("map", end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search))
 
 @app.route('/set_location', methods=["POST", "GET"])
 def set_location():
@@ -852,7 +853,7 @@ def set_location():
             start_zoom = zoom_level
             break
         start_zoom = 5
-    return redirect(url_for("map", home=True, start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search, company_id=request.args.get("company_id")))
+    return redirect(url_for("map", start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search))
 
 @app.route('/map', methods=["POST", "GET"])
 def map():
@@ -933,10 +934,12 @@ def map():
             lng > ?
         AND
             lng < ?
+        AND
+            pub_date < ?
         {}
         ORDER BY 
-            cert_id
-        DESC LIMIT 10000
+            pub_date
+        DESC LIMIT ?
     """
     add_fts_query = """
         AND
@@ -947,36 +950,52 @@ def map():
     region_size = request.args.get('region_size', 500)
     pad = (float(region_size) ** 0.5)/1.3
     text_search = request.args.get('text_search', None)
+    location_string = request.args.get('location_string')
+    today = datetime.datetime.now().date()
+    end_date = request.args.get('end_date', str(today))
+    limit_daily = request.args.get('limit_daily')
     while True:
         try:
             with create_connection() as conn:
-                df_cp_open = pd.read_sql(open_query, conn, params=[request.args.get("company_id")])
-                df_cp_closed = pd.read_sql(closed_query, conn, params=[request.args.get("company_id")])
-                if text_search:
-                    df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, text_search])
-                else:
-                    df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad])
-                logger.info('SQL queries successful!')
+                df_cp_open = pd.read_sql(open_query, conn, params=[session.get('company_id')])
+                df_cp_closed = pd.read_sql(closed_query, conn, params=[session.get('company_id')])
                 break
         except pd.io.sql.DatabaseError:
             logger.info('Database is locked. Retrying SQL queries...')
     df_cp_open.dropna(axis=0, subset=['lat'], inplace=True)
     df_cp_closed.dropna(axis=0, subset=['lat'], inplace=True)
+    while True:
+        # try:
+        with create_connection() as conn:
+            if text_search or limit_daily:
+                limit_count = 6000000 
+            else:
+                limit_count = 200
+            if text_search:
+                df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, text_search, end_date,limit_count*2])
+            else:
+                df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date,limit_count*2])
+        if len(df_wc) > 200:
+            last_date = df_wc.iloc[200].pub_date
+        elif len(df_wc):
+            last_date = list(df_wc.pub_date)[-1]
+        else:
+            last_date = "1990-06-2"
+        df_wc = df_wc[df_wc.pub_date >= last_date]
+        logger.info('SQL queries successful!')
+        break
+        # except pd.io.sql.DatabaseError:
+        #     logger.info('Database is locked. Retrying SQL queries...')
     df_wc.dropna(axis=0, subset=['lat'], inplace=True)
-    location_string = request.args.get('location_string')
-    today = datetime.datetime.now().date()
-    end_date = request.args.get('end_date', str(today))
-    limit_daily = request.args.get('limit_daily')
+    rows_remaining = df_wc.head(1) if limit_daily else df_wc
     if limit_daily:
-        rows_remaining = df_wc[df_wc.pub_date <= end_date].sort_values('pub_date', ascending=False).head(1)
         non_specified_start_date = list(rows_remaining.pub_date)[0] if len(rows_remaining) else '2000-01-01'
     else:
-        rows_remaining = df_wc[df_wc.pub_date <= end_date].sort_values('pub_date', ascending=False).head(200)
         non_specified_start_date = list(rows_remaining.pub_date)[-1] if len(rows_remaining) else '2000-01-01'
     start_date = request.args.get('start_date', non_specified_start_date)
-    def select_df_wc_window(start_date, end_date):
-        return df_wc[(start_date <= df_wc.pub_date) & (df_wc.pub_date <= end_date)]
-    df_wc_win = select_df_wc_window(start_date, end_date)
+    # def select_df_wc_window(start_date, end_date):
+    #     return df_wc[(start_date <= df_wc.pub_date) & (df_wc.pub_date <= end_date)]
+    # df_wc_win = select_df_wc_window(start_date, end_date)
     start_zoom = request.args.get('start_zoom', 6)
     start_coords_lat = request.args.get('start_coords_lat', df_cp_open.lat.mean())
     start_coords_lng = request.args.get('start_coords_lng', df_cp_open.lng.mean())
@@ -1006,6 +1025,8 @@ def map():
                 th {{
                     text-align: right;
                     vertical-align: top;
+                    font-family: 'Montserrat', sans-serif;
+                    font-size: 90%;
                 }}
                 td {{
                     text-align: left;
@@ -1051,6 +1072,7 @@ def map():
             <style>
                 h4 {{
                     text-align: center;
+                    font-family: 'Montserrat', sans-serif
                 }}
                 h5 {{
                     text-align: center;
@@ -1098,7 +1120,7 @@ def map():
     feature_group.add_to(m)
 
     feature_group = folium.FeatureGroup(name="Web CSP's")
-    for _, row in df_wc_win.iterrows():
+    for _, row in df_wc.iterrows():
         popup=folium.map.Popup(html=f"""
             <style>
                 h4 {{
@@ -1165,12 +1187,16 @@ def map():
         for line in [
             """<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>""",
             """<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"/>""",
-        ]:
+        ]:  # delete in folium-generated html that interfere with this project's `style.css`.
             html = html.replace(line,'')
+        html = html.replace(
+            """font-awesome/4.6.3/css/font-awesome.min.css""", 
+            """font-awesome/4.7.0/css/font-awesome.min.css"""
+        )  # update font-awesome in folium-generated html to match this project's `style.css`.
         f.seek(0)
         f.write(html)
         f.truncate()
-    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc_win), limit_daily=limit_daily, location_string=location_string, text_search=text_search, company_id=request.args.get("company_id"))
+    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), limit_daily=limit_daily, location_string=location_string, text_search=text_search)
 
 
 if __name__ == "__main__":

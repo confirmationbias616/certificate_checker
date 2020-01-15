@@ -7,11 +7,45 @@
     }
     .required:after { content:" *"; }
 
-    /* Style the navigation */
     .topnav {
       background-color: var(--outline);
       overflow: hidden;
     }
+
+    .scrolldf {
+      overflow: auto;
+      white-space: nowrap;
+    }
+
+    .welcome_banner {
+      background-color: var(--highlight);
+      text-align: right;
+      padding: 10;
+      font-size: 14px;
+    }
+    .welcome_banner_text{
+      margin-right:20px;
+      margin-top:0px;
+      margin-bottom:0px
+    }
+
+    .advertise_banner_container{
+      background-color: rgb(254, 255, 217);
+      /* display: flex; */
+      justify-content: center;
+    }
+    .advertise_banner {
+      padding: 0.2vw;
+      font-size: 2.5vw;
+      text-align: center
+    }
+    .advertise_banner_text a{
+      color: var(--highlight);
+    }
+    .advertise_banner_text a:hover{
+      color: var(--fieldset);
+    }
+
 
     /* Style the links inside the navigation bar */
     .topnav a.title {
@@ -36,14 +70,17 @@
 
     /* Change the color of links on hover */
     .topnav a:hover {
-      background-color: var(--highlight);
+      background-color: var(--fieldset);
       color: var(--outline);
     }
 
     /* Add a color to the active/current link */
     .topnav a.active {
-      background-color: var(--fieldset);
+      background-color: var(--highlight);
       color: var(--outline);
+    }
+    .topnav a.active:hover {
+      color: #f2f2f2;
     }
 
     /* Add a color to the active/current link */
@@ -73,7 +110,7 @@
     }
 
     /* When the screen is less than 600 pixels wide, hide all links, except for the first one ("Home"). Show the link that contains should open and close the topnav (.icon) */
-    @media screen and (max-width: 769px) {
+    @media screen and (max-width: 840px) {
       .topnav a:not(.title) {display: none;}
       .topnav a.icon {
         float: right;
@@ -82,7 +119,7 @@
     }
 
     /* The "responsive" class is added to the topnav with JavaScript when the user clicks on the icon. This class makes the topnav look good on small screens (display the links vertically instead of horizontally) */
-    @media screen and (max-width: 769px) {
+    @media screen and (max-width: 840px) {
       .topnav.responsive {position: relative;}
       .topnav.responsive a.icon {
         position: absolute;

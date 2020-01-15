@@ -27,19 +27,19 @@
       <br>
       <div id="hide_after2">
         <div display=block>
-          <form  action="{{ url_for('instant_scan', job_number=job_number, company_id=company_id, lookback='2_weeks') }}" method="POST">
+          <form  action="{{ url_for('instant_scan', job_number=job_number, lookback='2_weeks') }}" method="POST">
             <input type="submit" id="large_button" value="2 WEEKS" onclick="show_hint()">
           </form>
           <p>(estimated scan time of 30 seconds)</p>
         </div><br>
         <div display=block>
-          <form id="hide_after2" action="{{ url_for('instant_scan', job_number=job_number, company_id=company_id, lookback='1_month') }}" method="POST">
+          <form id="hide_after2" action="{{ url_for('instant_scan', job_number=job_number, lookback='1_month') }}" method="POST">
             <input type="submit" id="large_button" value="1 MONTH" onclick="show_hint()">
           </form>
           <p>(estimated scan time of 1 minute)</p>
         </div><br>
         <div display=block>
-          <form id="hide_after2" action="{{ url_for('instant_scan', job_number=job_number, company_id=company_id, lookback='2_months') }}" method="POST">
+          <form id="hide_after2" action="{{ url_for('instant_scan', job_number=job_number, lookback='2_months') }}" method="POST">
             <input type="submit" id="large_button" value="2 MONTHS" onclick="show_hint()">
           </form>
           <p>(estimated scan time of 2 minutes)</p>

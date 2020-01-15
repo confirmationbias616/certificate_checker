@@ -62,8 +62,9 @@ def use_fresh_certs_only(single_project_row, web_df):
         SET last_cert_id_check=?
         WHERE project_id=?
     """
-    with create_connection() as conn:
-        conn.cursor().execute(update_query, [max(possible_matches_scored.cert_id), single_project_row.project_id])
+    if len(possible_matches_scored):
+        with create_connection() as conn:
+            conn.cursor().execute(update_query, [max(possible_matches_scored.cert_id), single_project_row.project_id])
     return web_df
 
 def build_match_score(single_project_df, web_df, fresh_cert_limit=True):

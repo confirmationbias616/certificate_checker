@@ -21,11 +21,9 @@ logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
 try:
-    with open(".api_key.txt") as file:
-        api_key = file.read()
     with open(".secret.json") as f:
-        password = json.load(f)["geo_api_key"]
-except FileNotFoundError:  # no key if running in CI
+        api_key = json.load(f)["geo_api_key"]
+except FileNotFoundError:  # no `.secret.json` file if running in CI
     api_key = None
 
 def persistant_cache(file_name):
@@ -89,7 +87,7 @@ def geocode(df, retry_na=False):
     if (not retry_na) and ('address' not in df.columns or 'city' not in df.columns):
         raise ValueError("Input DataFrame does not contain all required columns (`city` and `address`)")
     df['address_latlng'] = df.apply(lambda row: get_address_latlng(row.address, row.city), axis=1)
-    df['city_latlng_size'] = df.city.apply(lambda x: get_city_latlng(x.title()))
+    df['city_latlng_size'] = df.city.apply(lambda x: get_city_latlng(x.lower()))
     df['address_lat'] = df.address_latlng.apply(lambda x: x.get('lat', np.nan))
     df['address_lng'] = df.address_latlng.apply(lambda x: x.get('lng', np.nan))
     df['city_lat'] = df.city_latlng_size.apply(lambda x: x[0].get('lat', np.nan))
@@ -143,7 +141,7 @@ def geo_update_db_table(table_name, start_date=None, end_date=None, limit=None):
                 row.loc[i, 'city_size'],
                 row.loc[i, match_id]
             ])
-        logger.info(f"Job {row.loc[i, match_id]} ({row.pub_date.iloc[0]})  has been updated with geo data")
+        logger.info(f"Job {row.loc[i, match_id]} ({row.pub_date.iloc[0] if table_name == 'web_certificates' else ''})  has been updated with geo data")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

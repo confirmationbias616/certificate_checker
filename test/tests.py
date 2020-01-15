@@ -276,6 +276,10 @@ class InputTests(unittest.TestCase):
         br = mechanize.Browser()
         base_url = "http://127.0.0.1:5000"
         br.open(base_url)
+        for link in br.links():
+            if "project_entry" in link.url:
+                break
+        br.follow_link(link)
         br.select_form("job_entry")
         br.form["job_number"] = test_job_number
         for field_name in [
@@ -294,7 +298,11 @@ class InputTests(unittest.TestCase):
             submit_success = True
         except urllib.error.HTTPError:
             pass
-        summary_html = requests.get(base_url + "/summary_table" + "?company_id=1").content
+        for link in br.links():
+            if "summary_table" in link.url:
+                break
+        br.follow_link(link)
+        summary_html = br.response().read()
         logged_success = any(re.findall(f"test_{test_job_number}", str(summary_html)))
         self.assertEqual(expected_submit_success, submit_success)
         self.assertEqual(expected_logged_success, logged_success)
@@ -302,10 +310,10 @@ class InputTests(unittest.TestCase):
             expected_logged_success
         ):  # test delete link only if project was expected to be logged.
             expected_delete_success = True
-            summary_page_soup = BeautifulSoup(summary_html, "html.parser")
-            summary_page_links = [
-                x.get("href") for x in summary_page_soup.find_all("a")
-            ]
+            for link in br.links():
+                if f"test_{test_job_number}" in link.url and "delete" in link.url:
+                    break
+            br.follow_link(link)
             get_new_project_id = """
                 SELECT * 
                 FROM company_projects 
@@ -313,11 +321,11 @@ class InputTests(unittest.TestCase):
             """
             with create_connection() as conn:
                 test_project_id = pd.read_sql(get_new_project_id, conn, params=[test_job_number]).iloc[0].project_id
-            delete_link = [
-                x for x in summary_page_links if str(test_project_id) in x and "delete" in x
-            ][0]
-            requests.get(base_url + delete_link)
-            summary_html = requests.get(base_url + "/summary_table").content
+            for link in br.links():
+                if "summary_table" in link.url:
+                    break
+            br.follow_link(link)
+            summary_html = br.response().read()
             delete_success = not any(re.findall(f"test_{test_job_number}", str(summary_html)))
             self.assertEqual(expected_delete_success, delete_success)
 
@@ -343,6 +351,11 @@ class InputTests(unittest.TestCase):
         br = mechanize.Browser()
         base_url = "http://127.0.0.1:5000"
         br.open(base_url)
+        for link in br.links():
+            if "project_entry" in link.url:
+                break
+        print(link)
+        br.follow_link(link) 
         br.select_form("job_entry")
         br.form["job_number"] = "9999"
         for field_name in [

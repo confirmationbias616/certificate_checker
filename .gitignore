@@ -2,6 +2,8 @@ cert_env*
 *.sqlite3
 train_set.csv
 
+flask_session/*
+
 templates/map_widget.html
 
 # ignore results.json except the dummy file in test folder
