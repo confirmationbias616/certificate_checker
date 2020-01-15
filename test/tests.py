@@ -276,11 +276,9 @@ class InputTests(unittest.TestCase):
         br = mechanize.Browser()
         base_url = "http://127.0.0.1:5000"
         br.open(base_url)
-        target_url="http://127.0.0.1:5000/project_entry"
         for link in br.links():
             if "project_entry" in link.url:
                 break
-        print(link)
         br.follow_link(link)
         br.select_form("job_entry")
         br.form["job_number"] = test_job_number
@@ -300,7 +298,11 @@ class InputTests(unittest.TestCase):
             submit_success = True
         except urllib.error.HTTPError:
             pass
-        summary_html = requests.get(base_url + "/summary_table" + "?company_id=1").content  # NOW THAT `company_id` IS STORED VIA SESSION, NEED TO CHANGE THIS
+        for link in br.links():
+            if "summary_table" in link.url:
+                break
+        br.follow_link(link)
+        summary_html = br.response().read()
         logged_success = any(re.findall(f"test_{test_job_number}", str(summary_html)))
         self.assertEqual(expected_submit_success, submit_success)
         self.assertEqual(expected_logged_success, logged_success)
