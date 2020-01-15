@@ -278,8 +278,9 @@ class InputTests(unittest.TestCase):
         br.open(base_url)
         target_url="http://127.0.0.1:5000/project_entry"
         for link in br.links():
-            if link.url == target_url:
+            if "project_entry" in link.url:
                 break
+        print(link)
         br.follow_link(link)
         br.select_form("job_entry")
         br.form["job_number"] = test_job_number
@@ -348,10 +349,10 @@ class InputTests(unittest.TestCase):
         br = mechanize.Browser()
         base_url = "http://127.0.0.1:5000"
         br.open(base_url)
-        target_url="http://127.0.0.1:5000/project_entry"
         for link in br.links():
-            if link.url == target_url:
+            if "project_entry" in link.url:
                 break
+        print(link)
         br.follow_link(link) 
         br.select_form("job_entry")
         br.form["job_number"] = "9999"
