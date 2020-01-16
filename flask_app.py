@@ -567,7 +567,7 @@ def process_feedback():
 
 @app.route("/about", methods=["POST", "GET"])
 def about():
-    return render_template("about.html", about=True, hide_helper_links=True)
+    return render_template("about.html", about=True)
 
 
 @app.route("/contact_config", methods=["POST", "GET"])
@@ -610,7 +610,6 @@ def contact_config():
         "contact_config.html",
         all_contacts=all_contacts,
         config=True,
-        hide_helper_links=True,
         **contact,
     )
 
