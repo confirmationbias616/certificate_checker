@@ -354,7 +354,6 @@ class InputTests(unittest.TestCase):
         for link in br.links():
             if "project_entry" in link.url:
                 break
-        print(link)
         br.follow_link(link) 
         br.select_form("job_entry")
         br.form["job_number"] = "9999"
