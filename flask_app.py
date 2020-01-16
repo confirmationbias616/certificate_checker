@@ -129,6 +129,8 @@ def index():
             FROM users 
             WHERE id=?
             """, conn, params=[current_user.id]).iloc[0].account_type
+        if session['account_type'] != "full":
+            return redirect(url_for("payment"))
     elif set_default_company_id:  # for CI server
         session['company_id'] = 1
     else:  # for for dev and prod servers
