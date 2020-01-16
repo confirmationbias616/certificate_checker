@@ -129,7 +129,7 @@ def index():
             FROM users 
             WHERE id=?
             """, conn, params=[current_user.id]).iloc[0].account_type
-        if session['account_type'] != "full":
+        if session.get('account_type') != "full":
             return redirect(url_for("payment"))
     elif set_default_company_id:  # for CI server
         session['company_id'] = 1
@@ -140,7 +140,7 @@ def index():
 
 @app.route("/project_entry", methods=["POST", "GET"])
 def project_entry():
-    if session['account_type'] != "full":
+    if session.get('account_type') != "full":
         return redirect(url_for("payment"))
     all_contacts_query = "SELECT * FROM contacts WHERE company_id=?"
     with create_connection() as conn:
@@ -358,7 +358,7 @@ def potential_match():
 
 @app.route("/summary_table")
 def summary_table():
-    if session['account_type'] != "full":
+    if session.get('account_type') != "full":
         return redirect(url_for("payment"))
     def highlight_pending(s):
         days_old = (
@@ -501,7 +501,7 @@ def summary_table():
 
 @app.route("/delete_job")
 def delete_job():
-    if session['account_type'] != "full":
+    if session.get('account_type') != "full":
         return redirect(url_for("payment"))
     delete_job_query = """
             DELETE FROM company_projects
@@ -520,7 +520,7 @@ def delete_job():
 
 @app.route("/instant_scan", methods=["POST", "GET"])
 def instant_scan():
-    if session['account_type'] != "full":
+    if session.get('account_type') != "full":
         return redirect(url_for("payment"))
     if request.method == "POST":
         job_number = request.args.get("job_number")
@@ -598,7 +598,7 @@ def payment():
 
 @app.route("/contact_config", methods=["POST", "GET"])
 def contact_config():
-    if session['account_type'] != "full":
+    if session.get('account_type') != "full":
         return redirect(url_for("payment"))
     contact = request.args
     all_contacts_query = "SELECT * FROM contacts WHERE company_id=?"
@@ -644,7 +644,7 @@ def contact_config():
 
 @app.route("/delete_contact")
 def delete_contact():
-    if session['account_type'] != "full":
+    if session.get('account_type') != "full":
         return redirect(url_for("payment"))
     delete_contact_query = """
             DELETE FROM contacts
@@ -659,7 +659,7 @@ def delete_contact():
 
 @app.route("/update_contact", methods=["POST", "GET"])
 def update_contact():
-    if session['account_type'] != "full":
+    if session.get('account_type') != "full":
         return redirect(url_for("payment"))
     contact = request.args
     update_contact_query = """
@@ -680,7 +680,7 @@ def update_contact():
 
 @app.route("/add_contact", methods=["POST", "GET"])
 def add_contact():
-    if session['account_type'] != "full":
+    if session.get('account_type') != "full":
         return redirect(url_for("payment"))
     contact = request.args
     add_contact_query = """
@@ -1097,7 +1097,7 @@ def map():
             tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
             icon=folium.Icon(prefix='fa', icon='check', color='gray')
         ).add_to(feature_group)
-    if session['account_type'] == "full":
+    if session.get('account_type') == "full":
         feature_group.add_to(m)
 
     feature_group = folium.FeatureGroup(name='Open Projects')
@@ -1151,7 +1151,7 @@ def map():
             tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
             icon=folium.Icon(prefix='fa', icon='search', color='black')
         ).add_to(feature_group)
-    if session['account_type'] == "full":
+    if session.get('account_type') == "full":
         feature_group.add_to(m)
 
     feature_group = folium.FeatureGroup(name="Web CSP's")
