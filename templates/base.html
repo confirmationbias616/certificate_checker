@@ -44,7 +44,7 @@
         <a href={{ url_for('login') }}><i>log in</i></a>
         {% endif %}
         <a class="spacer">|</a>
-        {% if session.get("company_id") %}
+        {% if session.get("account_type") %}
             <a {% if self._TemplateReference__context.name.rstrip('.html') == 'contact_config' %} class="active" {% endif %} href={{ url_for('contact_config') }}>configure contacts</a>
             <a {% if self._TemplateReference__context.name.rstrip('.html') == 'project_entry' %} class="active" {% endif %} href={{ url_for('project_entry') }}>project entry</a>
             <a {% if self._TemplateReference__context.name.rstrip('.html') == 'summary_table' %} class="active" {% endif %} href={{ url_for('summary_table') }}>projects</a>
