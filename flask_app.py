@@ -135,6 +135,7 @@ def index():
     elif set_default_company_id:  # for CI server
         session['company_id'] = 1
         session['company_name'] = "Testing123"
+        session['account_type'] = "full"
     else:  # for for dev and prod servers
         session['company_id'] = None
     return redirect(url_for("map"))
