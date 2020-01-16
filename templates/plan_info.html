@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  {% endblock %}
+</head>
+<body>
+    {% block body %}
+    <br><br>    
+    <div>
+        <h3 class="blocktext">The Pro Advantage</h3>
+        <P class="blocktext">
+            Vend ta salade.
+            <li class="blocktext">Deep Search</liclass="blocktext">
+            <li class="blocktext">Smart Notifications</li>
+        </P>
+        <br>
+        <h3 class="blocktext">Sign-up Process</h3>
+        <P class="blocktext">
+            In order to keep your information 100% safe, HBR Bot relies on Google for 
+            authentication.
+            <br><br>
+            You can either use an existing account or create a new one 
+            with your business e-mail address by choosing <b>Use my current email address 
+            instead</b>.
+            <br><br>
+            If you plan on having multiple employees from your company access this service, 
+            enter your company name as <b>First Name</b> within the Google account creation 
+            flow and leave <b>Last Name</b> blank.
+        </P>
+        <P class="blocktext">
+            <a href="{{ url_for('login') }}">Proceed to Google authentication</a>
+        </P>
+    </div>
+    <br><br>
+    {% endblock %}
+</body>
+</html>

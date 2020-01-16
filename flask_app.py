@@ -570,6 +570,11 @@ def about():
     return render_template("about.html", about=True)
 
 
+@app.route("/plan_info", methods=["POST", "GET"])
+def plan_info():
+    return render_template("plan_info.html")
+
+
 @app.route("/contact_config", methods=["POST", "GET"])
 def contact_config():
     contact = request.args
