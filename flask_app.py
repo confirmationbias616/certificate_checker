@@ -123,20 +123,21 @@ def index():
     if current_user.is_authenticated:
         session['company_id'] = current_user.id
         session['company_name'] = current_user.name
-    elif set_default_company_id:  # for CI server
-        session['company_id'] = 1
-        session['company_name'] = "Testing123"
-    else:  # for for dev and prod servers
-        session['company_id'] = None
-    if session.get('company_id'):
-        with create_connection() as conn:
-            session['account_type'] = pd.read_sql("""
-            SELECT * 
-            FROM users 
-            WHERE id=?
+        if session.get('company_id'):
+            with create_connection() as conn:
+                session['account_type'] = pd.read_sql("""
+                SELECT * 
+                FROM users 
+                WHERE id=?
             """, conn, params=[current_user.id]).iloc[0].account_type
         if session.get('account_type') != "full":
             return redirect(url_for("payment"))
+    elif set_default_company_id:  # for CI server
+        session['company_id'] = 1
+        session['company_name'] = "Testing123"
+        session['account_type'] = "full"
+    else:  # for for dev and prod servers
+        session['company_id'] = None
     return redirect(url_for("map"))
 
 
