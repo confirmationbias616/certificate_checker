@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  {% endblock %}
+</head>
+<body>
+    {% block body %}
+    <div>
+        <P class="blocktext">
+            This is your account, {{ session.get('company_name') }}
+        </P>
+    </div>
+    <br><br>
+    {% endblock %}
+</body>
+</html>

@@ -15,7 +15,7 @@
     {% if session.get('company_name') %} 
         <div class="welcome_banner">
             <p class="welcome_banner_text">
-                <i class="fa fa-user-circle"></i><i>  {{session.get('company_name')}}</i>
+                <a class="user" href="{{ url_for('user_account') }}"><i class="fa fa-user-circle"> {{session.get('company_name')}}</i></a>
             </p>
         </div>
     {% else %}

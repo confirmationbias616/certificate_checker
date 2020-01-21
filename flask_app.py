@@ -598,6 +598,9 @@ def plan_info():
 def payment():
     return render_template("payment.html")
 
+@app.route("/user_account", methods=["POST", "GET"])
+def user_account():
+    return render_template("user_account.html")
 
 @app.route("/contact_config", methods=["POST", "GET"])
 def contact_config():
