@@ -123,6 +123,7 @@ def index():
     if current_user.is_authenticated:
         session['company_id'] = current_user.id
         session['company_name'] = current_user.name
+        session['company_email'] = current_user.email
         if session.get('company_id'):
             with create_connection() as conn:
                 session['account_type'] = pd.read_sql("""
