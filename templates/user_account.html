@@ -8,10 +8,24 @@
 </head>
 <body>
     {% block body %}
+    <div class="blocktext">
+        <h3>
+            {{ session.get('company_name') }}'s Account
+        </h3>
+        <!-- TO-DO: add link to change account name -->
+    </div>
+    <hr style="border: 1px solid black">
+    <div class="blocktext">
+        <li style="display: inline-block; width: 400px;">
+            <strong>e-mail address:</strong> {{ session.get('company_email') }}
+        </li>
+        <li style="display: inline-block; width: 400px;">
+            <strong>account type:</strong> {{ session.get('account_type') }}
+        </li>
+    </div>
+    <hr style="border: 1px solid black">
     <div>
-        <P class="blocktext">
-            This is your account, {{ session.get('company_name') }}
-        </P>
+        <!-- TO-DO: add link to cancel account -->
     </div>
     <br><br>
     {% endblock %}
