@@ -117,8 +117,9 @@ def dated_url_for(endpoint, **values):
             values["q"] = int(os.stat(file_path).st_mtime)
     return url_for(endpoint, **values)
 
-@app.route("/", methods=["POST", "GET"])
-def index():
+def load_user():
+    if session.get('company_id'):
+        return
     username = current_user.name if current_user.is_authenticated else None
     if current_user.is_authenticated:
         session['company_id'] = current_user.id
@@ -139,11 +140,15 @@ def index():
         session['account_type'] = "full"
     else:  # for for dev and prod servers
         session['company_id'] = None
+
+@app.route("/", methods=["POST", "GET"])
+def index():
     return redirect(url_for("map"))
 
 
 @app.route("/project_entry", methods=["POST", "GET"])
 def project_entry():
+    load_user()
     if session.get('account_type') != "full":
         return redirect(url_for("payment"))
     all_contacts_query = "SELECT * FROM contacts WHERE company_id=?"
@@ -362,6 +367,7 @@ def potential_match():
 
 @app.route("/summary_table")
 def summary_table():
+    load_user()
     if session.get('account_type') != "full":
         return redirect(url_for("payment"))
     def highlight_pending(s):
@@ -573,7 +579,7 @@ def instant_scan():
 
 @app.route("/process_feedback", methods=["POST", "GET"])
 def process_feedback():
-    # if request.method == 'GET':
+    load_user()
     status = process_as_feedback(request.args)
     return render_template(
         "thanks_for_feedback.html",
@@ -597,14 +603,17 @@ def plan_info():
 
 @app.route("/payment", methods=["POST", "GET"])
 def payment():
+    load_user()
     return render_template("payment.html")
 
 @app.route("/user_account", methods=["POST", "GET"])
 def user_account():
+    load_user()
     return render_template("user_account.html")
 
 @app.route("/contact_config", methods=["POST", "GET"])
 def contact_config():
+    load_user()
     if session.get('account_type') != "full":
         return redirect(url_for("payment"))
     contact = request.args
@@ -897,6 +906,7 @@ def set_location():
 
 @app.route('/map', methods=["POST", "GET"])
 def map():
+    load_user()
     closed_query = """
         SELECT
             company_projects.job_number,
