@@ -20,7 +20,11 @@
             <strong>e-mail address:</strong> {{ session.get('company_email') }}
         </li>
         <li style="display: inline-block; width: 400px;">
-            <strong>account type:</strong> {{ session.get('account_type') }}
+            {% if session.get('account_type') %}
+                <strong>account type:</strong> {{ session.get('account_type') }}
+            {% else %}
+                <ul><a href="{{ url_for('payment') }}">Upgrade account</a></ul>
+            {% endif %}
         </li>
     </div>
     <hr style="border: 1px solid black">
