@@ -143,7 +143,11 @@ def load_user():
 
 @app.route("/", methods=["POST", "GET"])
 def index():
-    return redirect(url_for("map"))
+    load_user()
+    if session.get('account_type') == 'full' or not session.get('company_id'):
+        return redirect(url_for("map"))
+    else:
+        return redirect(url_for("payment"))
 
 
 @app.route("/project_entry", methods=["POST", "GET"])
