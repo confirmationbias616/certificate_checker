@@ -81,9 +81,14 @@ def create_connection(db_name="cert_db.sqlite3"):
 
 def custom_query(query):
     """Run custom SQL query against cert_db.sqlite3"""
-    with create_connection() as conn:
-        result =  pd.read_sql(query, conn)
-    print(result)
+    try:
+        with create_connection() as conn:
+            result =  pd.read_sql(query, conn)
+        print(result)
+    except TypeError:
+        with create_connection() as conn:
+            conn.cursor().execute(query)
+        print("SQL statement executed.")
     return result
 
 def dbtables_to_csv(db_name="cert_db.sqlite3", destination=""):
