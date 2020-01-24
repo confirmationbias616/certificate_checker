@@ -32,6 +32,7 @@ from oauthlib.oauth2 import WebApplicationClient
 import requests
 # from db import init_db_command
 from user import User
+import stripe
 
 
 logger = logging.getLogger(__name__)
@@ -608,7 +609,24 @@ def plan_info():
 @app.route("/payment", methods=["POST", "GET"])
 def payment():
     load_user()
-    return render_template("payment.html")
+    # Set your secret key: remember to change this to your live secret key in production
+    # See your keys here: https://dashboard.stripe.com/account/apikeys
+    stripe.api_key = 'sk_test_d2uR7P9xdhu8MW6akC8KTNEd00ArjxicJW'
+    stripe_session = stripe.checkout.Session.create(
+    payment_method_types=['card'],
+    subscription_data={
+        'items': [{
+        'plan': 'plan_GbSnJ1D9h7JrYl',
+        }],
+    },
+    success_url=url_for('thanks_for_payment', _external=True)+'?session_id={CHECKOUT_SESSION_ID}',
+    cancel_url=url_for('payment', _external=True),
+    )
+    return render_template("payment.html", session_id=stripe_session.id)
+
+@app.route("/thanks_for_payment", methods=["POST", "GET"])
+def thanks_for_payment():
+    return render_template("thanks_for_payment.html")
 
 @app.route("/user_account", methods=["POST", "GET"])
 def user_account():
