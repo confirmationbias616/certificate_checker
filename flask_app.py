@@ -626,6 +626,12 @@ def payment():
 
 @app.route("/thanks_for_payment", methods=["POST", "GET"])
 def thanks_for_payment():
+    update_account_type_query = (
+        "UPDATE users SET account_type = 'full' WHERE id = ?"
+    )
+    with create_connection() as conn:
+        conn.cursor().execute(update_account_type_query, [session.get('company_id')])
+    session['account_type'] = 'full'
     return render_template("thanks_for_payment.html")
 
 @app.route("/user_account", methods=["POST", "GET"])
