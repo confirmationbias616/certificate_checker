@@ -85,11 +85,12 @@ def custom_query(query):
         with create_connection() as conn:
             result =  pd.read_sql(query, conn)
         print(result)
+        return result
     except TypeError:
         with create_connection() as conn:
             conn.cursor().execute(query)
         print("SQL statement executed.")
-    return result
+        return
 
 def dbtables_to_csv(db_name="cert_db.sqlite3", destination=""):
     """Writes all tables of specified SQLite3 database to separate CSV files located in
