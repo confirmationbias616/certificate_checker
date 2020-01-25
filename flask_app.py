@@ -1043,14 +1043,13 @@ def map():
     df_cp_open.dropna(axis=0, subset=['lat'], inplace=True)
     df_cp_closed.dropna(axis=0, subset=['lat'], inplace=True)
     while True:
-        # try:
         with create_connection() as conn:
             if text_search or limit_daily:
                 limit_count = 6000000 
             else:
                 limit_count = 200
             if text_search:
-                df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, text_search, end_date,limit_count*2])
+                df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, text_search, limit_count*2])
             else:
                 df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date,limit_count*2])
         if len(df_wc) > 200:
@@ -1062,8 +1061,6 @@ def map():
         df_wc = df_wc[df_wc.pub_date >= last_date]
         logger.info('SQL queries successful!')
         break
-        # except pd.io.sql.DatabaseError:
-        #     logger.info('Database is locked. Retrying SQL queries...')
     df_wc.dropna(axis=0, subset=['lat'], inplace=True)
     rows_remaining = df_wc.head(1) if limit_daily else df_wc
     if limit_daily:
@@ -1071,9 +1068,10 @@ def map():
     else:
         non_specified_start_date = list(rows_remaining.pub_date)[-1] if len(rows_remaining) else '2000-01-01'
     start_date = request.args.get('start_date', non_specified_start_date)
-    # def select_df_wc_window(start_date, end_date):
-    #     return df_wc[(start_date <= df_wc.pub_date) & (df_wc.pub_date <= end_date)]
-    # df_wc_win = select_df_wc_window(start_date, end_date)
+    def select_df_wc_window(start_date, end_date):
+        return df_wc[(start_date <= df_wc.pub_date) & (df_wc.pub_date <= end_date)]
+    df_wc = select_df_wc_window(start_date, end_date)
+    # import pdb; pdb.set_trace()
     start_zoom = request.args.get('start_zoom', 6)
     start_coords_lat = request.args.get('start_coords_lat', df_cp_open.lat.mean())
     start_coords_lng = request.args.get('start_coords_lng', df_cp_open.lng.mean())
