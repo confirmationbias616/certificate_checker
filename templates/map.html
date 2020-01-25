@@ -12,9 +12,9 @@
     <div style="width: 100%; text-align: center;">
         <form action="{{ url_for('set_location') }}" name = "set_location" method="POST">
             <div style="display: inline-block">
-                <input type="text" name="location_string" size="20" {% if location_string %} value="{{ location_string }}"" {% endif %} placeholder="Focus on specific region" autofocus style="float: left; border: 1px solid black">
+                <input type="text" name="location_string" size="20" {% if location_string %} value="{{ location_string }}" {% endif %} placeholder="Focus on specific region" autofocus style="float: left; border: 1px solid black">
                 &emsp;
-                <input type="text" name="text_search" size="20" {% if text_search %} value="{{ text_search }}"" {% endif %} placeholder="List one or many keywords" autofocus style="float: left; border: 1px solid black">
+                <input type="text" name="text_search" size="20" {% if text_search %} value="{{ text_search }}" {% endif %} placeholder="List one or many keywords" autofocus style="float: left; border: 1px solid black">
                 &emsp;
                 <input type="submit" id="small_button" value="Explore!" style="width: 6em;" >
             </div>
