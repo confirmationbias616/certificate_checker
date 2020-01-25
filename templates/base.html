@@ -46,8 +46,8 @@
         <a class="spacer">|</a>
         {% if session.get("account_type") %}
             <a {% if self._TemplateReference__context.name.rstrip('.html') == 'contact_config' %} class="active" {% endif %} href={{ url_for('contact_config') }}>configure contacts</a>
-            <a {% if self._TemplateReference__context.name.rstrip('.html') == 'project_entry' %} class="active" {% endif %} href={{ url_for('project_entry') }}>project entry</a>
-            <a {% if self._TemplateReference__context.name.rstrip('.html') == 'summary_table' %} class="active" {% endif %} href={{ url_for('summary_table') }}>projects</a>
+            <a {% if self._TemplateReference__context.name.rstrip('.html') == 'project_entry' %} class="active" {% endif %} href={{ url_for('project_entry') }}>new project</a>
+            <a {% if self._TemplateReference__context.name.rstrip('.html') == 'summary_table' %} class="active" {% endif %} href={{ url_for('summary_table') }}>portfolio</a>
         {% endif %}
         <a {% if self._TemplateReference__context.name.rstrip('.html') == 'about' %} class="active" {% endif %} href={{ url_for('about') }}>about</a>
         <a {% if self._TemplateReference__context.name.rstrip('.html') == 'map' %} class="active" {% endif %} href={{ url_for('map') }}>map</a>
