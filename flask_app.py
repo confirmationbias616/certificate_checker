@@ -1023,8 +1023,10 @@ def map():
         AND
             web_certificates.cert_id IN (SELECT cert_id FROM cert_search WHERE text MATCH ?)
     """
-    get_lat = float(request.args.get('start_coords_lat', 45.41117))
-    get_lng = float(request.args.get('start_coords_lng', -75.69812))
+    get_lat = request.args.get('start_coords_lat', 'nan')
+    get_lat = 45.41117 if get_lat == 'nan' else float(get_lat)
+    get_lng = request.args.get('start_coords_lng', 'nan')
+    get_lng = -75.69812 if get_lng == 'nan' else float(get_lng)
     region_size = request.args.get('region_size', 500)
     pad = (float(region_size) ** 0.5)/1.3
     text_search = request.args.get('text_search', None)
@@ -1032,6 +1034,7 @@ def map():
     today = datetime.datetime.now().date()
     end_date = request.args.get('end_date', str(today))
     limit_daily = request.args.get('limit_daily')
+    limit_count = 200
     while True:
         try:
             with create_connection() as conn:
@@ -1044,16 +1047,12 @@ def map():
     df_cp_closed.dropna(axis=0, subset=['lat'], inplace=True)
     while True:
         with create_connection() as conn:
-            if text_search or limit_daily:
-                limit_count = 6000000 
-            else:
-                limit_count = 200
             if text_search:
                 df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, text_search, limit_count*2])
             else:
                 df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date,limit_count*2])
-        if len(df_wc) > 200:
-            last_date = df_wc.iloc[200].pub_date
+        if len(df_wc) > limit_count:
+            last_date = df_wc.iloc[limit_count].pub_date
         elif len(df_wc):
             last_date = list(df_wc.pub_date)[-1]
         else:
@@ -1071,7 +1070,6 @@ def map():
     def select_df_wc_window(start_date, end_date):
         return df_wc[(start_date <= df_wc.pub_date) & (df_wc.pub_date <= end_date)]
     df_wc = select_df_wc_window(start_date, end_date)
-    # import pdb; pdb.set_trace()
     start_zoom = request.args.get('start_zoom', 6)
     start_coords_lat = request.args.get('start_coords_lat', df_cp_open.lat.mean())
     start_coords_lng = request.args.get('start_coords_lng', df_cp_open.lng.mean())
