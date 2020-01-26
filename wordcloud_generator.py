@@ -58,12 +58,15 @@ general_terms = [
     'leaders',
     'division',
     'systems',
+    'restoration'
 ]
 dvision_terms = [
     'mechanical',
     'plumbing',
     'heating',
     'hvac',
+    'cooling',
+    'climate',
     'refrigeration',
     'insulation',
     'controls',
@@ -73,7 +76,10 @@ dvision_terms = [
     'paving',
     'excavating',
     'landscaping',
+    'masonry',
+    'drywall',
     'structural',
+    'elevator',
     'roofing',
 ]
 
