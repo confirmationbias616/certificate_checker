@@ -1271,6 +1271,22 @@ def map():
             """font-awesome/4.6.3/css/font-awesome.min.css""", 
             """font-awesome/4.7.0/css/font-awesome.min.css"""
         )  # update font-awesome in folium-generated html to match this project's `style.css`.
+        html = html.replace(
+            """initial-scale=1.0, maximum-scale=1.0,""",
+            """initial-scale=0.95, maximum-scale=0.95,"""
+        )
+        html = html.replace(
+            """width: 100.0%;""",
+            """width: 95.0%;"""
+        )
+        html = html.replace(
+            """position: relative;""",
+            """position: center;"""
+        )
+        html = html.replace(
+            """left: 0.0%;""",
+            """left: 2.5%;"""
+        )
         f.seek(0)
         f.write(html)
         f.truncate()
