@@ -1290,7 +1290,7 @@ def map():
         f.seek(0)
         f.write(html)
         f.truncate()
-    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), limit_daily=limit_daily, location_string=location_string, text_search=text_search, wc_id=text_search.replace(' ', '_'))
+    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), limit_daily=limit_daily, location_string=location_string, text_search=text_search, wc_id=text_search.replace(' ', '_') if text_search else '')
 
 
 if __name__ == "__main__":
