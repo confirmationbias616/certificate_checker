@@ -6,6 +6,8 @@ flask_session/*
 
 templates/map_widget.html
 
+static/wordcloud*
+
 # ignore results.json except the dummy file in test folder
 results.json
 !test/results.json

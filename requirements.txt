@@ -58,3 +58,4 @@ pyOpenSSL==19.0.0
 Flask-Login==0.4.1
 Flask-Session==0.3.1
 Stripe==2.42.0
+wordcloud-1.6.0

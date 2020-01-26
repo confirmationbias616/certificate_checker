@@ -33,6 +33,7 @@ import requests
 # from db import init_db_command
 from user import User
 import stripe
+from wordcloud_generator import generate_wordcloud
 
 
 logger = logging.getLogger(__name__)
@@ -1049,6 +1050,7 @@ def map():
         with create_connection() as conn:
             if text_search:
                 df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, text_search, limit_count*2])
+                generate_wordcloud(text_search)
             else:
                 df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date,limit_count*2])
         if len(df_wc) > limit_count:
@@ -1272,7 +1274,7 @@ def map():
         f.seek(0)
         f.write(html)
         f.truncate()
-    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), limit_daily=limit_daily, location_string=location_string, text_search=text_search)
+    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), limit_daily=limit_daily, location_string=location_string, text_search=text_search, wc_id=text_search.replace(' ', '_'))
 
 
 if __name__ == "__main__":
