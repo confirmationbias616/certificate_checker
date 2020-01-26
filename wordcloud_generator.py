@@ -62,6 +62,8 @@ general_terms = [
 ]
 dvision_terms = [
     'mechanical',
+    'sheet metal',
+    'air',
     'plumbing',
     'heating',
     'hvac',
