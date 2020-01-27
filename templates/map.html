@@ -56,12 +56,11 @@
         </div>
     </div>
     {% include "map_widget.html" %}
+    <br>
     {% if text_search %}
     <hr style="border: 1px solid var(--outline);">
     <div align="center">
-        <a href="static/wordcloud_{{ wc_id }}.png">
-            <img src="static/wordcloud_{{ wc_id }}.png" alt="wordcloud not found" width=98%>
-        </a>
+        <i><img src="static/wordcloud_{{ wc_id }}.png" alt="Not enough results to generate wordcloud" width=98%>{% if location_string and location_string != 'Ontario' %}Wordcloud matches restrained by searched keywords only - not map focus{% endif %}</i>
     </div>
     
     {% endif %}
