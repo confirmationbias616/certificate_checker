@@ -921,7 +921,7 @@ def set_location():
     location_string = request.form.get('location_string')
     limit_daily = request.form.get('limit_daily')
     text_search = request.form.get('text_search')
-    text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü ]*', text_search))  # strip out disallowed charcters
+    text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search))  # strip out disallowed charcters
     start_coords, region_size = get_city_latlng(location_string.title())
     if not start_coords:
         location_string = 'Ontario'
