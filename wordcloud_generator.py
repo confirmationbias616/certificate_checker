@@ -125,7 +125,7 @@ dvision_terms = [
 ]
 
 def grey_color_func(word, font_size, position, orientation, random_state=None, **kwargs):
-    return "hsl(0, 0%%, %d%%)" % random.randint(60, 100)
+    return "hsl(268, 17%%, %d%%)" % random.randint(0, 45)
 
 def generate_wordcloud(term):
     query = """
