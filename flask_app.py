@@ -899,6 +899,7 @@ def rewind():
     limit_daily = request.args.get('limit_daily')
     location_string = request.args.get('location_string')
     text_search = request.args.get('text_search')
+    wordcloud_requested = request.args.get('wordcloud_requested')
     skip = request.args.get('skip')
     if skip == 'd':
         end_date = str(parse_date(request.args.get('start_date')).date() - dateutil.relativedelta.relativedelta(days=1))
@@ -914,7 +915,7 @@ def rewind():
     start_coords_lng = request.args.get('start_coords_lng')
     start_zoom = request.args.get('start_zoom', 6)
     region_size = request.args.get('region_size', 500)
-    return redirect(url_for("map", end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search))
+    return redirect(url_for("map", end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested))
 
 @app.route('/set_location', methods=["POST", "GET"])
 def set_location():
@@ -922,6 +923,7 @@ def set_location():
     limit_daily = request.form.get('limit_daily')
     text_search = request.form.get('text_search')
     text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search))  # strip out disallowed charcters
+    wordcloud_requested = request.form.get('wordcloud_requested')
     start_coords, region_size = get_city_latlng(location_string.title())
     if not start_coords:
         location_string = 'Ontario'
@@ -931,7 +933,7 @@ def set_location():
             start_zoom = zoom_level
             break
         start_zoom = 5
-    return redirect(url_for("map", start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search))
+    return redirect(url_for("map", start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested))
 
 @app.route('/map', methods=["POST", "GET"])
 def map():
@@ -1031,6 +1033,7 @@ def map():
     region_size = request.args.get('region_size', 500)
     pad = (float(region_size) ** 0.5)/1.3
     text_search = request.args.get('text_search', None)
+    wordcloud_requested = request.args.get('wordcloud_requested', None)
     location_string = request.args.get('location_string')
     today = datetime.datetime.now().date()
     end_date = request.args.get('end_date', str(today))
@@ -1050,7 +1053,8 @@ def map():
         with create_connection() as conn:
             if text_search:
                 df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, text_search, limit_count*2])
-                generate_wordcloud(text_search)
+                if wordcloud_requested:
+                    generate_wordcloud(text_search)
             else:
                 df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date,limit_count*2])
         if len(df_wc) > limit_count:
@@ -1290,7 +1294,7 @@ def map():
         f.seek(0)
         f.write(html)
         f.truncate()
-    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), limit_daily=limit_daily, location_string=location_string, text_search=text_search, wc_id=text_search.replace(' ', '_') if text_search else '')
+    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), limit_daily=limit_daily, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, wc_id=text_search.replace(' ', '_') if text_search else '')
 
 
 if __name__ == "__main__":
