@@ -143,6 +143,11 @@ def generate_wordcloud(term):
     relevant_words = [word.lower().lstrip().rstrip().replace('.','') for word in df['contractor_clean']]
     relevant_text = " ".join(relevant_words)
     stopwords = set(STOPWORDS)
-    wordcloud = WordCloud(stopwords=stopwords, background_color=None, mode='RGBA', width=1000, height=400, color_func=lambda *args, **kwargs: "black").generate(relevant_text)
-    # wordcloud.recolor(color_func=grey_color_func, random_state=3)  # Not used for now
-    wordcloud.to_file(f"static/wordcloud_{term.replace(' ', '_')}.png")    stopwords.update(general_terms + dvision_terms + term.split(' '))
+    stopwords.update(general_terms + dvision_terms + term.split(' '))
+    try:
+        wordcloud = WordCloud(stopwords=stopwords, background_color=None, mode='RGBA', width=1000, height=400, color_func=lambda *args, **kwargs: "black").generate(relevant_text.upper())
+        if len(wordcloud.words_) >= 4:
+            wordcloud.recolor(color_func=grey_color_func, random_state=3)
+            wordcloud.to_file(f"static/wordcloud_{term.replace(' ', '_')}.png")
+    except ValueError:
+        pass  # search term did not generate enough words
