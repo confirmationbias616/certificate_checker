@@ -50,7 +50,7 @@
             <a {% if self._TemplateReference__context.name.rstrip('.html') == 'summary_table' %} class="active" {% endif %} href={{ url_for('summary_table') }}>portfolio</a>
         {% endif %}
         <a {% if self._TemplateReference__context.name.rstrip('.html') == 'about' %} class="active" {% endif %} href={{ url_for('about') }}>about</a>
-        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'map' %} class="active" {% endif %} href={{ url_for('map') }}>map</a>
+        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'map' %} class="active" {% endif %} href={{ url_for('map') }}>search</a>
     </div>
     <hr style="border: 2px solid black; margin:0px">
     {% block body %}{% endblock %}
