@@ -142,10 +142,7 @@ def generate_wordcloud(term):
     df['contractor_clean'] = df.contractor.apply(lambda x: cleanco(x).clean_name())
     relevant_words = [word.lower().lstrip().rstrip().replace('.','') for word in df['contractor_clean']]
     relevant_text = " ".join(relevant_words)
-    for term_word in term.split(' '):
-        relevant_text = relevant_text.replace(term_word, '')
     stopwords = set(STOPWORDS)
-    stopwords.update(general_terms + dvision_terms)
     wordcloud = WordCloud(stopwords=stopwords, background_color=None, mode='RGBA', width=1000, height=400, color_func=lambda *args, **kwargs: "black").generate(relevant_text)
     # wordcloud.recolor(color_func=grey_color_func, random_state=3)  # Not used for now
-    wordcloud.to_file(f"static/wordcloud_{term.replace(' ', '_')}.png")
+    wordcloud.to_file(f"static/wordcloud_{term.replace(' ', '_')}.png")    stopwords.update(general_terms + dvision_terms + term.split(' '))
