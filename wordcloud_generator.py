@@ -140,7 +140,7 @@ def generate_wordcloud(term):
     with create_connection() as conn:
         df = pd.read_sql(query, conn, params=[term])
     df['contractor_clean'] = df.contractor.apply(lambda x: cleanco(x).clean_name())
-    relevant_words = [word.lower().lstrip().rstrip() for word in df['contractor_clean']]
+    relevant_words = [word.lower().lstrip().rstrip().replace('.','') for word in df['contractor_clean']]
     relevant_text = " ".join(relevant_words)
     for term_word in term.split(' '):
         relevant_text = relevant_text.replace(term_word, '')
