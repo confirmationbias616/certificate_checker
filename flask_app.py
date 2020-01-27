@@ -1137,7 +1137,7 @@ def map():
         folium.Marker(
             [row.lat, row.lng],
             popup=popup,
-            tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
+            # tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
             icon=folium.Icon(prefix='fa', icon='check', color='gray')
         ).add_to(feature_group)
     if session.get('account_type') == "full":
@@ -1191,7 +1191,7 @@ def map():
         folium.Marker(
             [row.lat, row.lng],
             popup=popup,
-            tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
+            # tooltip=f"{row.title[:25]}{'...' if len(row.title) >= 25 else ''}",
             icon=folium.Icon(prefix='fa', icon='search', color='black')
         ).add_to(feature_group)
     if session.get('account_type') == "full":
@@ -1253,7 +1253,7 @@ def map():
         mc.add_child(folium.Marker(
             [row.lat, row.lng],
             popup=popup,
-            tooltip=f"{str(row.title)[:25]}{'...' if len(str(row.title)) >= 25 else ''}",
+            # tooltip=f"{str(row.title)[:25]}{'...' if len(str(row.title)) >= 25 else ''}",
             icon=folium.Icon(prefix='fa', icon='circle', color='green')
         ))
     feature_group.add_child(mc)
