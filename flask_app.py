@@ -1016,7 +1016,7 @@ def map():
         AND
             lng < ?
         AND
-            pub_date < ?
+            pub_date <= ?
         {}
         ORDER BY 
             pub_date
