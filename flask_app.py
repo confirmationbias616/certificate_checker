@@ -1309,6 +1309,32 @@ def map():
             """left: 0.0%;""",
             """left: 2.5%;"""
         )
+        html = html.replace(
+            """</style>""",
+            """
+                    .marker-cluster-small {
+                      background-color: rgba(110, 40, 100, 0.6);
+                    }
+                    .marker-cluster-small div {
+                      background-color: rgba(110, 40, 100, 0.6);
+                    }
+
+                    .marker-cluster-medium {
+                      background-color: rgba(93, 82, 111, 0.6);
+                    }
+                    .marker-cluster-medium div {
+                      background-color: rgba(93, 82, 111, 0.6);
+                    }
+
+                    .marker-cluster-large {
+                      background-color: rgba(138, 175, 190, 0.6);
+                    }
+                    .marker-cluster-large div {
+                      background-color: rgba(138, 175, 190, 0.6);
+                    }
+                  </style>
+            """
+        )
         f.seek(0)
         f.write(html)
         f.truncate()
