@@ -913,7 +913,7 @@ def rewind():
     location_string = request.args.get('location_string')
     text_search = request.args.get('text_search')
     wordcloud_requested = request.args.get('wordcloud_requested')
-    select_source = request.form.get('select_source')
+    select_source = request.args.get('select_source')
     skip = request.args.get('skip')
     if skip == 'd':
         end_date = str(parse_date(request.args.get('start_date')).date() - dateutil.relativedelta.relativedelta(days=1))
@@ -1312,7 +1312,7 @@ def map():
         f.seek(0)
         f.write(html)
         f.truncate()
-    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), limit_daily=limit_daily, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, wc_id=text_search.replace(' ', '_') if text_search else '')
+    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), limit_daily=limit_daily, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, wc_id=text_search.replace(' ', '_') if text_search else '', select_source=select_source)
 
 
 if __name__ == "__main__":
