@@ -14,7 +14,7 @@
             <div style="display: inline-block">
                 <input type="text" name="location_string" size="20" {% if location_string %} value="{{ location_string }}" {% endif %} placeholder="Focus on specific region" autofocus style="float: left; border: 1px solid black">
                 &emsp;
-                <input type="text" name="text_search" size="20" {% if text_search %} value="{{ text_search }}" {% endif %} placeholder="List one or many keywords" autofocus style="float: left; border: 1px solid black">
+                <input type="text" id="text_search" name="text_search" size="20" {% if text_search %} value="{{ text_search }}" {% endif %} placeholder="List one or many keywords" autofocus style="float: left; border: 1px solid black" keydown="enable_wordcloud()">
                 &emsp;
                 <input type="submit" id="small_button" value="Explore!" style="width: 6em;" >
             </div>
@@ -24,7 +24,7 @@
                     day-to-day view
                 </span> &nbsp
                 <span style="font-size: 85%;">
-                    <input type="checkbox" id="wordcloud_requested" name="wordcloud_requested" value="True" checked>
+                    <input type="checkbox" id="wordcloud_requested" name="wordcloud_requested" value="True" {% if not text_search %} disabled {% endif %} {% if wordcloud_requested and text_search %} checked {% endif %}>
                     generate wordcloud
                 </span>
             </div>
@@ -49,25 +49,35 @@
             </form>
             {% else %}
             <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
-                <input type="submit" id="small_button" value="<- older" style="width: 5em">
+                <input type="submit" id="small_button" value="<- older" style="width: 5em;">
             </form>
             {% endif %}
             
-            <p align="center" style ='float: left; padding: 5px;'><strong>{{ cert_count }}</strong> CSP's for <strong>{{ start_date }}</strong>{% if not limit_daily %} to <strong>{{ end_date }}</strong>{% endif %}</p>
+            <p align="center" style ='float: left; padding: 5px; margin-top:2px'><strong>{{ cert_count }}</strong> CSP's for <strong>{{ start_date }}</strong>{% if not limit_daily %} to <strong>{{ end_date }}</strong>{% endif %}</p>
         {% else %}
-            <p align="center" style ='float: left; padding: 5px;'><strong>Entirety of CSP history (> yr2000) has been explored for this region.</strong></p>
+            <p align="center" style ='float: left; padding: 5px; margin-top:2px'><strong>Entirety of CSP history (> yr2000) has been explored for this region.</strong></p>
         {% endif %}
         </div>
     </div>
     {% include "map_widget.html" %}
     <br>
-    {% if text_search %}
+    {% if wordcloud_requested %}
     <hr style="border: 1px solid var(--outline);">
     <div align="center">
         <i><img src="static/wordcloud_{{ wc_id }}.png" alt="Not enough results to generate wordcloud" width=98%>{% if location_string and location_string != 'Ontario' %}Wordcloud matches restrained by searched keywords only - not map focus{% endif %}</i>
     </div>
-    
     {% endif %}
+    <script type="text/javascript" >  
+        document.addEventListener('keydown', enable_wordcloud);
+        function enable_wordcloud(){  
+             if(document.getElementById("text_search").value.length > 1){  
+                 document.getElementById("wordcloud_requested").disabled = false;  
+             }else{
+               document.getElementById("wordcloud_requested").disabled = true;
+               document.getElementById("wordcloud_requested").checked = false;
+             }  
+        }  
+    </script>
     {% endblock %}
 </body>
 </html>
