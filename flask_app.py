@@ -1030,6 +1030,8 @@ def map():
             lng < ?
         AND
             pub_date <= ?
+        AND
+            web_certificates.source LIKE ?
         {}
         ORDER BY 
             pub_date
@@ -1050,6 +1052,7 @@ def map():
     location_string = request.args.get('location_string')
     today = datetime.datetime.now().date()
     end_date = request.args.get('end_date', str(today))
+    select_source = request.args.get('select_source', '%')
     limit_daily = request.args.get('limit_daily')
     limit_count = 200
     while True:
@@ -1065,11 +1068,11 @@ def map():
     while True:
         with create_connection() as conn:
             if text_search:
-                df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, text_search, limit_count*2])
+                df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, text_search, limit_count*2])
                 if wordcloud_requested:
                     generate_wordcloud(text_search)
             else:
-                df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date,limit_count*2])
+                df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, limit_count*2])
         if len(df_wc) > limit_count:
             last_date = df_wc.iloc[limit_count].pub_date
         elif len(df_wc):

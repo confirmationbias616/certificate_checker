@@ -26,6 +26,14 @@
                 <span style="font-size: 85%;">
                     <input type="checkbox" id="wordcloud_requested" name="wordcloud_requested" value="True" {% if not text_search %} disabled {% endif %} {% if wordcloud_requested and text_search %} checked {% endif %}>
                     generate wordcloud
+                </span> &nbsp
+                <span style="font-size: 85%;">
+                    <select name="source_select">
+                        <option value="%"> -- all sources -- </option>
+                        <option value="dcn">Daily Commercial News</option>
+                        <option value="ocn">Ontario Construction News</option>
+                        <option value="l2b">Link2Build</option>
+                    </select>
                 </span>
             </div>
         </form>
