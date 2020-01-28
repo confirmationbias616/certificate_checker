@@ -127,7 +127,7 @@ def scrape(
                 dateutil.parser.parse(entry_soup.find("date").get_text()).date()
             )
             city = (
-                entry_soup.find("h1", {"class": "entry-title"}).get_text().split(":")[0]
+                entry_soup.find("h2", {"class": "ocn-subheading"}).get_text().split(":")[0]
             )
             if cert_type == "csp":
                 address = (
