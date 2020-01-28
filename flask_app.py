@@ -640,6 +640,19 @@ def user_account():
     load_user()
     return render_template("user_account.html")
 
+@app.route("/terminate_account", methods=["POST", "GET"])
+def terminate_account():
+    load_user()
+    if request.args.get('confirmed'):
+        update_account_type_query = (
+            "UPDATE users SET account_type = '' WHERE id = ?"
+        )
+        with create_connection() as conn:
+            conn.cursor().execute(update_account_type_query, [session.get('company_id')])
+        session.clear()
+        return redirect(url_for("index"))
+    return render_template("terminate_account.html")
+
 @app.route("/contact_config", methods=["POST", "GET"])
 def contact_config():
     load_user()

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  {% endblock %}
+</head>
+<body>
+    {% block body %}
+    <br>
+    <div align='center'>
+        Are you sure?!
+    </div>
+    <br>
+    <hr style="border: 1px solid black">
+    <br>
+    <div align='center'>
+        <a href="{{ url_for('terminate_account', confirmed=true) }}">yes, terminate.</a>
+    </div>
+    <br><br>
+    {% endblock %}
+</body>
+</html>

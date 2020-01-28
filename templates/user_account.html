@@ -21,7 +21,7 @@
         </li>
         <li style="display: inline-block; width: 400px;">
             {% if session.get('account_type') %}
-                <strong>account type:</strong> {{ session.get('account_type') }}
+                <strong>account type:</strong> {{ session.get('account_type') }} (<a href="{{ url_for('terminate_account') }}">terminate account</a>)
             {% else %}
                 <ul><a href="{{ url_for('payment') }}">Upgrade account</a></ul>
             {% endif %}
