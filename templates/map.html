@@ -30,9 +30,9 @@
                 <span style="font-size: 85%;">
                     <select name="select_source">
                         <option value="%"> -- all sources -- </option>
-                        <option value="dcn">Daily Commercial News</option>
-                        <option value="ocn">Ontario Construction News</option>
-                        <option value="l2b">Link2Build</option>
+                        <option value="dcn" {% if select_source == "dcn" %} selected {% endif %}>Daily Commercial News</option>
+                        <option value="ocn" {% if select_source == "ocn" %} selected {% endif %}>Ontario Construction News</option>
+                        <option value="l2b" {% if select_source == "l2b" %} selected {% endif %}>Link2Build</option>
                     </select>
                 </span>
             </div>
@@ -43,20 +43,20 @@
         <div style="display: inline-block">
         {% if cert_count %}
             {% if limit_daily %}
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='y', location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='y', location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, select_source=select_source) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
                     <input type="submit" id="small_button" value="<- 1y" style="width: 5em">
             </form>
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='m', location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='m', location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, select_source=select_source) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
                     <input type="submit" id="small_button" value="<- 1m" style="width: 5em">
             </form>
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='w', location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='w', location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, select_source=select_source) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
                     <input type="submit" id="small_button" value="<- 1w" style="width: 5em">
             </form>
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='d', location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='d', location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, select_source=select_source) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
                     <input type="submit" id="small_button" value="<- 1d" style="width: 5em">
             </form>
             {% else %}
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, select_source=select_source) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
                 <input type="submit" id="small_button" value="<- older" style="width: 5em;">
             </form>
             {% endif %}
