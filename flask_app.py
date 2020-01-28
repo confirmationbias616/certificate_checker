@@ -1095,7 +1095,7 @@ def map():
                 }}
                 h5 {{
                     text-align: center;
-                    color: rgb(104, 76, 141);
+                    color: rgb(112, 94, 134);
                     font-family: 'Montserrat', sans-serif
                 }}
                 table {{
@@ -1157,7 +1157,7 @@ def map():
                 }}
                 h5 {{
                     text-align: center;
-                    color: rgb(104, 76, 141);
+                    color: rgb(112, 94, 134);
                     font-family: 'Montserrat', sans-serif
                 }}
                 table {{
@@ -1211,7 +1211,7 @@ def map():
                 }}
                 h5 {{
                     text-align: center;
-                    color: rgb(104, 76, 141);
+                    color: rgb(112, 94, 134);
                     font-family: 'Montserrat', sans-serif
                 }}
                 table {{
