@@ -141,6 +141,13 @@ dvision_terms = [
     'caulking',
 ]
 
+geographic_locations = [
+    'canada',
+    'canadian',
+    'ontario',
+    'ontarian'
+]
+
 def grey_color_func(word, font_size, position, orientation, random_state=None, **kwargs):
     return "hsl(268, 17%%, %d%%)" % random.randint(0, 45)
 
@@ -161,6 +168,8 @@ def generate_wordcloud(term, field):
     relevant_text = " ".join(relevant_words)
     stopwords = set(STOPWORDS)
     stopwords.update(general_terms + dvision_terms + term.split(' '))
+    if field != 'owner':
+        stopwords.update(geographic_locations)
     try:
         wordcloud = WordCloud(stopwords=stopwords, background_color=None, mode='RGBA', width=1000, height=400, color_func=lambda *args, **kwargs: "black").generate(relevant_text.upper())
         if len(wordcloud.words_) >= 4:
