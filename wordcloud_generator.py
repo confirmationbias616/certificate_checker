@@ -144,9 +144,9 @@ dvision_terms = [
 def grey_color_func(word, font_size, position, orientation, random_state=None, **kwargs):
     return "hsl(268, 17%%, %d%%)" % random.randint(0, 45)
 
-def generate_wordcloud(term):
+def generate_wordcloud(term, field):
     query = """
-        SELECT contractor
+        SELECT {}
         FROM web_certificates
         WHERE cert_id in (
             SELECT cert_id 
@@ -155,8 +155,8 @@ def generate_wordcloud(term):
         )
     """
     with create_connection() as conn:
-        df = pd.read_sql(query, conn, params=[term])
-    df['contractor_clean'] = df.contractor.apply(lambda x: cleanco(x).clean_name())
+        df = pd.read_sql(query.format(field), conn, params=[term])
+    df['contractor_clean'] = df[field].apply(lambda x: cleanco(x).clean_name())
     relevant_words = [word.lower().lstrip().rstrip().replace('.','') for word in df['contractor_clean']]
     relevant_text = " ".join(relevant_words)
     stopwords = set(STOPWORDS)
@@ -165,6 +165,6 @@ def generate_wordcloud(term):
         wordcloud = WordCloud(stopwords=stopwords, background_color=None, mode='RGBA', width=1000, height=400, color_func=lambda *args, **kwargs: "black").generate(relevant_text.upper())
         if len(wordcloud.words_) >= 4:
             wordcloud.recolor(color_func=grey_color_func, random_state=3)
-            wordcloud.to_file(f"static/wordcloud_{term.replace(' ', '_')}.png")
+            wordcloud.to_file(f"static/wordcloud_{term.replace(' ', '_')}_{field}.png")
     except ValueError:
         pass  # search term did not generate enough words
