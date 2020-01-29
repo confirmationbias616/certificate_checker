@@ -61,6 +61,7 @@
             </div>
         </form>
     </div>
+    {% if not wordcloud_requested %}
     <hr style="border: 1px solid var(--outline);">
     <div style="width: 100%; text-align: center;">
         <div style="display: inline-block">
@@ -92,7 +93,7 @@
     </div>
     {% include "map_widget.html" %}
     <br>
-    {% if wordcloud_requested %}
+    {% else %}
     <hr style="border: 1px solid var(--outline);">
     <div align="center">
         <h2><u>contractors</u></h2>
