@@ -95,7 +95,14 @@
     {% if wordcloud_requested %}
     <hr style="border: 1px solid var(--outline);">
     <div align="center">
-        <i><img src="static/wordcloud_{{ wc_id }}.png" alt="Not enough results to generate wordcloud" width=98%>{% if location_string and location_string != 'Ontario' %}Wordcloud matches restrained by searched keywords only - not map focus{% endif %}</i>
+        <h2><u>contractors</u></h2>
+        <i><img src="static/wordcloud_{{ wc_id }}_contractor.png" alt="Not enough results to generate wordcloud" width=98%>{% if location_string and location_string != 'Ontario' %}Wordcloud matches restrained by searched keywords only - not map focus{% endif %}</i>
+        <hr style="border: 1px solid var(--outline);">
+        <h2><u>certifiers (engineers / architects)</u></h2>
+        <i><img src="static/wordcloud_{{ wc_id }}_engineer.png" alt="Not enough results to generate wordcloud" width=98%>{% if location_string and location_string != 'Ontario' %}Wordcloud matches restrained by searched keywords only - not map focus{% endif %}</i>
+        <hr style="border: 1px solid var(--outline);">
+        <h2><u>owners</u></h2>
+        <i><img src="static/wordcloud_{{ wc_id }}_owner.png" alt="Not enough results to generate wordcloud" width=98%>{% if location_string and location_string != 'Ontario' %}Wordcloud matches restrained by searched keywords only - not map focus{% endif %}</i>
     </div>
     {% endif %}
     <script type="text/javascript" >  

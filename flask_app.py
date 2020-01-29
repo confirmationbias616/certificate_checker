@@ -1072,7 +1072,9 @@ def map():
             if text_search:
                 df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, text_search, limit_count*2])
                 if wordcloud_requested:
-                    generate_wordcloud(text_search)
+                    generate_wordcloud(text_search, 'contractor')
+                    generate_wordcloud(text_search, 'engineer')
+                    generate_wordcloud(text_search, 'owner')
             else:
                 df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, limit_count*2])
         if len(df_wc) > limit_count:
