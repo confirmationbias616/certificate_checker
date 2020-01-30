@@ -1077,7 +1077,7 @@ def map():
                     wc_count, _ = generate_wordcloud(text_search, 'contractor')
                     field_results = [(field, generate_wordcloud(text_search, field)[1]) for field in ('contractor', 'engineer', 'owner', 'city')]
                     sorted_field_results = sorted(field_results, key=lambda field_results:field_results[1])
-                    if sorted_field_results[0][1] < 0.2:
+                    if sorted_field_results[0][1] < 0.25:
                         wc_search_type = sorted_field_results[0][0]
                     print(sorted_field_results)
             else:
