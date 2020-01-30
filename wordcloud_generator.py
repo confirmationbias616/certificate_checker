@@ -213,7 +213,8 @@ def generate_wordcloud(term, field):
         if len(wordcloud.words_) >= 8:
             wordcloud.recolor(color_func=grey_color_func, random_state=3)
             wordcloud.to_file(f"static/wordcloud_{term.replace(' ', '_')}_{field}.png")
+        return len(df), len(wordcloud.words_)/len(df)
     except ValueError:
         pass  # search term did not generate enough words
-    return len(df), len(wordcloud.words_)/len(df)
+        return len(df), None
     
