@@ -215,3 +215,5 @@ def generate_wordcloud(term, field):
             wordcloud.to_file(f"static/wordcloud_{term.replace(' ', '_')}_{field}.png")
     except ValueError:
         pass  # search term did not generate enough words
+    return len(df), len(wordcloud.words_)/len(df)
+    
