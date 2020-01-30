@@ -216,5 +216,5 @@ def generate_wordcloud(term, field):
         return len(df), len(wordcloud.words_)/len(df)
     except ValueError:
         pass  # search term did not generate enough words
-        return len(df), None
+        return len(df), 0
     
