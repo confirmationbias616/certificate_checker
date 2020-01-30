@@ -1278,7 +1278,7 @@ def map():
             [row.lat, row.lng],
             popup=popup,
             # tooltip=f"{str(row.title)[:25]}{'...' if len(str(row.title)) >= 25 else ''}",
-            icon=folium.Icon(prefix='fa', icon='circle', color='green')
+            icon=folium.Icon(prefix='fa', icon='circle', color='lightgray')
         ))
     feature_group.add_child(mc)
     feature_group.add_to(m)
@@ -1312,27 +1312,27 @@ def map():
             """left: 2.5%;"""
         )
         html = html.replace(
-            """</style>""",
-            """
+            """</head>""",
+            """<style>
                     .marker-cluster-small {
-                      background-color: rgba(110, 40, 100, 0.6);
+                      background-color: rgba(130, 117, 147, 0.6);
                     }
                     .marker-cluster-small div {
-                      background-color: rgba(110, 40, 100, 0.6);
+                      background-color: rgba(130, 117, 147, 0.6);
                     }
 
                     .marker-cluster-medium {
-                      background-color: rgba(93, 82, 111, 0.6);
+                      background-color: rgba(112, 94, 134, 0.6);
                     }
                     .marker-cluster-medium div {
-                      background-color: rgba(93, 82, 111, 0.6);
+                      background-color: rgba(112, 94, 134, 0.6);
                     }
 
                     .marker-cluster-large {
-                      background-color: rgba(138, 175, 190, 0.6);
+                      background-color: rgba(91, 71, 116, 0.6);
                     }
                     .marker-cluster-large div {
-                      background-color: rgba(138, 175, 190, 0.6);
+                      background-color: rgba(112, 94, 134, 0.6);
                     }
                   </style>
             """
@@ -1340,7 +1340,6 @@ def map():
         f.seek(0)
         f.write(html)
         f.truncate()
-    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), limit_daily=limit_daily, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, wc_id=text_search.replace(' ', '_') if text_search else '', select_source=select_source)
 
 
 if __name__ == "__main__":
