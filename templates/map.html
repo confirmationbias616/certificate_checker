@@ -74,14 +74,30 @@
     {% else %}
     <hr style="border: 1px solid var(--outline);">
     <div align="center">
-        <h2><u>contractors</u></h2>
-        <i><img src="static/wordcloud_{{ wc_id }}_contractor.png" alt="Not enough results to generate wordcloud" width=98%>{% if location_string and location_string != 'Ontario' %}Wordcloud matches restrained by searched keywords only - not map focus{% endif %}</i>
-        <hr style="border: 1px solid var(--outline);">
-        <h2><u>certifiers (engineers / architects)</u></h2>
-        <i><img src="static/wordcloud_{{ wc_id }}_engineer.png" alt="Not enough results to generate wordcloud" width=98%>{% if location_string and location_string != 'Ontario' %}Wordcloud matches restrained by searched keywords only - not map focus{% endif %}</i>
-        <hr style="border: 1px solid var(--outline);">
-        <h2><u>owners</u></h2>
-        <i><img src="static/wordcloud_{{ wc_id }}_owner.png" alt="Not enough results to generate wordcloud" width=98%>{% if location_string and location_string != 'Ontario' %}Wordcloud matches restrained by searched keywords only - not map focus{% endif %}</i>
+        <i>analisys based on {{ wc_count }} projects</i><br>
+        {% if wc_search_type %}
+            <i>assuming search entity field was mainly </i> <em>{{ wc_search_type }}</em>
+        {% endif %}
+        {% if wc_search_type != 'contractor' %}
+            <hr style="border: 0.5px solid var(--outline);">
+            <h2 style="font-size: 4vw;"><u>contractors</u></h2>
+            <i><img src="static/wordcloud_{{ wc_id }}_contractor.png" alt="Not enough results to generate wordcloud" width=98%>{% if location_string and location_string != 'Ontario' %}Wordcloud matches restrained by searched keywords only - not map focus{% endif %}</i>
+        {% endif %}
+        {% if wc_search_type != 'engineer' %}
+            <hr style="border: 0.5px solid var(--outline);">
+            <h2 style="font-size: 4vw;"><u>certifiers (engineers / architects)</u></h2>
+            <i><img src="static/wordcloud_{{ wc_id }}_engineer.png" alt="Not enough results to generate wordcloud" width=98%>{% if location_string and location_string != 'Ontario' %}Wordcloud matches restrained by searched keywords only - not map focus{% endif %}</i>
+        {% endif %}
+        {% if wc_search_type != 'owner' %}
+            <hr style="border: 0.5px solid var(--outline);">
+            <h2 style="font-size: 4vw;"><u>owners</u></h2>
+            <i><img src="static/wordcloud_{{ wc_id }}_owner.png" alt="Not enough results to generate wordcloud" width=98%>{% if location_string and location_string != 'Ontario' %}Wordcloud matches restrained by searched keywords only - not map focus{% endif %}</i>
+        {% endif %}
+        {% if wc_search_type != 'city' %}
+        <hr style="border: 0.5px solid var(--outline);">
+        <h2 style="font-size: 4vw;"><u>city / region</u></h2>
+        <i><img src="static/wordcloud_{{ wc_id }}_city.png" alt="Not enough results to generate wordcloud" width=98%>{% if location_string and location_string != 'Ontario' %}Wordcloud matches restrained by searched keywords only - not map focus{% endif %}</i>
+    {% endif %}
     </div>
     {% endif %}
     <script type="text/javascript" >  

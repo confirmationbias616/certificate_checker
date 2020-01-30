@@ -1069,12 +1069,17 @@ def map():
     df_cp_closed.dropna(axis=0, subset=['lat'], inplace=True)
     while True:
         with create_connection() as conn:
+            wc_count = None
+            wc_search_type = None
             if text_search:
                 df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, text_search, limit_count*2])
                 if wordcloud_requested:
-                    generate_wordcloud(text_search, 'contractor')
-                    generate_wordcloud(text_search, 'engineer')
-                    generate_wordcloud(text_search, 'owner')
+                    wc_count, _ = generate_wordcloud(text_search, 'contractor')
+                    field_results = [(field, generate_wordcloud(text_search, field)[1]) for field in ('contractor', 'engineer', 'owner', 'city')]
+                    sorted_field_results = sorted(field_results, key=lambda field_results:field_results[1])
+                    if sorted_field_results[0][1] < 0.2:
+                        wc_search_type = sorted_field_results[0][0]
+                    print(sorted_field_results)
             else:
                 df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, limit_count*2])
         if len(df_wc) > limit_count:
@@ -1340,6 +1345,7 @@ def map():
         f.seek(0)
         f.write(html)
         f.truncate()
+    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), limit_daily=limit_daily, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, wc_id=text_search.replace(' ', '_') if text_search else '', select_source=select_source, wc_count=wc_count, wc_search_type=wc_search_type)
 
 
 if __name__ == "__main__":
