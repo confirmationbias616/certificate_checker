@@ -147,7 +147,7 @@ def load_user():
 def index():
     load_user()
     if session.get('account_type') == 'full' or not session.get('company_id'):
-        return redirect(url_for("map"))
+        return redirect(url_for("about"))
     else:
         return redirect(url_for("payment"))
 
