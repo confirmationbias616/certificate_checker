@@ -1252,7 +1252,7 @@ def map():
                 }}
             </style>
             <h4>{row.title}</h4>
-            <hr style="border: 1px solid black">
+            <hr style="border: 1px solid var(--highlight)">
             <table style="width:100%">
                 <tr>
                     <th><b>Date published</b></th>
@@ -1271,8 +1271,8 @@ def map():
                     <td><a href="{row.link}" "target="_blank">{row.source_name}</a></td>
                 </tr>
             </table>
-            <hr style="border: 1px solid black">
-            <h5><em>Web Certificate of Substantial Performance</em></h5>
+            <hr style="border: 1px solid var(--highlight);">
+            <h5 style="color: var(--background);"><em>Web Certificate of Substantial Performance</em></h5>
         """, max_width='250', max_height='200')
         mc.add_child(folium.Marker(
             [row.lat, row.lng],
