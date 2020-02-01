@@ -1113,7 +1113,7 @@ def map():
     def select_df_wc_window(start_date, end_date):
         return df_wc[(start_date <= df_wc.pub_date) & (df_wc.pub_date <= end_date)]
     df_wc = select_df_wc_window(start_date, end_date)
-    start_zoom = request.args.get('start_zoom', 6)
+    start_zoom = request.args.get('start_zoom', 6 if current_lat == 'nan' else 10)
     start_coords_lat = request.args.get('start_coords_lat', df_cp_open.lat.mean())
     start_coords_lng = request.args.get('start_coords_lng', df_cp_open.lng.mean())
     m = folium.Map(tiles='cartodbpositron', location=(get_lat, get_lng), zoom_start=start_zoom, min_zoom=5, height='71%')
