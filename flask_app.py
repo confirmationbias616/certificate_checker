@@ -91,18 +91,21 @@ def load_user(user_id):
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
-# list of tuples determining which upper limit of region size (left) should correspond
-# to which level of zoom (right) for the follium map
-zoom_params = (
-    (0.0002, 15),
-    (0.001, 13),
-    (0.005, 13),
-    (0.01, 13),
-    (0.1, 12),
-    (0.5, 11),
-    (1, 10),
-    (2.5, 8.5),
-)
+def get_zoom_level(region_size):
+    zoom_params = (
+        (0.0002, 15),
+        (0.001, 13),
+        (0.005, 13),
+        (0.01, 13),
+        (0.1, 12),
+        (0.5, 11),
+        (1, 10),
+        (2.5, 8.5),
+    )
+    for param_size, zoom_level in zoom_params:
+        if region_size < param_size:
+            return zoom_level
+    return 5
 
 # this function works in conjunction with `dated_url_for` to make sure the browser uses
 # the latest version of css stylesheet when modified and reloaded during testing
@@ -954,11 +957,7 @@ def set_location():
     if not start_coords:
         location_string = 'Ontario'
         start_coords, region_size = get_city_latlng('ontario')
-    for size, zoom_level in zoom_params:
-        if region_size < size:
-            start_zoom = zoom_level
-            break
-        start_zoom = 5
+    start_zoom = get_zoom_level(region_size)
     return redirect(url_for("map", start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, select_source=select_source))
 
 @app.route('/map', methods=["POST", "GET"])
@@ -1113,7 +1112,7 @@ def map():
     def select_df_wc_window(start_date, end_date):
         return df_wc[(start_date <= df_wc.pub_date) & (df_wc.pub_date <= end_date)]
     df_wc = select_df_wc_window(start_date, end_date)
-    start_zoom = request.args.get('start_zoom', 6 if current_lat == 'nan' else 10)
+    start_zoom = request.args.get('start_zoom', get_zoom_level(region_size))
     start_coords_lat = request.args.get('start_coords_lat', df_cp_open.lat.mean())
     start_coords_lng = request.args.get('start_coords_lng', df_cp_open.lng.mean())
     m = folium.Map(tiles='cartodbpositron', location=(get_lat, get_lng), zoom_start=start_zoom, min_zoom=5, height='71%')
