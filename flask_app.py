@@ -120,9 +120,10 @@ def dated_url_for(endpoint, **values):
     return url_for(endpoint, **values)
 
 def get_current_coords():
-    c = requests.get(f"https://ipgeolocation.com/{request.remote_addr}")
+    ip_add = request.remote_addr
+    print(f"IP address: {request.remote_addr}")
+    c = requests.get(f"https://ipgeolocation.com/{ip_add}")
     if c.status_code == 200:
-        print(f"IP: {c.json()}")
         lat, lng = [float(x) for x in response.json()['coords'].split(',')]
         return lat, lng
     else:
