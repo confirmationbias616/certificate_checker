@@ -954,9 +954,9 @@ def set_location():
     wordcloud_requested = request.form.get('wordcloud_requested')
     select_source = request.form.get('select_source')
     start_coords, region_size = get_city_latlng(location_string.title())
-    if not start_coords:
-        location_string = 'Ontario'
-        start_coords, region_size = get_city_latlng('ontario')
+    # if not start_coords:
+    #     location_string = 'Ontario'
+    #     start_coords, region_size = get_city_latlng('ontario')
     start_zoom = get_zoom_level(region_size)
     return redirect(url_for("map", start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, select_source=select_source))
 
