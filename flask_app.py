@@ -599,7 +599,7 @@ def process_feedback():
 
 @app.route("/about", methods=["POST", "GET"])
 def about():
-    return render_template("about.html", about=True)
+    return render_template("about.html")
 
 
 @app.route("/plan_info", methods=["POST", "GET"])
