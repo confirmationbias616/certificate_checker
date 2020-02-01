@@ -119,6 +119,16 @@ def dated_url_for(endpoint, **values):
             values["q"] = int(os.stat(file_path).st_mtime)
     return url_for(endpoint, **values)
 
+def get_current_coords():
+    c = requests.get(f"https://ipgeolocation.com/{request.remote_addr}")
+    if c.status_code == 200:
+        print(f"IP: {c.json()}")
+        lat, lng = [float(x) for x in response.json()['coords'].split(',')]
+        return lat, lng
+    else:
+        print("Invalid IP address. Running local server?")
+        return 'nan', 'nan'
+
 def load_user():
     if session.get('company_id'):
         return
@@ -1043,11 +1053,12 @@ def map():
         AND
             web_certificates.cert_id IN (SELECT cert_id FROM cert_search WHERE text MATCH ?)
     """
-    get_lat = request.args.get('start_coords_lat', 'nan')
+    current_lat, current_lng = get_current_coords()
+    get_lat = request.args.get('start_coords_lat', current_lat)
     get_lat = 45.41117 if get_lat == 'nan' else float(get_lat)
-    get_lng = request.args.get('start_coords_lng', 'nan')
+    get_lng = request.args.get('start_coords_lng', current_lng)
     get_lng = -75.69812 if get_lng == 'nan' else float(get_lng)
-    region_size = request.args.get('region_size', 500)
+    region_size = request.args.get('region_size', 500 if current_lat == 'nan' else 100)
     pad = (float(region_size) ** 0.5)/1.3
     text_search = request.args.get('text_search', None)
     wordcloud_requested = request.args.get('wordcloud_requested', None)
