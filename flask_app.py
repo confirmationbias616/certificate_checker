@@ -120,7 +120,7 @@ def dated_url_for(endpoint, **values):
     return url_for(endpoint, **values)
 
 def get_current_coords():
-    ip_add = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+    ip_add = request.headers['X-Real-IP']  #special for PythonAnywhere
     print(f"IP address: {ip_add}")
     response = requests.get(f"https://ipgeolocation.com/{ip_add}")
     if response.status_code == 200:
