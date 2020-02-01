@@ -1059,7 +1059,7 @@ def map():
     get_lat = 45.41117 if get_lat == 'nan' else float(get_lat)
     get_lng = request.args.get('start_coords_lng', current_lng)
     get_lng = -75.69812 if get_lng == 'nan' else float(get_lng)
-    region_size = request.args.get('region_size', 500 if current_lat == 'nan' else 10)
+    region_size = request.args.get('region_size', 500 if current_lat == 'nan' else 1)
     pad = (float(region_size) ** 0.5)/1.3
     text_search = request.args.get('text_search', None)
     wordcloud_requested = request.args.get('wordcloud_requested', None)
