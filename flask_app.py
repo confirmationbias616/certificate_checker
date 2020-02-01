@@ -123,14 +123,18 @@ def dated_url_for(endpoint, **values):
     return url_for(endpoint, **values)
 
 def get_current_coords():
-    ip_add = request.headers['X-Real-IP']  #special for PythonAnywhere
+    try:
+        ip_add = request.headers['X-Real-IP']  #special for PythonAnywhere
+    except KeyError:
+        print("Couldn't get IP address. Running local server?")
+        return 'nan', 'nan'
     print(f"IP address: {ip_add}")
     response = requests.get(f"https://ipgeolocation.com/{ip_add}")
     if response.status_code == 200:
         lat, lng = [float(x) for x in response.json()['coords'].split(',')]
         return lat, lng
     else:
-        print("Invalid IP address. Running local server?")
+        print("Invalid IP address.")
         return 'nan', 'nan'
 
 def load_user():
