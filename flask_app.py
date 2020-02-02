@@ -961,7 +961,7 @@ def set_location():
     # if not start_coords:
     #     location_string = 'Ontario'
     #     start_coords, region_size = get_city_latlng('ontario')
-    start_zoom = get_zoom_level(region_size)
+    start_zoom = get_zoom_level(float(region_size))
     return redirect(url_for("map", start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size, result_limit=result_limit, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, select_source=select_source))
 
 @app.route('/map', methods=["POST", "GET"])
@@ -1116,7 +1116,7 @@ def map():
     def select_df_wc_window(start_date, end_date):
         return df_wc[(start_date <= df_wc.pub_date) & (df_wc.pub_date <= end_date)]
     df_wc = select_df_wc_window(start_date, end_date)
-    start_zoom = request.args.get('start_zoom', get_zoom_level(region_size))
+    start_zoom = request.args.get('start_zoom', get_zoom_level(float(region_size)))
     start_coords_lat = request.args.get('start_coords_lat', df_cp_open.lat.mean())
     start_coords_lng = request.args.get('start_coords_lng', df_cp_open.lng.mean())
     m = folium.Map(tiles='cartodbpositron', location=(get_lat, get_lng), zoom_start=start_zoom, min_zoom=5, height='71%')
