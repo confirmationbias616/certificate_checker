@@ -20,6 +20,7 @@
                 <input type="submit" id="small_button" value="Explore!" style="width: 6em;" >
             </div>
             <div style="padding: 5px">
+                <span style="font-size: 85%;">
                     <input type="radio" name="result_limit" value="daily" {% if (not result_limit) or (result_limit == 'daily') %} checked {% endif %}> daily
                     <input type="radio" name="result_limit" value="bulk" {% if result_limit == 'bulk' %} checked {% endif %}> bulk
                 </span> &nbsp
