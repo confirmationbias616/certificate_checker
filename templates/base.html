@@ -50,6 +50,7 @@
         {% endif %}
         <a {% if self._TemplateReference__context.name.rstrip('.html') == 'about' %} class="active" {% endif %} href={{ url_for('about') }}>about</a>
         <a {% if self._TemplateReference__context.name.rstrip('.html') == 'map' %} class="active" {% endif %} href={{ url_for('map') }}>search</a>
+        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'insights' %} class="active" {% endif %} href={{ url_for('insights') }}>insights</a>    
     </div>
     <hr style="border: 2px solid black; margin:0px">
     {% block body %}{% endblock %}

@@ -1360,6 +1360,22 @@ def map():
         f.truncate()
     return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), result_limit=result_limit, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, wc_id=text_search.replace(' ', '_') if text_search else '', select_source=select_source, wc_count=wc_count, wc_search_type=wc_search_type)
 
+@app.route('/insights', methods=["POST", "GET"])
+def insights():
+    load_user()
+    wc_count = None
+    wc_search_type = None
+    text_search = request.form.get('text_search', '')
+    if text_search:
+        text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search))  # strip out disallowed charcters
+        wc_count, _ = generate_wordcloud(text_search, 'contractor')
+        field_results = [(field, generate_wordcloud(text_search, field)[1]) for field in ('contractor', 'engineer', 'owner', 'city')]
+        sorted_field_results = sorted(field_results, key=lambda field_results:field_results[1])
+        if sorted_field_results[0][1] < 0.25:
+            wc_search_type = sorted_field_results[0][0]
+        print(sorted_field_results)
+    return render_template('insights.html', text_search=text_search, wc_id=text_search.replace(' ', '_') if text_search else '', wc_count=wc_count, wc_search_type=wc_search_type)
+
 
 if __name__ == "__main__":
     if load_config()["flask_app"]["adhoc_ssl"]:
