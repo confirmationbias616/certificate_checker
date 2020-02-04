@@ -6,7 +6,7 @@ import requests
 import json
 import numpy as np
 from statistics import mean
-from utils import create_connection
+from utils import create_connection, persistant_cache
 
 
 logger = logging.getLogger(__name__)
@@ -25,20 +25,6 @@ try:
         api_key = json.load(f)["geo_api_key"]
 except FileNotFoundError:  # no `.secret.json` file if running in CI
     api_key = None
-
-def persistant_cache(file_name):
-    def decorator(original_func):
-        try:
-            cache = json.load(open(file_name, 'r'))
-        except (IOError, ValueError):
-            cache = {}
-        def new_func(param):
-            if param not in cache:
-                cache[param] = original_func(param)
-                json.dump(cache, open(file_name, 'w'), indent=4)
-            return cache[param]
-        return new_func
-    return decorator
 
 def api_call(address_param):
     if not api_key:

@@ -63,6 +63,22 @@ def save_config(config):
         yaml.dump(config, stream=stream)
 
 
+def persistant_cache(file_name):
+    """Creates and/or updates persitant cache in json format with given filename."""
+    def decorator(original_func):
+        try:
+            cache = json.load(open(file_name, 'r'))
+        except (IOError, ValueError):
+            cache = {}
+        def new_func(param):
+            if param not in cache:
+                cache[param] = original_func(param)
+                json.dump(cache, open(file_name, 'w'), indent=4)
+            return cache[param]
+        return new_func
+    return decorator
+
+
 def create_connection(db_name="cert_db.sqlite3"):
     """Creates a connection with specified SQLite3 database in current directory.
     Connection conveniently closes on unindent of with block.
