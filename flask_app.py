@@ -959,7 +959,8 @@ def set_location():
     location_string = request.form.get('location_string')
     result_limit = request.form.get('result_limit')
     text_search = request.form.get('text_search')
-    text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search))  # strip out disallowed charcters
+    text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search)[:-1])  # strip out disallowed charcters
+    text_search = ' '.join([x.lower() if x not in ('OR', 'AND') else x for x in text_search.split(' ')])
     wordcloud_requested = request.form.get('wordcloud_requested')
     select_source = request.form.get('select_source')
     start_coords, region_size = get_city_latlng(location_string.title())
@@ -1372,9 +1373,10 @@ def insights():
     wc_search_type = None
     text_search = request.form.get('text_search', '')
     if text_search:
-        text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search))  # strip out disallowed charcters
-        wc_count, _ = generate_wordcloud(text_search, 'contractor')
-        field_results = [(field, generate_wordcloud(text_search, field)[1]) for field in ('contractor', 'engineer', 'owner', 'city')]
+        text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search)[:-1])  # strip out disallowed charcters
+        text_search = ' '.join([x.lower() if x not in ('OR', 'AND') else x for x in text_search.split(' ')])
+        wc_count, _ = generate_wordcloud(f"{text_search}_contractor")
+        field_results = [(field, generate_wordcloud(f"{text_search}_{field}")[1]) for field in ('contractor', 'engineer', 'owner', 'city')]
         sorted_field_results = sorted(field_results, key=lambda field_results:field_results[1])
         if sorted_field_results[0][1] < 0.25:
             wc_search_type = sorted_field_results[0][0]
