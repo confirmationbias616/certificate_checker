@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from cleanco import cleanco
 import pandas as pd
 import random
-from utils import create_connection
+from utils import create_connection, persistant_cache
 
 
 general_terms = [
@@ -189,7 +189,10 @@ geographic_locations = [
 def grey_color_func(word, font_size, position, orientation, random_state=None, **kwargs):
     return "hsl(268, 17%%, %d%%)" % random.randint(0, 45)
 
-def generate_wordcloud(term, field):
+@persistant_cache('static/wc_cache.json')
+def generate_wordcloud(term_field):
+    field = term_field.split('_')[-1]
+    term = '_'.join(term_field.split('_')[:-1])
     query = """
         SELECT {}
         FROM web_certificates

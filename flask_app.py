@@ -1097,8 +1097,8 @@ def map():
             if text_search:
                 df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, text_search, limit_count*2])
                 if wordcloud_requested:
-                    wc_count, _ = generate_wordcloud(text_search, 'contractor')
-                    field_results = [(field, generate_wordcloud(text_search, field)[1]) for field in ('contractor', 'engineer', 'owner', 'city')]
+                    wc_count, _ = generate_wordcloud(f"{text_search}_contractor")
+                    field_results = [(field, generate_wordcloud(f"{text_search}_{field}")[1]) for field in ('contractor', 'engineer', 'owner', 'city')]
                     sorted_field_results = sorted(field_results, key=lambda field_results:field_results[1])
                     if sorted_field_results[0][1] < 0.25:
                         wc_search_type = sorted_field_results[0][0]
