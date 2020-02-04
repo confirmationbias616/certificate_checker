@@ -133,6 +133,9 @@ def get_current_coords():
     print(f"IP address: {ip_add}")
     response = requests.get(f"https://ipgeolocation.com/{ip_add}")
     if response.status_code == 200:
+        if response.json()['region'] != 'Ontario':
+            print("User located outside Ontario")
+            return 'nan', 'nan'
         lat, lng = [float(x) for x in response.json()['coords'].split(',')]
         return lat, lng
     else:
