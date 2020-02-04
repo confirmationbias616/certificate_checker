@@ -34,6 +34,7 @@ import requests
 from user import User
 import stripe
 from wordcloud_generator import generate_wordcloud
+from functools import lru_cache
 
 
 logger = logging.getLogger(__name__)
@@ -122,6 +123,7 @@ def dated_url_for(endpoint, **values):
             values["q"] = int(os.stat(file_path).st_mtime)
     return url_for(endpoint, **values)
 
+@lru_cache(maxsize=32)
 def get_current_coords():
     try:
         ip_add = request.headers['X-Real-IP']  #special for PythonAnywhere
