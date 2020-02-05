@@ -166,6 +166,52 @@ def load_user():
     else:  # for for dev and prod servers
         session['company_id'] = None
 
+# @lru_cache()
+def get_web_certs(east_lat, west_lat, south_lng, north_lng, end_date, select_source, limit_count, text_search=False):
+    web_query = """
+        SELECT 
+            web_certificates.*, 
+            (base_urls.base_url || web_certificates.url_key) AS link,
+            COALESCE(web_certificates.address_lat, web_certificates.city_lat) as lat,
+            COALESCE(web_certificates.address_lng, web_certificates.city_lng) as lng,
+            base_urls.long_name as source_name
+        FROM 
+            web_certificates
+        JOIN 
+            base_urls
+        ON 
+            web_certificates.source=base_urls.source
+        WHERE
+            cert_type = "csp"
+        AND
+            lat > ?
+        AND
+            lat < ?
+        AND
+            lng > ?
+        AND
+            lng < ?
+        AND
+            pub_date <= ?
+        AND
+            web_certificates.source LIKE ?
+        {}
+        ORDER BY 
+            pub_date
+        DESC LIMIT ?
+    """
+    add_fts_query = """
+        AND
+            web_certificates.cert_id IN (SELECT cert_id FROM cert_search WHERE text MATCH ?)
+    """
+    if text_search:
+        web_query = web_query.format(add_fts_query)
+    else:
+        web_query.format('')
+    with create_connection() as conn:
+        df = pd.read_sql(web_query.format(add_fts_query) , conn, params=[east_lat, west_lat, south_lng, north_lng, end_date, select_source, text_search, limit_count*2])
+    return df
+
 @app.route("/", methods=["POST", "GET"])
 def index():
     load_user()
@@ -1029,42 +1075,6 @@ def map():
         AND
             company_id=?
     """
-    web_query = """
-        SELECT 
-            web_certificates.*, 
-            (base_urls.base_url || web_certificates.url_key) AS link,
-            COALESCE(web_certificates.address_lat, web_certificates.city_lat) as lat,
-            COALESCE(web_certificates.address_lng, web_certificates.city_lng) as lng,
-            base_urls.long_name as source_name
-        FROM 
-            web_certificates
-        JOIN 
-            base_urls
-        ON 
-            web_certificates.source=base_urls.source
-        WHERE
-            cert_type = "csp"
-        AND
-            lat > ?
-        AND
-            lat < ?
-        AND
-            lng > ?
-        AND
-            lng < ?
-        AND
-            pub_date <= ?
-        AND
-            web_certificates.source LIKE ?
-        {}
-        ORDER BY 
-            pub_date
-        DESC LIMIT ?
-    """
-    add_fts_query = """
-        AND
-            web_certificates.cert_id IN (SELECT cert_id FROM cert_search WHERE text MATCH ?)
-    """
     current_lat, current_lng = get_current_coords()
     get_lat = request.args.get('start_coords_lat', current_lat)
     get_lat = 45.41117 if get_lat == 'nan' else float(get_lat)
@@ -1091,20 +1101,19 @@ def map():
     df_cp_open.dropna(axis=0, subset=['lat'], inplace=True)
     df_cp_closed.dropna(axis=0, subset=['lat'], inplace=True)
     while True:
-        with create_connection() as conn:
-            wc_count = None
-            wc_search_type = None
-            if text_search:
-                df_wc = pd.read_sql(web_query.format(add_fts_query) , conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, text_search, limit_count*2])
-                if wordcloud_requested:
-                    wc_count, _ = generate_wordcloud(f"{text_search}_contractor")
-                    field_results = [(field, generate_wordcloud(f"{text_search}_{field}")[1]) for field in ('contractor', 'engineer', 'owner', 'city')]
-                    sorted_field_results = sorted(field_results, key=lambda field_results:field_results[1])
-                    if sorted_field_results[0][1] < 0.25:
-                        wc_search_type = sorted_field_results[0][0]
-                    print(sorted_field_results)
-            else:
-                df_wc = pd.read_sql(web_query.format(''), conn, params=[get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, limit_count*2])
+        wc_count = None
+        wc_search_type = None
+        if text_search:
+            df_wc = get_web_certs(get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, limit_count*2, text_search=text_search)
+            if wordcloud_requested:
+                wc_count, _ = generate_wordcloud(f"{text_search}_contractor")
+                field_results = [(field, generate_wordcloud(f"{text_search}_{field}")[1]) for field in ('contractor', 'engineer', 'owner', 'city')]
+                sorted_field_results = sorted(field_results, key=lambda field_results:field_results[1])
+                if sorted_field_results[0][1] < 0.25:
+                    wc_search_type = sorted_field_results[0][0]
+                print(sorted_field_results)
+        else:
+            df_wc = get_web_certs(get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, limit_count*2)
         if len(df_wc) > limit_count:
             last_date = df_wc.iloc[limit_count].pub_date
         elif len(df_wc):
