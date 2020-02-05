@@ -166,7 +166,7 @@ def load_user():
     else:  # for for dev and prod servers
         session['company_id'] = None
 
-# @lru_cache()
+@lru_cache()
 def get_web_certs(east_lat, west_lat, south_lng, north_lng, end_date, select_source, limit_count, text_search=False):
     web_query = """
         SELECT 
