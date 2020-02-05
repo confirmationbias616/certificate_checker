@@ -1100,29 +1100,15 @@ def map():
             logger.info('Database is locked. Retrying SQL queries...')
     df_cp_open.dropna(axis=0, subset=['lat'], inplace=True)
     df_cp_closed.dropna(axis=0, subset=['lat'], inplace=True)
-    while True:
-        wc_count = None
-        wc_search_type = None
-        if text_search:
-            df_wc = get_web_certs(get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, limit_count*2, text_search=text_search)
-            if wordcloud_requested:
-                wc_count, _ = generate_wordcloud(f"{text_search}_contractor")
-                field_results = [(field, generate_wordcloud(f"{text_search}_{field}")[1]) for field in ('contractor', 'engineer', 'owner', 'city')]
-                sorted_field_results = sorted(field_results, key=lambda field_results:field_results[1])
-                if sorted_field_results[0][1] < 0.25:
-                    wc_search_type = sorted_field_results[0][0]
-                print(sorted_field_results)
-        else:
-            df_wc = get_web_certs(get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, limit_count*2)
-        if len(df_wc) > limit_count:
-            last_date = df_wc.iloc[limit_count].pub_date
-        elif len(df_wc):
-            last_date = list(df_wc.pub_date)[-1]
-        else:
-            last_date = "1990-06-2"
-        df_wc = df_wc[df_wc.pub_date >= last_date]
-        logger.info('SQL queries successful!')
-        break
+    df_wc = get_web_certs(get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, limit_count*2, text_search=text_search)
+    if len(df_wc) > limit_count:
+        last_date = df_wc.iloc[limit_count].pub_date
+    elif len(df_wc):
+        last_date = list(df_wc.pub_date)[-1]
+    else:
+        last_date = "1990-06-2"
+    df_wc = df_wc[df_wc.pub_date >= last_date]
+    logger.info('SQL queries successful!')
     df_wc.dropna(axis=0, subset=['lat'], inplace=True)
     rows_remaining = df_wc.head(1) if result_limit == 'daily' else df_wc
     if (not result_limit) or (result_limit == 'daily'):
@@ -1373,7 +1359,7 @@ def map():
         f.seek(0)
         f.write(html)
         f.truncate()
-    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), result_limit=result_limit, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, wc_id=text_search.replace(' ', '_') if text_search else '', select_source=select_source, wc_count=wc_count, wc_search_type=wc_search_type)
+    return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), result_limit=result_limit, location_string=location_string, text_search=text_search, select_source=select_source)
 
 @app.route('/insights', methods=["POST", "GET"])
 def insights():

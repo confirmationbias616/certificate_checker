@@ -25,10 +25,6 @@
                     <input type="radio" name="result_limit" value="bulk" {% if result_limit == 'bulk' %} checked {% endif %}> bulk
                 </span> &nbsp
                 <span style="font-size: 85%;">
-                    <input type="checkbox" id="wordcloud_requested" name="wordcloud_requested" value="True" {% if not text_search %} disabled {% endif %} {% if wordcloud_requested and text_search %} checked {% endif %}>
-                    generate wordcloud
-                </span> &nbsp
-                <span style="font-size: 85%;">
                     <select name="select_source">
                         <option value="%">--  --  --  --  all sources  --  --  --  --</option>
                         <option value="dcn" {% if select_source == "dcn" %} selected {% endif %}>Daily Commercial News</option>
