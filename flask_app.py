@@ -206,7 +206,10 @@ def get_web_certs(east_lat, west_lat, south_lng, north_lng, end_date, select_sou
     """
     web_query = web_query.format(add_fts_query) if text_search else web_query.format('')
     with create_connection() as conn:
-        df = pd.read_sql(web_query.format(add_fts_query) , conn, params=[east_lat, west_lat, south_lng, north_lng, end_date, select_source, text_search, limit_count*2])
+        if text_search:
+            df = pd.read_sql(web_query , conn, params=[east_lat, west_lat, south_lng, north_lng, end_date, select_source, text_search, limit_count*2])
+        else:
+            df = pd.read_sql(web_query , conn, params=[east_lat, west_lat, south_lng, north_lng, end_date, select_source, limit_count*2])
     return df
 
 @app.route("/", methods=["POST", "GET"])
