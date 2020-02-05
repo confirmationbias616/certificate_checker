@@ -204,10 +204,7 @@ def get_web_certs(east_lat, west_lat, south_lng, north_lng, end_date, select_sou
         AND
             web_certificates.cert_id IN (SELECT cert_id FROM cert_search WHERE text MATCH ?)
     """
-    if text_search:
-        web_query = web_query.format(add_fts_query)
-    else:
-        web_query.format('')
+    web_query = web_query.format(add_fts_query) if text_search else web_query.format('')
     with create_connection() as conn:
         df = pd.read_sql(web_query.format(add_fts_query) , conn, params=[east_lat, west_lat, south_lng, north_lng, end_date, select_source, text_search, limit_count*2])
     return df
