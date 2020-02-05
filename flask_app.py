@@ -128,18 +128,18 @@ def get_current_coords():
     try:
         ip_add = request.headers['X-Real-IP']  #special for PythonAnywhere
     except KeyError:
-        print("Couldn't get IP address. Running local server?")
+        logger.info("Couldn't get IP address. Running local server?")
         return 'nan', 'nan'
-    print(f"IP address: {ip_add}")
+    logger.info(f"IP address: {ip_add}")
     response = requests.get(f"https://ipgeolocation.com/{ip_add}")
     if response.status_code == 200:
         if response.json()['region'] != 'Ontario':
-            print("User located outside Ontario")
+            logger.info("User located outside Ontario")
             return 'nan', 'nan'
         lat, lng = [float(x) for x in response.json()['coords'].split(',')]
         return lat, lng
     else:
-        print("Invalid IP address.")
+        logger.info("Invalid IP address.")
         return 'nan', 'nan'
 
 def load_user():
@@ -1002,6 +1002,7 @@ def rewind():
 
 @app.route('/set_location', methods=["POST", "GET"])
 def set_location():
+    logger.debug(f"set_location just got called: {datetime.datetime.now()}")
     location_string = request.form.get('location_string')
     result_limit = request.form.get('result_limit')
     text_search = request.form.get('text_search')
@@ -1020,7 +1021,9 @@ def set_location():
 
 @app.route('/map', methods=["POST", "GET"])
 def map():
+    logger.debug(f"map just got called: {datetime.datetime.now()}")
     load_user()
+    logger.debug(f"done loading user - start building page: {datetime.datetime.now()}")
     closed_query = """
         SELECT
             company_projects.job_number,
@@ -1090,17 +1093,23 @@ def map():
     select_source = request.args.get('select_source', '%')
     result_limit = request.args.get('result_limit')
     limit_count = 200
+    logger.debug(f"done with all map set-up - start getting running SQL queries: {datetime.datetime.now()}")
     while True:
         try:
             with create_connection() as conn:
+                logger.debug(f"getting open project: {datetime.datetime.now()}")
                 df_cp_open = pd.read_sql(open_query, conn, params=[session.get('company_id')])
+                logger.debug(f"getting closed project: {datetime.datetime.now()}")
                 df_cp_closed = pd.read_sql(closed_query, conn, params=[session.get('company_id')])
                 break
         except pd.io.sql.DatabaseError:
             logger.info('Database is locked. Retrying SQL queries...')
+    logger.debug(f"closed db connection after retreiving open and closed: {datetime.datetime.now()}")
     df_cp_open.dropna(axis=0, subset=['lat'], inplace=True)
     df_cp_closed.dropna(axis=0, subset=['lat'], inplace=True)
+    logger.debug(f"getting web_certs: {datetime.datetime.now()}")
     df_wc = get_web_certs(get_lat - pad, get_lat + pad, get_lng - pad, get_lng + pad, end_date, select_source, limit_count*2, text_search=text_search)
+    logger.debug(f"got web_certs: {datetime.datetime.now()}")
     if len(df_wc) > limit_count:
         last_date = df_wc.iloc[limit_count].pub_date
     elif len(df_wc):
@@ -1122,6 +1131,7 @@ def map():
     start_zoom = request.args.get('start_zoom', get_zoom_level(float(region_size)))
     start_coords_lat = request.args.get('start_coords_lat', df_cp_open.lat.mean())
     start_coords_lng = request.args.get('start_coords_lng', df_cp_open.lng.mean())
+    logger.debug(f"start building map: {datetime.datetime.now()}")
     m = folium.Map(tiles='cartodbpositron', location=(get_lat, get_lng), zoom_start=start_zoom, min_zoom=5, height='71%')
     mc = MarkerCluster()
     feature_group = folium.FeatureGroup(name='Closed Projects')
@@ -1303,6 +1313,7 @@ def map():
     feature_group.add_to(m)
     folium.LayerControl(collapsed=True).add_to(m)
     m.save('templates/map_widget.html')
+    logger.debug(f"done building map - start editing html: {datetime.datetime.now()}")
     with open('templates/map_widget.html', 'r+') as f:
         html = f.read()
         for line in [
@@ -1359,6 +1370,7 @@ def map():
         f.seek(0)
         f.write(html)
         f.truncate()
+        logger.debug(f"done editing html - rendering page: {datetime.datetime.now()}")
     return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), result_limit=result_limit, location_string=location_string, text_search=text_search, select_source=select_source)
 
 @app.route('/insights', methods=["POST", "GET"])
