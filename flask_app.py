@@ -205,12 +205,16 @@ def get_web_certs(east_lat, west_lat, south_lng, north_lng, end_date, select_sou
             web_certificates.cert_id IN (SELECT cert_id FROM cert_search WHERE text MATCH ?)
     """
     web_query = web_query.format(add_fts_query) if text_search else web_query.format('')
-    with create_connection() as conn:
-        if text_search:
-            df = pd.read_sql(web_query , conn, params=[east_lat, west_lat, south_lng, north_lng, end_date, select_source, text_search, limit_count*2])
-        else:
-            df = pd.read_sql(web_query , conn, params=[east_lat, west_lat, south_lng, north_lng, end_date, select_source, limit_count*2])
-    return df
+    while True:
+        try:
+            with create_connection() as conn:
+                if text_search:
+                    df = pd.read_sql(web_query , conn, params=[east_lat, west_lat, south_lng, north_lng, end_date, select_source, text_search, limit_count*2])
+                else:
+                    df = pd.read_sql(web_query , conn, params=[east_lat, west_lat, south_lng, north_lng, end_date, select_source, limit_count*2])
+                return df
+        except pd.io.sql.DatabaseError:
+            logger.info('Database is locked. Retrying SQL queries...')
 
 @app.route("/", methods=["POST", "GET"])
 def index():
