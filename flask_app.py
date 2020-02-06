@@ -35,6 +35,9 @@ from user import User
 import stripe
 from wordcloud_generator import generate_wordcloud
 from functools import lru_cache
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 
 
 logger = logging.getLogger(__name__)
@@ -1384,6 +1387,27 @@ def insights():
     wc_search_type = None
     text_search = request.form.get('text_search', '')
     if text_search:
+        query = """
+            SELECT pub_date
+            FROM web_certificates
+            WHERE cert_id in (
+                SELECT cert_id 
+                FROM cert_search 
+                WHERE text MATCH ?
+            )
+        """
+        with create_connection() as conn:
+            df = pd.read_sql(query, conn, params=[text_search])
+        df["pub_date"] = df["pub_date"].astype("datetime64")
+        df.groupby(df["pub_date"].dt.year).count().plot(kind="bar", legend=False, title="Projects per Year", color=(0.5, 0.5, 0.5, 0.5))
+        ax = plt.axes()
+        x_axis = ax.axes.get_xaxis()
+        x_label = x_axis.get_label()
+        x_label.set_visible(False)
+        for spine in ax.spines:
+            ax.spines[spine].set_visible(False)
+        ax.tick_params(axis=u'both', which=u'both',length=0)
+        plt.savefig(f"static/timeline_{text_search.replace(' ', '_')}.png")
         text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search)[:-1])  # strip out disallowed charcters
         text_search = ' '.join([x.lower() if x not in ('OR', 'AND') else x for x in text_search.split(' ')])
         wc_count, _ = generate_wordcloud(f"{text_search}_contractor")
