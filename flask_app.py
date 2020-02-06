@@ -1187,6 +1187,7 @@ def map():
             </table>
             <hr style="border: 1px solid black">
             <h5><em>project was successfully matched</em></h5>
+            <br>
         """, max_width='250', max_height='200')
         folium.Marker(
             [row.lat, row.lng],
@@ -1241,6 +1242,7 @@ def map():
             </table>
             <hr style="border: 1px solid black">
             <h5><em>actively searching for matches</em></h5>
+            <br>
         """, max_width='250', max_height='200')
         folium.Marker(
             [row.lat, row.lng],
@@ -1303,6 +1305,7 @@ def map():
             </table>
             <hr style="border: 1px solid var(--highlight);">
             <h5 style="color: var(--background);"><em>Web Certificate of Substantial Performance</em></h5>
+            <br>
         """, max_width='250', max_height='200')
         mc.add_child(folium.Marker(
             [row.lat, row.lng],
