@@ -1399,7 +1399,7 @@ def insights():
         with create_connection() as conn:
             df = pd.read_sql(query, conn, params=[text_search])
         df["pub_date"] = df["pub_date"].astype("datetime64")
-        df.groupby(df["pub_date"].dt.year).count().plot(kind="bar", legend=False, title="Projects per Year", color=(0.5, 0.5, 0.5, 0.5))
+        df.groupby(df["pub_date"].dt.year).count().plot(kind="bar", legend=False, title="Projects per Year", color=(0.5, 0.5, 0.5, 1))
         ax = plt.axes()
         x_axis = ax.axes.get_xaxis()
         x_label = x_axis.get_label()
@@ -1407,7 +1407,7 @@ def insights():
         for spine in ax.spines:
             ax.spines[spine].set_visible(False)
         ax.tick_params(axis=u'both', which=u'both',length=0)
-        plt.savefig(f"static/timeline_{text_search.replace(' ', '_')}.png")
+        plt.savefig(f"static/timeline_{text_search.replace(' ', '_')}.png", transparent=True)
         text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search)[:-1])  # strip out disallowed charcters
         text_search = ' '.join([x.lower() if x not in ('OR', 'AND') else x for x in text_search.split(' ')])
         wc_count, _ = generate_wordcloud(f"{text_search}_contractor")
