@@ -210,7 +210,7 @@ def scrape(
             if cert_type == 'ccs':
                 city = attr_pairs.get('Of premises at', np.nan)
                 address = attr_pairs.get('Of premises at', np.nan)
-                title = ' '.join(attr_pairs.get('The subcontract provided for the supply of the following services or materials', ''), attr_pairs.get('To the following improvement', ''))
+                title = ' '.join((attr_pairs.get('The subcontract provided for the supply of the following services or materials', ''), attr_pairs.get('To the following improvement', '')))
                 title = np.nan if title in ('', ' ') else title
             else:
                 city = attr_pairs.get('Where the Premises is Situated', np.nan)
