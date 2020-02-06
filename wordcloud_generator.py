@@ -213,7 +213,7 @@ def generate_wordcloud(term_field):
         stopwords.update(geographic_locations)
     try:
         wordcloud = WordCloud(stopwords=stopwords, background_color=None, mode='RGBA', width=1000, height=400, color_func=lambda *args, **kwargs: "black").generate(relevant_text.upper())
-        if len(wordcloud.words_) >= 8:
+        if len(wordcloud.words_):
             wordcloud.recolor(color_func=grey_color_func, random_state=3)
             wordcloud.to_file(f"static/wordcloud_{term.replace(' ', '_')}_{field}.png")
         return len(df), len(wordcloud.words_)/len(df)
