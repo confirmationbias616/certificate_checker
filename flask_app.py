@@ -1186,7 +1186,7 @@ def map():
                 </tr>
             </table>
             <hr style="border: 1px solid black">
-            <h5><em>Web Certificate of Substantial Performance</em></h5>
+            <h5><em>project was successfully matched</em></h5>
         """, max_width='250', max_height='200')
         folium.Marker(
             [row.lat, row.lng],
@@ -1240,7 +1240,7 @@ def map():
                 </tr>
             </table>
             <hr style="border: 1px solid black">
-            <h5><em>Web Certificate of Substantial Performance</em></h5>
+            <h5><em>actively searching for matches</em></h5>
         """, max_width='250', max_height='200')
         folium.Marker(
             [row.lat, row.lng],
