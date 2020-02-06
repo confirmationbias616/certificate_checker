@@ -1013,7 +1013,7 @@ def set_location():
     result_limit = request.form.get('result_limit')
     text_search = request.form.get('text_search')
     text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search)[:-1])  # strip out disallowed charcters
-    text_search = ' '.join([x.lower() if x not in ('OR', 'AND') else x for x in text_search.split(' ')])
+    text_search = ' '.join([x.lower() if x not in ('OR', 'AND', 'NOT') else x for x in text_search.split(' ')])
     select_source = request.form.get('select_source')
     start_coords, region_size = get_city_latlng(location_string.title())
     if not start_coords:
