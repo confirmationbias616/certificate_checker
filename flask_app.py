@@ -1030,7 +1030,7 @@ def set_location():
     result_limit = request.form.get('result_limit')
     text_search = request.form.get('text_search')
     text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search)[:-1])  # strip out disallowed charcters
-    text_search = ' '.join([x.lower() if x not in ('OR', 'AND') else x for x in text_search.split(' ')])
+    text_search = ' '.join([x.lower() if x not in ('OR', 'AND', 'NOT') else x for x in text_search.split(' ')])
     select_source = request.form.get('select_source')
     start_coords, region_size = get_city_latlng(location_string.title())
     if not start_coords:
@@ -1444,7 +1444,7 @@ def insights():
             ax.tick_params(axis=u'both', which=u'both',length=0)
             plt.savefig(f"static/timeline_{text_search.replace(' ', '_')}.png", transparent=True)
         text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search)[:-1])  # strip out disallowed charcters
-        text_search = ' '.join([x.lower() if x not in ('OR', 'AND') else x for x in text_search.split(' ')])
+        text_search = ' '.join([x.lower() if x not in ('OR', 'AND', 'NOT') else x for x in text_search.split(' ')])
         wc_count, _ = generate_wordcloud(f"{text_search}_contractor")
         field_results = [(field, generate_wordcloud(f"{text_search}_{field}")[1]) for field in ('contractor', 'engineer', 'owner', 'city')]
         sorted_field_results = sorted(field_results, key=lambda field_results:field_results[1])
