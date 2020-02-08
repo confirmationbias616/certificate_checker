@@ -2,6 +2,8 @@
 
 from flask import Flask, render_template, url_for, request, redirect, session
 from flask_session import Session
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import datetime
 from dateutil.parser import parse as parse_date
 import dateutil.relativedelta
@@ -52,6 +54,21 @@ logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
 app = Flask(__name__)
+
+def authorized_user():
+    if session.get('user_id'): #current_user.name:
+        print(session.get('user_id'))
+        return True
+    else:
+        return False
+
+def ip_key_func():
+    try:
+        return request.headers['X-Real-IP']
+    except KeyError:
+        return 'test-unlimited'
+
+limiter = Limiter(app, key_func=ip_key_func, default_limits=["100 per day", "1 per second"])
 
 #set up Flask-Sessions
 app.config.from_object(__name__)
@@ -1025,6 +1042,14 @@ def set_location():
     return redirect(url_for("map", start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size, result_limit=result_limit, location_string=location_string, text_search=text_search, select_source=select_source))
 
 @app.route('/map', methods=["POST", "GET"])
+@limiter.limit(
+    "9/day;3/hour",
+    error_message="""
+        HBR Bot limits Search and Insight requests to the lesser of 2 per hour and 6 per day
+        for free-tier users. Upgrade to a Pro account for unlimited functionality.
+    """,
+    exempt_when=authorized_user
+)
 def map():
     logger.debug(f"map just got called: {datetime.datetime.now()}")
     load_user()
@@ -1381,6 +1406,14 @@ def map():
     return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), result_limit=result_limit, location_string=location_string, text_search=text_search, select_source=select_source)
 
 @app.route('/insights', methods=["POST", "GET"])
+@limiter.limit(
+    "9/day;3/hour",
+    error_message="""
+        HBR Bot limits Search and Insight requests to the lesser of 2 per hour and 6 per day
+        for free-tier users. Upgrade to a Pro account for unlimited functionality.
+    """,
+    exempt_when=authorized_user
+)
 def insights():
     load_user()
     wc_count = None
