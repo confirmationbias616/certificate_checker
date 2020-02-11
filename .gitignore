@@ -10,6 +10,8 @@ static/wordcloud*
 static/timeline*
 static/wc_cache.json
 
+limiter.db*
+
 # ignore results.json except the dummy file in test folder
 results.json
 !test/results.json

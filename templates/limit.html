@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  {% endblock %}
+</head>
+<P>
+    {% block body %}
+    <h3 class="blocktext">
+      Too Many Requests
+    </h3>
+    <br>
+    <P class="blocktext">
+      HBR Bot limits <b>Search</b> and <b>Insight</b> requests to only 3 per day 
+      for non-registered users.
+    </P>
+    <P class="blocktext">
+      <a href="{{ url_for('plan_info') }}">Upgrade to a Pro account</a> for unlimited functionality.
+    </P>
+    {% endblock %}
+</body>
+</html>
+    

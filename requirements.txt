@@ -59,5 +59,6 @@ Flask-Login==0.4.1
 Flask-Session==0.3.1
 Stripe==2.42.0
 wordcloud==1.6.0
-flask-limiter==1.1.0
-limits==1.5
+psutil==5.6.7
+redis==3.4.1
+redislite==5.0.165407

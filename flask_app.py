@@ -2,8 +2,6 @@
 
 from flask import Flask, render_template, url_for, request, redirect, session
 from flask_session import Session
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 import datetime
 from dateutil.parser import parse as parse_date
 import dateutil.relativedelta
@@ -40,6 +38,12 @@ from functools import lru_cache
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
+from redislite import Redis
+from redislite.client import RedisLiteException
+try:
+    redis_connection = Redis('/dev/shm/limiter.db')
+except RedisLiteException:
+    redis_connection = Redis('limiter.db')
 
 
 logger = logging.getLogger(__name__)
@@ -56,8 +60,9 @@ logger.setLevel(logging.INFO)
 app = Flask(__name__)
 
 def authorized_user():
-    if session.get('user_id'): #current_user.name:
-        print(session.get('user_id'))
+    if request.headers.get('X-Real-IP'):
+        return True  # test or dev server
+    elif session.get('user_id'):
         return True
     else:
         return False
@@ -67,8 +72,6 @@ def ip_key_func():
         return request.headers['X-Real-IP']
     except KeyError:
         return 'test-unlimited'
-
-limiter = Limiter(app, key_func=ip_key_func, default_limits=["100 per day", "1 per second"])
 
 #set up Flask-Sessions
 app.config.from_object(__name__)
@@ -108,6 +111,15 @@ login_manager.init_app(app)
 @login_manager.user_loader
 def load_user(user_id):
     return User.get(user_id)
+
+def request_limit_reached():
+    if not session.get('user_id'):
+        user_ip = str(request.headers.get('X-Real-IP'))
+        access_count = redis_connection.get(user_ip)
+        access_count = 1 if not access_count else int(access_count) + 1
+        redis_connection.set(user_ip, access_count)
+        return True if access_count > 3 else False
+    return False
 
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
@@ -727,6 +739,10 @@ def thanks_for_payment():
     session['account_type'] = 'full'
     return render_template("thanks_for_payment.html")
 
+@app.route("/limit", methods=["POST", "GET"])
+def limit():
+    return render_template("limit.html")
+
 @app.route("/user_account", methods=["POST", "GET"])
 def user_account():
     load_user()
@@ -1041,17 +1057,11 @@ def set_location():
     return redirect(url_for("map", start_coords_lat=start_coords['lat'], start_coords_lng=start_coords['lng'], start_zoom=start_zoom, region_size=region_size, result_limit=result_limit, location_string=location_string, text_search=text_search, select_source=select_source))
 
 @app.route('/map', methods=["POST", "GET"])
-@limiter.limit(
-    "9/day;3/hour",
-    error_message="""
-        HBR Bot limits Search and Insight requests to the lesser of 2 per hour and 6 per day
-        for free-tier users. Upgrade to a Pro account for unlimited functionality.
-    """,
-    exempt_when=authorized_user
-)
 def map():
     logger.debug(f"map just got called: {datetime.datetime.now()}")
     load_user()
+    if request_limit_reached():
+        return redirect(url_for("limit"))
     logger.debug(f"done loading user - start building page: {datetime.datetime.now()}")
     closed_query = """
         SELECT
@@ -1405,16 +1415,10 @@ def map():
     return render_template('map.html', map=True, start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, cert_count=len(df_wc), result_limit=result_limit, location_string=location_string, text_search=text_search, select_source=select_source)
 
 @app.route('/insights', methods=["POST", "GET"])
-@limiter.limit(
-    "9/day;3/hour",
-    error_message="""
-        HBR Bot limits Search and Insight requests to the lesser of 2 per hour and 6 per day
-        for free-tier users. Upgrade to a Pro account for unlimited functionality.
-    """,
-    exempt_when=authorized_user
-)
 def insights():
     load_user()
+    if request_limit_reached():
+        return redirect(url_for("limit"))
     wc_count = None
     wc_search_type = None
     text_search = request.form.get('text_search', '')
