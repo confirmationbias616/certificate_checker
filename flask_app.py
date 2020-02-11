@@ -99,13 +99,18 @@ def load_user(user_id):
     return User.get(user_id)
 
 def request_limit_reached():
-    if not session.get('user_id'):
-        user_ip = str(request.headers.get('X-Real-IP'))
-        access_count = redis_connection.get(user_ip)
-        access_count = 1 if not access_count else int(access_count) + 1
-        redis_connection.set(user_ip, access_count)
-        return True if access_count > 3 else False
-    return False
+    full_user_query = "SELECT id FROM users WHERE account_type='full'"
+    with create_connection() as conn:
+        valid_user_ids = pd.read_sql(full_user_query, conn).id
+    if session.get('user_id') in valid_user_ids:
+        return False  # unlimited access for full accounts
+    user_ip = str(request.headers.get('X-Real-IP'))
+    if user_ip == 'None':
+        return False  # test or dev server
+    access_count = redis_connection.get(user_ip)
+    access_count = 1 if not access_count else int(access_count) + 1
+    redis_connection.set(user_ip, access_count)
+    return True if access_count > 3 else False
 
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
