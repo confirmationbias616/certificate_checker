@@ -102,7 +102,7 @@ def request_limit_reached():
     full_user_query = "SELECT id FROM users WHERE account_type='full'"
     with create_connection() as conn:
         valid_user_ids = pd.read_sql(full_user_query, conn).id
-    if str(session.get('user_id')) in valid_user_ids:
+    if str(session.get('company_id')) in valid_user_ids:
         return False  # unlimited access for full accounts
     user_ip = str(request.headers.get('X-Real-IP'))
     if user_ip == 'None':
