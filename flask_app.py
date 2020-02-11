@@ -59,20 +59,6 @@ logger.setLevel(logging.INFO)
 
 app = Flask(__name__)
 
-def authorized_user():
-    if request.headers.get('X-Real-IP'):
-        return True  # test or dev server
-    elif session.get('user_id'):
-        return True
-    else:
-        return False
-
-def ip_key_func():
-    try:
-        return request.headers['X-Real-IP']
-    except KeyError:
-        return 'test-unlimited'
-
 #set up Flask-Sessions
 app.config.from_object(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'
