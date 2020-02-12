@@ -109,10 +109,6 @@ def request_limit_reached():
         return False  # test or dev server
     access_count = redis_connection.get(user_ip)
     if not access_count:
-        try:
-            session.pop('limit_expiry')
-        except KeyError:
-            pass
         redis_connection.set(user_ip, 1)
         return False
     elif int(access_count) < 4:
