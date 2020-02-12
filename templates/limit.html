@@ -13,8 +13,8 @@
     </h3>
     <br>
     <P class="blocktext">
-      HBR Bot limits <b>Search</b> and <b>Insight</b> requests to only 3 per day 
-      for non-registered users.
+      HBR Bot restricts <b>Search</b> and <b>Insight</b> requests to only 3 per session
+      for non-registered users. This limit resets @ <b><span style="color:darkred;">{{ session.get('limit_expiry').strftime('%I:%M:%S %p') }}</span>.</b>
     </P>
     <P class="blocktext">
       <a href="{{ url_for('plan_info') }}">Upgrade to a Pro account</a> for unlimited functionality.

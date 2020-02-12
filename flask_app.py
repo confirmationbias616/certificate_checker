@@ -108,9 +108,23 @@ def request_limit_reached():
     if user_ip == 'None':
         return False  # test or dev server
     access_count = redis_connection.get(user_ip)
-    access_count = 1 if not access_count else int(access_count) + 1
-    redis_connection.set(user_ip, access_count)
-    return True if access_count > 3 else False
+    if not access_count:
+        try:
+            session.pop('limit_expiry')
+        except KeyError:
+            pass
+        redis_connection.set(user_ip, 1)
+        return False
+    elif int(access_count) < 4:
+        redis_connection.set(user_ip, int(access_count) + 1)
+        return False
+    elif int(access_count) == 4:
+        redis_connection.set(user_ip, int(access_count) + 1)
+        redis_connection.expireat(user_ip, 60)
+        session['limit_expiry'] = datetime.datetime.now() + datetime.timedelta(seconds=60, hours=-5)
+        return True
+    else:
+        return True
 
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
