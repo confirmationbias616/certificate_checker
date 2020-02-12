@@ -714,7 +714,7 @@ def about():
 @app.route("/plan_info", methods=["POST", "GET"])
 def plan_info():
     load_user()
-    if 'company_id' in session.keys() and session.get('account_type') != "full":
+    if session.get('company_id') and session.get('account_type') != "full":
         return redirect(url_for('payment'))
     return render_template("plan_info.html")
 
