@@ -120,7 +120,7 @@ def request_limit_reached():
         return False
     elif int(access_count) == 4:
         redis_connection.set(user_ip, int(access_count) + 1)
-        redis_connection.expireat(user_ip, 60)
+        redis_connection.expire(user_ip, 60)
         session['limit_expiry'] = datetime.datetime.now() + datetime.timedelta(seconds=60, hours=-5)
         return True
     else:
