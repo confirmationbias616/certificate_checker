@@ -105,23 +105,34 @@ def request_limit_reached():
     if session.get('company_id') in list(valid_user_ids.id):
         return False  # unlimited access for full accounts
     user_ip = str(request.headers.get('X-Real-IP'))
-    if user_ip == 'None':
-        return False  # test or dev server
-    access_count = redis_connection.get(user_ip)
+    # if user_ip == 'None':
+    #     return False  # test or dev server
+    if user_ip in redis_connection:
+        time_since_first_access = datetime.datetime.now() - parse_date(redis_connection.hgetall(user_ip).get(b'time_first_access'))
+    else:
+        time_since_first_access = datetime.timedelta(minutes=0)
+    if time_since_first_access > datetime.timedelta(minutes=5):
+        redis_connection.delete(user_ip)  # reset access_count for user due to staleness
+    access_count = int(redis_connection.hgetall(user_ip).get(b'access_count')) if user_ip in redis_connection else 0
     if not access_count:
-        try:
-            session.pop('limit_expiry')
-        except KeyError:
-            pass
-        redis_connection.set(user_ip, 1)
+        redis_connection.hmset(user_ip, {
+            'access_count': 1,
+            'time_first_access': str(datetime.datetime.now())
+        })
         return False
-    elif int(access_count) < 4:
-        redis_connection.set(user_ip, int(access_count) + 1)
+    elif access_count < 4:
+        redis_connection.hmset(user_ip, {
+            'access_count': access_count + 1,
+            'time_first_access': redis_connection.hgetall(user_ip).get(b'time_first_access')  # carry over
+        })
         return False
-    elif int(access_count) == 4:
-        redis_connection.set(user_ip, int(access_count) + 1)
-        redis_connection.expire(user_ip, 60)
-        session['limit_expiry'] = datetime.datetime.now() + datetime.timedelta(seconds=60, hours=-5)
+    elif access_count == 4:
+        redis_connection.hmset(user_ip, {
+            'access_count': access_count + 1,
+            'time_first_access': redis_connection.hgetall(user_ip).get(b'time_first_access')  # carry over
+        })
+        redis_connection.expire(user_ip, 120)
+        session['limit_expiry'] = datetime.datetime.now() + datetime.timedelta(minutes=2) + datetime.timedelta(seconds=60, hours=-5)
         return True
     else:
         return True
