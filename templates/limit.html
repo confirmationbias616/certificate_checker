@@ -8,13 +8,14 @@
 </head>
 <P>
     {% block body %}
-    <h3 class="blocktext">
+    <h3 class="blocktext" style="color:rgb(88, 9, 9);">
       Too Many Requests
     </h3>
     <br>
     <P class="blocktext">
-      HBR Bot restricts <b>Search</b> and <b>Insight</b> requests to only 3 per session
-      for non-registered users. This limit resets @ <b><span style="color:darkred;">{{ session.get('limit_expiry').strftime('%I:%M:%S %p') }}</span>.</b>
+      HBR Bot restricts <b>Search</b> and <b>Insight</b> to 3 requests per session for 
+      non-registered users. This current ban resets @ <b><span style="color:rgb(88, 9, 9);">
+        {{ session.get('limit_expiry').strftime('%-I:%M %p') }}</span>.</b>
     </P>
     <P class="blocktext">
       <a href="{{ url_for('plan_info') }}">Upgrade to a Pro account</a> for unlimited functionality.
