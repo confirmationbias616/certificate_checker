@@ -40,11 +40,13 @@ import matplotlib
 matplotlib.use('Agg')
 from redislite import Redis
 from redislite.client import RedisLiteException
+
+
 try:
     redis_connection = Redis('/dev/shm/limiter.db')
 except RedisLiteException:
     redis_connection = Redis('limiter.db')
-
+redis_connection.flushdb()
 
 logger = logging.getLogger(__name__)
 log_handler = logging.StreamHandler(sys.stdout)
