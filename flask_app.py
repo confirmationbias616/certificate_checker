@@ -1070,8 +1070,8 @@ def set_location():
     select_source = request.form.get('select_source')
     start_coords, region_size = get_city_latlng(location_string.title())
     if not start_coords:
-        location_string = None
-        current_lat, current_lng = get_current_coords()
+        # location_string = None
+        current_lat, current_lng, current_city = get_current_coords()
         start_coords = {'lat':current_lat, 'lng':current_lng}
         region_size = 500 if current_lat == 'nan' else 1
     start_zoom = get_zoom_level(float(region_size))
@@ -1138,7 +1138,7 @@ def map():
         AND
             company_id=?
     """
-    current_lat, current_lng = get_current_coords()
+    current_lat, current_lng, current_city = get_current_coords()
     get_lat = request.args.get('start_coords_lat', current_lat)
     get_lat = 45.41117 if get_lat == 'nan' else float(get_lat)
     get_lng = request.args.get('start_coords_lng', current_lng)
@@ -1146,7 +1146,8 @@ def map():
     region_size = request.args.get('region_size', 500 if current_lat == 'nan' else 1)
     pad = (float(region_size) ** 0.5)/1.3
     text_search = request.args.get('text_search', None)
-    location_string = request.args.get('location_string')
+    location_string = request.args.get('location_string', current_city)
+    location_string = None if location_string == 'nan' else location_string
     today = datetime.datetime.now().date()
     end_date = request.args.get('end_date', str(today))
     select_source = request.args.get('select_source', '%')
