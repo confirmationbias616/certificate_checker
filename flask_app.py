@@ -269,7 +269,7 @@ def get_web_certs(east_lat, west_lat, south_lng, north_lng, end_date, select_sou
 def index():
     load_user()
     if session.get('account_type') == 'full' or not session.get('company_id'):
-        return redirect(url_for("about"))
+        return render_template('landing_page.html')
     else:
         return redirect(url_for("payment"))
 
