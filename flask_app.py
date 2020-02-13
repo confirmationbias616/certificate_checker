@@ -179,18 +179,18 @@ def get_current_coords():
         ip_add = request.headers['X-Real-IP']  #special for PythonAnywhere
     except KeyError:
         logger.info("Couldn't get IP address. Running local server?")
-        return 'nan', 'nan'
+        return 'nan', 'nan', 'nan'
     logger.info(f"IP address: {ip_add}")
     response = requests.get(f"https://ipgeolocation.com/{ip_add}")
     if response.status_code == 200:
         if response.json()['region'] != 'Ontario':
             logger.info("User located outside Ontario")
-            return 'nan', 'nan'
+            return 'nan', 'nan', 'nan'
         lat, lng = [float(x) for x in response.json()['coords'].split(',')]
-        return lat, lng
+        return lat, lng, response.json()['city']
     else:
         logger.info("Invalid IP address.")
-        return 'nan', 'nan'
+        return 'nan', 'nan', 'nan'
 
 def load_user():
     if session.get('company_id'):
