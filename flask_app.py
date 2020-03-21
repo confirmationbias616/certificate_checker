@@ -137,7 +137,7 @@ def request_limit_reached():
             'time_first_access': redis_connection.hgetall(user_ip).get(b'time_first_access')  # carry over
         })
         redis_connection.expire(user_ip, 120)
-        session['limit_expiry'] = datetime.datetime.now() + datetime.timedelta(minutes=free_timeout_length) + datetime.timedelta(seconds=60, hours=-5)
+        session['limit_expiry'] = datetime.datetime.now() + datetime.timedelta(minutes=free_timeout_length) + datetime.timedelta(seconds=60, hours=-4)
         return True
     else:
         return True
