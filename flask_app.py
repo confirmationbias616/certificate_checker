@@ -101,6 +101,9 @@ def load_user(user_id):
     return User.get(user_id)
 
 def request_limit_reached():
+    max_free_requests = load_config()['flask_app']['max_free_requests']
+    free_timeout_length = load_config()['flask_app']['free_timeout_length']
+    free_session_length = load_config()['flask_app']['free_session_length']
     full_user_query = "SELECT id FROM users WHERE account_type='full'"
     with create_connection() as conn:
         valid_user_ids = pd.read_sql(full_user_query, conn)
@@ -113,7 +116,7 @@ def request_limit_reached():
         time_since_first_access = datetime.datetime.now() - parse_date(redis_connection.hgetall(user_ip).get(b'time_first_access'))
     else:
         time_since_first_access = datetime.timedelta(minutes=0)
-    if time_since_first_access > datetime.timedelta(minutes=5):
+    if time_since_first_access > datetime.timedelta(minutes=free_session_length):
         redis_connection.delete(user_ip)  # reset access_count for user due to staleness
     access_count = int(redis_connection.hgetall(user_ip).get(b'access_count')) if user_ip in redis_connection else 0
     if not access_count:
@@ -122,19 +125,19 @@ def request_limit_reached():
             'time_first_access': str(datetime.datetime.now())
         })
         return False
-    elif access_count < 4:
+    elif access_count < max_free_requests:
         redis_connection.hmset(user_ip, {
             'access_count': access_count + 1,
             'time_first_access': redis_connection.hgetall(user_ip).get(b'time_first_access')  # carry over
         })
         return False
-    elif access_count == 4:
+    elif access_count == max_free_requests:
         redis_connection.hmset(user_ip, {
             'access_count': access_count + 1,
             'time_first_access': redis_connection.hgetall(user_ip).get(b'time_first_access')  # carry over
         })
         redis_connection.expire(user_ip, 120)
-        session['limit_expiry'] = datetime.datetime.now() + datetime.timedelta(minutes=2) + datetime.timedelta(seconds=60, hours=-5)
+        session['limit_expiry'] = datetime.datetime.now() + datetime.timedelta(minutes=free_timeout_length) + datetime.timedelta(seconds=60, hours=-5)
         return True
     else:
         return True

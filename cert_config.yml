@@ -31,6 +31,9 @@ flask_app:
     2_weeks: 750  # config parameter not used yet
     1_month: 1500  # config parameter not used yet
     2_months: 3000  # config parameter not used yet
+  max_free_requests : 4
+  free_timeout_length : 2
+  free_session_length : 5
 
 daily_routine:
   test: False
