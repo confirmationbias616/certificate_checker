@@ -12,6 +12,8 @@ from scraper import scrape
 from communicator import process_as_feedback
 from geocoder import geocode, geo_update_db_table, get_city_latlng
 import pandas as pd
+import numpy as np
+from scipy.interpolate import interp1d
 import logging
 import sys
 import os
@@ -1458,11 +1460,28 @@ def insights():
             )
         """
         with create_connection() as conn:
-            df = pd.read_sql(query, conn, params=[text_search])
-        df["pub_date"] = df["pub_date"].astype("datetime64")
-        df = df.groupby(df["pub_date"].dt.year).count()
-        if len(df):
-            df.plot(kind="bar", legend=False, title="Projects per Year", color=(0.5, 0.5, 0.5, 1))
+            df_raw = pd.read_sql(query, conn, params=[text_search])
+        df_raw["pub_date"] = df_raw["pub_date"].astype("datetime64")
+        df_actual = df_raw.groupby(df_raw["pub_date"].dt.year).count().rename(columns={'pub_date': 'count'})
+        present = datetime.datetime.now()
+        df2 = pd.DataFrame(index=np.arange(2001,2021))
+        df_actual = df2.join(df_actual)
+        df_actual.fillna(0, inplace=True)
+        df_forecast = df_actual.copy()
+        try:
+            forecast_current_year = df_actual.loc[present.year]['count'] * 365 / present.timetuple().tm_yday
+            df_forecast.loc[present.year]['count'] = forecast_current_year
+        except KeyError:
+            pass
+        df_ema = df_forecast.copy()
+        df_ema['EMA_5'] = df_ema.iloc[:,0][::-1].ewm(span=5, adjust=True).mean()[::-1]#[:-3]
+        df_ema['SMOOTH_EMA_5'] = df_ema.EMA_5.interpolate(method='cubic')
+        if len(df_actual):
+            plt.figure(figsize=[15,10])
+            plt.bar(df_actual.index, df_actual.iloc[:,0], align='center', alpha=0.2, label='projects completed per year', color='blue')
+            plt.bar(df_forecast.index, df_forecast.iloc[:,0], align='center', alpha=0.4, label='projected completions this year', color='gray')
+            plt.plot(df_ema.iloc[:-3]['SMOOTH_EMA_5'],label='calculated project load', color='purple', linewidth=5)
+            plt.plot(df_ema.iloc[-4:-1]['SMOOTH_EMA_5'], color='purple', linewidth=5, linestyle='--')
             ax = plt.axes()
             x_axis = ax.axes.get_xaxis()
             x_label = x_axis.get_label()
@@ -1470,6 +1489,10 @@ def insights():
             for spine in ax.spines:
                 ax.spines[spine].set_visible(False)
             ax.tick_params(axis=u'both', which=u'both',length=0)
+            ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+            ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+            plt.locator_params(axis='x', nbins=20)
+            plt.legend()
             plt.savefig(f"static/timeline_{text_search.replace(' ', '_')}.png", transparent=True)
         text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search)[:-1])  # strip out disallowed charcters
         text_search = ' '.join([x.lower() if x not in ('OR', 'AND', 'NOT') else x for x in text_search.split(' ')])
