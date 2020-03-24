@@ -38,6 +38,7 @@ import stripe
 from wordcloud_generator import generate_wordcloud
 from functools import lru_cache
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 import matplotlib
 matplotlib.use('Agg')
 from redislite import Redis
