@@ -1479,6 +1479,7 @@ def insights():
         df_ema['SMOOTH_EMA_5'] = df_ema.EMA_5.interpolate(method='cubic')
         if len(df_raw):
             plt.figure(figsize=[13,10])
+            plt.rcParams.update({'font.size': 22})
             plt.bar(df_actual.index, df_actual.iloc[:,0], align='center', alpha=0.2, label='projects completed per year', color='blue')
             if int(forecast_current_year):
                 plt.bar(df_forecast.index, df_forecast.iloc[:,0], align='center', alpha=0.4, label='projected completions this year', color='gray')
@@ -1494,7 +1495,7 @@ def insights():
             ax.yaxis.set_major_locator(MaxNLocator(integer=True))
             ax.xaxis.set_major_locator(MaxNLocator(integer=True))
             plt.locator_params(axis='x', nbins=20)
-            legend = plt.legend(frameon = 1)
+            legend = plt.legend(frameon=1, prop={'size': 20})
             frame = legend.get_frame()
             frame.set_alpha(0)
             plt.savefig(f"static/timeline_{text_search.replace(' ', '_')}.png", transparent=True)
