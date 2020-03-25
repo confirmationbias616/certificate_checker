@@ -1480,7 +1480,8 @@ def insights():
         if len(df_raw):
             plt.figure(figsize=[18,10])
             plt.bar(df_actual.index, df_actual.iloc[:,0], align='center', alpha=0.2, label='projects completed per year', color='blue')
-            plt.bar(df_forecast.index, df_forecast.iloc[:,0], align='center', alpha=0.4, label='projected completions this year', color='gray')
+            if int(forecast_current_year):
+                plt.bar(df_forecast.index, df_forecast.iloc[:,0], align='center', alpha=0.4, label='projected completions this year', color='gray')
             plt.plot(df_ema.iloc[:-3]['SMOOTH_EMA_5'],label='calculated project load', color='purple', linewidth=5)
             plt.plot(df_ema.iloc[-4:-1]['SMOOTH_EMA_5'], color='purple', linewidth=5, linestyle='--')
             ax = plt.axes()
