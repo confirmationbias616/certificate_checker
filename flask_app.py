@@ -1477,8 +1477,8 @@ def insights():
         df_ema = df_forecast.copy()
         df_ema['EMA_5'] = df_ema.iloc[:,0][::-1].ewm(span=5, adjust=True).mean()[::-1]#[:-3]
         df_ema['SMOOTH_EMA_5'] = df_ema.EMA_5.interpolate(method='cubic')
-            plt.figure(figsize=[15,10])
         if len(df_raw):
+            plt.figure(figsize=[18,10])
             plt.bar(df_actual.index, df_actual.iloc[:,0], align='center', alpha=0.2, label='projects completed per year', color='blue')
             plt.bar(df_forecast.index, df_forecast.iloc[:,0], align='center', alpha=0.4, label='projected completions this year', color='gray')
             plt.plot(df_ema.iloc[:-3]['SMOOTH_EMA_5'],label='calculated project load', color='purple', linewidth=5)
