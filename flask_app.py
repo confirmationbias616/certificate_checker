@@ -1494,6 +1494,7 @@ def insights():
             ax.tick_params(axis=u'both', which=u'both',length=0)
             ax.yaxis.set_major_locator(MaxNLocator(integer=True))
             ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+            plt.xticks([2005, 2010, 2015, 2020])
             plt.locator_params(axis='x', nbins=20)
             legend = plt.legend(frameon=1, prop={'size': 20})
             frame = legend.get_frame()
