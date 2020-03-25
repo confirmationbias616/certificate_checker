@@ -1493,7 +1493,9 @@ def insights():
             ax.yaxis.set_major_locator(MaxNLocator(integer=True))
             ax.xaxis.set_major_locator(MaxNLocator(integer=True))
             plt.locator_params(axis='x', nbins=20)
-            plt.legend()
+            legend = plt.legend(frameon = 1)
+            frame = legend.get_frame()
+            frame.set_alpha(0)
             plt.savefig(f"static/timeline_{text_search.replace(' ', '_')}.png", transparent=True)
         text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search)[:-1])  # strip out disallowed charcters
         text_search = ' '.join([x.lower() if x not in ('OR', 'AND', 'NOT') else x for x in text_search.split(' ')])
