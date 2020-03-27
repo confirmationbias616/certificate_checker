@@ -5,6 +5,7 @@ train_set.csv
 flask_session/*
 
 templates/map_widget.html
+templates/time_heatmap.html
 
 static/wordcloud*
 static/timeline*

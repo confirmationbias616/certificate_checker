@@ -54,6 +54,7 @@
     </div>
     <hr style="border: 1px solid var(--outline);">
     {% if text_search %}
+    {% include "time_heatmap.html" %}
     <div align="center">
         <i>analisys based on {{ wc_count }} projects</i><br>
         {% if wc_search_type %}
