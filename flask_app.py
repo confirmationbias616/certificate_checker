@@ -1526,44 +1526,6 @@ def insights():
             years = df.year.sort_values().unique()
             for year in years:
                 df_year_list.append(df.loc[df.year == year, ['address_lat', 'address_lng', 'count']].groupby(['address_lat', 'address_lng']).sum().reset_index().values.tolist())
-            m = generateBaseMap()
-            # HeatMapWithTime(df_year_list, radius=5, gradient={0.2: 'blue', 0.4: 'lime', 0.6: 'orange', 1: 'red'}, min_opacity=0.5, max_opacity=0.8, use_local_extrema=True).add_to(m)
-            HeatMapWithTime(df_year_list, index=list(years), auto_play=True).add_to(m)
-            m.save('templates/time_heatmap.html')
-            with open('templates/time_heatmap.html', 'r+') as f:
-                html = f.read()
-                for line in [
-                    """<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>""",
-                    """<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"/>""",
-                ]:  # delete in folium-generated html that interfere with this project's `style.css`.
-                    html = html.replace(line,'')
-                html = html.replace(
-                    """font-awesome/4.6.3/css/font-awesome.min.css""", 
-                    """font-awesome/4.7.0/css/font-awesome.min.css"""
-                )  # update font-awesome in folium-generated html to match this project's `style.css`.
-                html = html.replace(
-                    """initial-scale=1.0, maximum-scale=1.0,""",
-                    """initial-scale=0.8, maximum-scale=0.8,"""
-                )
-                html = html.replace(
-                    """width: 100.0%;""",
-                    """width: 80.0%;"""
-                )
-                html = html.replace(
-                    """height: 100.0%;""",
-                    """height: 80.0%;"""
-                )
-                # html = html.replace(
-                #     """position: relative;""",
-                #     """position: center;"""
-                # )
-                html = html.replace(
-                    """left: 0.0%;""",
-                    """left: 10%;"""
-                )
-                f.seek(0)
-                f.write(html)
-                f.truncate()
         text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search)[:-1])  # strip out disallowed charcters
         text_search = ' '.join([x.lower() if x not in ('OR', 'AND', 'NOT') else x for x in text_search.split(' ')])
         wc_count, _ = generate_wordcloud(f"{text_search}_contractor")
