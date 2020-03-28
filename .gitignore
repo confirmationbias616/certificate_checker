@@ -5,7 +5,8 @@ train_set.csv
 flask_session/*
 
 templates/map_widget.html
-templates/time_heatmap.html
+templates/agg_heatmap.html
+templates/year_lapse_heatmap.html
 
 static/wordcloud*
 static/timeline*
@@ -154,3 +155,4 @@ venv.bak/
 .vscode/settings.json
 rf_model.pkl
 rf_features.pkl
+
