@@ -20,7 +20,7 @@ import os
 import re
 import ast
 import folium
-from folium.plugins import MarkerCluster, HeatMapWithTime, HeatMap
+from folium.plugins import MarkerCluster, HeatMapWithTime, HeatMap, LocateControl
 import json
 import sqlite3
 from flask_login import (
@@ -1381,6 +1381,7 @@ def map():
     feature_group.add_child(mc)
     feature_group.add_to(m)
     folium.LayerControl(collapsed=True).add_to(m)
+    LocateControl().add_to(m)
     m.save('templates/map_widget.html')
     logger.debug(f"done building map - start editing html: {datetime.datetime.now()}")
     with open('templates/map_widget.html', 'r+') as f:
@@ -1516,6 +1517,7 @@ def insights():
             df['month'] = df.pickup_datetime.apply(lambda x: x.month)
             def generateBaseMap(default_location=[49.5, -82], default_zoom_start=5):
                 m = folium.Map(tiles='cartodbpositron', location=default_location, control_scale=True, zoom_start=default_zoom_start)
+                LocateControl().add_to(m)
                 return m
             df['count'] = 1
             m = generateBaseMap()
