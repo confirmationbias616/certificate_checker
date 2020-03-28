@@ -1476,7 +1476,7 @@ def insights():
         except KeyError:
             pass
         df_ema = df_forecast.copy()
-        df_ema['EMA_5'] = df_ema.iloc[:,0][::-1].ewm(span=5, adjust=True).mean()[::-1]#[:-3]
+        df_ema['EMA_5'] = df_ema.iloc[:,0][::-1].ewm(span=5, adjust=True).mean()[::-1]
         df_ema['SMOOTH_EMA_5'] = df_ema.EMA_5.interpolate(method='cubic')
         if len(df_raw):
             plt.figure(figsize=[18,10])
