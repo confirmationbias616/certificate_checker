@@ -1479,7 +1479,7 @@ def insights():
         df_ema['EMA_5'] = df_ema.iloc[:,0][::-1].ewm(span=5, adjust=True).mean()[::-1]
         df_ema['SMOOTH_EMA_5'] = df_ema.EMA_5.interpolate(method='cubic')
         if len(df_raw):
-            plt.figure(figsize=[18,10])
+            plt.figure(figsize=[15,10])
             plt.rcParams.update({'font.size': 22})
             plt.bar(df_actual.index, df_actual.iloc[:,0], align='center', alpha=0.2, label='projects completed per year', color='blue')
             if int(forecast_current_year):
@@ -1517,7 +1517,7 @@ def insights():
             df['year'] = df.pickup_datetime.apply(lambda x: x.year)
             df['month'] = df.pickup_datetime.apply(lambda x: x.month)
             df['count'] = 1
-            def generateBaseMap(default_location=[49.5, -83], default_zoom_start=4):
+            def generateBaseMap(default_location=[48.5, -83], default_zoom_start=4):
                 m = folium.Map(tiles='cartodbpositron', location=default_location, control_scale=True, zoom_start=default_zoom_start)
                 LocateControl().add_to(m)
                 return m
