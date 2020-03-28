@@ -54,14 +54,17 @@
     </div>
     <hr style="border: 1px solid var(--outline);">
     {% if text_search %}
-    {% include "time_heatmap.html" %}
     <div align="center">
         <i>analisys based on {{ wc_count }} projects</i><br>
         {% if wc_search_type %}
             <i>assuming search entity field was mainly </i> <em>{{ wc_search_type }}</em>
         {% endif %}
         <hr style="border: 0.5px solid var(--outline);">
-        <i><img src="static/timeline_{{ wc_id }}.png" alt="..." width=90%></i>
+        <div align='center'>
+            <img src="static/timeline_{{ wc_id }}.png" alt="..." width=450>
+            <iframe src='/get_agg_heatmap' width="225" height="225"></iframe>
+            <iframe src='/get_year_lapse_heatmap' width="225" height="225" style='margin-left: 10px;'></iframe>
+        </div>
         {% if wc_search_type != 'contractor' %}
             <hr style="border: 0.5px solid var(--outline);">
             <h2 style="font-size: 4vw;"><u>contractors</u></h2>

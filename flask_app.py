@@ -1479,13 +1479,14 @@ def insights():
         df_ema['EMA_5'] = df_ema.iloc[:,0][::-1].ewm(span=5, adjust=True).mean()[::-1]#[:-3]
         df_ema['SMOOTH_EMA_5'] = df_ema.EMA_5.interpolate(method='cubic')
         if len(df_raw):
-            plt.figure(figsize=[13,10])
+            plt.figure(figsize=[18,10])
             plt.rcParams.update({'font.size': 22})
             plt.bar(df_actual.index, df_actual.iloc[:,0], align='center', alpha=0.2, label='projects completed per year', color='blue')
             if int(forecast_current_year):
                 plt.bar(df_forecast.index, df_forecast.iloc[:,0], align='center', alpha=0.4, label='projected completions this year', color='gray')
-            plt.plot(df_ema.iloc[:-3]['SMOOTH_EMA_5'],label='calculated project load', color='purple', linewidth=5)
-            plt.plot(df_ema.iloc[-4:-1]['SMOOTH_EMA_5'], color='purple', linewidth=5, linestyle='--')
+            if len(df_raw) > 10:
+                plt.plot(df_ema.iloc[:-3]['SMOOTH_EMA_5'],label='calculated project load', color='purple', linewidth=5)
+                plt.plot(df_ema.iloc[-4:-1]['SMOOTH_EMA_5'], color='purple', linewidth=5, linestyle='--')
             ax = plt.axes()
             x_axis = ax.axes.get_xaxis()
             x_label = x_axis.get_label()
@@ -1515,17 +1516,22 @@ def insights():
             df.pickup_datetime = pd.to_datetime(df.pub_date, format='%Y-%m-%d')
             df['year'] = df.pickup_datetime.apply(lambda x: x.year)
             df['month'] = df.pickup_datetime.apply(lambda x: x.month)
-            def generateBaseMap(default_location=[49.5, -82], default_zoom_start=5):
+            df['count'] = 1
+            def generateBaseMap(default_location=[49.5, -83], default_zoom_start=4):
                 m = folium.Map(tiles='cartodbpositron', location=default_location, control_scale=True, zoom_start=default_zoom_start)
                 LocateControl().add_to(m)
                 return m
-            df['count'] = 1
             m = generateBaseMap()
-            HeatMap(data=df[['address_lat', 'address_lng', 'count']].groupby(['address_lat', 'address_lng']).sum().reset_index().values.tolist(), radius=8, max_zoom=13).add_to(m)
+            agg_data = df[['address_lat', 'address_lng', 'count']].groupby(['address_lat', 'address_lng']).sum().reset_index().values.tolist()
+            HeatMap(data=agg_data, radius=12, use_local_extrema=False, gradient={0.2: 'blue', 0.4: 'blue', 0.6: 'purple', 1: 'purple'}).add_to(m)
+            m.save('templates/agg_heatmap.html')
+            m = generateBaseMap()
             df_year_list = []
             years = df.year.sort_values().unique()
             for year in years:
                 df_year_list.append(df.loc[df.year == year, ['address_lat', 'address_lng', 'count']].groupby(['address_lat', 'address_lng']).sum().reset_index().values.tolist())
+            HeatMapWithTime(df_year_list, index=list(years), auto_play=True, radius=15, use_local_extrema=True, gradient={0.2: 'blue', 0.4: 'blue', 0.6: 'purple', 1: 'purple'}).add_to(m)
+            m.save('templates/year_lapse_heatmap.html')
         text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search)[:-1])  # strip out disallowed charcters
         text_search = ' '.join([x.lower() if x not in ('OR', 'AND', 'NOT') else x for x in text_search.split(' ')])
         wc_count, _ = generate_wordcloud(f"{text_search}_contractor")
@@ -1535,6 +1541,16 @@ def insights():
             wc_search_type = sorted_field_results[0][0]
         print(sorted_field_results)
     return render_template('insights.html', text_search=text_search, wc_id=text_search.replace(' ', '_') if text_search else '', wc_count=wc_count, wc_search_type=wc_search_type)
+
+@app.route('/get_year_lapse_heatmap', methods=["POST", "GET"])
+def get_year_lapse_heatmap():
+    print('yo')
+    return render_template('year_lapse_heatmap.html')
+
+@app.route('/get_agg_heatmap', methods=["POST", "GET"])
+def get_agg_heatmap():
+    print('yo')
+    return render_template('agg_heatmap.html')
 
 
 if __name__ == "__main__":
