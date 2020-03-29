@@ -1460,6 +1460,7 @@ def insights():
                 FROM cert_search 
                 WHERE text MATCH ?
             )
+            AND cert_type = 'csp'
         """
         with create_connection() as conn:
             df_raw = pd.read_sql(query, conn, params=[text_search])
@@ -1532,6 +1533,7 @@ def insights():
                 df_year_list.append(df.loc[df.year == year, ['address_lat', 'address_lng', 'count']].groupby(['address_lat', 'address_lng']).sum().reset_index().values.tolist())
             HeatMapWithTime(df_year_list, index=list(years), auto_play=True, radius=15, use_local_extrema=True, gradient={0.2: 'blue', 0.4: 'blue', 0.6: 'purple', 1: 'purple'}).add_to(m)
             m.save('templates/year_lapse_heatmap.html')
+            AND cert_type = 'csp'
         text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search)[:-1])  # strip out disallowed charcters
         text_search = ' '.join([x.lower() if x not in ('OR', 'AND', 'NOT') else x for x in text_search.split(' ')])
         wc_count, _ = generate_wordcloud(f"{text_search}_contractor")
