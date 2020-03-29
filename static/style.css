@@ -150,7 +150,8 @@
     } 
 
     body {
-      background-color: var(--background);
+      background-color: var(--background); /* For browsers that do not support gradients */
+      background-image: linear-gradient(90deg, var(--highlight), var(--background) 80% ,var(--fieldset));
       font-family: 'Montserrat', sans-serif;
       margin-left:0px;
       margin-right:0px;
