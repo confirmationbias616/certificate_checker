@@ -28,9 +28,9 @@ df_agg = pd.DataFrame(df_agg.to_records())
 for source in ['dcn', 'ocn', 'l2b']:
     df_agg[f'{source}_p'] = df_agg.apply(lambda row: row[f'{source}'] * 100 / sum([row['dcn'], row['ocn'], row['l2b']]), axis=1)
 
-plt.figure(figsize=[10,10])
+plt.figure(figsize=[15,10])
 plt.rcParams.update({'font.size': 22})
-plt.bar(df_agg.yearmonth, df_agg.dcn, bottom=df_agg.ocn+df_agg.l2b, align='center', alpha=0.4, label='Daily Commercial News', color='gray')
+plt.bar(df_agg.yearmonth, df_agg.dcn, bottom=df_agg.ocn+df_agg.l2b, align='center', alpha=0.6, label='Daily Commercial News', color='gray')
 plt.bar(df_agg.yearmonth, df_agg.ocn, bottom=df_agg.l2b, align='center', alpha=0.7, label='Ontario Construction News', color='blue')
 plt.bar(df_agg.yearmonth, df_agg.l2b, align='center', label='Link2Build', color=(112/255, 94/255, 134/255, 1))
 ax = plt.axes()
