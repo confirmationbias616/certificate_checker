@@ -1503,37 +1503,37 @@ def insights():
             frame = legend.get_frame()
             frame.set_alpha(0)
             plt.savefig(f"static/timeline_{text_search.replace(' ', '_')}.png", transparent=True)
-            query = """
-                SELECT *
-                FROM web_certificates
-                WHERE cert_id in (
-                    SELECT cert_id 
-                    FROM cert_search 
-                    WHERE text MATCH ?
-                )
-            """
-            with create_connection() as conn:
-                df = pd.read_sql(query, conn, params=[text_search])
-            df.pickup_datetime = pd.to_datetime(df.pub_date, format='%Y-%m-%d')
-            df['year'] = df.pickup_datetime.apply(lambda x: x.year)
-            df['month'] = df.pickup_datetime.apply(lambda x: x.month)
-            df['count'] = 1
-            def generateBaseMap(default_location=[48.5, -83], default_zoom_start=4):
-                m = folium.Map(tiles='cartodbpositron', location=default_location, control_scale=True, zoom_start=default_zoom_start)
-                LocateControl().add_to(m)
-                return m
-            m = generateBaseMap()
-            agg_data = df[['address_lat', 'address_lng', 'count']].groupby(['address_lat', 'address_lng']).sum().reset_index().values.tolist()
-            HeatMap(data=agg_data, radius=12, use_local_extrema=False, gradient={0.2: 'blue', 0.4: 'blue', 0.6: 'purple', 1: 'purple'}).add_to(m)
-            m.save('templates/agg_heatmap.html')
-            m = generateBaseMap()
-            df_year_list = []
-            years = df.year.sort_values().unique()
-            for year in years:
-                df_year_list.append(df.loc[df.year == year, ['address_lat', 'address_lng', 'count']].groupby(['address_lat', 'address_lng']).sum().reset_index().values.tolist())
-            HeatMapWithTime(df_year_list, index=list(years), auto_play=True, radius=15, use_local_extrema=True, gradient={0.2: 'blue', 0.4: 'blue', 0.6: 'purple', 1: 'purple'}).add_to(m)
-            m.save('templates/year_lapse_heatmap.html')
+        query = """
+            SELECT *
+            FROM web_certificates
+            WHERE cert_id in (
+                SELECT cert_id 
+                FROM cert_search 
+                WHERE text MATCH ?
+            )
             AND cert_type = 'csp'
+        """
+        with create_connection() as conn:
+            df = pd.read_sql(query, conn, params=[text_search])
+        df.pickup_datetime = pd.to_datetime(df.pub_date, format='%Y-%m-%d')
+        df['year'] = df.pickup_datetime.apply(lambda x: x.year)
+        df['month'] = df.pickup_datetime.apply(lambda x: x.month)
+        df['count'] = 1
+        def generateBaseMap(default_location=[48.5, -83], default_zoom_start=4):
+            m = folium.Map(tiles='cartodbpositron', location=default_location, control_scale=True, zoom_start=default_zoom_start)
+            LocateControl().add_to(m)
+            return m
+        m = generateBaseMap()
+        agg_data = df[['address_lat', 'address_lng', 'count']].groupby(['address_lat', 'address_lng']).sum().reset_index().values.tolist()
+        HeatMap(data=agg_data, radius=12, use_local_extrema=False, gradient={0.2: 'blue', 0.4: 'blue', 0.6: 'purple', 1: 'purple'}).add_to(m)
+        m.save('templates/agg_heatmap.html')
+        m = generateBaseMap()
+        df_year_list = []
+        years = df.year.sort_values().unique()
+        for year in years:
+            df_year_list.append(df.loc[df.year == year, ['address_lat', 'address_lng', 'count']].groupby(['address_lat', 'address_lng']).sum().reset_index().values.tolist())
+        HeatMapWithTime(df_year_list, index=list(years), auto_play=True, radius=15, use_local_extrema=True, gradient={0.2: 'blue', 0.4: 'blue', 0.6: 'purple', 1: 'purple'}).add_to(m)
+        m.save('templates/year_lapse_heatmap.html')
         text_search = ' '.join(re.findall('[A-z0-9çéâêîôûàèùëïü() ]*', text_search)[:-1])  # strip out disallowed charcters
         text_search = ' '.join([x.lower() if x not in ('OR', 'AND', 'NOT') else x for x in text_search.split(' ')])
         wc_count, _ = generate_wordcloud(f"{text_search}_contractor")
