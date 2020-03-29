@@ -1472,7 +1472,10 @@ def insights():
         df_actual.fillna(0, inplace=True)
         df_forecast = df_actual.copy()
         try:
-            forecast_current_year = df_actual.loc[present.year]['count'] * 365 / present.timetuple().tm_yday
+            day_of_year = present.timetuple().tm_yday
+            forecast_current_year = df_actual.loc[present.year]['count'] * 365 / day_of_year
+            if day_of_year < 15:
+                forecast_current_year = max(df_actual.loc[present.year - 1]['count'] * 1.5 , forecast_current_year)
             df_forecast.loc[present.year]['count'] = forecast_current_year
         except KeyError:
             pass
