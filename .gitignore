@@ -11,6 +11,8 @@ templates/year_lapse_heatmap.html
 static/wordcloud*
 static/timeline*
 static/wc_cache.json
+static/competition_per_proportion.png
+static/competition_per_quantity.png
 
 limiter.db*
 
