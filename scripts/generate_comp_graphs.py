@@ -31,7 +31,7 @@ for source in ['dcn', 'ocn', 'l2b']:
 
 plt.figure(figsize=[15,10])
 plt.rcParams.update({'font.size': 22})
-plt.bar(df_agg.yearmonth, df_agg.dcn, bottom=df_agg.ocn+df_agg.l2b, align='center', color='gray', alpha=1, label='Daily Commercial News')
+plt.bar(df_agg.yearmonth, df_agg.dcn, bottom=df_agg.ocn+df_agg.l2b, align='center', color='gray', alpha=1, label='Daily Commercial News (DCN)')
 plt.bar(df_agg.yearmonth, df_agg.ocn, bottom=df_agg.l2b, align='center', color=(112/255, 94/255, 134/255, 1), label='Ontario Construction News')
 plt.bar(df_agg.yearmonth, df_agg.l2b, align='center', color=(138/225, 175/225, 190/225, 1), label='Link2Build')
 ax = plt.axes()
@@ -50,7 +50,8 @@ plt.locator_params(axis='x', nbins=20)
 legend = plt.legend(frameon=1, prop={'size': 20})
 frame = legend.get_frame()
 frame.set_alpha(0)
-plt.title("Quantity of CSP's per source\n")
+plt.title("The Rise of DCN Alternatives\n")
+plt.ylabel("CSP's Issued\n")
 plt.savefig("static/competition_per_quantity.png", transparent=True)
 
 
