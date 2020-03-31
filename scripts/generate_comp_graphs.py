@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import os,sys,inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -42,7 +43,9 @@ for spine in ax.spines:
 ax.tick_params(axis=u'both', which=u'both',length=0)
 ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-plt.xticks(['2018-06', '2018-12', '2019-06', '2019-12', '2020-06'])
+possibly_valid_xticks = (f'{x[0]}-{x[1]}' for x in zip(np.repeat(range(2018, 2100),2), ['06', '12']*100))
+valid_xticks = [x for x in possibly_valid_xticks if x in ['2018-06', '2018-02', '2018-12', '2019-06', '2019-12', 'alex']]
+plt.xticks(valid_xticks)
 plt.locator_params(axis='x', nbins=20)
 legend = plt.legend(frameon=1, prop={'size': 20})
 frame = legend.get_frame()
