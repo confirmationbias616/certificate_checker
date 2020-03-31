@@ -30,9 +30,9 @@ for source in ['dcn', 'ocn', 'l2b']:
 
 plt.figure(figsize=[15,10])
 plt.rcParams.update({'font.size': 22})
-plt.bar(df_agg.yearmonth, df_agg.dcn, bottom=df_agg.ocn+df_agg.l2b, align='center', alpha=0.6, label='Daily Commercial News', color='gray')
-plt.bar(df_agg.yearmonth, df_agg.ocn, bottom=df_agg.l2b, align='center', alpha=0.7, label='Ontario Construction News', color='blue')
-plt.bar(df_agg.yearmonth, df_agg.l2b, align='center', label='Link2Build', color=(112/255, 94/255, 134/255, 1))
+plt.bar(df_agg.yearmonth, df_agg.dcn, bottom=df_agg.ocn+df_agg.l2b, align='center', color='gray', alpha=1, label='Daily Commercial News')
+plt.bar(df_agg.yearmonth, df_agg.ocn, bottom=df_agg.l2b, align='center', color=(112/255, 94/255, 134/255, 1), label='Ontario Construction News')
+plt.bar(df_agg.yearmonth, df_agg.l2b, align='center', color=(138/225, 175/225, 190/225, 1), label='Link2Build')
 ax = plt.axes()
 x_axis = ax.axes.get_xaxis()
 x_label = x_axis.get_label()
