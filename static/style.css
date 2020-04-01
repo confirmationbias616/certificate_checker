@@ -184,7 +184,7 @@
     .blocktext {
       margin-left: auto;
       margin-right: auto;
-      width: 70%;
+      width: calc(120px + 62vw) ;
       font-size: calc(16px + 1vw);
     }
     input[id=large_button]:hover { 
