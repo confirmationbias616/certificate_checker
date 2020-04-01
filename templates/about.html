@@ -11,50 +11,60 @@
     <br><br>    
     <div>
         <P class="blocktext">
-            The idea behind this tool is to minimize subcontractors' average wait
-            time for receiving their hard-earned 10% holdback payemnts. This is
-            acheived by monitoring all known commercial news websites for
-            postings of CSP (Certificate of Substantial Completion) and notify
-            involved subcontractors. Applicable to all construction projects in
-            Ontario, Canada.
+            HBR Bot assists Ontario subcontractors in quickly recovering their
+            10% holdback funds. This is acheived by monitoring all known publishers
+            of CSP's (Certificates of Substantial Completion) and notifying
+            involved subcontractors once a match has been found for one of their 
+            projects.
         </P>
         <br>
-        <P class="blocktext">
-            Why is this required? See graph below.
-        </P>
+        <h3 class="blocktext">
+            Why start using this tool <u>now</u>? &nbsp &nbsp<i class="fa fa-hand-o-down"></i>
+        </h3>
         <div align='center'>
             <img src="static/competition_per_quantity.png" alt="..." style='width: calc(120px + 62vw); min-width: 300px; max-height: 95vh'>
         </div>
-        <br>
         <P class="blocktext">
+            Before 2019, Daily Commercial News (DCN) used to have a monopoly on 
+            publishing of CSP's in Ontario. Due to a recent change in provincial
+            legisltion, the market has been opened up to allow competition in CSP
+            publishing. As shown above, the proliferation of publishers has already
+            begun. <br><br>
+            Before long, it will become far too time consuming for anyone to check
+            CSP sources regularly and cross-reference with their own list of open
+            projects. HBR Bot streamlines this process and makes it available for
+            all. <br><br>
             To get started, simply enter a new project and let HBR Bot guide you through 
             the process. To learn more about the Lien Construction Act and holdback 
             releases in general, visit
             <a href="https://canada.constructconnect.com/dcn/construction-act">this link</a>.
         </P>
         <br>
+        <h3 class="blocktext">Tech Stack</h3>
         <P class="blocktext">
-            As for the tech stack, HBR Bot is written in Python and SQL. It essentially
-            consists of a machine learning model wrapped in a web app. At a high level,
-            the type of data science problem being solved here can be classified as
+            HBR Bot is written in <b>Python</b> and <b>SQL</b>. In essence, it is a machine learning model
+            wrapped in a web app. For intelligent matching of CSP's to subcontractor's logged
+            open projects, the type of data science problem being solved here can be classified as
             <a href='http://www.datacommunitydc.org/blog/2013/08/entity-resolution-for-big-data'>
                 Entity Resoultion</a>.
-            The machine learning model is a Scikit-Learn Random Forest and it makes use of
+            The machine learning model is a <b>Scikit-Learn</b> Random Forest and it is fed by 
             an active style of learning with human-in-the-loop validation via user feedback
-            from the web app. 
-        </P>
-        <br>
-        <P class="blocktext">
+            from the web app. <br><br>
             Due to the class imbalance issue of an initially small amount
-            of confirmed positive matches, the ML training process makes use of the SMOTE
-            algorithm. The data wrangling step utilizes the fuzzywuzzy package, which
-            applies fuzzy logic to all string mtaching. The web app is built with Flask and is
-            hosted on PythonAnywhere. The database is SQLite3. The code base is version
-            controlled with Git and hosted on GitHub. It is also automatically tested and
-            continuously integrated on CircleCI.
+            of confirmed positive matches, the ML training process makes use of the <b>SMOTE</b>
+            algorithm. The data wrangling step utilizes the <b>fuzzywuzzy</b> package, which
+            applies fuzzy logic to all string mtaching.<br><br>
+            The web app is built with <b>Flask</b> and is hosted on <b>PythonAnywhere</b>.<br><br>
+            The database is <b>SQLite3</b> and the <b>FTS3</b> extension is used for text search within the database.<br><br>
+            The graphs are built with <b>Matplotlib</b> and the maps are built with <b>Folium</b>.<br><br>
+            Project data is enriched with the <b>Google Maps Geocode API</b>.<br><br>
+            Authentication and authorization of users is provided via <b>Google's Sign-In OAuth API</b>.<br><br>
+            Rate limiting is managed between web workers by a Redis key-value store via <b>Redislite</b>.<br><br>
+            Payments are processed with <b>Stripe</b>, emails are sent with <b>Sendgrid</b>.<br><br>
+            The code base is version controlled with <b>Git</b> and hosted on <b>GitHub</b>.<br><br>
+            It is also automatically tested and continuously integrated on <b>CircleCI</b>.<br><br>
         </P>
     </div>
-    <br><br>
     {% endblock %}
 </body>
 </html>
