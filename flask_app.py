@@ -1277,11 +1277,15 @@ def map():
                 </tr>
                 <tr>
                     <th><b>Contractor</b></th> 
-                    <td>{row.contractor}</td> 
+                    <td><a href={ url_for('insights', text_search=row.contractor) }>{row.contractor}</a></td>
                 </tr>
                 <tr>
                     <th><b>Owner</b></th>
-                    <td>{row.owner}</td>
+                    <td><a href={ url_for('insights', text_search=row.owner) }>{row.owner}</a></td>
+                </tr>
+                <tr>
+                    <th><b>Certifier</b></th>
+                    <td><a href={ url_for('insights', text_search=row.engineer) }>{row.engineer}</a></td>
                 </tr>
                 <tr>
                     <th><b>Source</b></th>
@@ -1342,6 +1346,10 @@ def map():
                     <th><b>Owner</b></th>
                     <td><a href={ url_for('insights', text_search=row.owner) }>{row.owner}</a></td>
                 </tr>
+                <tr>
+                    <th><b>Certifier</b></th>
+                    <td><a href={ url_for('insights', text_search=row.engineer) }>{row.engineer}</a></td>
+                </tr>
             </table>
             <hr style="border: 1px solid black">
             <h5><em>actively searching for matches</em></h5>
@@ -1390,16 +1398,20 @@ def map():
             <hr style="border: 1px solid var(--highlight)">
             <table style="width:100%">
                 <tr>
-                    <th><b>Date published</b></th>
-                    <td>{row.pub_date}</td>
+                    <th><b>Contractor</b></th> 
+                    <td><a href={ url_for('insights', text_search=row.contractor) }>{row.contractor}</a></td>
                 </tr>
                 <tr>
-                    <th><b>Contractor</b></th> 
-                    <td>{row.contractor}</td> 
+                    <th><b>Owner</b></th>
+                    <td><a href={ url_for('insights', text_search=row.owner) }>{row.owner}</a></td>
                 </tr>
                 <tr>
                     <th><b>Owner</b></th>
                     <td>{row.owner}</td>
+                </tr>
+                <tr>
+                    <th><b>Certifier</b></th>
+                    <td><a href={ url_for('insights', text_search=row.engineer) }>{row.engineer}</a></td>
                 </tr>
                 <tr>
                     <th><b>Source</b></th>
