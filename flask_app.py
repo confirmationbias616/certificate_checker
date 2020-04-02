@@ -775,6 +775,44 @@ def user_account():
     load_user()
     return render_template("user_account.html")
 
+@app.route("/admin", methods=["POST", "GET"])
+def admin():
+    with create_connection() as conn:
+        df_users = pd.read_sql("""
+            SELECT
+                SUBSTR(date_added,0,5)||'-'||SUBSTR(date_added,6,2) as yearmonth,
+                COUNT(*) as count
+            FROM users
+            WHERE date_added > '2018-01-01'
+            GROUP BY yearmonth
+            ORDER BY date_added
+        """, conn)
+    all_possible_yearmonths = [f"{x[0]}-{x[1]}" for x in list(zip(np.repeat(range(2020, 2100),12), [str(x).zfill(2) for x in range(1,13)]*36))]
+    all_yearmonths = [x for x in all_possible_yearmonths if x <= list(df_users['yearmonth'])[-1]]
+    df_agg = pd.merge(pd.DataFrame({'yearmonth' : all_yearmonths}), df_users, how='left').fillna(0)
+    plt.figure(figsize=[15,10])
+    plt.rcParams.update({'font.size': 22})
+    plt.bar(df_agg.yearmonth, df_agg['count'], align='center', color=(112/255, 94/255, 134/255, 1))
+    ax = plt.axes()
+    x_axis = ax.axes.get_xaxis()
+    x_label = x_axis.get_label()
+    x_label.set_visible(False)
+    for spine in ax.spines:
+        ax.spines[spine].set_visible(False)
+    ax.tick_params(axis=u'both', which=u'both',length=0)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    possibly_valid_xticks = (f'{x[0]}-{x[1]}' for x in zip(np.repeat(range(2018, 2100),6), ['02', '04', '06', '08', '10', '12'] * 100))
+    valid_xticks = [x for x in possibly_valid_xticks if x in list(df_agg.yearmonth.unique())]
+    plt.xticks(valid_xticks)
+    plt.locator_params(axis='x', nbins=20)
+    legend = plt.legend(frameon=1, prop={'size': 20})
+    frame = legend.get_frame()
+    frame.set_alpha(0)
+    plt.title("New sign-ups\n")
+    plt.savefig("static/new_users.png", transparent=True)
+    return render_template("admin.html")
+
 @app.route("/terminate_account", methods=["POST", "GET"])
 def terminate_account():
     load_user()
