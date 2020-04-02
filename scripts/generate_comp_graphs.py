@@ -44,7 +44,7 @@ ax.tick_params(axis=u'both', which=u'both',length=0)
 ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 possibly_valid_xticks = (f'{x[0]}-{x[1]}' for x in zip(np.repeat(range(2018, 2100),2), ['06', '12']*100))
-valid_xticks = [x for x in possibly_valid_xticks if x in ['2018-06', '2018-02', '2018-12', '2019-06', '2019-12', 'alex']]
+valid_xticks = [x for x in possibly_valid_xticks if x in list(df_agg.yearmonth.unique())]
 plt.xticks(valid_xticks)
 plt.locator_params(axis='x', nbins=20)
 legend = plt.legend(frameon=1, prop={'size': 20})
