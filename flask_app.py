@@ -1336,11 +1336,11 @@ def map():
             <table style="width:100%">
                 <tr>
                     <th><b>Contractor</b></th> 
-                    <td>{row.contractor}</td> 
+                    <td><a href={ url_for('insights', text_search=row.contractor) }>{row.contractor}</a></td>
                 </tr>
                 <tr>
                     <th><b>Owner</b></th>
-                    <td>{row.owner}</td>
+                    <td><a href={ url_for('insights', text_search=row.owner) }>{row.owner}</a></td>
                 </tr>
             </table>
             <hr style="border: 1px solid black">
@@ -1488,7 +1488,7 @@ def insights():
         return redirect(url_for("limit"))
     wc_count = None
     wc_search_type = None
-    text_search = request.form.get('text_search', '')
+    text_search = request.form.get('text_search', request.args.get('text_search', ''))
     if text_search:
         query = """
             SELECT pub_date
