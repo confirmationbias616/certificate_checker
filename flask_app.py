@@ -1406,10 +1406,6 @@ def map():
                     <td><a href={ url_for('insights', text_search=row.owner) }>{row.owner}</a></td>
                 </tr>
                 <tr>
-                    <th><b>Owner</b></th>
-                    <td>{row.owner}</td>
-                </tr>
-                <tr>
                     <th><b>Certifier</b></th>
                     <td><a href={ url_for('insights', text_search=row.engineer) }>{row.engineer}</a></td>
                 </tr>
