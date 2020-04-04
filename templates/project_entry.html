@@ -13,66 +13,65 @@
   {% block body %}
   <div style="margin-left: 2%; margin-right: 2%; margin-top: 0px">
   <br><br>
-  <form action="/project_entry" name = "job_entry" method="POST" onsubmit="return(validate())">
-    <fieldset>
-      <legend>{% if job_number %}Adjust{% else %}New{% endif %} Project Info</legend>
-      <span>   *</span><span style="font-size:90%"><i> denotes a required field</i><br><br></span>
-      <div class="required">
-        <p2>Subcontract Job #</p2><br>
-        <input type="text" name="job_number" size="6" {% if job_number %}value="{{job_number}}" {% else %}placeholder="2567"{% endif %} pattern="[A-Za-z0-9\-]+" {% if job_number %} readonly title="Cannot modify project number once it has been set." {% else %} autofocus required title="only alphanumerical characters and dashes (-) are accepted"{% endif %}>
-      </div><br>
-      <div class="required">
-        <p2>Project Title</p2><br>
-        <input type="text" name="title" size="28" {% if title %}value="{{title}}" {% else %}placeholder="ABC Tower D - Disruptek Office Fit-Up"{% endif %} required {% if job_number %} autofocus {% endif %}>
-      </div><br>
-      <div class="required">
-        <p2>City</p2><br>
-        <input type="text" name="city" size="12" {% if city %}value="{{city}}" {% else %}placeholder="Ottawa"{% endif %} required>
-      </div><br>
-      <div class="required">
-        <p2>Address</p2><br>
-        <input type="text" name="address" size="20" {% if address %}value="{{address}}" {% else %}placeholder="123 Fake Street"{% endif %} required>
-      </div><br>
-      <div class="required">
-        <p2>General Contractor</p2><br>
-        <input type="text" name="contractor" size="28" {% if contractor %}value="{{contractor}}" {% else %}placeholder="MegaCon Builders"{% endif %} required>
-      </div><br>
-      <p2>Owner</p2><br>
-        <input type="text" name="owner" size="28" {% if owner %}value="{{owner}}" {% else %}placeholder="ASAP Properties Inc."{% endif %}>
-      <br><br>
-      <p2>Certifier</p2><br>
-        <input type="text" name="engineer" size="28" {% if engineer %}value="{{engineer}}" {% else %}placeholder="Superior Associates Limited"{% endif %} title="Typically, this is the architect of record.">
-    </fieldset>
-    <fieldset>
-        <legend>Interested Parties</legend>
-        <span style="font-size:90%"><i>   Must select at least 1 contact from below</i></span>
-        {% if all_contacts|length %}
-          {% for _, contact in all_contacts.iterrows() %}
-            <ul>
-              <input type="checkbox" id="id_{{contact['id']}}" name="contacts" value="{{contact['id']}}" {% if receiver_emails_dump and contact['email_address'] in receiver_emails_dump %} checked {% endif %}>
-              <label for="id_{{contact['id']}}">{{contact['name']}}</label>
-            </ul>
-          {% endfor %}
-        {% else %}
-          <p align="right">
-            ^^^
-          </p>
-          <p>
-            You must first configure your company's contacts in order to submit a project.
-          </p>
-          <p align="right">
-            ^^^
-          </p>
+  <div style='width: 95vw; max-width: 864px; margin-left: auto; margin-right: auto;'>
+    <form action="/project_entry" name = "job_entry" method="POST" onsubmit="return(validate())">
+      <fieldset>
+        <legend>{% if job_number %}Adjust{% else %}New{% endif %} Project Info</legend>
+        <span>   *</span><span style="font-size:90%"><i> denotes a required field</i><br><br></span>
+        <div class="required">
+          <p2>Subcontract Job #</p2><br>
+          <input type="text" name="job_number" size="6" {% if job_number %}value="{{job_number}}" {% else %}placeholder="2567"{% endif %} pattern="[A-Za-z0-9\-]+" {% if job_number %} readonly title="Cannot modify project number once it has been set." {% else %} autofocus required title="only alphanumerical characters and dashes (-) are accepted"{% endif %}>
+        </div><br>
+        <div class="required">
+          <p2>Project Title</p2><br>
+          <input type="text" name="title" size="28" {% if title %}value="{{title}}" {% else %}placeholder="ABC Tower D - Disruptek Office Fit-Up"{% endif %} required {% if job_number %} autofocus {% endif %}>
+        </div><br>
+        <div class="required">
+          <p2>City</p2><br>
+          <input type="text" name="city" size="12" {% if city %}value="{{city}}" {% else %}placeholder="Ottawa"{% endif %} required>
+        </div><br>
+        <div class="required">
+          <p2>Address</p2><br>
+          <input type="text" name="address" size="20" {% if address %}value="{{address}}" {% else %}placeholder="123 Fake Street"{% endif %} required>
+        </div><br>
+        <div class="required">
+          <p2>General Contractor</p2><br>
+          <input type="text" name="contractor" size="28" {% if contractor %}value="{{contractor}}" {% else %}placeholder="MegaCon Builders"{% endif %} required>
+        </div><br>
+        <p2>Owner</p2><br>
+          <input type="text" name="owner" size="28" {% if owner %}value="{{owner}}" {% else %}placeholder="ASAP Properties Inc."{% endif %}>
+        <br><br>
+        <p2>Certifier</p2><br>
+          <input type="text" name="engineer" size="28" {% if engineer %}value="{{engineer}}" {% else %}placeholder="Superior Associates Limited"{% endif %} title="Typically, this is the architect of record.">
+      </fieldset>
+      <fieldset>
+          <legend>Interested Parties</legend>
+          <span style="font-size:90%"><i>   Must select at least 1 contact from below</i></span>
+          {% if all_contacts|length %}
+            {% for _, contact in all_contacts.iterrows() %}
+              <ul>
+                <input type="checkbox" id="id_{{contact['id']}}" name="contacts" value="{{contact['id']}}" {% if receiver_emails_dump and contact['email_address'] in receiver_emails_dump %} checked {% endif %}>
+                <label for="id_{{contact['id']}}">{{contact['name']}}</label>
+              </ul>
+            {% endfor %}
+          {% else %}
+            <p align="right">
+              ^^^
+            </p>
+            <p>
+              You must first configure your company's contacts in order to submit a project.
+            </p>
+            <p align="right">
+              ^^^
+            </p>
+          {% endif %}
+      </fieldset>
+      <div style='width: 300px'>
+        <input type="submit" id="large_button" value="SUBMIT">
+        {% if not job_number %}
+          <input type="reset" id="large_button" value="RESET">
         {% endif %}
-    </fieldset>
-    <!-- <img src="https://thumbs.gfycat.com/ShadowyThornyGelada-size_restricted.gif"> -->
-    <div>
-      <br><br>
-      <input type="submit" id="large_button" value="SUBMIT">
-      <br><br>
-      {% if not job_number %}
-        <input type="reset" id="large_button" value="RESET">
-      {% endif %}
+      </div>
     </div>
   </form>
 </div>
