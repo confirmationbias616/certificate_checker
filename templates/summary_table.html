@@ -8,6 +8,10 @@
 </head>
 <body>
     {% block body %}
+    <div>
+      <a href={{ url_for('contact_config') }}>configure contacts</a>
+      <a href={{ url_for('project_entry') }}>new project</a>
+    </div>
     <div style="margin-left: 10px; margin-right: 10px;">
       <h3>
         Actively searching for:
