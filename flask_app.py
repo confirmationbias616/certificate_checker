@@ -1398,8 +1398,8 @@ def map():
             <hr style="border: 1px solid var(--highlight)">
             <table style="width:100%">
                 <tr>
-                    <td><a href={ url_for('insights', text_search=row.contractor) }>{row.contractor}</a></td>
                     <th><b>Contractor</b></th>
+                    <td><a href={ url_for('insights', text_search=row.contractor) }>{row.contractor.replace("`",' ')}</a></td>
                 </tr>
                 <tr>
                     <th><b>Owner</b></th>
