@@ -256,7 +256,7 @@
     }
     fieldset{
       transition: box-shadow 0.5s;
-      background-color: var(--fieldset);
+      background-color: rgb(168, 185, 191);
       float: left;
       width: 330px;
       margin: 8px;

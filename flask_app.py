@@ -860,7 +860,7 @@ def contact_config():
                 ]
             )
             .set_properties(
-                **{"font-size": "10pt", "background-color": "rgb(138, 175, 190)"}
+                **{"font-size": "10pt", "background-color": "rgb(168, 185, 191)"}
             )
             .hide_index()
         )
