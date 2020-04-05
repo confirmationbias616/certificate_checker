@@ -28,6 +28,10 @@
             <input type="submit" id="small_button" value="{% if update %} Update {% else %} Add {% endif %}">
             <input type='text' name='company_id' value='{{ session.get("company_id") }}' hidden>
         </form>
+        <br><br>
+        <form action="/summary_table">
+            <input type="submit" id="small_button" value="back">
+        </form>
     </div>
     <br><br>
     {% endblock %}
