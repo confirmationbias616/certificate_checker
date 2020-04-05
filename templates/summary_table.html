@@ -8,11 +8,16 @@
 </head>
 <body>
     {% block body %}
-    <div>
-      <a href={{ url_for('contact_config') }}>configure contacts</a>
-      <a href={{ url_for('project_entry') }}>new project</a>
+    <br>
+    <div align='center'>
+      <form action="{{ url_for('project_entry') }}" style='display: inline'>
+        <input type='submit' id="large_button" value='NEW JOB'>
+      </form>
+      <form action="{{ url_for('contact_config') }}" style='display: inline'>
+        <input type='submit' id="large_button" value='CONTACTS'>
+      </form>
     </div>
-    <div style="margin-left: 10px; margin-right: 10px;">
+    <div class='blocktext-tables'>
       <h3>
         Actively searching for:
       </h3>
@@ -30,8 +35,8 @@
         {{df_closed | safe}}
       </p>
       </div>
+      <p align="center" style="color:rgb(85, 82, 88)"><i>assuming 60-day lien period:</i>  <span style="color:rgb(97, 62, 143)">lien period still in effect</span>  --  <span style="color:black">lien period expired</span></p>
     </div>
-    <p align="center" style="color:rgb(85, 82, 88)"><i>assuming 60-day lien period:</i>  <span style="color:rgb(97, 62, 143)">lien period still in effect</span>  --  <span style="color:black">lien period expired</span></p>
     {% endblock %}
 </body>
 </html>

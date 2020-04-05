@@ -628,7 +628,7 @@ def summary_table():
             )
             .set_table_attributes('border="1"')
             .set_properties(
-                **{"font-size": "10pt", "background-color": "rgb(168, 185, 191)"}
+                **{"background-color": "rgb(168, 185, 191)"}
             )
             .set_properties(
                 subset=["action", "job_number", "contacts"], **{"text-align": "center"}
