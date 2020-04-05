@@ -46,8 +46,8 @@
       </fieldset>
       <fieldset>
           <legend>Interested Parties</legend>
-          <span style="font-size:90%"><i>   Must select at least 1 contact from below</i></span>
           {% if all_contacts|length %}
+            <span style="font-size:90%"><i>   Must select at least 1 contact from below</i></span>
             {% for _, contact in all_contacts.iterrows() %}
               <ul>
                 <input type="checkbox" id="id_{{contact['id']}}" name="contacts" value="{{contact['id']}}" {% if receiver_emails_dump and contact['email_address'] in receiver_emails_dump %} checked {% endif %}>
