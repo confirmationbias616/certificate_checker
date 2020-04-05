@@ -4,6 +4,8 @@
     --outline: rgb(15, 15, 12);
     --item: rgb(122, 128, 138);
     --fieldset: rgb(138, 175, 190);
+    --shadow-inactive: rgba(15,15,12,0.3);
+    --shadow-hover: rgba(15,15,12,0.6);
     }
     .required:after { content:" *"; }
     .topnav {
@@ -17,7 +19,7 @@
     }
 
     .welcome_banner {
-      background-color: var(--highlight);
+      background-image: linear-gradient(90deg, var(--highlight), var(--background) 80% ,var(--fieldset));
       text-align: right;
       padding: 10;
       font-size: 14px;
@@ -54,7 +56,7 @@
       text-align: center;
       padding: 14px 16px;
       text-decoration: none;
-      font-size: 20px;
+      font-size: calc(20px + 1vw);
     }
     .topnav a {
       transition: color 0.5s;
@@ -69,8 +71,8 @@
 
     /* Change the color of links on hover */
     .topnav a:hover {
-      background-color: var(--fieldset);
-      color: var(--outline);
+      background-color: var(--highlight);
+      /* color: var(--outline); */
     }
 
     /* Add a color to the active/current link */
@@ -188,16 +190,16 @@
       font-size: calc(16px + 1vw);
     }
     input[id=large_button]:hover { 
-      box-shadow: -3px -3px 6px var(--highlight);
+      box-shadow: -2px -2px 2px var(--shadow-hover);
     }
     input[id=small_button]:hover { 
-      box-shadow: -3px -3px 6px var(--highlight);
+      box-shadow: -2px -2px 2px var(--shadow-hover);
     }
     fieldset:hover { 
-      box-shadow: -5px -5px 6px var(--highlight);
+      box-shadow: -2px -2px 2px var(--shadow-hover);
     }
     legend:hover { 
-      box-shadow: -5px -5px 10px var(--highlight);
+      box-shadow: -2px -2px 2px var(--shadow-hover);
     }
     input[type=text]{
       transition: box-shadow 0.5s;
@@ -216,7 +218,7 @@
       background-color: var(--item);
       border: 2px var(--outline) solid;
       border-radius: 5px;
-      box-shadow: -3px -3px 5px grey;
+      box-shadow: -2px -2px 1px var(--shadow-inactive);
     }
     input[id=small_button]{
       transition: box-shadow 0.5s;
@@ -227,7 +229,7 @@
       background-color: var(--item);
       border: 2px var(--outline) solid;
       border-radius: 5px;
-      box-shadow: -3px -3px 5px grey;
+      box-shadow: -2px -2px 1px var(--shadow-inactive);
     }
     button[id=large_button]{
       transition: box-shadow 0.5s;
@@ -241,7 +243,7 @@
       background-color: var(--item);
       border: 2px var(--outline) solid;
       border-radius: 5px;
-      box-shadow: -3px -3px 5px grey;
+      box-shadow: -2px -2px 1px var(--shadow-inactive);
     }
     input[type=text]{
       font-family: 'Montserrat', sans-serif;
@@ -263,7 +265,7 @@
       padding: 12px;
       box-sizing: 2px border-box;
       border: 2px solid var(--outline);
-      box-shadow: -5px -5px 5px grey;
+      box-shadow: -2px -2px 1px var(--shadow-inactive);
     }
     legend{
       transition: box-shadow 0.5s;
@@ -276,7 +278,7 @@
       font-style: italic;
       text-align: right;
       border-radius: 20px;
-      box-shadow: -5px -5px 10px grey;
+      box-shadow: -2px -2px 1px var(--shadow-inactive);
     }
     div#content {
       display: none;

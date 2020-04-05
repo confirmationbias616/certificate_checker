@@ -31,8 +31,9 @@
                 </span>
             </div>
         </div>
-        <hr style="border: 2px solid var(--highlight); margin:0px">
+        <hr style="border: 2px solid var(--fieldset); margin:0px">
     {% endif %}
+    <hr style="border: 2px solid var(--highlight); margin:0px">
     <div class="topnav" id="myTopnav">
         <a href="javascript:void(0);" class="icon" onclick="myFunction()">
             <i class="fa fa-bars"></i>
@@ -51,7 +52,7 @@
         <a {% if self._TemplateReference__context.name.rstrip('.html') == 'insights' %} class="active" {% endif %} href={{ url_for('insights') }}>insights</a>    
         <a {% if self._TemplateReference__context.name.rstrip('.html') == 'about' %} class="active" {% endif %} href={{ url_for('about') }}>about</a>
     </div>
-    <hr style="border: 2px solid black; margin:0px">
+    <hr style="border: 2px solid var(--highlight); margin:0px">
     {% block body %}{% endblock %}
     <script>
         function myFunction() {
