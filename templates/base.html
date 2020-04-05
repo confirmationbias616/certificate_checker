@@ -31,14 +31,14 @@
                 </span>
             </div>
         </div>
-        <hr style="border: 2px solid var(--fieldset); margin:0px">
     {% endif %}
-    <hr style="border: 2px solid var(--highlight); margin:0px">
+    <hr style="border: 2px solid var(--item); margin:0px">
     <div class="topnav" id="myTopnav">
         <a href="javascript:void(0);" class="icon" onclick="myFunction()">
-            <i class="fa fa-bars"></i>
+            <i class="fa fa-bars" id="nav_select" style='display: block; color: var(--item)'></i>
+            <i class="fa fa-times" id="nav_close" style='display: none; color: var(--item)'></i>
         </a>
-        <a class="title" href={{ url_for('index') }}><strong>HBR Bot</strong></a>
+        <a class="title" id='title' href={{ url_for('index') }}><strong>HBR Bot</strong></a>
         {% if session.get("company_id") %}
         <a href={{ url_for('logout') }}><i>log out</i></a>
         {% else %}
@@ -52,14 +52,18 @@
         <a {% if self._TemplateReference__context.name.rstrip('.html') == 'insights' %} class="active" {% endif %} href={{ url_for('insights') }}>insights</a>    
         <a {% if self._TemplateReference__context.name.rstrip('.html') == 'about' %} class="active" {% endif %} href={{ url_for('about') }}>about</a>
     </div>
-    <hr style="border: 2px solid var(--highlight); margin:0px">
+    <hr style="border: 2px solid var(--item); margin:0px">
     {% block body %}{% endblock %}
     <script>
         function myFunction() {
           var x = document.getElementById("myTopnav");
           if (x.className === "topnav") {
+            document.getElementById("nav_select").style.display = "none";
+            document.getElementById("nav_close").style.display = "block";
             x.className += " responsive";
           } else {
+            document.getElementById("nav_select").style.display = "block";
+            document.getElementById("nav_close").style.display = "none";
             x.className = "topnav";
           }
         }
