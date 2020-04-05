@@ -55,15 +55,12 @@
               </ul>
             {% endfor %}
           {% else %}
-            <p>
+            <a href="{{ url_for('contact_config') }}">
               You must first configure your company's contacts in order to submit a project.
-            </p>
+            </a>
           {% endif %}
       </fieldset>
       <div style='width: 300px'>
-        <form action="{{ url_for('contact_config') }}" style='display: inline'>
-          <input type='submit' id="large_button" value='CONFIGURATE CONTACTS' style='width: 280px'>
-        </form>
         <input type="submit" id="large_button" value="SUBMIT">
         {% if not job_number %}
           <input type="reset" id="large_button" value="RESET">
