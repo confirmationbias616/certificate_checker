@@ -1,9 +1,13 @@
 :root {
+    --bg-alpha: 0.7;
     --highlight: rgb(112, 94, 134);
+    --highlight-bg: rgba(112, 94, 134, var(--bg-alpha));
     --background: rgb(145, 163, 161);
+    --background-bg: rgba(145, 163, 161, var(--bg-alpha));
     --outline: rgb(15, 15, 12);
     --item: rgb(122, 128, 138);
     --fieldset: rgb(138, 175, 190);
+    --fieldset-bg: rgb(138, 175, 190, var(--bg-alpha));
     --shadow-inactive: rgba(15,15,12,0.3);
     --shadow-hover: rgba(15,15,12,0.6);
     }
