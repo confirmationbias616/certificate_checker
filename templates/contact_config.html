@@ -25,7 +25,7 @@
             <input type="text" name="id" value="{{ id }}" hidden>
             <input type="text" name="name" {% if update %} value="{{ name }}" {% else %} placeholder="name" {% endif %}>
             <input type="text" name="email_address" {% if update %} value="{{ email_address }}" {% else %} placeholder="email address" {% endif %}>
-            <input type="submit" id="small_button" value="{% if update %} Update {% else %} Add {% endif %}">
+            <input type="submit" id="small_button" value="{% if update %} Update {% else %} add {% endif %}" style='margin: 10px'>
             <input type='text' name='company_id' value='{{ session.get("company_id") }}' hidden>
         </form>
         <br><br>
