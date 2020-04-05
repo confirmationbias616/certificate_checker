@@ -225,7 +225,7 @@
       transition: box-shadow 0.5s;
       font-family: 'Montserrat', sans-serif;
       font-size: 120%;
-      width: 120px;
+      width: min(20vw, 120px);
       height: 2em;
       margin-right:10px;
       margin-left:10px;
@@ -239,7 +239,7 @@
       transition: box-shadow 0.5s;
       font-family: 'Montserrat', sans-serif;
       font-size: 90%;
-      width: 10%;
+      width: min(10vw, 30px);
       height: 1.8em;
       background-color: var(--item);
       border: 2px var(--outline) solid;
