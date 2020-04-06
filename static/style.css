@@ -248,20 +248,6 @@
       border-radius: 5px;
       box-shadow: -2px -2px 1px var(--shadow-inactive);
     }
-    button[id=large_button]{
-      transition: box-shadow 0.5s;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 120%;
-      width: 120px;
-      height: 2em;
-      margin-right:10px;
-      margin-left:10px;
-      margin-top:10px;
-      background-color: var(--item);
-      border: 2px var(--outline) solid;
-      border-radius: 5px;
-      box-shadow: -2px -2px 1px var(--shadow-inactive);
-    }
     input[type=text]{
       font-family: 'Montserrat', sans-serif;
       font-size: 100%;
