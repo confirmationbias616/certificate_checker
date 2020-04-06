@@ -46,11 +46,11 @@
         {% endif %}
         <a class="spacer">|</a>
         {% if session.get("account_type") %}
-            <a {% if self._TemplateReference__context.name.rstrip('.html') == 'summary_table' %} class="active" {% endif %} href={{ url_for('summary_table') }}>portfolio</a>
+            <a {% if self._TemplateReference__context.name.rstrip('.html') == 'summary_table' %} class="active" {% endif %} href={{ url_for('summary_table') }}><b>portfolio</b></a>
         {% endif %}
-        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'map' %} class="active" {% endif %} href={{ url_for('map') }}>search</a>
-        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'insights' %} class="active" {% endif %} href={{ url_for('insights') }}>insights</a>    
-        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'about' %} class="active" {% endif %} href={{ url_for('about') }}>about</a>
+        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'map' %} class="active" {% endif %} href={{ url_for('map') }}><b>search</b></a>
+        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'insights' %} class="active" {% endif %} href={{ url_for('insights') }}><b>insights</b></a>    
+        <a {% if self._TemplateReference__context.name.rstrip('.html') == 'about' %} class="active" {% endif %} href={{ url_for('about') }}><b>about</b></a>
     </div>
     <hr style="border: 2px solid var(--item); margin:0px">
     {% block body %}{% endblock %}
