@@ -41,7 +41,7 @@
     }
     .advertise_banner {
       padding: 0.2vw;
-      font-size: 2.5vw;
+      font-size: min(2.5vw, 10px);
       text-align: center
     }
     .advertise_banner_text a{
@@ -70,7 +70,9 @@
       vertical-align: middle;
       padding: 14px 16px;
       text-decoration: none;
-      font-size: 16px;
+      font-size: calc(15px + 0.2vw);
+      margin-top: calc(-20px + 2vh);
+      margin-bottom: calc(-20px + 2vh);
     }
 
     /* Change the color of links on hover */
@@ -108,7 +110,7 @@
     }
     a.user:hover {
       color: var(--outline);
-      font-size: 16px;
+      font-size: calc(14px + 0.35vw);
     }
 
     /* Hide the link that should open and close the topnav on small screens */
@@ -119,7 +121,7 @@
     }
     .user {
       transition: 0.2s;
-      font-size: 14px;
+      font-size: calc(12px + 0.25vw);
       color: black;
     }
 
@@ -224,7 +226,7 @@
     input[id=large_button]{
       transition: box-shadow 0.5s;
       font-family: 'Montserrat', sans-serif;
-      font-size: 120%;
+      font-size: calc(16px + 0.5vw);
       width: min(20vw, 120px);
       height: 2em;
       margin-right:10px;
@@ -238,7 +240,7 @@
     input[id=small_button]{
       transition: box-shadow 0.5s;
       font-family: 'Montserrat', sans-serif;
-      font-size: 90%;
+      font-size: calc(11px + 0.15vw);
       width: min(10vw, 30px);
       height: 1.8em;
       background-color: var(--item);
