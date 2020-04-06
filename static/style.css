@@ -61,11 +61,12 @@
       padding: 14px 16px;
       text-decoration: none;
       font-size: calc(20px + 1vw);
+      text-shadow: -2px -2px 3px var(--item);
     }
     .topnav a {
       transition: color 0.5s;
       float: right;
-      color: var(--item);
+      color: var(--fieldset);
       text-align: center;
       vertical-align: middle;
       padding: 14px 16px;
@@ -78,7 +79,7 @@
     /* Change the color of links on hover */
     .topnav a:hover {
       background-color: var(--highlight);
-      /* color: var(--outline); */
+      color: var(--outline);
     }
 
     /* Add a color to the active/current link */
@@ -87,7 +88,7 @@
       color: var(--outline);
     }
     .topnav a.active:hover {
-      color: #f2f2f2;
+      color: var(--highlight);
     }
 
     /* Add a color to the active/current link */
@@ -102,7 +103,8 @@
     }
     .topnav a.title:hover {
       background-color: var(--outline);
-      color:var(--highlight);
+      color:var(--item);
+      text-shadow: -2px -2px 3px var(--highlight);
     }
     .topnav a.icon:hover {
       background-color: var(--outline);
