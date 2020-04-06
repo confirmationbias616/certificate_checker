@@ -72,8 +72,8 @@
       padding: 14px 16px;
       text-decoration: none;
       font-size: calc(15px + 0.2vw);
-      margin-top: calc(-20px + 2vh);
-      margin-bottom: calc(-20px + 2vh);
+      margin-top: max(calc(-20px + 2vh), -12px);
+      margin-bottom: max(calc(-20px + 2vh), -12px);
     }
 
     /* Change the color of links on hover */
@@ -184,6 +184,10 @@
       font-family: 'Montserrat', sans-serif;
       font-size: 100%;
     }
+    p {
+      font-family: 'Montserrat', sans-serif;
+      font-size: calc(10px + 0.5vh + 0.2vw);
+    }
     p1 {
       font-family: 'Montserrat', sans-serif;
       font-size: 100%;
@@ -228,9 +232,7 @@
     input[id=large_button]{
       transition: box-shadow 0.5s;
       font-family: 'Montserrat', sans-serif;
-      font-size: calc(16px + 0.5vw);
-      width: min(20vw, 120px);
-      height: 2em;
+      font-size: calc(12px + 0.8vh + 0.3vw);
       margin-right:10px;
       margin-left:10px;
       margin-top:10px;
@@ -242,9 +244,7 @@
     input[id=small_button]{
       transition: box-shadow 0.5s;
       font-family: 'Montserrat', sans-serif;
-      font-size: calc(11px + 0.15vw);
-      width: min(10vw, 30px);
-      height: 1.8em;
+      font-size: calc(8px + 0.5vh + 0.2vw);
       background-color: var(--item);
       border: 2px var(--outline) solid;
       border-radius: 5px;
