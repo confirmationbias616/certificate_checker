@@ -1269,6 +1269,7 @@ def map():
                 }}
             </style>
             <h4>{row.title}</h4>
+            <h5><b>@ {row.address}</b></h5>
             <hr style="border: 1px solid black">
             <table style="width:100%">
                 <tr>
@@ -1336,6 +1337,7 @@ def map():
                 }}
             </style>
             <h4>{row.title}</h4>
+            <h5><b>@ {row.address}</b></h5>
             <hr style="border: 1px solid black">
             <table style="width:100%">
                 <tr>
@@ -1395,6 +1397,7 @@ def map():
                 }}
             </style>
             <h4>{row.title}</h4>
+            <h5><b>@ {row.address}</b></h5>
             <hr style="border: 1px solid var(--highlight)">
             <table style="width:100%">
                 <tr>
