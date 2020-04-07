@@ -233,8 +233,10 @@
       box-shadow: -2px -2px 1px var(--shadow-inactive);
     }
     input[type=text]{
-      border: none;
       border-radius: 5px;
+      display: block;
+      font-size: calc(8px + 0.5vh + 0.2vw);
+      width: 80vw;
     }
     select{
       border: none;
