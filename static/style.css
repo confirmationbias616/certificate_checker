@@ -239,6 +239,35 @@
       width: 80vw;
     }
     select{
+      margin-right: 1vw;
+    }
+    .radio-toolbar input[type="radio"] {
+      display: none;
+    }
+    .radio-toolbar label {
+      display: inline-block;
+      background-color: var(--item);
+      padding: 0px 5px;
+      font-size: calc(8px + 0.5vh + 0.2vw);
+      box-shadow: 0px 0px 2px 2px var(--outline);
+      cursor: pointer;
+    }
+    .radio-toolbar input[type="radio"]:checked+label {
+      box-shadow: none;
+      border: 1px var(--outline) solid;
+    }
+    @media screen and (min-width: 500px) {
+      input[type=text]{
+        display: inline;
+      }
+      #text_search{
+        width: 40vw;
+      }
+      #location_string{
+        width: calc(200px + 10vw)
+      }
+    }
+    select{
       border: none;
     }
     fieldset{
