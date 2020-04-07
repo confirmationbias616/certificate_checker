@@ -213,9 +213,6 @@
     legend:hover { 
       box-shadow: -2px -2px 2px var(--shadow-hover);
     }
-    input[type=text]{
-      transition: box-shadow 0.5s;
-    }
     input[id=large_button]{
       transition: box-shadow 0.5s;
       font-size: calc(12px + 0.8vh + 0.3vw);
