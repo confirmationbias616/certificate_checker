@@ -10,6 +10,7 @@
     --fieldset-bg: rgb(138, 175, 190, var(--bg-alpha));
     --shadow-inactive: rgba(15,15,12,0.3);
     --shadow-hover: rgba(15,15,12,0.6);
+    font-family: 'Montserrat', sans-serif;
     }
     .required:after { content:" *"; }
     .topnav {
@@ -166,14 +167,12 @@
     body {
       background-color: rgb(196, 193, 193); /* For browsers that do not support gradients */
       background-image: linear-gradient(90deg, var(--highlight-bg), var(--background-bg) 80% ,var(--fieldset-bg));
-      font-family: 'Montserrat', sans-serif;
       margin-left:0px;
       margin-right:0px;
       margin-top:0px;
       margin-bottom:0px;
     }
     h2 {
-      font-family: 'Montserrat', sans-serif; 
       font-size: 280%;
       text-align: center;
       color: var(--outline);
@@ -184,18 +183,15 @@
       font-size: 100%;
     }
     p {
-      font-family: 'Montserrat', sans-serif;
       font-size: calc(10px + 0.5vh + 0.2vw);
     }
     p1 {
-      font-family: 'Montserrat', sans-serif;
       font-size: 100%;
       font-style: italic;
       color: var(--highlight);
       padding-left: 1%;
     }
     p2 {
-      font-family: 'Montserrat', sans-serif;
       font-size: 100%;
       padding-left: 1%;
     }
@@ -225,12 +221,10 @@
     }
     input[type=text]{
       transition: box-shadow 0.5s;
-      font-family: 'Montserrat', sans-serif;
       font-size: 120%;
     }
     input[id=large_button]{
       transition: box-shadow 0.5s;
-      font-family: 'Montserrat', sans-serif;
       font-size: calc(12px + 0.8vh + 0.3vw);
       margin-right:10px;
       margin-left:10px;
@@ -242,7 +236,6 @@
     }
     input[id=small_button]{
       transition: box-shadow 0.5s;
-      font-family: 'Montserrat', sans-serif;
       font-size: calc(8px + 0.5vh + 0.2vw);
       background-color: var(--item);
       border: 2px var(--outline) solid;
@@ -250,13 +243,11 @@
       box-shadow: -2px -2px 1px var(--shadow-inactive);
     }
     input[type=text]{
-      font-family: 'Montserrat', sans-serif;
       font-size: 100%;
       border: none;
       border-radius: 5px;
     }
     select{
-      font-family: 'Montserrat', sans-serif;
       font-size: 100%;
       border: none;
     }
@@ -276,7 +267,6 @@
       padding: 0.2em 0.6em;
       border: 2px solid var(--outline);
       background-color: var(--item);
-      font-family: 'Montserrat', sans-serif;
       font-size: 80%;
       font-weight: bold;
       font-style: italic;
