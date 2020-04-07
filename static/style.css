@@ -186,13 +186,11 @@
       font-size: calc(10px + 0.5vh + 0.2vw);
     }
     p1 {
-      font-size: 100%;
       font-style: italic;
       color: var(--highlight);
       padding-left: 1%;
     }
     p2 {
-      font-size: 100%;
       padding-left: 1%;
     }
     .blocktext {
@@ -221,7 +219,6 @@
     }
     input[type=text]{
       transition: box-shadow 0.5s;
-      font-size: 120%;
     }
     input[id=large_button]{
       transition: box-shadow 0.5s;
@@ -243,12 +240,10 @@
       box-shadow: -2px -2px 1px var(--shadow-inactive);
     }
     input[type=text]{
-      font-size: 100%;
       border: none;
       border-radius: 5px;
     }
     select{
-      font-size: 100%;
       border: none;
     }
     fieldset{
@@ -267,7 +262,6 @@
       padding: 0.2em 0.6em;
       border: 2px solid var(--outline);
       background-color: var(--item);
-      font-size: 80%;
       font-weight: bold;
       font-style: italic;
       text-align: right;
