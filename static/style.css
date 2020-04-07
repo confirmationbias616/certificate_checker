@@ -178,10 +178,6 @@
       color: var(--outline);
       text-shadow: -1px -1px 6px var(--highlight);
     }
-    h4 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 100%;
-    }
     p {
       font-size: calc(10px + 0.5vh + 0.2vw);
     }
