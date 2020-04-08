@@ -13,15 +13,15 @@
     <div style="width: 100%; text-align: center; margin-top: -5px">
         <form action="{{ url_for('set_location') }}" name = "set_location" method="POST">
             <div style="display: inline-block;">
-                <input type="text" id="location_string" size="26" {% if location_string %} value="{{ location_string }}" {% endif %} placeholder="Focus on specific region" autofocus style="border: 1px solid black; margin-bottom: 5px; margin-left: 5px;">
+                <input type="text" id="location_string" name="location_string" size="26" {% if location_string %} value="{{ location_string }}" {% endif %} placeholder="Focus on specific region" autofocus style="border: 1px solid black; margin-bottom: 5px; margin-left: 5px;">
                 <input type="text" id="text_search" name="text_search" size="26" {% if text_search %} value="{{ text_search }}" {% endif %} placeholder="List one or many keywords" autofocus style="margin-bottom: 5px; margin-left: 5px; border: 1px solid black" keydown="enable_wordcloud()">
             </div>
             <div style='margin-top: 1vh; margin-bottom: 1vh'>
                 <span class='radio-toolbar'>
                     <input type="radio" name="result_limit" id='daily' value="daily" {% if (not result_limit) or (result_limit == 'daily') %} checked {% endif %}>
-                    <label for="daily" style='border-top-left-radius: 5px; border-bottom-left-radius: 5px;'>daily</label>
+                    <label for="daily">daily</label>
                     <input type="radio" name="result_limit" id='bulk' value="bulk" {% if result_limit == 'bulk' %} checked {% endif %}>
-                    <label for="bulk" style='border-top-right-radius: 5px; border-bottom-right-radius: 5px;'>bulk</label>
+                    <label for="bulk">bulk</label>
                 </span> &nbsp
                 <span>
                     <select name="select_source">

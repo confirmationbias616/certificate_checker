@@ -12,17 +12,19 @@
     --shadow-hover: rgba(15,15,12,0.6);
     font-family: 'Montserrat', sans-serif;
     }
-    .required:after { content:" *"; }
+    .required::after {
+      content:"  *";
+      color: var(--highlight);
+      font-weight: bold
+    }
     .topnav {
       background-color: var(--outline);
       overflow: hidden;
     }
-
     .scrolldf {
       overflow: auto;
       white-space: nowrap;
     }
-
     .welcome_banner {
       background-image: linear-gradient(90deg, var(--highlight), var(--background) 80% ,var(--fieldset));
       text-align: right;
@@ -34,7 +36,6 @@
       margin-top:0px;
       margin-bottom:0px
     }
-
     .advertise_banner_container{
       background-color: rgb(254, 255, 217);
       /* display: flex; */
@@ -48,11 +49,6 @@
     .advertise_banner_text a{
       color: var(--highlight);
     }
-    .advertise_banner_text a:hover{
-      color: var(--fieldset);
-    }
-
-
     /* Style the links inside the navigation bar */
     .topnav a.title {
       transition: color 0.5s;
@@ -114,7 +110,9 @@
       color: var(--outline);
       font-size: calc(14px + 0.35vw);
     }
-
+    .advertise_banner_text a:hover{
+      color: var(--fieldset);
+    }
     /* Hide the link that should open and close the topnav on small screens */
     .topnav .icon {
       transition: 0.5s;
@@ -122,11 +120,15 @@
       font-size: 20px;
     }
     .user {
-      transition: 0.2s;
-      font-size: calc(12px + 0.25vw);
       color: black;
+      transition: 0.2s;
     }
-
+    .user {
+      font-size: calc(12px + 0.25vw);
+    }
+    .advertise_banner {
+      font-size: calc(7px + 1vw);
+    }
     /* When the screen is less than 600 pixels wide, hide all links, except for the first one ("Home"). Show the link that contains should open and close the topnav (.icon) */
     @media screen and (max-width: 840px) {
       .topnav a:not(.title) {display: none;}
@@ -154,15 +156,11 @@
         display: block;
         text-align: left;
       }
-      a.user {
+      a.user, a.user:visited  {
         text-decoration: none;
         color: black;
       }
-      a.user:visited {
-        text-decoration: none;
-        color: black;
-      }
-    } 
+    }
 
     body {
       background-color: rgb(196, 193, 193); /* For browsers that do not support gradients */
@@ -177,17 +175,6 @@
       text-align: center;
       color: var(--outline);
       text-shadow: -1px -1px 6px var(--highlight);
-    }
-    p {
-      font-size: calc(10px + 0.5vh + 0.2vw);
-    }
-    p1 {
-      font-style: italic;
-      color: var(--highlight);
-      padding-left: 1%;
-    }
-    p2 {
-      padding-left: 1%;
     }
     .blocktext {
       margin-left: auto;
@@ -224,9 +211,11 @@
       border-radius: 5px;
       box-shadow: -2px -2px 1px var(--shadow-inactive);
     }
+    input[id=small_button], input[type=text], select, .radio-toolbar, p{
+      font-size: calc(10px + 0.5vh + 0.2vw);
+    }
     input[id=small_button]{
       transition: box-shadow 0.5s;
-      font-size: calc(8px + 0.5vh + 0.2vw);
       background-color: var(--item);
       border: 2px var(--outline) solid;
       border-radius: 5px;
@@ -235,26 +224,27 @@
     input[type=text]{
       border-radius: 5px;
       display: block;
-      font-size: calc(8px + 0.5vh + 0.2vw);
-      width: 80vw;
+      /* width: 90vw; */
     }
     select{
-      margin-right: 1vw;
+      margin-right: 1.5vw;
+      margin-left: 1vw;
+      width: min(22vw, 200px);
     }
-    .radio-toolbar input[type="radio"] {
-      display: none;
+    .radio-toolbar{
+      border: 1px var(--outline) solid;
+      border-radius: 5px;
+      padding: 0.1em 0.5em;
+      display: inline-block;
     }
     .radio-toolbar label {
-      display: inline-block;
-      background-color: var(--item);
-      padding: 0px 5px;
-      font-size: calc(8px + 0.5vh + 0.2vw);
-      box-shadow: 0px 0px 2px 2px var(--outline);
+      cursor: pointer;
+    }
+    .input[type=radio] {
       cursor: pointer;
     }
     .radio-toolbar input[type="radio"]:checked+label {
-      box-shadow: none;
-      border: 1px var(--outline) solid;
+      cursor: default;
     }
     @media screen and (min-width: 500px) {
       input[type=text]{
@@ -262,6 +252,9 @@
       }
       #text_search{
         width: 40vw;
+      }
+      #text_search_insights{
+        width: calc(400px + 10vw)
       }
       #location_string{
         width: calc(200px + 10vw)
@@ -274,12 +267,19 @@
       transition: box-shadow 0.5s;
       background-color: rgb(168, 185, 191);
       float: left;
-      width: 320px;
+      width: max(60vw, 320px);
       margin: 8px;
       padding: 12px;
       box-sizing: 2px border-box;
       border: 2px solid var(--outline);
       box-shadow: -2px -2px 1px var(--shadow-inactive);
+    }
+    #project_entry_container{
+      margin-top: 10px;
+      margin-left: calc(10vw - 10px);
+      margin-right: 2px;
+      display: block;
+      overflow: hidden;
     }
     legend{
       transition: box-shadow 0.5s;
