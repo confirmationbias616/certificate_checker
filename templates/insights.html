@@ -4,6 +4,13 @@
 <head>
   {% extends 'base.html' %}
   {% block head %}
+  <style>
+      summary{
+        margin-left: 10vw;
+        margin-bottom: 1vh;
+        margin-top: 2vh;
+      };
+  </style>
   {% endblock %}
 </head>
 <body>
@@ -47,7 +54,7 @@
                 &emsp;
                 </div>
                 <div style="margin-left: 5px;">
-                <input type="submit" id="small_button" value="Explore!" style="width: 6em" >
+                <input type="submit" id="small_button" value="explore" style="width: 6em" >
                 </div>
             </div>
         </form>
@@ -57,35 +64,41 @@
     <div align="center">
         <i>analisys based on {{ wc_count }} projects</i><br>
         {% if wc_search_type %}
-            <i>assuming search entity field was mainly </i> <em>{{ wc_search_type }}</em>
+            <i>search entity field assumed as: </i><span style="font-weight: bold; font-style: italic; color: var(--highlight)">{{ wc_search_type if wc_search_type != 'city' else 'region' }}</span>
         {% endif %}
-        <hr style="border: 0.5px solid var(--outline);">
-        <div align='center'>
+        <br><br>
+        <details open>
+            <summary>productivity timeline</summary>
             <img src="static/timeline_{{ wc_id }}.png" alt="..." width=60% style='min-width: 400px; max-height:800px'>
-            <div align='center'>
-                <iframe src='/get_agg_heatmap' style='width: 30vw; height: 30vw; max-width: 500px; max-height: 350px; min-width: 225px; min-height: 225px; margin-right: 10px; margin-bottom: 10px;'></iframe>
-                <iframe src='/get_year_lapse_heatmap' style='width: 30vw; height: 30vw; max-width: 500px; max-height: 350px; min-width: 225px; min-height: 225px; margin-bottom: 10px;'></iframe>
-            </div>
-        </div>
+        </details>
+        <details>
+            <summary>geographical focus</summary>
+            <iframe src='/get_agg_heatmap' style='width: 30vw; height: 30vw; max-width: 500px; max-height: 350px; min-width: 225px; min-height: 225px; margin-right: 10px; margin-bottom: 10px;'></iframe>
+            <iframe src='/get_year_lapse_heatmap' style='width: 30vw; height: 30vw; max-width: 500px; max-height: 350px; min-width: 225px; min-height: 225px; margin-bottom: 10px;'></iframe>
+        </details>
         {% if wc_search_type != 'contractor' %}
-            <hr style="border: 0.5px solid var(--outline);">
-            <h2 style="font-size: 4vw;"><u>contractors</u></h2>
+        <details>
+            <summary>contractor relationships</summary>
             <i><img src="static/wordcloud_{{ wc_id }}_contractor.png" alt="Not enough results to generate wordcloud" width=80%></i>
+        </details>
         {% endif %}
         {% if wc_search_type != 'engineer' %}
-            <hr style="border: 0.5px solid var(--outline);">
-            <h2 style="font-size: 4vw;"><u>certifiers (engineers / architects)</u></h2>
+        <details>
+            <summary>consultant relationships (wordcloud)</summary>
             <i><img src="static/wordcloud_{{ wc_id }}_engineer.png" alt="Not enough results to generate wordcloud" width=80%></i>
+        </details>
         {% endif %}
         {% if wc_search_type != 'owner' %}
-            <hr style="border: 0.5px solid var(--outline);">
-            <h2 style="font-size: 4vw;"><u>owners</u></h2>
+        <details>
+            <summary>owner relationships (wordcloud)</summary>
             <i><img src="static/wordcloud_{{ wc_id }}_owner.png" alt="Not enough results to generate wordcloud" width=80%></i>
+        </details>
         {% endif %}
         {% if wc_search_type != 'city' %}
-        <hr style="border: 0.5px solid var(--outline);">
-        <h2 style="font-size: 4vw;"><u>city / region</u></h2>
-        <i><img src="static/wordcloud_{{ wc_id }}_city.png" alt="Not enough results to generate wordcloud" width=80%></i>
+        <details>
+            <summary>regional tendencies (wordcloud)</summary>
+            <i><img src="static/wordcloud_{{ wc_id }}_city.png" alt="Not enough results to generate wordcloud" width=80%></i>
+        </details>
         {% endif %}
     </div>
     {% else %}

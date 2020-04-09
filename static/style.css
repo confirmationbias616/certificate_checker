@@ -131,30 +131,39 @@
     }
     /* When the screen is less than 600 pixels wide, hide all links, except for the first one ("Home"). Show the link that contains should open and close the topnav (.icon) */
     @media screen and (max-width: 840px) {
-      .topnav a:not(.title) {display: none;}
+      .topnav a:not(.title) {
+        display: none;
+      }
       .topnav a.icon {
         float: right;
         display: block;
+        animation: sweep-details-from-right 0.5s ease-in-out;
       }
     }
 
     /* The "responsive" class is added to the topnav with JavaScript when the user clicks on the icon. This class makes the topnav look good on small screens (display the links vertically instead of horizontally) */
     @media screen and (max-width: 840px) {
-      .topnav.responsive {position: relative;}
+      .topnav.responsive {
+        position: relative;
+      }
       .topnav.responsive a.icon {
         position: absolute;
         right: 0;
         top: 0;
+        animation: sweep-details-from-right 0.5s ease-in-out;
       }
       .topnav.responsive a {
         float: none;
         display: block;
         text-align: right;
+        animation: sweep-details-from-top 0.5s ease-in-out;
+        animation-direction: alternate;
       }
       .topnav.responsive #title {
         float: none;
         display: block;
         text-align: left;
+        animation: none
       }
       a.user, a.user:visited  {
         text-decoration: none;
@@ -211,7 +220,7 @@
       border-radius: 5px;
       box-shadow: -2px -2px 1px var(--shadow-inactive);
     }
-    input[id=small_button], input[type=text], select, .radio-toolbar, p{
+    input[id=small_button], input[type=text], select, .radio-toolbar, p, summary{
       font-size: calc(10px + 0.5vh + 0.2vw);
     }
     input[id=small_button]{
@@ -226,10 +235,48 @@
       display: block;
       /* width: 90vw; */
     }
-    select{
+    #text_search, #text_search_insights, #location_string{
+      width: 90vw;
+    }
+    summary:focus{
+      outline-style: none;
+    }
+    summary{
+      text-align: left;
+      margin-left: 2vw;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    details[open] summary ~ * {
+      animation: sweep-details-from-left 0.5s ease-in-out;
+    }
+    @keyframes sweep-details-from-left {
+      0%    {opacity: 0; margin-left: -20vw}
+      100%  {opacity: 1; margin-left: 0vw}
+    }
+    @keyframes sweep-details-from-right {
+      0%    {opacity: 0; margin-right: -20vw}
+      100%  {opacity: 1; margin-right: 0vw}
+    }
+    @keyframes sweep-details-from-top {
+      0%    {opacity: 0; margin-top: -8vh}
+      50%  {opacity: 0; margin-top: -4vh}
+      100%  {opacity: 1; margin-top: 0vh}
+    }
+    @keyframes fade-in {
+      0%    {opacity: 0;}
+      100%  {opacity: 1;}
+    }
+    select {
       margin-right: 1.5vw;
       margin-left: 1vw;
-      width: min(22vw, 200px);
+      width: 22vw;
+      border: none;
+    }
+    @media screen and (min-width: 909px) {
+      select {
+        width: 200px;
+      }
     }
     .radio-toolbar{
       border: 1px var(--outline) solid;
@@ -260,14 +307,11 @@
         width: calc(200px + 10vw)
       }
     }
-    select{
-      border: none;
-    }
     fieldset{
       transition: box-shadow 0.5s;
       background-color: rgb(168, 185, 191);
       float: left;
-      width: max(60vw, 320px);
+      width: max(30vw, 270px);
       margin: 8px;
       padding: 12px;
       box-sizing: 2px border-box;
