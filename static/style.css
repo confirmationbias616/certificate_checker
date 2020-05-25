@@ -218,7 +218,7 @@
       border-radius: 5px;
       box-shadow: -2px -2px 1px var(--shadow-inactive);
     }
-    input[id=small_button], input[type=text], select, .radio-toolbar, p, summary{
+    input[id=small_button], input[type=text], select, .radio-toolbar, p, summary, span {
       font-size: calc(10px + 0.5vh + 0.2vw);
     }
     input[id=small_button]{
