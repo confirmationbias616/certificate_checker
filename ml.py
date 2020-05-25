@@ -315,7 +315,7 @@ def validate_model(**kwargs):
     # check if 100% recall for new model
     qty_actual_matches = int(len(new_results) ** 0.5)
     qty_found_matches = new_results[new_results.pred_match == 1].title.nunique()
-    is_100_recall = qty_found_matches == qty_actual_matches
+    full_recall = qty_found_matches == qty_actual_matches
     # the below exception will happen if there was no existing model present in
     # folder (in testing) important to not skip validation so that the function
     # can be propperly tested
@@ -368,7 +368,7 @@ def validate_model(**kwargs):
     sq_avg_prob = round(sum(sq_pred_probs) / len(sq_pred_probs), 3)
     new_avg_prob = round(sum(new_pred_probs) / len(new_pred_probs), 3)
     update_results({
-        "100% recall acheived" : is_100_recall,
+        "100% recall acheived" : full_recall,
         'minimum probability required for status quo model' : sq_min_prob,
         'minimum probability required for new model' : new_min_prob,
         'average probability required for status quo model' : sq_avg_prob,
@@ -376,7 +376,7 @@ def validate_model(**kwargs):
         'false positives with status quo' : sq_false_positives,
         'false positives with new' : new_false_positives,
     })
-    if not is_100_recall:
+    if not full_recall:
         logger.warning(
             "100% recall not acheived with new model - archiving it "
             "and maintaining status quo!"
