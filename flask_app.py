@@ -17,6 +17,7 @@ from scipy.interpolate import interp1d
 import logging
 import sys
 import os
+import time
 import re
 import ast
 import folium
@@ -1563,6 +1564,7 @@ def insights():
             frame = legend.get_frame()
             frame.set_alpha(0)
             plt.savefig(f"static/timeline_{text_search.replace(' ', '_')}.png", transparent=True)
+            time.sleep(5)
         query = """
             SELECT *
             FROM web_certificates
