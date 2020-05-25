@@ -407,7 +407,16 @@ def validate_model(**kwargs):
             (new_false_positives, new_min_prob, new_avg_prob),
             (sq_false_positives, sq_min_prob, sq_avg_prob),
         ):
-            if new_false_positives <= sq_false_positives:
+            if metric == "false positive(s)":
+                if new <= sq:
+                    good_outcome = True
+                else:
+                    good_outcome = False
+            elif new >= sq:
+                good_outcome = True
+            else:
+                good_outcome = False
+            if good_outcome:
                 logger.info(
                     f"New model produced {new} {metric}, "
                     f"which is better or equal to status quo of {sq}."
