@@ -113,7 +113,7 @@ def build_train_set():
         test_web_df = pd.read_sql(corr_web_certs_query, conn)
     test_web_df = wrangle(test_web_df)
 
-    # Get some certificates that are definitely not matches provide some false matches to train from
+    # Get some certificates that are definitely not matches to provide some false matches to train from
     start_date = "2011-01-01"
     end_date = "2011-04-30"
     hist_query = "SELECT * FROM web_certificates WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
@@ -144,7 +144,8 @@ def train_model(
     prob_thresh=load_config()["machine_learning"]["prboability_thresholds"]["general"]
 ):
     """Trains instance of scikit-learn's RandomForestClassifier model on the training dataset
-    from project's root directory and saves trained model to root directory as well.
+    from project's root directory (typically produced by function ml.build_train_set) and saves
+    trained model to root directory as well.
     
     Parameters:
      - `prob_thresh` (float): probability threshold which the classifier will use to determine
