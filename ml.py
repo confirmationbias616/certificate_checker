@@ -56,6 +56,8 @@ def build_train_set():
             company_projects.owner,
             company_projects.contractor,
             company_projects.engineer,
+            company_projects.address_lat,
+            company_projects.address_lng,
             web_certificates.url_key,
             company_projects.receiver_emails_dump
         FROM 
@@ -248,6 +250,8 @@ def validate_model(**kwargs):
             company_projects.owner,
             company_projects.contractor,
             company_projects.engineer,
+            company_projects.address_lat,
+            company_projects.address_lng,
             company_projects.receiver_emails_dump,
             web_certificates.url_key,
             attempted_matches.ground_truth,

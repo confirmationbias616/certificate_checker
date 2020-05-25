@@ -1,5 +1,6 @@
 from fuzzywuzzy import fuzz
 import numpy as np
+import math
 from utils import create_connection
 
 
@@ -38,6 +39,12 @@ def attr_score(web_str, company_project_str, match_style="full"):
             return fuzz.partial_ratio(web_str, company_project_str)
     except TypeError:
         return 0
+
+def geocode_proximity_score(lat1, lng1, lat2, lng2):
+    proximity = ((lat1-lat2)**2 + (lng1-lng2)**2)**0.5
+    if math.isnan(proximity):
+        proximity = 1
+    return proximity
 
 def use_fresh_certs_only(single_project_row, web_df):
     """if True, `last_cert_id_check` will be read for assembling only fresh
@@ -88,14 +95,19 @@ def build_match_score(single_project_df, web_df, fresh_cert_limit=True):
             f"`company_projects` dataframe was suppose to conatin only 1 single row - "
             f"it contained {len(single_project_df)} rows instead."
         )
-    scoreable_attrs = [
+    scoreable_strings = [
         "contractor",
         "street_name",
         "street_number",
         "title",
         "city",
-        "owner",
+        "owner"
     ]
+    scoreable_floats = [
+        "address_lat",
+        "address_lng"
+    ]
+    scoreable_attrs = scoreable_strings + scoreable_floats
     for (
         _,
         company_project_row,
@@ -106,21 +118,36 @@ def build_match_score(single_project_df, web_df, fresh_cert_limit=True):
             possible_matches_scored = use_fresh_certs_only(company_project_row, web_df)
         else:
             possible_matches_scored = web_df
-        for attr in scoreable_attrs:
-            for attr_suffix, match_style in zip(
+        # import pdb; pdb.set_trace()
+        for string in scoreable_strings:
+            for string_suffix, match_style in zip(
                 ["score", "pr_score"], ["full", "partial"]
             ):
-                possible_matches_scored[
-                    f"{attr}_{attr_suffix}"
-                ] = possible_matches_scored.apply(
-                    lambda web_row: attr_score(
-                        web_row[attr],
-                        company_project_row[attr],
-                        match_style=match_style,
-                    ),
-                    axis=1,
-                )
+                try:
+                    possible_matches_scored[
+                        f"{string}_{string_suffix}"
+                    ] = possible_matches_scored.apply(
+                        lambda web_row: attr_score(
+                            web_row[string],
+                            company_project_row[string],
+                            match_style=match_style,
+                        ),
+                        axis=1,
+                    )
+                except:
+                    print(string)
+
+        possible_matches_scored["geocode_proximity_score"] = possible_matches_scored.apply(
+            lambda web_row: geocode_proximity_score(
+                web_row['address_lat'],
+                web_row['address_lng'],
+                company_project_row['address_lat'],
+                company_project_row['address_lng'],
+            ),
+            axis=1
+        )
+
         possible_matches_scored["total_score"] = possible_matches_scored.apply(
-            lambda row: compile_score(row, scoreable_attrs, "multiply"), axis=1
+            lambda row: compile_score(row, scoreable_strings, "multiply"), axis=1
         )
         return possible_matches_scored
