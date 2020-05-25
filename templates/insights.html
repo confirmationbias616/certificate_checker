@@ -48,7 +48,7 @@
                             z-index: 1;
                             display: inline;"
                     {% endif %}
-                    onclick="document.getElementById('text_search').value = '';
+                    onclick="document.getElementById('text_search_insights').value = '';
                         document.getElementById('x').style.display='none';"
                 >x</a>
                 &emsp;
@@ -112,8 +112,8 @@
     {% endif %}
     <script>  
         document.addEventListener('keydown', show_x_clear);
-        function show_x_clear(){  
-             if(document.getElementById("text_search").value.length > 1){  
+        function show_x_clear(){
+             if(document.getElementById("text_search_insights").value.length > 1){
                 document.getElementById('x').style.display='inline';
              }else{
                 document.getElementById('x').style.display='none';
