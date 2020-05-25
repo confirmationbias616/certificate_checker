@@ -1373,6 +1373,14 @@ def map():
                 h4 {{
                     text-align: center;
                     font-family: 'Montserrat', sans-serif
+                    display: table-cell;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    font-family: 'Montserrat', sans-serif;
+                    overflow: hidden;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
                 }}
                 h5 {{
                     text-align: center;
