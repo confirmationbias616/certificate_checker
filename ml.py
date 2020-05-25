@@ -205,9 +205,11 @@ def train_model(
             {"feat": X.columns, "imp": clf.feature_importances_}
         ).sort_values("imp", ascending=False)
         logger.debug("\nfeat_imp\n")
-        logger.info(
-            f"top feature is `{feat_imp.iloc[0].feat}` with factor of {round(feat_imp.iloc[0].imp, 3)}"
-        )
+        logger.info("top features are:")
+        for _, row in feat_imp.iterrows():
+            logger.info(
+                f"`{row['feat']}` -> {round(row['imp'], 3)}"
+            )
         logger.info(f"recall: {round(rc, 3)}")
         logger.info(f"precision: {round(pr, 3)}")
         logger.info(f"f1 score: {round(f1, 3)}")
