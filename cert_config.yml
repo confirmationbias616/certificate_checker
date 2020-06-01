@@ -6,20 +6,14 @@ machine_learning:
     multi_phase: 0.92
 
   guardrail_metrics:
-    max_number_of_false_positives: 0  # config parameter not used yet
     min_recall: 0.95  # config parameter not used yet
     min_precision: 0.9  # config parameter not used yet
-    min_f1_score: 0  # config parameter not used yet
 
   exclude_features:
     # - city_score
     # - city_pr_score
     # - total_score
 
-  include_features:  # config parameter not used yet
-    # - bla
-    # - bla
-    # - bla
 
 flask_app:
   debug: False
