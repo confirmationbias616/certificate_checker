@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
 from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import KFold
@@ -13,6 +14,7 @@ import sys
 import logging
 import os
 import datetime
+from statistics import mean
 
 
 logger = logging.getLogger(__name__)
@@ -206,28 +208,28 @@ def train_model(
             results[results.pred == 1]
         )
         f1 = f1_score(y_test, pred)
-        logger.info(
+        logger.debug(
             f"number of truthes to learn from: {len([x for x in y_train if x==1])} out of {len(y_train)}"
         )
-        logger.info(f"number of tests: {len(results[results.truth==1])}")
+        logger.debug(f"number of tests: {len(results[results.truth==1])}")
         feat_imp = pd.DataFrame(
             {"feat": X.columns, "imp": clf.feature_importances_}
         ).sort_values("imp", ascending=False)
         logger.debug("\nfeat_imp\n")
-        logger.info("top features are:")
+        logger.debug("top features are:")
         for _, row in feat_imp.iterrows():
-            logger.info(
+            logger.debug(
                 f"`{row['feat']}` -> {round(row['imp'], 3)}"
             )
-        logger.info(f"recall: {round(rc, 3)}")
-        logger.info(f"precision: {round(pr, 3)}")
-        logger.info(f"f1 score: {round(f1, 3)}")
+        logger.debug(f"recall: {round(rc, 3)}")
+        logger.debug(f"precision: {round(pr, 3)}")
+        logger.debug(f"f1 score: {round(f1, 3)}")
         rc_cum.append(rc)
         pr_cum.append(pr)
         f1_cum.append(f1)
-    logger.info(f"average recall: {round(sum(rc_cum)/len(rc_cum), 3)}")
-    logger.info(f"average precision: {round(sum(pr_cum)/len(pr_cum), 3)}")
-    logger.info(f"avergae f1 score: {round(sum(f1_cum)/len(f1_cum), 3)}")
+    logger.debug(f"average recall: {round(sum(rc_cum)/len(rc_cum), 3)}")
+    logger.debug(f"average precision: {round(sum(pr_cum)/len(pr_cum), 3)}")
+    logger.debug(f"avergae f1 score: {round(sum(f1_cum)/len(f1_cum), 3)}")
     if smote_data:
         X_final, y_final = sm.fit_sample(X, y)
     else:
@@ -264,6 +266,7 @@ def validate_model(**kwargs):
             company_projects.address_lng,
             company_projects.receiver_emails_dump,
             web_certificates.url_key,
+            web_certificates.cert_id,
             attempted_matches.ground_truth,
             attempted_matches.multi_phase,
             web_certificates.pub_date,
@@ -328,13 +331,67 @@ def validate_model(**kwargs):
         test=True,
         prob_thresh=kwargs["prob_thresh"],
     )
-    # check if 100% recall for new model
-    qty_actual_matches = int(len(new_results) ** 0.5)
-    qty_found_matches = new_results[new_results.pred_match == 1].title.nunique()
-    full_recall = qty_found_matches == qty_actual_matches
-    # the below exception will happen if there was no existing model present in
-    # folder (in testing) important to not skip validation so that the function
-    # can be propperly tested
+    analysis_df = pd.merge(
+        new_results[['job_number', 'cert_id', 'pred_prob', 'pred_match', 'total_score']],
+        validate_company_projects[['job_number', 'cert_id', 'ground_truth']],
+        how='left',
+        on=['job_number', 'cert_id']
+    )
+    analysis_df['ground_truth'] = analysis_df.ground_truth.apply(lambda x: 1 if x == 1.0 else 0)
+    tp = len(analysis_df[(analysis_df.pred_match == 1) & (analysis_df.ground_truth == 1)])
+    fp = len(analysis_df[(analysis_df.pred_match == 1) & (analysis_df.ground_truth == 0)])
+    tn = len(analysis_df[(analysis_df.pred_match == 0) & (analysis_df.ground_truth == 0)])
+    fn = len(analysis_df[(analysis_df.pred_match == 0) & (analysis_df.ground_truth == 1)])
+    if fn:
+        logger.warning(f"match for project #{list(analysis_df[(analysis_df.pred_match == 0) & (analysis_df.ground_truth == 1)]['job_number'])} was not detected.")
+    logger.info(f"true postives: {tp}")
+    logger.info(f"false postives: {fp}")
+    logger.info(f"true negatives: {tn}")
+    logger.info(f"false negatives: {fn}")
+    recall = tp / (tp + fn)
+    precision = tp / (tp + fp)
+    logger.info(f"recall: {recall}")
+    logger.info(f"precision: {precision}")
+    min_prob = min(analysis_df[analysis_df.ground_truth == 1.0]['pred_prob'])
+    logger.info(f"minimum probability threshhold to acheive 100% recall: {min_prob}")
+    analysis_df['adj_pred_match'] = analysis_df.pred_prob.apply(lambda x: x >= min_prob)
+    avg_prob = mean(analysis_df[analysis_df.ground_truth == 1.0]['pred_prob'])
+    # min_prob = min(analysis_df[analysis_df.ground_truth == 1.0]['total_score'])
+    # logger.info(f"minimum probability threshhold to acheive 100% recall: {min_prob}")
+    # analysis_df['adj_pred_match'] = analysis_df.total_score.apply(lambda x: x >= min_prob)
+    logger.debug(analysis_df[analysis_df.adj_pred_match])
+    signal_and_noise = analysis_df[analysis_df.pred_prob > -0.1]
+    signal = signal_and_noise[signal_and_noise.ground_truth == 1.0]['pred_prob']
+    noise = signal_and_noise[signal_and_noise.ground_truth != 1.0]['pred_prob']
+    upper_ranges, ground_truths, false_matches = [], [], []
+    for upper_range in np.arange(0.1,1.01,0.1):
+        bottom_range = upper_ranges[-1] if upper_ranges else 0
+        ground_truths.append(len([value for value in signal if value <= upper_range and value > bottom_range]))
+        false_matches.append(len([value for value in noise if value <= upper_range and value > bottom_range]))
+        upper_ranges.append(round(upper_range,1))
+    df = pd.DataFrame({
+        'probability score' : upper_ranges,
+        'ground_truths' : ground_truths,
+        'false_matches' : false_matches
+    })
+    fig = df.plot(x='probability score', kind='bar', stacked=True).get_figure()
+    plt.axvline(x=kwargs['prob_thresh']*10 - 1, color='blue', linestyle='--')
+    print(kwargs['prob_thresh'])
+    fig.savefig('fig.png')  # will also show histogram if function is inside jupyter notebook with %matplotlib inline
+    if recall < 1.0:
+        adj_tp = len(analysis_df[(analysis_df.adj_pred_match == 1) & (analysis_df.ground_truth == 1)])
+        adj_fp = len(analysis_df[(analysis_df.adj_pred_match == 1) & (analysis_df.ground_truth == 0)])
+        adj_tn = len(analysis_df[(analysis_df.adj_pred_match == 0) & (analysis_df.ground_truth == 0)])
+        adj_fn = len(analysis_df[(analysis_df.adj_pred_match == 0) & (analysis_df.ground_truth == 1)])
+        logger.info(f"adjusted true postives: {adj_tp}")
+        logger.info(f"adjusted false postives: {adj_fp}")
+        logger.info(f"adjusted true negatives: {adj_tn}")
+        logger.info(f"adjusted false negatives: {adj_fn}")
+        adj_recall = adj_tp / (adj_tp + adj_fn)
+        adj_precision = adj_tp / (adj_tp + adj_fp)
+        logger.info(f"adjusted recall: {adj_recall}")
+        logger.info(f"adjusted precision: {adj_precision}")
+        logger.info(f"Would have had {adj_fp} false positives ({adj_precision}% precision) if threshold was adjusted down to acheive 100%")
     try:
         sq_results = match(
             version="status_quo",
@@ -363,36 +420,43 @@ def validate_model(**kwargs):
                 test=True,
                 prob_thresh=kwargs["prob_thresh"],
             )
-    # check out how many false positives were generated with status quo model and new model
-    sq_false_positives = len(sq_results[sq_results.pred_match == 1]) - qty_found_matches
-    new_false_positives = (
-        len(new_results[new_results.pred_match == 1]) - qty_found_matches
+    sq_analysis_df = pd.merge(
+        sq_results[['job_number', 'cert_id', 'pred_prob', 'pred_match', 'total_score']],
+        validate_company_projects[['job_number', 'cert_id', 'ground_truth']],
+        how='left',
+        on=['job_number', 'cert_id']
     )
-    # pull out some stats
-    sq_pred_probs = sq_results[sq_results.pred_match == 1]
-    new_pred_probs = new_results[new_results.pred_match == 1]
-    sq_pred_probs = sq_pred_probs.sort_values("pred_prob", ascending=False)
-    new_pred_probs = new_pred_probs.sort_values("pred_prob", ascending=False)
-    sq_pred_probs["index"] = sq_pred_probs.index
-    new_pred_probs["index"] = new_pred_probs.index
-    sq_pred_probs = sq_pred_probs.drop_duplicates(subset="index", keep="first")
-    new_pred_probs = new_pred_probs.drop_duplicates(subset="index", keep="first")
-    sq_pred_probs = sq_pred_probs.pred_prob
-    new_pred_probs = new_pred_probs.pred_prob
-    sq_min_prob = round(min(sq_pred_probs), 3)
-    new_min_prob = round(min(new_pred_probs), 3)
-    sq_avg_prob = round(sum(sq_pred_probs) / len(sq_pred_probs), 3)
-    new_avg_prob = round(sum(new_pred_probs) / len(new_pred_probs), 3)
+    sq_analysis_df['ground_truth'] = sq_analysis_df.ground_truth.apply(lambda x: 1 if x == 1.0 else 0)
+    sq_tp = len(sq_analysis_df[(sq_analysis_df.pred_match == 1) & (sq_analysis_df.ground_truth == 1)])
+    sq_fp = len(sq_analysis_df[(sq_analysis_df.pred_match == 1) & (sq_analysis_df.ground_truth == 0)])
+    sq_tn = len(sq_analysis_df[(sq_analysis_df.pred_match == 0) & (sq_analysis_df.ground_truth == 0)])
+    sq_fn = len(sq_analysis_df[(sq_analysis_df.pred_match == 0) & (sq_analysis_df.ground_truth == 1)])
+    if sq_fn:
+        logger.warning(f"match for project #{list(sq_analysis_df[(sq_analysis_df.pred_match == 0) & (sq_analysis_df.ground_truth == 1)]['job_number'])} was not detected.")
+    logger.info(f"true postives: {sq_tp}")
+    logger.info(f"false postives: {sq_fp}")
+    logger.info(f"true negatives: {sq_tn}")
+    logger.info(f"false negatives: {sq_fn}")
+    sq_recall = sq_tp / (sq_tp + sq_fn)
+    sq_precision = sq_tp / (sq_tp + sq_fp)
+    logger.info(f"recall: {sq_recall}")
+    logger.info(f"precision: {sq_precision}")
+    sq_min_prob = min(sq_analysis_df[sq_analysis_df.ground_truth == 1.0]['pred_prob'])
+    logger.info(f"minimum probability threshhold to acheive 100% recall: {sq_min_prob}")
+    sq_analysis_df['adj_pred_match'] = sq_analysis_df.pred_prob.apply(lambda x: x >= sq_min_prob)
+    sq_avg_prob = mean(sq_analysis_df[sq_analysis_df.ground_truth == 1.0]['pred_prob'])
+    logger.debug(sq_analysis_df[sq_analysis_df.adj_pred_match])
     update_results({
-        "100% recall acheived" : full_recall,
+        "100% recall acheived" : True if int(recall) == 1 else False,
         'minimum probability required for status quo model' : sq_min_prob,
-        'minimum probability required for new model' : new_min_prob,
+        'minimum probability required for new model' : min_prob,
         'average probability required for status quo model' : sq_avg_prob,
-        'average probability required for new model' : new_avg_prob,
-        'false positives with status quo' : sq_false_positives,
-        'false positives with new' : new_false_positives,
+        'average probability required for new model' : avg_prob,
+        'false positives with status quo' : sq_fp,
+        'false positives with new' : fp,
+        'precision': precision,
     })
-    if not full_recall:
+    if recall < 1.0:
         logger.warning(
             "100% recall not acheived with new model - archiving it "
             "and maintaining status quo!"
@@ -418,8 +482,8 @@ def validate_model(**kwargs):
                 os.rename(f"new_rf_{artifact}.pkl", f"rf_{artifact}.pkl")
         for metric, new, sq in zip(
             ("false positive(s)", "max threshold", "average prediction probability"),
-            (new_false_positives, new_min_prob, new_avg_prob),
-            (sq_false_positives, sq_min_prob, sq_avg_prob),
+            (fp, min_prob, avg_prob),
+            (sq_fp, sq_min_prob, sq_avg_prob),
         ):
             if metric == "false positive(s)":
                 if new <= sq:
