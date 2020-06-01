@@ -671,17 +671,29 @@ def instant_scan():
         job_number = request.args.get("job_number")
         lookback = request.args.get("lookback")
         if lookback == "2_months":
-            lookback_cert_count = 3000
+            lookback_cert_date = str(datetime.datetime.now().date() - datetime.timedelta(days=62))
         elif lookback == "1_month":
-            lookback_cert_count = 1500
+            lookback_cert_date = str(datetime.datetime.now().date() - datetime.timedelta(days=31))
         else:  # also applies for `2_weeks`
-            lookback_cert_count = 750
+            lookback_cert_date = str(datetime.datetime.now().date() - datetime.timedelta(days=14))
         company_query = "SELECT * FROM company_projects WHERE job_number=? AND company_id=?"
         with create_connection() as conn:
             company_projects = pd.read_sql(company_query, conn, params=[job_number, session.get('company_id')])
-        hist_query = "SELECT * FROM web_certificates ORDER BY pub_date DESC LIMIT ?"
+        hist_query = """ 
+            SELECT * FROM (
+                SELECT * FROM web_certificates 
+                WHERE pub_date > ?
+            )
+            WHERE 
+                address_lat IS NULL 
+                OR (
+                    abs(address_lat - ?) < 0.5
+                    AND
+                    abs(address_lng - ?) < 0.5
+                )
+        """
         with create_connection() as conn:
-            df_web = pd.read_sql(hist_query, conn, params=[lookback_cert_count])
+            df_web = pd.read_sql(hist_query, conn, params=[lookback_cert_date, company_projects.iloc[0].address_lat, company_projects.iloc[0].address_lng])
         results = match(
             company_projects=company_projects,
             df_web=df_web,
