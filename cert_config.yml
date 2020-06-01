@@ -1,11 +1,11 @@
 machine_learning:
   model_version: 'latest'  # config parameter not used yet
   prboability_thresholds:
-    general: 0.2
-    multi_phase: 0.5
+    general: 0.4
+    multi_phase: 0.6
   guardrail_metrics:
     min_recall: 1  # config parameter not used yet
-    min_precision: 0.9  # config parameter not used yet
+    min_precision: 0.3  # config parameter not used yet
   use_smote: True
   exclude_features:
     -
