@@ -155,6 +155,8 @@ def train_model(
      whether or not there is a match. Scikit-learn's default threshold is 0.5 but this is being
      disregarded. Note that this threshold doesn't impact the actual training of the model - 
      only its custom predictions and performance metrics.
+     - `smote_data` (boolean): whether or not the SMOTE algorithm should be applied to the labeled
+     data before training the model. Default False.
 
     Returns:
      - rc_cum (float): average recall
