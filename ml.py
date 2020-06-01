@@ -239,7 +239,10 @@ def train_model(
     return rc_cum, pr_cum, f1_cum
 
 
-def validate_model(**kwargs):
+def validate_model(
+    prob_thresh=load_config()["machine_learning"]["prboability_thresholds"]["general"],
+    test=False
+):
     """Compares new model with status quo production model and compiles/reports the results.
     Based on results, will either replace model and archive old one or just maintain status quo.
     
@@ -249,10 +252,6 @@ def validate_model(**kwargs):
      - `test` (bool): whether in testing or not, will dtermine flow of operations and mute emails appropriately.
 
     """
-    try:
-        test = kwargs["test"]
-    except KeyError:
-        test = False
     match_query = """
         SELECT
             company_projects.job_number,
@@ -329,7 +328,7 @@ def validate_model(**kwargs):
         company_projects=validate_company_projects,
         df_web=validate_web_df,
         test=True,
-        prob_thresh=kwargs["prob_thresh"],
+        prob_thresh=prob_thresh,
     )
     analysis_df = pd.merge(
         new_results[['job_number', 'cert_id', 'pred_prob', 'pred_match', 'total_score']],
@@ -375,8 +374,7 @@ def validate_model(**kwargs):
         'false_matches' : false_matches
     })
     fig = df.plot(x='probability score', kind='bar', stacked=True).get_figure()
-    plt.axvline(x=kwargs['prob_thresh']*10 - 1, color='blue', linestyle='--')
-    print(kwargs['prob_thresh'])
+    plt.axvline(x=prob_thresh*10-1, color='blue', linestyle='--')
     fig.savefig('fig.png')  # will also show histogram if function is inside jupyter notebook with %matplotlib inline
     if recall < 1.0:
         adj_tp = len(analysis_df[(analysis_df.adj_pred_match == 1) & (analysis_df.ground_truth == 1)])
@@ -398,7 +396,7 @@ def validate_model(**kwargs):
             company_projects=validate_company_projects,
             df_web=validate_web_df,
             test=True,
-            prob_thresh=kwargs["prob_thresh"],
+            prob_thresh=prob_thresh,
         )
     except FileNotFoundError:
         logger.info(
@@ -418,7 +416,7 @@ def validate_model(**kwargs):
                 company_projects=validate_company_projects,
                 df_web=validate_web_df,
                 test=True,
-                prob_thresh=kwargs["prob_thresh"],
+                prob_thresh=prob_thresh,
             )
     sq_analysis_df = pd.merge(
         sq_results[['job_number', 'cert_id', 'pred_prob', 'pred_match', 'total_score']],
