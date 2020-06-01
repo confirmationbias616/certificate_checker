@@ -461,6 +461,8 @@ def validate_model(
     sq_avg_prob = mean(sq_analysis_df[sq_analysis_df.ground_truth == 1.0]['pred_prob'])
     logger.debug(sq_analysis_df[sq_analysis_df.adj_pred_match])
     update_results({
+        "probability threshold": prob_thresh,
+        "SMOTE": load_config()["machine_learning"]["use_smote"],
         "100% recall acheived" : True if int(recall) == 1 else False,
         'minimum probability required for status quo model' : sq_min_prob,
         'minimum probability required for new model' : min_prob,
