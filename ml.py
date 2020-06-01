@@ -143,7 +143,8 @@ def build_train_set():
 
 
 def train_model(
-    prob_thresh=load_config()["machine_learning"]["prboability_thresholds"]["general"]
+    prob_thresh=load_config()["machine_learning"]["prboability_thresholds"]["general"],
+    smote_data=False
 ):
     """Trains instance of scikit-learn's RandomForestClassifier model on the training dataset
     from project's root directory (typically produced by function ml.build_train_set) and saves
@@ -177,8 +178,11 @@ def train_model(
         logger.info(f"K-Split #{split_no}...")
         X_train, X_test = X.values[train_index], X.values[test_index]
         y_train, y_test = y.values[train_index], y.values[test_index]
-        X_train_smo, y_train_smo = sm.fit_sample(X_train, y_train)
-        clf.fit(X_train_smo, y_train_smo)
+        if smote_data:
+            X_train_final, y_train_final = sm.fit_sample(X_train, y_train)
+        else:
+            X_train_final, y_train_final = X_train, y_train
+        clf.fit(X_train_final, y_train_final)
         prob = clf.predict_proba(X_test)
         pred = [1 if x >= prob_thresh else 0 for x in clf.predict_proba(X_test)[:, 1]]
         y_test = y_test.reshape(
@@ -221,8 +225,11 @@ def train_model(
     logger.info(f"average recall: {round(sum(rc_cum)/len(rc_cum), 3)}")
     logger.info(f"average precision: {round(sum(pr_cum)/len(pr_cum), 3)}")
     logger.info(f"avergae f1 score: {round(sum(f1_cum)/len(f1_cum), 3)}")
-    X_smo, y_smo = sm.fit_sample(X, y)
-    clf.fit(X_smo, y_smo)
+    if smote_data:
+        X_final, y_final = sm.fit_sample(X, y)
+    else:
+        X_final, y_final = X, y 
+    clf.fit(X_final, y_final)
     save_model(clf)
     return rc_cum, pr_cum, f1_cum
 
