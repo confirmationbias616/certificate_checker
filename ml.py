@@ -146,7 +146,7 @@ def build_train_set():
 
 def train_model(
     prob_thresh=load_config()["machine_learning"]["prboability_thresholds"]["general"],
-    smote_data=False
+    use_smote=load_config()["machine_learning"]["use_smote"]
 ):
     """Trains instance of scikit-learn's RandomForestClassifier model on the training dataset
     from project's root directory (typically produced by function ml.build_train_set) and saves
@@ -156,9 +156,9 @@ def train_model(
      - `prob_thresh` (float): probability threshold which the classifier will use to determine
      whether or not there is a match. Scikit-learn's default threshold is 0.5 but this is being
      disregarded. Note that this threshold doesn't impact the actual training of the model - 
-     only its custom predictions and performance metrics.
-     - `smote_data` (boolean): whether or not the SMOTE algorithm should be applied to the labeled
-     data before training the model. Default False.
+     only its custom predictions and performance metrics. Default loads from config file.
+     - `use_smote` (boolean): whether or not the SMOTE algorithm should be applied to the labeled
+     data before training the model. Default loads from config file.
 
     Returns:
      - rc_cum (float): average recall
@@ -183,7 +183,7 @@ def train_model(
         logger.info(f"K-Split #{split_no}...")
         X_train, X_test = X.values[train_index], X.values[test_index]
         y_train, y_test = y.values[train_index], y.values[test_index]
-        if smote_data:
+        if use_smote:
             X_train_final, y_train_final = sm.fit_sample(X_train, y_train)
         else:
             X_train_final, y_train_final = X_train, y_train
@@ -230,7 +230,7 @@ def train_model(
     logger.debug(f"average recall: {round(sum(rc_cum)/len(rc_cum), 3)}")
     logger.debug(f"average precision: {round(sum(pr_cum)/len(pr_cum), 3)}")
     logger.debug(f"avergae f1 score: {round(sum(f1_cum)/len(f1_cum), 3)}")
-    if smote_data:
+    if use_smote:
         X_final, y_final = sm.fit_sample(X, y)
     else:
         X_final, y_final = X, y 

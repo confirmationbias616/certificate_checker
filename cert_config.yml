@@ -9,6 +9,7 @@ machine_learning:
     min_recall: 1  # config parameter not used yet
     min_precision: 0.9  # config parameter not used yet
 
+  use_smote: True
   exclude_features:
     -
     # - city_score
