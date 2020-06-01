@@ -370,12 +370,26 @@ def validate_model(
         upper_ranges.append(round(upper_range,1))
     df = pd.DataFrame({
         'probability score' : upper_ranges,
-        'ground_truths' : ground_truths,
-        'false_matches' : false_matches
+        'true match' : ground_truths,
+        'false match' : false_matches
     })
-    fig = df.plot(x='probability score', kind='bar', stacked=True).get_figure()
-    plt.axvline(x=prob_thresh*10-1, color='blue', linestyle='--')
-    fig.savefig('static/precision_spread.png')  # will also show histogram if function is inside jupyter notebook with %matplotlib inline
+    p1 = plt.bar(df['probability score'], df['true match'], width=0.04, color=(112/255, 94/255, 204/255, 1))
+    p2 = plt.bar(df['probability score'], df['false match'], width=0.04, bottom=df['true match'], color=(112/255, 94/255, 134/255, 1))
+    t = plt.axvline(x=prob_thresh, color=(70/255, 70/255, 80/255, 1), linestyle='--')
+    plt.ylabel('# of matches')
+    plt.xlabel('predicted probability of match')
+    plt.title('Precision Spread on Validation Data\n')
+    plt.legend((p1[0], p2[0]), ('true match', 'false match'))
+    ax = plt.axes()
+    x_axis = ax.axes.get_xaxis()
+    x_label = x_axis.get_label()
+    for spine in ax.spines:
+        ax.spines[spine].set_visible(False)
+    legend = plt.legend((p1[0], p2[0], t), ('true match', 'false match', 'decision threshold'), frameon=1)
+    frame = legend.get_frame()
+    frame.set_alpha(0)
+    if not test:  # will also display inside jupyter notebook regardless (if %matplotlib inline)
+        plt.savefig('static/precision_spread.png', transparent=True, dpi=300)
     if recall < 1.0:
         adj_tp = len(analysis_df[(analysis_df.adj_pred_match == 1) & (analysis_df.ground_truth == 1)])
         adj_fp = len(analysis_df[(analysis_df.adj_pred_match == 1) & (analysis_df.ground_truth == 0)])

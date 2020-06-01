@@ -168,6 +168,28 @@
         color: black;
       }
     }
+  
+  .admin_viz_container {
+    display: block;
+    text-align: center;
+  }
+    .admin_viz {
+    width: 45vw;
+    max-height: 95vh;
+    margin: 2vw;
+    box-shadow: 0vw 0vw 1vw 0.2vw rgba(100,100,100,0.2);
+  }
+  @media screen and (max-width: 900px) {
+    .admin_viz {
+      width: 95vw;
+      max-width: 500px;
+      min-width: 300px;
+    }
+    .admin_viz_container {
+      display: block;
+      float: left;
+    }
+  }
 
     body {
       background-color: rgb(196, 193, 193); /* For browsers that do not support gradients */
