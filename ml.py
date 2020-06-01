@@ -375,7 +375,7 @@ def validate_model(
     })
     fig = df.plot(x='probability score', kind='bar', stacked=True).get_figure()
     plt.axvline(x=prob_thresh*10-1, color='blue', linestyle='--')
-    fig.savefig('fig.png')  # will also show histogram if function is inside jupyter notebook with %matplotlib inline
+    fig.savefig('static/precision_spread.png')  # will also show histogram if function is inside jupyter notebook with %matplotlib inline
     if recall < 1.0:
         adj_tp = len(analysis_df[(analysis_df.adj_pred_match == 1) & (analysis_df.ground_truth == 1)])
         adj_fp = len(analysis_df[(analysis_df.adj_pred_match == 1) & (analysis_df.ground_truth == 0)])
