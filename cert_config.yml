@@ -6,7 +6,7 @@ machine_learning:
     multi_phase: 0.92
 
   guardrail_metrics:
-    min_recall: 0.95  # config parameter not used yet
+    min_recall: 1  # config parameter not used yet
     min_precision: 0.9  # config parameter not used yet
 
   exclude_features:
