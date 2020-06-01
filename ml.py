@@ -353,7 +353,7 @@ def validate_model(**kwargs):
             return  # exit function because there is no basline to validate against
         else:
             logger.info(
-                "will keep testing validation using new model as baseline. Just for testing urposes."
+                "will keep testing validation using new model as baseline. Just for testing purposes."
             )
             sq_results = match(
                 version="new",
