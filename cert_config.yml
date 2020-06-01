@@ -11,10 +11,10 @@ machine_learning:
     min_precision: 0.9  # config parameter not used yet
     min_f1_score: 0  # config parameter not used yet
 
-  exclude_features:  # config parameter not used yet
-    # - bla
-    # - bla
-    # - bla
+  exclude_features:
+    # - city_score
+    # - city_pr_score
+    # - total_score
 
   include_features:  # config parameter not used yet
     # - bla

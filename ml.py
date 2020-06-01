@@ -165,7 +165,8 @@ def train_model(
     """
     logger.info("training random forest classifier")
     df = pd.read_csv("./train_set.csv")
-    X = df[[x for x in df.columns if x.endswith("_score")]]
+    exclude_fetures = load_config()["machine_learning"]["exclude_features"]
+    X = df[[x for x in df.columns if x.endswith("_score") and x not in exclude_fetures]]
     save_feature_list(X.columns)
     feature_list = list(X.columns)
     update_results({'features' : feature_list})
