@@ -508,3 +508,5 @@ def validate_model(**kwargs):
 
 if __name__ == "__main__":
     train_model()
+    build_train_set()
+    validate_model()
