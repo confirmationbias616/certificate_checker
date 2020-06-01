@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 from sklearn.ensemble import RandomForestClassifier
 from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import KFold
@@ -373,11 +374,14 @@ def validate_model(
         'true match' : ground_truths,
         'false match' : false_matches
     })
-    p1 = plt.bar(df['probability score'], df['true match'], width=0.04, color=(112/255, 94/255, 204/255, 1))
-    p2 = plt.bar(df['probability score'], df['false match'], width=0.04, bottom=df['true match'], color=(112/255, 94/255, 134/255, 1))
+    p1 = plt.bar(df['probability score'], df['true match'], width=0.07, align='edge', color=(112/255, 94/255, 204/255, 1))
+    p2 = plt.bar(df['probability score'], df['false match'], width=0.07, align='edge', bottom=df['true match'], color=(112/255, 94/255, 134/255, 1))
     t = plt.axvline(x=prob_thresh, color=(70/255, 70/255, 80/255, 1), linestyle='--')
     plt.ylabel('# of matches')
     plt.xlabel('predicted probability of match')
+    ax = plt.axes()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    plt.xticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
     plt.title('Precision Spread on Validation Data\n')
     plt.legend((p1[0], p2[0]), ('true match', 'false match'))
     # ax = plt.axes()
