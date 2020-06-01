@@ -363,14 +363,18 @@ def validate_model(
     signal_and_noise = analysis_df[analysis_df.pred_prob > -0.1]
     signal = signal_and_noise[signal_and_noise.ground_truth == 1.0]['pred_prob']
     noise = signal_and_noise[signal_and_noise.ground_truth != 1.0]['pred_prob']
-    upper_ranges, ground_truths, false_matches = [], [], []
-    for upper_range in np.arange(0.1,1.01,0.1):
-        bottom_range = upper_ranges[-1] if upper_ranges else 0
+    interval = 0.1
+    bottom_ranges = np.arange(0, 1, interval)
+    ground_truths, false_matches = [], []
+    for bottom_range in bottom_ranges:
+        bottom_range = round(bottom_range, 1)
+        upper_range = round((bottom_range + interval), 1)
+        if bottom_range == 0.0:  # capture all the false matches scored at exactly 0
+            bottom_range = -0.1
         ground_truths.append(len([value for value in signal if value <= upper_range and value > bottom_range]))
         false_matches.append(len([value for value in noise if value <= upper_range and value > bottom_range]))
-        upper_ranges.append(round(upper_range,1))
     df = pd.DataFrame({
-        'probability score' : upper_ranges,
+        'probability score' : bottom_ranges,
         'true match' : ground_truths,
         'false match' : false_matches
     })
@@ -381,6 +385,7 @@ def validate_model(
     plt.xlabel('predicted probability of match')
     ax = plt.axes()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    # ax.set_yscale('log', nonposy='clip')  # too glitchy to use
     plt.xticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
     plt.title('Precision Spread on Validation Data\n')
     plt.legend((p1[0], p2[0]), ('true match', 'false match'))
