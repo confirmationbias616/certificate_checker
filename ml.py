@@ -380,11 +380,9 @@ def validate_model(
     plt.xlabel('predicted probability of match')
     plt.title('Precision Spread on Validation Data\n')
     plt.legend((p1[0], p2[0]), ('true match', 'false match'))
-    ax = plt.axes()
-    x_axis = ax.axes.get_xaxis()
-    x_label = x_axis.get_label()
-    for spine in ax.spines:
-        ax.spines[spine].set_visible(False)
+    # ax = plt.axes()
+    # for spine in ax.spines:
+    #     ax.spines[spine].set_visible(False)
     legend = plt.legend((p1[0], p2[0], t), ('true match', 'false match', 'decision threshold'), frameon=1)
     frame = legend.get_frame()
     frame.set_alpha(0)
