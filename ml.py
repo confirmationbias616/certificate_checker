@@ -213,15 +213,6 @@ def train_model(
             f"number of truthes to learn from: {len([x for x in y_train if x==1])} out of {len(y_train)}"
         )
         logger.debug(f"number of tests: {len(results[results.truth==1])}")
-        feat_imp = pd.DataFrame(
-            {"feat": X.columns, "imp": clf.feature_importances_}
-        ).sort_values("imp", ascending=False)
-        logger.debug("\nfeat_imp\n")
-        logger.debug("top features are:")
-        for _, row in feat_imp.iterrows():
-            logger.debug(
-                f"`{row['feat']}` -> {round(row['imp'], 3)}"
-            )
         logger.debug(f"recall: {round(rc, 3)}")
         logger.debug(f"precision: {round(pr, 3)}")
         logger.debug(f"f1 score: {round(f1, 3)}")
@@ -236,6 +227,14 @@ def train_model(
     else:
         X_final, y_final = X, y 
     clf.fit(X_final, y_final)
+    feat_imp = pd.DataFrame(
+        {"feat": X.columns, "imp": clf.feature_importances_}
+    ).sort_values("imp", ascending=False)
+    logger.info("top features are:")
+    for _, row in feat_imp.iterrows():
+        logger.info(
+            "\t" + "{:<25}".format(row['feat']) + "\t" + str(round(row['imp']*100, 1)) + "\t"
+        )
     save_model(clf)
     return rc_cum, pr_cum, f1_cum
 
@@ -356,9 +355,6 @@ def validate_model(
     logger.info(f"minimum probability threshhold to acheive 100% recall: {min_prob}")
     analysis_df['adj_pred_match'] = analysis_df.pred_prob.apply(lambda x: x >= min_prob)
     avg_prob = mean(analysis_df[analysis_df.ground_truth == 1.0]['pred_prob'])
-    # min_prob = min(analysis_df[analysis_df.ground_truth == 1.0]['total_score'])
-    # logger.info(f"minimum probability threshhold to acheive 100% recall: {min_prob}")
-    # analysis_df['adj_pred_match'] = analysis_df.total_score.apply(lambda x: x >= min_prob)
     logger.debug(analysis_df[analysis_df.adj_pred_match])
     signal_and_noise = analysis_df[analysis_df.pred_prob > -0.1]
     signal = signal_and_noise[signal_and_noise.ground_truth == 1.0]['pred_prob']
