@@ -25,6 +25,9 @@ results.json
 # ignore cahces
 cache*
 
+# ignore images
+*.png
+
 # ignore passwords and API keys
 .secret.json
 
