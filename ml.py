@@ -175,7 +175,7 @@ def train_model(
     update_results({'features' : feature_list})
     y = df[["ground_truth"]]
     clf = RandomForestClassifier(n_estimators=100, random_state=42)
-    sm = SMOTE(random_state=42, ratio=1)
+    sm = SMOTE(random_state=42, sampling_strategy=1)
     kf = KFold(n_splits=3, shuffle=True, random_state=41)
     rc_cum, pr_cum, f1_cum = [], [], []
     split_no = 0
