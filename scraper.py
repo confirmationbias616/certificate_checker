@@ -118,30 +118,36 @@ def scrape(
                 in entry_soup.find("h1", {"class": "entry-title"}).get_text()
             ):
                 cert_type = "np"
-            elif (
-                "Notice of Termination"
-                in entry_soup.find("h2", {"class": "ocn-heading"}).find_next_sibling("p").get_text()
-            ):
-                cert_type = "term"    
             else:
-                cert_type = "csp"
+                try: 
+                    header = entry_soup.find("h2", {"class": "ocn-heading"}).find_next_sibling("p").get_text()
+                except AttributeError:
+                    header = ' '
+                if "Notice of Termination" in header:
+                    cert_type = "term"
+                else:
+                    cert_type = "csp"
             pub_date = str(
                 dateutil.parser.parse(entry_soup.find("date").get_text()).date()
-            )
-            city = (
-                entry_soup.find("h2", {"class": "ocn-subheading"}).get_text().split(":")[0]
-            )
+            )       
+            try: 
+                city = entry_soup.find("h2", {"class": "ocn-subheading"}).get_text().split(":")[0]
+            except AttributeError:
+                city = ''
             if cert_type == "csp":
                 address = (
                     entry_soup.find("div", {"class": "ocn-certificate"})
                     .find("p")
                     .get_text()
                 )
-                title = (
-                    entry_soup.find("h2", {"class": "ocn-heading"})
-                    .find_next_sibling("p")
-                    .get_text()
-                )
+                try:
+                    title = (
+                        entry_soup.find("h2", {"class": "ocn-heading"})
+                        .find_next_sibling("p")
+                        .get_text()
+                    )
+                except AttributeError:
+                    title = ''
                 company_soup = entry_soup.find("div", {"class": "ocn-participant-wrap"})
                 company_results = {
                     key.get_text(): value.get_text()
@@ -364,6 +370,11 @@ def scrape(
         if not test and check_url_key in logged_url_keys:
             logger.info(f"entry for {check_url_key} was already logged - continuing with the next one (if any)...")
             continue
+        details = get_details(entry)
+        # print(entry)
+        if not details:
+            logger.info(f"entry for {check_url_key} was a 404 page - continuing with the next one (if any)...")
+            continue
         for cumulative, item in zip(
             [
                 pub_date,
@@ -376,7 +387,7 @@ def scrape(
                 url_key,
                 cert_type,
             ],
-            get_details(entry),
+            details,
         ):
             cumulative.append(item)
         if limit and (i >= limit):
