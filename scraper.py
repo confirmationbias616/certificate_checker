@@ -127,7 +127,7 @@ def scrape(
                 dateutil.parser.parse(entry_soup.find("date").get_text()).date()
             )
             city = (
-                entry_soup.find("h1", {"class": "entry-title"}).get_text().split(":")[0]
+                entry_soup.find("h2", {"class": "ocn-subheading"}).get_text().split(":")[0]
             )
             if cert_type == "csp":
                 address = (
@@ -188,7 +188,13 @@ def scrape(
                 engineer = np.nan
         elif source == "l2b":
             cert_type_text = entry_soup.find("h2").get_text()
-            cert_type = ("csp" if "Form 9" in cert_type_text else cert_type_text)
+            #cert_type = ("csp" if "Form 9" in cert_type_text else cert_type_text)
+            if "Form 9" in cert_type_text:
+                cert_type = "csp"
+            elif "Form 10" in cert_type_text:
+                cert_type = "ccs"
+            else:
+                cert_type = cert_type_text
             attr_pairs = {}
             fields = entry_soup.find_all('p', {'class':'mb-25'})
             for field in fields:
@@ -201,9 +207,15 @@ def scrape(
             html = response.content
             soup = BeautifulSoup(html, "html.parser")
             pub_date = [str(parse_date(entry.find_all('td')[1].get_text()).date()) for entry in soup.find('tbody').find_all('tr') if url_key in str(entry)][0]
-            city = attr_pairs.get('Where the Premises is Situated', np.nan)
-            address = attr_pairs.get('Where the Premises is Located', np.nan)
-            title = attr_pairs.get('This is to certify that the contract for the following improvement', np.nan)
+            if cert_type == 'ccs':
+                city = attr_pairs.get('Of premises at', np.nan)
+                address = attr_pairs.get('Of premises at', np.nan)
+                title = ' '.join((attr_pairs.get('The subcontract provided for the supply of the following services or materials', ''), attr_pairs.get('To the following improvement', '')))
+                title = np.nan if title in ('', ' ') else title
+            else:
+                city = attr_pairs.get('Where the Premises is Situated', np.nan)
+                address = attr_pairs.get('Where the Premises is Located', np.nan)
+                title = attr_pairs.get('This is to certify that the contract for the following improvement', np.nan)
             owner = attr_pairs.get('Name of Owner', np.nan)
             contractor = attr_pairs.get('Name of Contractor', np.nan)
             engineer = attr_pairs.get('Name of Payment Certifier', np.nan)

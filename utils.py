@@ -63,6 +63,22 @@ def save_config(config):
         yaml.dump(config, stream=stream)
 
 
+def persistant_cache(file_name):
+    """Creates and/or updates persitant cache in json format with given filename."""
+    def decorator(original_func):
+        try:
+            cache = json.load(open(file_name, 'r'))
+        except (IOError, ValueError):
+            cache = {}
+        def new_func(param):
+            if param not in cache:
+                cache[param] = original_func(param)
+                json.dump(cache, open(file_name, 'w'), indent=4)
+            return cache[param]
+        return new_func
+    return decorator
+
+
 def create_connection(db_name="cert_db.sqlite3"):
     """Creates a connection with specified SQLite3 database in current directory.
     Connection conveniently closes on unindent of with block.
@@ -81,10 +97,16 @@ def create_connection(db_name="cert_db.sqlite3"):
 
 def custom_query(query):
     """Run custom SQL query against cert_db.sqlite3"""
-    with create_connection() as conn:
-        result =  pd.read_sql(query, conn)
-    print(result)
-    return result
+    try:
+        with create_connection() as conn:
+            result =  pd.read_sql(query, conn)
+        print(result)
+        return result
+    except TypeError:
+        with create_connection() as conn:
+            conn.cursor().execute(query)
+        print("SQL statement executed.")
+        return
 
 def dbtables_to_csv(db_name="cert_db.sqlite3", destination=""):
     """Writes all tables of specified SQLite3 database to separate CSV files located in

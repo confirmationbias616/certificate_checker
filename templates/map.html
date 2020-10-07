@@ -4,58 +4,86 @@
 <head>
   {% extends 'base.html' %}
   {% block head %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    details[open] summary ~ * {
+      animation: sweep-details-from-top 0.5s ease-in-out;
+    }
+  </style>
   {% endblock %}
 </head>
 <body>
     {% block body %}
-    &nbsp;
     <div style="width: 100%; text-align: center;">
-        <form action="{{ url_for('set_location') }}" name = "set_location" method="POST">
-            <div style="display: inline-block">
-                <input type="text" name="location_string" size="20" {% if location_string %} value="{{ location_string }}"" {% endif %} placeholder="Focus on specific region" autofocus style="float: left; border: 1px solid black">
-                &emsp;
-                <input type="text" name="text_search" size="20" {% if text_search %} value="{{ text_search }}"" {% endif %} placeholder="List one or many keywords" autofocus style="float: left; border: 1px solid black">
-                &emsp;
-                <input type="submit" id="small_button" value="Explore!" style="width: 6em;" >
-            </div>
-            <div>
-                <span>
-                    <input type="checkbox" id="limit_daily" name="limit_daily" value="True" {% if limit_daily %} checked {% endif %}>
-                    day-to-day view
-                </span>
-            </div>
-        </form>
+        <details style="margin-bottom: 2vh;">
+            <summary align='left' style="margin: 2vw">refine search</summary>
+            <form action="{{ url_for('set_location') }}" name = "set_location" method="POST">
+                <div style="display: inline-block;">
+                    <input type="text" id="location_string" name="location_string" size="26" {% if location_string %} value="{{ location_string }}" {% endif %} placeholder="Focus on specific region" autofocus style="border: 1px solid black; margin-bottom: 5px; margin-left: 5px;">
+                    <input type="text" id="text_search" name="text_search" size="26" {% if text_search %} value="{{ text_search }}" {% endif %} placeholder="List one or many keywords" autofocus style="margin-bottom: 5px; margin-left: 5px; border: 1px solid black" keydown="enable_wordcloud()">
+                </div>
+                <div style='margin-top: 1vh; margin-bottom: 1vh'>
+                    <span class='radio-toolbar'>
+                        <input type="radio" name="result_limit" id='daily' value="daily" {% if (not result_limit) or (result_limit == 'daily') %} checked {% endif %}>
+                        <label for="daily">daily</label>
+                        <input type="radio" name="result_limit" id='bulk' value="bulk" {% if result_limit == 'bulk' %} checked {% endif %}>
+                        <label for="bulk">bulk</label>
+                    </span> &nbsp
+                    <span>
+                        <select name="select_source">
+                            <option value="%">all sources</option>
+                            <option value="dcn" {% if select_source == "dcn" %} selected {% endif %}>Daily Commercial News</option>
+                            <option value="ocn" {% if select_source == "ocn" %} selected {% endif %}>Ontario Construction News</option>
+                            <option value="l2b" {% if select_source == "l2b" %} selected {% endif %}>Link2Build</option>
+                        </select>
+                    </span>
+                    <input type="submit" id="small_button" value="explore">
+                </div>
+            </form>
+        </details>
     </div>
     <hr style="border: 1px solid var(--outline);">
     <div style="width: 100%; text-align: center;">
-        <div style="display: inline-block">
+        <div style="display: inline-block;">
         {% if cert_count %}
-            {% if limit_daily %}
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='y', location_string=location_string, text_search=text_search) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            {% if (not result_limit) or (result_limit == 'daily') %}
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, result_limit=result_limit, skip='y', location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, select_source=select_source) }}" name = "change_date" method="POST" style ='padding: 5px; display: inline-block;'>
                     <input type="submit" id="small_button" value="<- 1y" style="width: 5em">
             </form>
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='m', location_string=location_string, text_search=text_search) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, result_limit=result_limit, skip='m', location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, select_source=select_source) }}" name = "change_date" method="POST" style ='padding: 5px; display: inline-block;'>
                     <input type="submit" id="small_button" value="<- 1m" style="width: 5em">
             </form>
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='w', location_string=location_string, text_search=text_search) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, result_limit=result_limit, skip='w', location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, select_source=select_source) }}" name = "change_date" method="POST" style ='padding: 5px; display: inline-block;'>
                     <input type="submit" id="small_button" value="<- 1w" style="width: 5em">
             </form>
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, skip='d', location_string=location_string, text_search=text_search) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, result_limit=result_limit, skip='d', location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, select_source=select_source) }}" name = "change_date" method="POST" style ='padding: 5px; display: inline-block;'>
                     <input type="submit" id="small_button" value="<- 1d" style="width: 5em">
             </form>
             {% else %}
-            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, limit_daily=limit_daily, location_string=location_string, text_search=text_search) }}" name = "change_date" method="POST" style ='float: left; padding: 5px;'>
-                <input type="submit" id="small_button" value="<- older" style="width: 5em">
+            <form action="{{ url_for('rewind', start_date=start_date, end_date=end_date, start_coords_lat=start_coords_lat, start_coords_lng=start_coords_lng, start_zoom=start_zoom, region_size=region_size, result_limit=result_limit, location_string=location_string, text_search=text_search, wordcloud_requested=wordcloud_requested, select_source=select_source) }}" name = "change_date" method="POST" style ='padding: 5px; display: inline-block;'>
+                <input type="submit" id="small_button" value="<- older" style="width: 5em;">
             </form>
             {% endif %}
             
-            <p align="center" style ='float: left; padding: 5px;'><strong>{{ cert_count }}</strong> CSP's for <strong>{{ start_date }}</strong>{% if not limit_daily %} to <strong>{{ end_date }}</strong>{% endif %}</p>
+            <p align="center" style ='padding: 5px; margin-top:2px'><strong>{{ cert_count }}</strong> CSP's for <strong>{{ start_date }}</strong>{% if result_limit == 'bulk' %} to <strong>{{ end_date }}</strong>{% endif %}</p>
         {% else %}
-            <p align="center" style ='float: left; padding: 5px;'><strong>Entirety of CSP history (> yr2000) has been explored for this region.</strong></p>
+            <p align="center" style ='float: left; padding: 5px; margin-top:2px'><strong>Entirety of CSP history (> yr2000) has been explored for this region.</strong></p>
         {% endif %}
         </div>
     </div>
     {% include "map_widget.html" %}
+    </div>
+    <script>  
+        document.addEventListener('keydown', enable_wordcloud);
+        function enable_wordcloud(){  
+             if(document.getElementById("text_search").value.length > 1){  
+                 document.getElementById("wordcloud_requested").disabled = false;  
+             }else{
+               document.getElementById("wordcloud_requested").disabled = true;
+               document.getElementById("wordcloud_requested").checked = false;
+             }  
+        }  
+    </script>
     {% endblock %}
 </body>
 </html>

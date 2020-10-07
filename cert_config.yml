@@ -1,25 +1,18 @@
 machine_learning:
   model_version: 'latest'  # config parameter not used yet
-
   prboability_thresholds:
-    general: 0.7
-    multi_phase: 0.92
-
+    general: 0.4
+    multi_phase: 0.6
   guardrail_metrics:
-    max_number_of_false_positives: 0  # config parameter not used yet
-    min_recall: 0.95  # config parameter not used yet
-    min_precision: 0.9  # config parameter not used yet
-    min_f1_score: 0  # config parameter not used yet
+    min_recall: 1  # config parameter not used yet
+    min_precision: 0.3  # config parameter not used yet
+  use_smote: True
+  exclude_features:
+    -
+    # - city_score
+    # - city_pr_score
+    # - total_score
 
-  exclude_features:  # config parameter not used yet
-    # - bla
-    # - bla
-    # - bla
-
-  include_features:  # config parameter not used yet
-    # - bla
-    # - bla
-    # - bla
 
 flask_app:
   debug: False
@@ -27,10 +20,9 @@ flask_app:
   test: False
   show_summary:
     cert_limit: 1600  # config parameter not used yet
-  instant_scan:
-    2_weeks: 750  # config parameter not used yet
-    1_month: 1500  # config parameter not used yet
-    2_months: 3000  # config parameter not used yet
+  max_free_requests : 4
+  free_timeout_length : 2
+  free_session_length : 5
 
 daily_routine:
   test: False

@@ -5,6 +5,18 @@ train_set.csv
 flask_session/*
 
 templates/map_widget.html
+templates/agg_heatmap.html
+templates/year_lapse_heatmap.html
+
+static/wordcloud*
+static/timeline*
+static/wc_cache.json
+static/competition_per_proportion.png
+static/competition_per_quantity.png
+static/new_users.png
+static/precision_spread.png
+
+limiter.db*
 
 # ignore results.json except the dummy file in test folder
 results.json
@@ -147,3 +159,4 @@ venv.bak/
 .vscode/settings.json
 rf_model.pkl
 rf_features.pkl
+

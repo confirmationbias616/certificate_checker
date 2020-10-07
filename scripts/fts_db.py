@@ -10,6 +10,14 @@ from utils import create_connection
 drop_fts = """
     DROP TABLE cert_search
 """
+clean_string_column = """
+    UPDATE 
+	    web_certificates
+    SET
+        {} = ' '
+    WHERE
+        {} IS NULL
+"""
 create_fts = """
     CREATE VIRTUAL TABLE cert_search
     USING FTS3(cert_id, text)
@@ -28,6 +36,8 @@ def update_fts():
             conn.cursor().execute(drop_fts)  # drop fts table if existing so it can be rewritten
         except sqlite3.OperationalError:
             pass
+        for column in ['title', 'owner', 'contractor', 'city', 'engineer']:
+            conn.cursor().execute(clean_string_column.format(column, column))
         conn.cursor().execute(create_fts)
         conn.cursor().execute(populate_fts)
 

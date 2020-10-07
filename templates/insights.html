@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  <style>
+      summary{
+        margin-left: 10vw;
+        margin-bottom: 1vh;
+        margin-top: 2vh;
+      };
+  </style>
+  {% endblock %}
+</head>
+<body>
+    {% block body %}
+    &nbsp;
+    <div style="width: 100%; text-align: center; margin-top: -5px">
+        <form action="{{ url_for('insights') }}" name = "insights" method="POST">
+            <div style="display: inline-block;">
+                <div style="float:left">
+                <input
+                    type="text"
+                    id="text_search_insights"
+                    name="text_search"
+                    size="26"
+                    {% if text_search %} value="{{ text_search }}" {% endif %}
+                    placeholder="List one or many keywords"
+                    autofocus
+                    style="
+                        float: left;
+                        margin-bottom: 5px;
+                        margin-left: 5px;
+                        border: 1px solid black;
+                    "
+                    keydown="show_x_clear()">
+                <a
+                    id='x' 
+                    {% if not text_search %}
+                        style="font-size: 130%;
+                            margin-left: -22px;
+                            z-index: 1;
+                            display: none;"
+                    {% else %}
+                        style="font-size: 130%;
+                            margin-left: -22px;
+                            z-index: 1;
+                            display: inline;"
+                    {% endif %}
+                    onclick="document.getElementById('text_search_insights').value = '';
+                        document.getElementById('x').style.display='none';"
+                >x</a>
+                &emsp;
+                </div>
+                <div style="margin-left: 5px;">
+                <input type="submit" id="small_button" value="explore" style="width: 6em" >
+                </div>
+            </div>
+        </form>
+    </div>
+    <hr style="border: 1px solid var(--outline);">
+    {% if text_search %}
+    <div align="center">
+        <p><i>analisys based on {{ wc_count }} projects</i></p>
+        {% if wc_search_type %}
+            <p><i>search entity field assumed as: </i><span style="font-weight: bold; font-style: italic; color: var(--highlight)">{{ wc_search_type if wc_search_type != 'city' else 'region' }}</span></p>
+        {% endif %}
+        <br><br>
+        <details open>
+            <summary>productivity timeline</summary>
+            <img loading='lazy' src="static/timeline_{{ wc_id }}.png" alt="..." width=90% style='min-width: 320px; max-height: 100vh'>
+        </details>
+        <details>
+            <summary>geographical focus</summary>
+            <iframe src='/get_agg_heatmap' style='width: 40vw; height: 50vh; max-width: 500px; max-height: 350px; min-width: 150px; min-height: 225px; margin-right: 10px; margin-bottom: 10px;'></iframe>
+            <iframe src='/get_year_lapse_heatmap' style='width: 40vw; height: 50vh; max-width: 500px; max-height: 350px; min-width: 150px; min-height: 225px; margin-bottom: 10px;'></iframe>
+        </details>
+        {% if wc_search_type != 'contractor' %}
+        <details>
+            <summary>contractor relationships (wordcloud)</summary>
+            <i><img src="static/wordcloud_{{ wc_id }}_contractor.png" alt="Not enough results to generate wordcloud" width=80%></i>
+        </details>
+        {% endif %}
+        {% if wc_search_type != 'engineer' %}
+        <details>
+            <summary>consultant relationships (wordcloud)</summary>
+            <i><img src="static/wordcloud_{{ wc_id }}_engineer.png" alt="Not enough results to generate wordcloud" width=80%></i>
+        </details>
+        {% endif %}
+        {% if wc_search_type != 'owner' %}
+        <details>
+            <summary>owner relationships (wordcloud)</summary>
+            <i><img src="static/wordcloud_{{ wc_id }}_owner.png" alt="Not enough results to generate wordcloud" width=80%></i>
+        </details>
+        {% endif %}
+        {% if wc_search_type != 'city' %}
+        <details>
+            <summary>regional tendencies (wordcloud)</summary>
+            <i><img src="static/wordcloud_{{ wc_id }}_city.png" alt="Not enough results to generate wordcloud" width=80%></i>
+        </details>
+        {% endif %}
+    </div>
+    {% else %}
+    <br>
+    <P class="blocktext">
+        Tons of key industry insights are hiding in Ontario's past 20 years of contracts.
+    </P><br><br>
+    <P class="blocktext">
+        Enter keywords above to started!
+    </P>
+    {% endif %}
+    <script>  
+        document.addEventListener('keydown', show_x_clear);
+        function show_x_clear(){
+             if(document.getElementById("text_search_insights").value.length > 1){
+                document.getElementById('x').style.display='inline';
+             }else{
+                document.getElementById('x').style.display='none';
+             }  
+        }  
+    </script>
+    {% endblock %}
+</body>
+</html>
+    

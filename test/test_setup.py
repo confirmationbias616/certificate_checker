@@ -85,7 +85,8 @@ def create_test_db():
                 name TEXT NOT NULL,
                 email TEXT UNIQUE,
                 profile_pic TEXT,
-                account_type TEXT
+                account_type TEXT,
+                date_added TEXT
             );
             INSERT INTO users SELECT * FROM old_table;
             DROP TABLE old_table;

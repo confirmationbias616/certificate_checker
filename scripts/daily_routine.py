@@ -28,7 +28,7 @@ def daily_routine():
             logger.info("build_train_set")
             build_train_set()
             logger.info("train_model")
-            train_model(prob_thresh=prob_thresh)
+            train_model(prob_thresh=prob_thresh, use_smote=False)
         except Exception as e:
             logger.critical(e)
     if "validate" in load_config()["daily_routine"]["steps"]:

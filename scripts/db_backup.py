@@ -6,7 +6,7 @@ from os import listdir
 import re
 
 
-for filename, extension in [['cert_db', '.sqlite3'], ['cache_geocode_city', '.json']]:
+for filename, extension in [['cert_db', '.sqlite3'], ['cache_geocode_city', '.json'], ['static/cw_cache', '.json']]:
     try:
         today_date = datetime.datetime.now()
         week_old_date = dateutil.parser.parse(

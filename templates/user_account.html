@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  {% endblock %}
+</head>
+<body>
+    {% block body %}
+    <div align='center'>
+        <h3>
+            {{ session.get('company_name') }}'s Account
+        </h3>
+        <!-- TO-DO: add link to change account name -->
+    </div>
+    <hr style="border: 1px solid black">
+    <div align='center' style="margin-left: auto; margin-right: auto; width: 95%; overflow: auto; white-space: nowrap;">
+        <li style="display: inline-block; width: 400px;">
+            <strong>e-mail address:</strong> {{ session.get('company_email') }}
+        </li>
+        <li style="display: inline-block; width: 400px;">
+            {% if session.get('account_type') %}
+                <strong>account type:</strong> {{ session.get('account_type') }} (<a href="{{ url_for('terminate_account') }}">terminate account</a>)
+            {% else %}
+                <ul><a href="{{ url_for('payment') }}">Upgrade account</a></ul>
+            {% endif %}
+        </li>
+        <br><br>
+    </div>
+    <hr style="border: 1px solid black">
+    <br><br>
+    {% endblock %}
+</body>
+</html>

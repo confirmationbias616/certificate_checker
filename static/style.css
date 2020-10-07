@@ -1,24 +1,32 @@
 :root {
-    --highlight: rgb(104, 76, 141);
+    --bg-alpha: 0.7;
+    --highlight: rgb(112, 94, 134);
+    --highlight-bg: rgba(112, 94, 134, var(--bg-alpha));
     --background: rgb(145, 163, 161);
+    --background-bg: rgba(145, 163, 161, var(--bg-alpha));
     --outline: rgb(15, 15, 12);
     --item: rgb(122, 128, 138);
     --fieldset: rgb(138, 175, 190);
+    --fieldset-bg: rgb(138, 175, 190, var(--bg-alpha));
+    --shadow-inactive: rgba(15,15,12,0.3);
+    --shadow-hover: rgba(15,15,12,0.6);
+    font-family: 'Montserrat', sans-serif;
     }
-    .required:after { content:" *"; }
-
+    .required::after {
+      content:"  *";
+      color: var(--highlight);
+      font-weight: bold
+    }
     .topnav {
       background-color: var(--outline);
       overflow: hidden;
     }
-
     .scrolldf {
       overflow: auto;
       white-space: nowrap;
     }
-
     .welcome_banner {
-      background-color: var(--highlight);
+      background-image: linear-gradient(90deg, var(--highlight), var(--background) 80% ,var(--fieldset));
       text-align: right;
       padding: 10;
       font-size: 14px;
@@ -28,7 +36,6 @@
       margin-top:0px;
       margin-bottom:0px
     }
-
     .advertise_banner_container{
       background-color: rgb(254, 255, 217);
       /* display: flex; */
@@ -36,17 +43,12 @@
     }
     .advertise_banner {
       padding: 0.2vw;
-      font-size: 2.5vw;
+      font-size: min(2.5vw, 10px);
       text-align: center
     }
     .advertise_banner_text a{
       color: var(--highlight);
     }
-    .advertise_banner_text a:hover{
-      color: var(--fieldset);
-    }
-
-
     /* Style the links inside the navigation bar */
     .topnav a.title {
       transition: color 0.5s;
@@ -55,32 +57,35 @@
       text-align: center;
       padding: 14px 16px;
       text-decoration: none;
-      font-size: 20px;
+      font-size: calc(20px + 1vw);
+      letter-spacing: 0.08em;
     }
     .topnav a {
       transition: color 0.5s;
       float: right;
-      color: #f2f2f2;
+      color: var(--fieldset);
       text-align: center;
       vertical-align: middle;
       padding: 14px 16px;
       text-decoration: none;
-      font-size: 16px;
+      font-size: calc(15px + 0.2vw);
+      margin-top: max(calc(-20px + 2vh), -12px);
+      margin-bottom: max(calc(-20px + 2vh), -12px);
     }
 
     /* Change the color of links on hover */
     .topnav a:hover {
-      background-color: var(--fieldset);
+      background-color: var(--highlight);
       color: var(--outline);
     }
 
     /* Add a color to the active/current link */
     .topnav a.active {
-      background-color: var(--highlight);
+      background-color: var(--item);
       color: var(--outline);
     }
     .topnav a.active:hover {
-      color: #f2f2f2;
+      color: var(--highlight);
     }
 
     /* Add a color to the active/current link */
@@ -95,23 +100,40 @@
     }
     .topnav a.title:hover {
       background-color: var(--outline);
-      color:var(--highlight);
+      color:var(--item);
     }
     .topnav a.icon:hover {
       background-color: var(--outline);
       color:var(--highlight);
     }
-
+    a.user:hover {
+      color: var(--outline);
+      font-size: calc(14px + 0.35vw);
+    }
+    .advertise_banner_text a:hover{
+      color: var(--fieldset);
+    }
     /* Hide the link that should open and close the topnav on small screens */
     .topnav .icon {
       transition: 0.5s;
       display: none;
       font-size: 20px;
     }
-
+    .user {
+      color: black;
+      transition: 0.2s;
+    }
+    .user {
+      font-size: calc(12px + 0.25vw);
+    }
+    .advertise_banner {
+      font-size: calc(7px + 1vw);
+    }
     /* When the screen is less than 600 pixels wide, hide all links, except for the first one ("Home"). Show the link that contains should open and close the topnav (.icon) */
     @media screen and (max-width: 840px) {
-      .topnav a:not(.title) {display: none;}
+      .topnav a:not(.title) {
+        display: none;
+      }
       .topnav a.icon {
         float: right;
         display: block;
@@ -120,7 +142,9 @@
 
     /* The "responsive" class is added to the topnav with JavaScript when the user clicks on the icon. This class makes the topnav look good on small screens (display the links vertically instead of horizontally) */
     @media screen and (max-width: 840px) {
-      .topnav.responsive {position: relative;}
+      .topnav.responsive {
+        position: relative;
+      }
       .topnav.responsive a.icon {
         position: absolute;
         right: 0;
@@ -129,122 +153,209 @@
       .topnav.responsive a {
         float: none;
         display: block;
-        text-align: left;
+        text-align: right;
+        animation: sweep-details-from-top 0.5s ease-in-out;
+        animation-direction: alternate;
       }
-    } 
+      .topnav.responsive #title {
+        float: none;
+        display: block;
+        text-align: left;
+        animation: none
+      }
+      a.user, a.user:visited  {
+        text-decoration: none;
+        color: black;
+      }
+    }
+  
+  .admin_viz_container {
+    display: block;
+    text-align: center;
+  }
+    .admin_viz {
+    width: 45vw;
+    max-height: 95vh;
+    margin: 2vw;
+    box-shadow: 0vw 0vw 10px 5px rgba(100,100,100,0.3);
+    border-radius: 10px;
+  }
+  @media screen and (max-width: 900px) {
+    .admin_viz {
+      width: 95vw;
+      max-width: 500px;
+      min-width: 300px;
+    }
+    .admin_viz_container {
+      display: block;
+      float: left;
+    }
+  }
 
     body {
-      background-color: var(--background);
-      font-family: 'Montserrat', sans-serif;
+      background-color: rgb(196, 193, 193); /* For browsers that do not support gradients */
+      background-image: linear-gradient(90deg, var(--highlight-bg), var(--background-bg) 80% ,var(--fieldset-bg));
       margin-left:0px;
       margin-right:0px;
       margin-top:0px;
       margin-bottom:0px;
     }
     h2 {
-      font-family: 'Montserrat', sans-serif; 
       font-size: 280%;
       text-align: center;
       color: var(--outline);
       text-shadow: -1px -1px 6px var(--highlight);
     }
-    h4 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 100%;
-    }
-    p1 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 100%;
-      font-style: italic;
-      color: var(--highlight);
-      padding-left: 1%;
-    }
-    p2 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 100%;
-      padding-left: 1%;
-    }
     .blocktext {
       margin-left: auto;
       margin-right: auto;
-      width: 70%
+      width: calc(120px + 62vw) ;
+      font-size: calc(16px + 1vw);
+    }
+    .blocktext-tables {
+      margin-left: auto;
+      margin-right: auto;
+      width: calc(120px + 62vw) ;
+      font-size: calc(12px + 0.5vw);
     }
     input[id=large_button]:hover { 
-      box-shadow: -3px -3px 6px var(--highlight);
+      box-shadow: -2px -2px 2px var(--shadow-hover);
     }
     input[id=small_button]:hover { 
-      box-shadow: -3px -3px 6px var(--highlight);
+      box-shadow: -2px -2px 2px var(--shadow-hover);
     }
     fieldset:hover { 
-      box-shadow: -5px -5px 6px var(--highlight);
+      box-shadow: -2px -2px 2px var(--shadow-hover);
     }
     legend:hover { 
-      box-shadow: -5px -5px 10px var(--highlight);
-    }
-    input[type=text]{
-      transition: box-shadow 0.5s;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 120%;
+      box-shadow: -2px -2px 2px var(--shadow-hover);
     }
     input[id=large_button]{
       transition: box-shadow 0.5s;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 120%;
-      width: 120px;
-      height: 2em;
+      font-size: calc(12px + 0.8vh + 0.3vw);
       margin-right:10px;
       margin-left:10px;
       margin-top:10px;
       background-color: var(--item);
       border: 2px var(--outline) solid;
       border-radius: 5px;
-      box-shadow: -3px -3px 5px grey;
+      box-shadow: -2px -2px 1px var(--shadow-inactive);
+    }
+    input[id=small_button], input[type=text], select, .radio-toolbar, p, summary, span {
+      font-size: calc(10px + 0.5vh + 0.2vw);
     }
     input[id=small_button]{
       transition: box-shadow 0.5s;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 90%;
-      width: 10%;
-      height: 1.8em;
       background-color: var(--item);
       border: 2px var(--outline) solid;
       border-radius: 5px;
-      box-shadow: -3px -3px 5px grey;
+      box-shadow: -2px -2px 1px var(--shadow-inactive);
     }
     input[type=text]{
-      font-family: 'Montserrat', sans-serif;
-      font-size: 100%;
-      border: none;
       border-radius: 5px;
+      display: block;
+      /* width: 90vw; */
     }
-    select{
-      font-family: 'Montserrat', sans-serif;
-      font-size: 100%;
+    #text_search, #text_search_insights, #location_string{
+      width: 90vw;
+    }
+    summary:focus{
+      outline-style: none;
+    }
+    summary{
+      text-align: left;
+      margin-left: 2vw;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    details[open] summary ~ * {
+      animation: sweep-details-from-left 0.5s ease-in-out;
+    }
+    @keyframes sweep-details-from-left {
+      0%    {opacity: 0; margin-left: -20vw}
+      100%  {opacity: 1; margin-left: 0vw}
+    }
+    @keyframes sweep-details-from-right {
+      0%    {opacity: 0; margin-right: -20vw}
+      100%  {opacity: 1; margin-right: 0vw}
+    }
+    @keyframes sweep-details-from-top {
+      0%    {opacity: 0; margin-top: -8vh}
+      50%  {opacity: 0; margin-top: -4vh}
+      100%  {opacity: 1; margin-top: 0vh}
+    }
+    @keyframes fade-in {
+      0%    {opacity: 0;}
+      100%  {opacity: 1;}
+    }
+    select {
+      margin-right: 1.5vw;
+      margin-left: 1vw;
+      width: 22vw;
       border: none;
+    }
+    @media screen and (min-width: 909px) {
+      select {
+        width: 200px;
+      }
+    }
+    .radio-toolbar{
+      border: 1px var(--outline) solid;
+      border-radius: 5px;
+      padding: 0.1em 0.5em;
+      display: inline-block;
+    }
+    .radio-toolbar label {
+      cursor: pointer;
+    }
+    .input[type=radio] {
+      cursor: pointer;
+    }
+    .radio-toolbar input[type="radio"]:checked+label {
+      cursor: default;
+    }
+    @media screen and (min-width: 500px) {
+      input[type=text]{
+        display: inline;
+      }
+      #text_search{
+        width: 40vw;
+      }
+      #text_search_insights{
+        width: calc(400px + 10vw)
+      }
+      #location_string{
+        width: calc(200px + 10vw)
+      }
     }
     fieldset{
       transition: box-shadow 0.5s;
-      background-color: var(--fieldset);
+      background-color: rgb(168, 185, 191);
       float: left;
-      width: 330px;
+      width: max(30vw, 270px);
       margin: 8px;
       padding: 12px;
       box-sizing: 2px border-box;
       border: 2px solid var(--outline);
-      box-shadow: -5px -5px 5px grey;
+      box-shadow: -2px -2px 1px var(--shadow-inactive);
+    }
+    #project_entry_container{
+      margin-top: 10px;
+      margin-left: calc(10vw - 10px);
+      margin-right: 2px;
+      display: block;
+      overflow: hidden;
     }
     legend{
       transition: box-shadow 0.5s;
       padding: 0.2em 0.6em;
       border: 2px solid var(--outline);
       background-color: var(--item);
-      font-family: 'Montserrat', sans-serif;
-      font-size: 80%;
       font-weight: bold;
       font-style: italic;
       text-align: right;
       border-radius: 20px;
-      box-shadow: -5px -5px 10px grey;
+      box-shadow: -2px -2px 1px var(--shadow-inactive);
     }
     div#content {
       display: none;

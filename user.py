@@ -1,4 +1,5 @@
 from flask_login import UserMixin
+import datetime
 
 from db import get_db
 
@@ -27,8 +28,8 @@ class User(UserMixin):
     def create(id_, name, email, profile_pic):
         db = get_db()
         db.execute(
-            "INSERT INTO users (id, name, email, profile_pic) "
-            "VALUES (?, ?, ?, ?)",
-            (id_, name, email, profile_pic),
+            "INSERT INTO users (id, name, email, profile_pic, date_created) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (id_, name, email, profile_pic, str(datetime.datetime.now().date())),
         )
         db.commit()

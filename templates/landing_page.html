@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% extends 'base.html' %}
+  {% block head %}
+  <link rel="prerender" href="{{url_for('map')}}">
+  {% endblock %}
+</head>
+<body>
+    {% block body %}
+    <br><br>    
+    <div>
+        <h1 class='blocktext'>Your hub for finding CSP's and other industry insights.</h1>
+    </div>
+    <br><br>
+    {% endblock %}
+</body>
+</html>
