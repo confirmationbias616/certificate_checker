@@ -57,6 +57,8 @@ def scrape(
             except requests.exceptions.ConnectionError:
                 sleep(1)
                 continue
+        if response.status_code == 404:
+            return
         html = response.content
         entry_soup = BeautifulSoup(html, "html.parser")
         if source == "dcn":
