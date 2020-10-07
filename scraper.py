@@ -211,7 +211,15 @@ def scrape(
                     attr_pairs.update({attr_pair[0]: attr_pair[1]})
                 except IndexError:
                     pass
-            response = requests.get(base_url)
+            retry_count = 0
+            while True:
+                try:
+                    response = requests.get(base_url)
+                    break
+                except requests.exceptions.ConnectionError:
+                    logger.info(f"L2B not responding again ({retry_count}). waiting 2 seconds and retrying...")
+                    retry_count += 1
+                    sleep(2)
             html = response.content
             soup = BeautifulSoup(html, "html.parser")
             pub_date = [str(parse_date(entry.find_all('td')[1].get_text()).date()) for entry in soup.find('tbody').find_all('tr') if url_key in str(entry)][0]
