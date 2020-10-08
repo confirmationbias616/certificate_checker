@@ -92,7 +92,7 @@ def send_email(receiver_email, text_message, job_number, test=False):
     """
     message = Mail(
         to_emails=[*receiver_email.values()],
-        subject=f'HBR-Bot Match Notification', f"Upcoming Holdback Release: #{job_number}"
+        subject=f"Upcoming Holdback Release: #{job_number}"
         text=text_message
     )
     message.from_email = From('notifications@joblert.me', 'HBR-Bot Notifier')
