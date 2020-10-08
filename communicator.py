@@ -101,8 +101,9 @@ def communicate(single_web_cert, single_project, test=False):
         f"<br>"
     )
     cert_msg = (
-        f"Before going any further, please follow the link below to make sure the "
-        f"algorithm correctly matched project in question:<br>{base_url}{url_key}<br>"
+        f"Please <a href='{base_url}{url_key}'>click here</a> to make sure "
+        f"HBR-Bot correctly matched your project. <b>Don't forget to come back"
+        f"when you're done!</b>"
     )
     timing_msg = (
         f"If it's the right project, then the certificate was just published "
