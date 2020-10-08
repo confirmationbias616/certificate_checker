@@ -41,7 +41,7 @@ def send_email(receiver_email, text_message, job_number, test=False):
     message = Mail(
         to_emails=[*receiver_email.values()],
         subject=f"Upcoming Holdback Release: #{job_number}",
-        text=text_message
+        html_content=text_message
     )
     message.from_email = From('notifications@joblert.me', 'HBR-Bot Notifier')
     message.to_email = To([*receiver_email.values()])
@@ -95,50 +95,50 @@ def communicate(single_web_cert, single_project, test=False):
         project_title = pd.read_sql("SELECT * FROM company_projects WHERE project_id=?", conn, params=[single_project.project_id]).iloc[0].title
     intro_msg = (
         f"Hi {', '.join(receiver_email.keys())},"
-        f"\n\n"
+        f"<br><br>"
         f"It looks like your project #{single_project.job_number} "
         f"({project_title}) might be almost ready for holdback release!"
-        f"\n"
+        f"<br>"
     )
     cert_msg = (
         f"Before going any further, please follow the link below to make sure the "
-        f"algorithm correctly matched project in question:\n{base_url}{url_key}\n"
+        f"algorithm correctly matched project in question:<br>{base_url}{url_key}<br>"
     )
     timing_msg = (
         f"If it's the right project, then the certificate was just published "
         f"on {datetime.datetime.strftime(pub_date,'%B %e, %Y')}. This means a "
-        f"valid holdback release invoice could be submitted as of:\n"
-        f"A)\t{datetime.datetime.strftime(due_date(45),'%B %e, %Y')} "
-        f"if the contract was signed before October 1, 2019 or;\n"
-        f"B)\t{datetime.datetime.strftime(due_date(60),'%B %e, %Y')} "
+        f"valid holdback release invoice could be submitted as of:<br>"
+        f"A)&#9;{datetime.datetime.strftime(due_date(45),'%B %e, %Y')} "
+        f"if the contract was signed before October 1, 2019 or;<br>"
+        f"B)&#9;{datetime.datetime.strftime(due_date(60),'%B %e, %Y')} "
         f"if the contract was signed since then."
-        f"\n"
+        f"<br>"
     )
     link_constructor = "https://www.hbr-bot.ca/process_feedback?project_id={}&job_number={}&response={}&source={}&cert_id={}"
     feedback_msg = (
         f"Your feedback will be required so that HBR Bot can properly "
         f"handle this ticket, whether that means closing it out or keep "
         f"searching for new matches. It will also help improve the "
-        f"matching algorithm for future projects.\n"
-        f"\n"
+        f"matching algorithm for future projects.<br>"
+        f"<br>"
         f"Please click on 1 of the 3 links below to submit your response "
-        f"with regards to this match.\n\n"
-        f"\t - link does not relate to my project:\n"
-        f"\t{link_constructor.format(single_project.project_id, single_project.job_number, 0, source, single_web_cert.iloc[0].cert_id)}\n\n"
-        f"\t - link is accurate match for my project:\n"
-        f"\t{link_constructor.format(single_project.project_id, single_project.job_number, 1, source, single_web_cert.iloc[0].cert_id)}\n\n"
-        f"\t - link is close but seems to relate to a different phase or "
-        f"stage:\n"
-        f"\t{link_constructor.format(single_project.project_id, single_project.job_number, 2, source, single_web_cert.iloc[0].cert_id)}\n\n"
-        f"\n\n"
+        f"with regards to this match.<br><br>"
+        f"&#9; - link does not relate to my project:<br>"
+        f"&#9;{link_constructor.format(single_project.project_id, single_project.job_number, 0, source, single_web_cert.iloc[0].cert_id)}<br><br>"
+        f"&#9; - link is accurate match for my project:<br>"
+        f"&#9;{link_constructor.format(single_project.project_id, single_project.job_number, 1, source, single_web_cert.iloc[0].cert_id)}<br><br>"
+        f"&#9; - link is close but seems to relate to a different phase or "
+        f"stage:<br>"
+        f"&#9;{link_constructor.format(single_project.project_id, single_project.job_number, 2, source, single_web_cert.iloc[0].cert_id)}<br><br>"
+        f"<br><br>"
     )
     disclaimer_msg = (
         "Fianlly, please be aware this is a fully automated message. "
         "The info presented above could be erroneous."
-        "\n"
+        "<br>"
     )
-    closeout_msg = "Thanks,\n" "HBR Bot\n"
-    message = "\n".join(
+    closeout_msg = "Thanks,<br>" "HBR Bot<br>"
+    message = "<br>".join(
         [intro_msg, cert_msg, timing_msg, feedback_msg, disclaimer_msg, closeout_msg]
     )
     send_email(receiver_email, message, single_project.job_number, test=test)
