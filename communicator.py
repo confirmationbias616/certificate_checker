@@ -207,5 +207,5 @@ def process_as_feedback(feedback):
         logger.info(
             f"cert_id`{cert_id}` from {source} was a "
             f"{'successful match' if response == 1 else 'mis-match'} for job "
-            f"#{project_id}"
+            f"{project_id} (#{job_number})"
         )
