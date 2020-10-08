@@ -120,7 +120,7 @@ def communicate(single_web_cert, single_project, test=False):
         f"handle this ticket, whether that means closing it out or keep "
         f"searching for new matches. It will also help improve the "
         f"matching algorithm for future projects.<br>"
-        f"<br>""
+        f"<br>"
         f"<a href='{link_constructor.format(single_project.project_id, single_project.job_number, 0, source, single_web_cert.iloc[0].cert_id)}'>link does not relate to my project</a>"
         f"<br>"
         f"<a href='{link_constructor.format(single_project.project_id, single_project.job_number, 1, source, single_web_cert.iloc[0].cert_id)}'>link is accurate match for my project</a>"
