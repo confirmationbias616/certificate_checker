@@ -79,20 +79,21 @@ except FileNotFoundError:  # no `.secret.json` file if running in CI
 #         print(e.message)
 
 
-def send_email(receiver_email, html_message, test=False):
+def send_email(receiver_email, text_message, job_number, test=False):
     """Sends an e-mail from `hbr.bot.notifier@gmail.com over SMTP protocol.
     
     Parameters:
      - `receiver_email` (dict {str:str}): keys are contact names and values are contact
      email addresses. This specifies the recipient(s) of the email.
      - `html_message` (str): text contained in the email.
+     - `job_number` (str): user's job number.
      - `test`: if set to `True`, will short-circuits out of function without doing anything.
     
     """
     message = Mail(
         to_emails=[*receiver_email.values()],
-        subject=f'HBR-Bot Match Notification',
-        html_content=html_message
+        subject=f"Upcoming Holdback Release: #{job_number}",
+        text=text_message
     )
     message.from_email = From('notifications@joblert.me', 'HBR-Bot Notifier')
     message.to_email = To([*receiver_email.values()])
@@ -145,12 +146,6 @@ def communicate(single_web_cert, single_project, test=False):
     with create_connection() as conn:
         project_title = pd.read_sql("SELECT * FROM company_projects WHERE project_id=?", conn, params=[single_project.project_id]).iloc[0].title
     intro_msg = (
-        f"From: HBR Bot"
-        f"\n"
-        f"To: {', '.join(receiver_email.values())}"
-        f"\n"
-        f"Subject: Upcoming Holdback Release: #{single_project.job_number}"
-        f"\n\n"
         f"Hi {', '.join(receiver_email.keys())},"
         f"\n\n"
         f"It looks like your project #{single_project.job_number} "
@@ -198,7 +193,7 @@ def communicate(single_web_cert, single_project, test=False):
     message = "\n".join(
         [intro_msg, cert_msg, timing_msg, feedback_msg, disclaimer_msg, closeout_msg]
     )
-    send_email(receiver_email, message, test=test)
+    send_email(receiver_email, message, single_project.job_number, test=test)
 
 
 def process_as_feedback(feedback):
