@@ -7,7 +7,9 @@ import ast
 from utils import create_connection
 import pandas as pd
 import json
-
+import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, From, To
 
 logger = logging.getLogger(__name__)
 log_handler = logging.StreamHandler(sys.stdout)
@@ -26,29 +28,86 @@ except FileNotFoundError:  # no `.secret.json` file if running in CI
     pass
 
 
-def send_email(receiver_email, message, test=False):
+
+# def send_email(found_id):
+#     with create_connection() as conn:
+#         found = pd.read_sql("""
+#             SELECT
+#                 users.name as user_name,
+#                 users.email,
+#                 search.career_page,
+#                 search.company,
+#                 search.keywords,
+#                 found.title,
+#                 found.link 
+#             FROM found
+#             JOIN search 
+#             ON search.id = found.search_id
+#             JOIN users 
+#             ON users.id = search.user_id
+#             WHERE found.id = ?
+#         """, conn, params=[found_id]).iloc[0]
+#     message = Mail(
+#         to_emails=found.email,
+#         subject=f'New Job Posting for {found.title}',
+#         html_content=f"""
+#             <body>
+#                 Hi {found.user_name},
+#                 <br><br>
+#                 Looks like one of your target career pages (<a href='{found.career_page}'>{found.company}</a>)
+#                 recently posted a new job for <a href='{get_valid_link(found.career_page, found.link)}'>{found.title}</a>.
+#                 <br><br>
+#                 This matches your search for keyword <b>{found.keywords}</b>.
+#                 <br><br>
+#                 Good luck!<br>
+#                 <a href='www.joblert.me'>joblert.me</a>
+#             </body>
+#         """
+#     )
+#     message.from_email = From('notifications@joblert.me', 'joblert.me')
+#     print(found.user_name)
+#     message.to_email = To(found.email, found.user_name)
+#     try:
+#         with open(".secret.json") as f:
+#             api_key = json.load(f)["sendgrid_key"]
+#         sg = SendGridAPIClient(api_key)
+#         response = sg.send(message)
+#         print(response.status_code)
+#         print(response.body)
+#         print(response.headers)
+#     except Exception as e:
+#         print(e.message)
+
+
+def send_email(receiver_email, html_message, test=False):
     """Sends an e-mail from `hbr.bot.notifier@gmail.com over SMTP protocol.
     
     Parameters:
      - `receiver_email` (dict {str:str}): keys are contact names and values are contact
      email addresses. This specifies the recipient(s) of the email.
-     - `message` (str): text contained in the email.
+     - `html_message` (str): text contained in the email.
      - `test`: if set to `True`, will short-circuits out of function without doing anything.
     
     """
-    port = 465  # for SSL
-    smtp_server = "smtp.gmail.com"
-    sender_email = "hbr.bot.notifier"
+    message = Mail(
+        to_emails=[*receiver_email.values()],
+        subject=f'HBR-Bot Match Notification',
+        html_content=html_message
+    )
+    message.from_email = From('notifications@joblert.me', 'HBR-Bot Notifier')
+    message.to_email = To([*receiver_email.values()])
     if test:
         return  # escape early
     try:
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-            server.login(sender_email, password)
-            server.sendmail(sender_email, [*receiver_email.values()], message)
-        logger.info(f"Successfully sent an email to {', '.join(receiver_email.keys())}")
-    except (FileNotFoundError, NameError):
-        logger.info("password not available -> could not send e-mail")
+        with open(".secret.json") as f:
+            api_key = json.load(f)["sendgrid_key"]
+        sg = SendGridAPIClient(api_key)
+        response = sg.send(message)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+    except Exception as e:
+        print(e.message)
 
 
 def communicate(single_web_cert, single_project, test=False):
