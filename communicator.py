@@ -27,58 +27,6 @@ try:
 except FileNotFoundError:  # no `.secret.json` file if running in CI
     pass
 
-
-
-# def send_email(found_id):
-#     with create_connection() as conn:
-#         found = pd.read_sql("""
-#             SELECT
-#                 users.name as user_name,
-#                 users.email,
-#                 search.career_page,
-#                 search.company,
-#                 search.keywords,
-#                 found.title,
-#                 found.link 
-#             FROM found
-#             JOIN search 
-#             ON search.id = found.search_id
-#             JOIN users 
-#             ON users.id = search.user_id
-#             WHERE found.id = ?
-#         """, conn, params=[found_id]).iloc[0]
-#     message = Mail(
-#         to_emails=found.email,
-#         subject=f'New Job Posting for {found.title}',
-#         html_content=f"""
-#             <body>
-#                 Hi {found.user_name},
-#                 <br><br>
-#                 Looks like one of your target career pages (<a href='{found.career_page}'>{found.company}</a>)
-#                 recently posted a new job for <a href='{get_valid_link(found.career_page, found.link)}'>{found.title}</a>.
-#                 <br><br>
-#                 This matches your search for keyword <b>{found.keywords}</b>.
-#                 <br><br>
-#                 Good luck!<br>
-#                 <a href='www.joblert.me'>joblert.me</a>
-#             </body>
-#         """
-#     )
-#     message.from_email = From('notifications@joblert.me', 'joblert.me')
-#     print(found.user_name)
-#     message.to_email = To(found.email, found.user_name)
-#     try:
-#         with open(".secret.json") as f:
-#             api_key = json.load(f)["sendgrid_key"]
-#         sg = SendGridAPIClient(api_key)
-#         response = sg.send(message)
-#         print(response.status_code)
-#         print(response.body)
-#         print(response.headers)
-#     except Exception as e:
-#         print(e.message)
-
-
 def send_email(receiver_email, text_message, job_number, test=False):
     """Sends an e-mail from `hbr.bot.notifier@gmail.com over SMTP protocol.
     
@@ -166,7 +114,7 @@ def communicate(single_web_cert, single_project, test=False):
         f"if the contract was signed since then."
         f"\n"
     )
-    link_constructor = "https://www.hbr-bot.com/process_feedback?project_id={}&job_number={}&response={}&source={}&cert_id={}"
+    link_constructor = "https://www.hbr-bot.ca/process_feedback?project_id={}&job_number={}&response={}&source={}&cert_id={}"
     feedback_msg = (
         f"Your feedback will be required so that HBR Bot can properly "
         f"handle this ticket, whether that means closing it out or keep "
