@@ -21,7 +21,7 @@
 <br>
 <P class="blocktext">
     To get started, simply enter your project's info in the 
-    <a href="https://hbr-bot.com">home page</a> form
+    <a href="https://hbr-bot.ca">home page</a> form
     and let HBR Bot guide you through the process. To learn more about the Lien
     Construction Act and holdback releases in general, visit
     <a href="https://canada.constructconnect.com/dcn/construction-act">this link<a>.</a>

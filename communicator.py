@@ -114,7 +114,7 @@ def communicate(single_web_cert, single_project, test=False):
         f"if the contract was signed since then."
         f"\n"
     )
-    link_constructor = "https://www.hbr-bot.com/process_feedback?project_id={}&job_number={}&response={}&source={}&cert_id={}"
+    link_constructor = "https://www.hbr-bot.ca/process_feedback?project_id={}&job_number={}&response={}&source={}&cert_id={}"
     feedback_msg = (
         f"Your feedback will be required so that HBR Bot can properly "
         f"handle this ticket, whether that means closing it out or keep "
