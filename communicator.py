@@ -83,7 +83,7 @@ def communicate(single_web_cert, single_project, test=False):
     receiver_emails_dump = single_project.receiver_emails_dump
     receiver_email = ast.literal_eval(receiver_emails_dump)
     source = single_web_cert.iloc[0].source
-    source_base_url_query = "SELECT base_url FROM base_urls WHERE source=?"
+    source_base_url_query = "SELECT base_url FROM base_urls WHERE source=%s"
     with create_connection() as conn:
         base_url = conn.cursor().execute(source_base_url_query, [source]).fetchone()[0]
     url_key = single_web_cert.iloc[0].url_key
@@ -92,7 +92,7 @@ def communicate(single_web_cert, single_project, test=False):
     ).date()
     due_date = lambda delay: pub_date + datetime.timedelta(days=delay)
     with create_connection() as conn:
-        project_title = pd.read_sql("SELECT * FROM company_projects WHERE project_id=?", conn, params=[single_project.project_id]).iloc[0].title
+        project_title = pd.read_sql("SELECT * FROM company_projects WHERE project_id=%s", conn, params=[single_project.project_id]).iloc[0].title
     intro_msg = (
         f"Hi {', '.join(receiver_email.keys())},"
         f"<br><br>"
@@ -163,7 +163,7 @@ def process_as_feedback(feedback):
         try:
             was_prev_closed = (
                 pd.read_sql(
-                    "SELECT * FROM company_projects WHERE project_id=?",
+                    "SELECT * FROM company_projects WHERE project_id=%s",
                     conn,
                     params=[project_id],
                 )
@@ -183,7 +183,7 @@ def process_as_feedback(feedback):
     if response == 1:
         logger.info(f"got feeback that cert_id {cert_id} from {source} was correct")
         update_status_query = (
-            "UPDATE company_projects SET closed = 1 WHERE project_id = ?"
+            "UPDATE company_projects SET closed = 1 WHERE project_id = %s"
         )
         with create_connection() as conn:
             conn.cursor().execute(update_status_query, [project_id])

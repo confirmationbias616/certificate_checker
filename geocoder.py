@@ -85,12 +85,12 @@ def geocode(df, retry_na=False):
 def geo_update_db_table(table_name, start_date=None, end_date=None, limit=None):
     update_geo_data = """
         UPDATE {}
-        SET address_lat = ?,
-            address_lng = ?,
-            city_lat = ?,
-            city_lng = ?,
-            city_size = ?
-        WHERE {} = ?
+        SET address_lat = %s,
+            address_lng = %s,
+            city_lat = %s,
+            city_lng = %s,
+            city_size = %s
+        WHERE {} = %s
     """
     if table_name == 'company_projects':
         fetch_jobs = """
@@ -101,7 +101,7 @@ def geo_update_db_table(table_name, start_date=None, end_date=None, limit=None):
         update_geo_data = update_geo_data.format(table_name, match_id)
     elif table_name == 'web_certificates':
         fetch_jobs = """
-            SELECT * from web_certificates WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date DESC
+            SELECT * from web_certificates WHERE pub_date BETWEEN %s AND %s ORDER BY pub_date DESC
         """
         match_id = 'cert_id'
         limit_params = [start_date, end_date]

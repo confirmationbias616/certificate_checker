@@ -121,7 +121,7 @@ def build_train_set():
     # Get some certificates that are definitely not matches to provide some false matches to train from
     start_date = "2011-01-01"
     end_date = "2011-04-30"
-    hist_query = "SELECT * FROM web_certificates WHERE pub_date BETWEEN ? AND ? ORDER BY pub_date"
+    hist_query = "SELECT * FROM web_certificates WHERE pub_date BETWEEN %s AND %s ORDER BY pub_date"
     with create_connection() as conn:
         rand_web_df = pd.read_sql(hist_query, conn, params=[start_date, end_date])
     rand_web_df = wrangle(rand_web_df)

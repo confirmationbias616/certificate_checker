@@ -199,7 +199,7 @@ def generate_wordcloud(term_field):
         WHERE cert_id in (
             SELECT cert_id 
             FROM cert_search 
-            WHERE text MATCH ?
+            WHERE text MATCH %s
         )
     """
     with create_connection() as conn:

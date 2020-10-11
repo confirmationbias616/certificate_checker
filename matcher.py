@@ -196,7 +196,7 @@ def match(
         hist_query = """
             SELECT * 
             FROM web_certificates
-            WHERE pub_date>=? AND pub_date<=?
+            WHERE pub_date>=%s AND pub_date<=%s
             ORDER BY pub_date
         """
         with create_connection() as conn:
