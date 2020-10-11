@@ -4,6 +4,7 @@ from cleanco import cleanco
 import pandas as pd
 import random
 from utils import create_connection, persistant_cache
+import mysql.connector
 
 
 general_terms = [

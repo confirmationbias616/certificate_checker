@@ -13,6 +13,7 @@ import sys
 import logging
 import dateutil.parser
 from dateutil.parser import parse as parse_date
+import mysql.connector
 
 
 logger = logging.getLogger(__name__)
