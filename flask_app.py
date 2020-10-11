@@ -44,6 +44,7 @@ import matplotlib
 matplotlib.use('Agg')
 from redislite import Redis
 from redislite.client import RedisLiteException
+import mysql.connector
 
 
 try:
@@ -76,6 +77,14 @@ except FileNotFoundError:  # no `.secret.json` file if running in CI
     app.config['SECRET_KEY'] = "JUSTTESTING"
 
 Session(app)
+
+try:
+    with open(".secret.json") as f:
+        pws = json.load(f)
+        mysql_pw = pws["mysql"]
+        paw_pw = pws["pythonanywhere"]
+except FileNotFoundError:  # no `.secret.json` file if running in CI
+    pass
 
 # trick from SO for properly relaoding CSS
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -212,7 +221,7 @@ def load_user():
                 session['account_type'] = pd.read_sql("""
                 SELECT * 
                 FROM users 
-                WHERE id=?
+                WHERE id=%s
             """, conn, params=[current_user.id]).iloc[0].account_type
         if session.get('account_type') != "full":
             return redirect(url_for("payment"))
@@ -240,37 +249,33 @@ def get_web_certs(east_lat, west_lat, south_lng, north_lng, end_date, select_sou
         WHERE
             cert_type = "csp"
         AND
-            lat > ?
+            COALESCE(web_certificates.address_lat, web_certificates.city_lat) > %s
         AND
-            lat < ?
+            COALESCE(web_certificates.address_lat, web_certificates.city_lat) < %s
         AND
-            lng > ?
+            COALESCE(web_certificates.address_lng, web_certificates.city_lng) > %s
         AND
-            lng < ?
+            COALESCE(web_certificates.address_lng, web_certificates.city_lng) < %s
         AND
-            pub_date <= ?
+            pub_date <= %s
         AND
-            web_certificates.source LIKE ?
+            web_certificates.source LIKE %s
         {}
         ORDER BY 
             pub_date
-        DESC LIMIT ?
+        DESC LIMIT %s
     """
     add_fts_query = """
         AND
-            web_certificates.cert_id IN (SELECT cert_id FROM cert_search WHERE text MATCH ?)
+            web_certificates.cert_id IN (SELECT cert_id FROM cert_search WHERE text MATCH %s)
     """
     web_query = web_query.format(add_fts_query) if text_search else web_query.format('')
-    while True:
-        try:
-            with create_connection() as conn:
-                if text_search:
-                    df = pd.read_sql(web_query , conn, params=[east_lat, west_lat, south_lng, north_lng, end_date, select_source, text_search, limit_count*2])
-                else:
-                    df = pd.read_sql(web_query , conn, params=[east_lat, west_lat, south_lng, north_lng, end_date, select_source, limit_count*2])
-                return df
-        except pd.io.sql.DatabaseError:
-            logger.info('Database is locked. Retrying SQL queries...')
+    with create_connection() as conn:
+        if text_search:
+            df = pd.read_sql(web_query , conn, params=[east_lat, west_lat, south_lng, north_lng, end_date, select_source, text_search, limit_count*2])
+        else:
+            df = pd.read_sql(web_query , conn, params=[east_lat, west_lat, south_lng, north_lng, end_date, select_source, limit_count*2])
+        return df
 
 @app.route("/", methods=["POST", "GET"])
 def index():
@@ -286,14 +291,14 @@ def project_entry():
     load_user()
     if session.get('account_type') != "full":
         return redirect(url_for("payment"))
-    all_contacts_query = "SELECT * FROM contacts WHERE company_id=?"
+    all_contacts_query = "SELECT * FROM contacts WHERE company_id=%s"
     with create_connection() as conn:
         all_contacts = pd.read_sql(all_contacts_query, conn, params=[session.get('company_id')])
     if request.method == "POST":
         selected_contact_ids = request.form.getlist("contacts")
         selected_contacts_query = (
             f"SELECT name, email_address FROM contacts WHERE id in "
-            f"({','.join('?'*len(selected_contact_ids))}) AND company_id=?"
+            f"({','.join('%s'*len(selected_contact_ids))}) AND company_id=%s"
         )
         with create_connection() as conn:
             selected_contacts = pd.read_sql(
@@ -312,7 +317,7 @@ def project_entry():
         with create_connection() as conn:
             try:
                 row = pd.read_sql(
-                    "SELECT * FROM company_projects WHERE job_number=? and company_id=?",
+                    "SELECT * FROM company_projects WHERE job_number=%s and company_id=%s",
                     conn,
                     params=[new_entry["job_number"], session.get('company_id')],
                 ).iloc[0]
@@ -334,11 +339,11 @@ def project_entry():
         if was_prev_logged:
             with create_connection() as conn:
                 conn.cursor().execute(f"""
-                    DELETE FROM company_projects WHERE job_number=? AND company_id=?
+                    DELETE FROM company_projects WHERE job_number=%s AND company_id=%s
                 """, [new_entry["job_number"], session.get('company_id')])
         with create_connection() as conn:
             conn.cursor().execute(f"""
-                INSERT INTO company_projects (company_id, {', '.join(list(new_entry.keys()))}) VALUES (?, {','.join(['?']*len(new_entry))})
+                INSERT INTO company_projects (company_id, {', '.join(list(new_entry.keys()))}) VALUES (%s, {','.join(['%s']*len(new_entry))})
             """, [session.get('company_id')] + list(new_entry.values()))
         geo_update_db_table('company_projects', limit=1)
         if not was_prev_logged:
@@ -466,9 +471,9 @@ def already_matched():
         ON
             base_urls.source = web_certificates.source
         WHERE
-            job_number=?
+            job_number=%s
         AND
-            company_id=?
+            company_id=%s
         AND
             attempted_matches.ground_truth = 1
     """
@@ -486,7 +491,7 @@ def potential_match():
     job_number = request.args.get("job_number")
     url_key = request.args.get("url_key")
     source = request.args.get("source")
-    source_base_url_query = "SELECT base_url FROM base_urls WHERE source=?"
+    source_base_url_query = "SELECT base_url FROM base_urls WHERE source=%s"
     with create_connection() as conn:
         base_url = conn.cursor().execute(source_base_url_query, [source]).fetchone()[0]
     return render_template(
@@ -553,7 +558,7 @@ def summary_table():
             WHERE
                 company_projects.closed=1
             AND
-                company_id=?
+                company_id=%s
             AND
                 attempted_matches.ground_truth=1
         """
@@ -561,7 +566,7 @@ def summary_table():
             SELECT *
             FROM company_projects
             WHERE company_projects.closed=0
-            AND company_id=?
+            AND company_id=%s
         """
     with create_connection() as conn:
         df_closed = pd.read_sql(closed_query, conn, params=[session.get('company_id')]).sort_values(
@@ -650,11 +655,11 @@ def delete_job():
         return redirect(url_for("payment"))
     delete_job_query = """
             DELETE FROM company_projects
-            WHERE project_id=?
+            WHERE project_id=%s
         """
     delete_match_query = """
             DELETE FROM attempted_matches
-            WHERE project_id=?
+            WHERE project_id=%s
         """
     project_id = request.args.get("project_id")
     with create_connection() as conn:
@@ -676,20 +681,20 @@ def instant_scan():
             lookback_cert_date = str(datetime.datetime.now().date() - datetime.timedelta(days=31))
         else:  # also applies for `2_weeks`
             lookback_cert_date = str(datetime.datetime.now().date() - datetime.timedelta(days=14))
-        company_query = "SELECT * FROM company_projects WHERE job_number=? AND company_id=?"
+        company_query = "SELECT * FROM company_projects WHERE job_number=%s AND company_id=%s"
         with create_connection() as conn:
             company_projects = pd.read_sql(company_query, conn, params=[job_number, session.get('company_id')])
         hist_query = """ 
             SELECT * FROM (
                 SELECT * FROM web_certificates 
-                WHERE pub_date > ?
+                WHERE pub_date > %s
             )
             WHERE 
                 address_lat IS NULL 
                 OR (
-                    abs(address_lat - ?) < 0.5
+                    abs(address_lat - %s) < 0.5
                     AND
-                    abs(address_lng - ?) < 0.5
+                    abs(address_lng - %s) < 0.5
                 )
         """
         with create_connection() as conn:
@@ -772,7 +777,7 @@ def payment():
 @app.route("/thanks_for_payment", methods=["POST", "GET"])
 def thanks_for_payment():
     update_account_type_query = (
-        "UPDATE users SET account_type = 'full' WHERE id = ?"
+        "UPDATE users SET account_type = 'full' WHERE id = %s"
     )
     with create_connection() as conn:
         conn.cursor().execute(update_account_type_query, [session.get('company_id')])
@@ -797,7 +802,7 @@ def admin():
                 COUNT(*) as count
             FROM users
             WHERE date_added > '2018-01-01'
-            GROUP BY yearmonth
+            GROUP BY 1
             ORDER BY date_added
         """, conn)
     all_possible_yearmonths = [f"{x[0]}-{x[1]}" for x in list(zip(np.repeat(range(2020, 2100),12), [str(x).zfill(2) for x in range(1,13)]*36))]
@@ -829,7 +834,7 @@ def terminate_account():
     load_user()
     if request.args.get('confirmed'):
         update_account_type_query = (
-            "UPDATE users SET account_type = '' WHERE id = ?"
+            "UPDATE users SET account_type = '' WHERE id = %s"
         )
         with create_connection() as conn:
             conn.cursor().execute(update_account_type_query, [session.get('company_id')])
@@ -843,7 +848,7 @@ def contact_config():
     if session.get('account_type') != "full":
         return redirect(url_for("payment"))
     contact = request.args
-    all_contacts_query = "SELECT * FROM contacts WHERE company_id=?"
+    all_contacts_query = "SELECT * FROM contacts WHERE company_id=%s"
     with create_connection() as conn:
         all_contacts = pd.read_sql(all_contacts_query, conn, params=[session.get('company_id')])
     if not len(all_contacts):
@@ -890,8 +895,8 @@ def delete_contact():
         return redirect(url_for("payment"))
     delete_contact_query = """
             DELETE FROM contacts
-            WHERE id=?
-            AND company_id=?
+            WHERE id=%s
+            AND company_id=%s
         """
     contact = request.args
     with create_connection() as conn:
@@ -906,9 +911,9 @@ def update_contact():
     contact = request.args
     update_contact_query = """
         UPDATE contacts
-        SET name = ?,  email_address = ?
-        WHERE id=?
-        AND company_id=?
+        SET name = %s,  email_address = %s
+        WHERE id=%s
+        AND company_id=%s
     """
     if request.method == "POST":
         contact = request.form
@@ -927,7 +932,7 @@ def add_contact():
     contact = request.args
     add_contact_query = """
         INSERT INTO contacts
-        (company_id, name, email_address) VALUES(?, ?, ?)
+        (company_id, name, email_address) VALUES(%s, %s, %s)
     """
     if request.method == "POST":
         contact = request.form
@@ -978,7 +983,7 @@ def interact():
             try:
                 with create_connection() as conn:
                     comp_df = pd.read_sql(
-                        "SELECT * FROM company_projects WHERE job_number=? AND company_id=?",
+                        "SELECT * FROM company_projects WHERE job_number=%s AND company_id=%s",
                         conn,
                         params=[form.get("job_number"), session.get('company_id')],
                     )
@@ -1173,7 +1178,7 @@ def map():
         AND
             attempted_matches.ground_truth=1
         AND
-            company_id=?
+            company_id=%s
     """
     open_query = """
         SELECT
@@ -1191,7 +1196,7 @@ def map():
         WHERE
             company_projects.closed=0
         AND
-            company_id=?
+            company_id=%s
     """
     current_lat, current_lng, current_city = get_current_coords()
     get_lat = request.args.get('start_coords_lat', current_lat)
@@ -1209,16 +1214,11 @@ def map():
     result_limit = request.args.get('result_limit')
     limit_count = 200
     logger.debug(f"done with all map set-up - start getting running SQL queries: {datetime.datetime.now()}")
-    while True:
-        try:
-            with create_connection() as conn:
-                logger.debug(f"getting open project: {datetime.datetime.now()}")
-                df_cp_open = pd.read_sql(open_query, conn, params=[session.get('company_id')])
-                logger.debug(f"getting closed project: {datetime.datetime.now()}")
-                df_cp_closed = pd.read_sql(closed_query, conn, params=[session.get('company_id')])
-                break
-        except pd.io.sql.DatabaseError:
-            logger.info('Database is locked. Retrying SQL queries...')
+    with create_connection() as conn:
+        logger.debug(f"getting open project: {datetime.datetime.now()}")
+        df_cp_open = pd.read_sql(open_query, conn, params=[session.get('company_id')])
+        logger.debug(f"getting closed project: {datetime.datetime.now()}")
+        df_cp_closed = pd.read_sql(closed_query, conn, params=[session.get('company_id')])
     logger.debug(f"closed db connection after retreiving open and closed: {datetime.datetime.now()}")
     df_cp_open.dropna(axis=0, subset=['lat'], inplace=True)
     df_cp_closed.dropna(axis=0, subset=['lat'], inplace=True)
@@ -1526,7 +1526,7 @@ def insights():
             WHERE cert_id in (
                 SELECT cert_id 
                 FROM cert_search 
-                WHERE text MATCH ?
+                WHERE text MATCH %s
             )
             AND cert_type = 'csp'
         """
@@ -1581,7 +1581,7 @@ def insights():
             WHERE cert_id in (
                 SELECT cert_id 
                 FROM cert_search 
-                WHERE text MATCH ?
+                WHERE text MATCH %s
             )
             AND cert_type = 'csp'
         """
