@@ -44,6 +44,7 @@ import matplotlib
 matplotlib.use('Agg')
 from redislite import Redis
 from redislite.client import RedisLiteException
+import mysql.connector
 
 
 try:
@@ -76,6 +77,14 @@ except FileNotFoundError:  # no `.secret.json` file if running in CI
     app.config['SECRET_KEY'] = "JUSTTESTING"
 
 Session(app)
+
+try:
+    with open(".secret.json") as f:
+        pws = json.load(f)
+        mysql_pw = pws["mysql"]
+        paw_pw = pws["pythonanywhere"]
+except FileNotFoundError:  # no `.secret.json` file if running in CI
+    pass
 
 # trick from SO for properly relaoding CSS
 app.config['TEMPLATES_AUTO_RELOAD'] = True
