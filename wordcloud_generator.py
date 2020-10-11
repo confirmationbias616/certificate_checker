@@ -5,6 +5,7 @@ import pandas as pd
 import random
 from utils import create_connection, persistant_cache
 import mysql.connector
+import json
 
 
 try:

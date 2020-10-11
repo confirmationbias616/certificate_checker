@@ -10,6 +10,7 @@ import sys
 import logging
 import argparse
 import mysql.connector
+import json
 
 
 logger = logging.getLogger(__name__)
