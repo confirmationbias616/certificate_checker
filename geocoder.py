@@ -27,6 +27,14 @@ try:
 except FileNotFoundError:  # no `.secret.json` file if running in CI
     api_key = None
 
+try:
+    with open(".secret.json") as f:
+        pws = json.load(f)
+        mysql_pw = pws["mysql"]
+        paw_pw = pws["pythonanywhere"]
+except FileNotFoundError:  # no `.secret.json` file if running in CI
+    pass
+
 def api_call(address_param):
     if not api_key:
         return {}

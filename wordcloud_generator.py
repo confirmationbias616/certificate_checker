@@ -7,6 +7,14 @@ from utils import create_connection, persistant_cache
 import mysql.connector
 
 
+try:
+    with open(".secret.json") as f:
+        pws = json.load(f)
+        mysql_pw = pws["mysql"]
+        paw_pw = pws["pythonanywhere"]
+except FileNotFoundError:  # no `.secret.json` file if running in CI
+    pass
+
 general_terms = [
     'construction',
     'constructor',

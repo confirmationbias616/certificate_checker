@@ -5,6 +5,14 @@ from utils import create_connection
 import mysql.connector
 
 
+try:
+    with open(".secret.json") as f:
+        pws = json.load(f)
+        mysql_pw = pws["mysql"]
+        paw_pw = pws["pythonanywhere"]
+except FileNotFoundError:  # no `.secret.json` file if running in CI
+    pass
+
 def compile_score(row, scoreable_attrs, style):
     """Compiles the total score of each column in the row that was individually scored
     against its attribute counterpart and sports the `_score` suffix."""
