@@ -264,7 +264,7 @@ def scrape(
         hist_query = """
             SELECT pub_date 
             FROM web_certificates 
-            WHERE source=? 
+            WHERE source=%s
             ORDER BY pub_date DESC LIMIT 1
         """
         with create_connection() as conn:
@@ -368,7 +368,7 @@ def scrape(
     logged_key_query = """
         SELECT url_key 
         FROM web_certificates 
-        WHERE source=? 
+        WHERE source=%s
     """
     with create_connection() as conn:
         logged_url_keys = list(pd.read_sql(logged_key_query, conn, params=[source]).url_key)
@@ -459,7 +459,7 @@ def scrape(
     ]
     query = f""" 
         INSERT INTO web_certificates 
-        ({', '.join(attrs)}) VALUES ({','.join(['?']*len(attrs))})
+        ({', '.join(attrs)}) VALUES ({','.join(['%s']*len(attrs))})
     """
     new_certs = [[row[attr] for attr in attrs] for _, row in df_web.iterrows()]
     with create_connection() as conn:

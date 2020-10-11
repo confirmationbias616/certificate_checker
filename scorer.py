@@ -66,8 +66,8 @@ def use_fresh_certs_only(single_project_row, web_df):
         possible_matches_scored = web_df
     update_query = """ 
         UPDATE company_projects 
-        SET last_cert_id_check=?
-        WHERE project_id=?
+        SET last_cert_id_check=%s
+        WHERE project_id=%s
     """
     if len(possible_matches_scored):
         with create_connection() as conn:
