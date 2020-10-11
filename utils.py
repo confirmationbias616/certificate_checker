@@ -79,8 +79,8 @@ def persistant_cache(file_name):
     return decorator
 
 
-def create_connection(db_name="cert_db.sqlite3"):
-    """Creates a connection with specified SQLite3 database in current directory.
+def create_connection():
+    """Creates a connection with specified MySQL database.
     Connection conveniently closes on unindent of with block.
 
     Typical usage pattern is as follows:
@@ -88,12 +88,12 @@ def create_connection(db_name="cert_db.sqlite3"):
         some_df = pd.read_sql(some_query, conn)
     
     """
-    try:
-        conn = sqlite3.connect(db_name)
-        return conn
-    except Error as e:
-        logger.critical(e)
-    return None
+    return mysql.connector.connect(
+        host='alexroy616.mysql.pythonanywhere-services.com',
+        db='alexroy616$cert_db',
+        user='alexroy616',
+        password=mysql_pw
+    )
 
 def custom_query(query):
     """Run custom SQL query against cert_db.sqlite3"""
