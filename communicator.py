@@ -28,6 +28,14 @@ try:
 except FileNotFoundError:  # no `.secret.json` file if running in CI
     pass
 
+try:
+    with open(".secret.json") as f:
+        pws = json.load(f)
+        mysql_pw = pws["mysql"]
+        paw_pw = pws["pythonanywhere"]
+except FileNotFoundError:  # no `.secret.json` file if running in CI
+    pass
+
 def send_email(receiver_email, text_message, job_number, test=False):
     """Sends an e-mail from `hbr.bot.notifier@gmail.com over SMTP protocol.
     

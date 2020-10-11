@@ -30,6 +30,13 @@ log_handler.setFormatter(
 logger.addHandler(log_handler)
 logger.setLevel(logging.INFO)
 
+try:
+    with open(".secret.json") as f:
+        pws = json.load(f)
+        mysql_pw = pws["mysql"]
+        paw_pw = pws["pythonanywhere"]
+except FileNotFoundError:  # no `.secret.json` file if running in CI
+    pass
 
 def save_model(model):
     """Pickles current machine learning model nd saves it to the project's root directory."""
