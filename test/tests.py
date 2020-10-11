@@ -28,6 +28,7 @@ from utils import create_connection, load_config
 from test.test_setup import create_test_db
 from flask_app import app
 import os
+import mysql.connector
 
 
 prob_thresh = load_config()["machine_learning"]["prboability_thresholds"]["general"]

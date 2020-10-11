@@ -2,6 +2,7 @@ from fuzzywuzzy import fuzz
 import numpy as np
 import math
 from utils import create_connection
+import mysql.connector
 
 
 def compile_score(row, scoreable_attrs, style):

@@ -16,6 +16,7 @@ import logging
 import os
 import datetime
 from statistics import mean
+import mysql.connector
 
 
 logger = logging.getLogger(__name__)

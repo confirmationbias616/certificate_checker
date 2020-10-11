@@ -10,6 +10,7 @@ import json
 import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, From, To
+import mysql.connector
 
 logger = logging.getLogger(__name__)
 log_handler = logging.StreamHandler(sys.stdout)

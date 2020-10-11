@@ -9,6 +9,7 @@ import re
 import sys
 import logging
 import argparse
+import mysql.connector
 
 
 logger = logging.getLogger(__name__)

@@ -7,6 +7,7 @@ import json
 import numpy as np
 from statistics import mean
 from utils import create_connection, persistant_cache
+import mysql.connector
 
 
 logger = logging.getLogger(__name__)

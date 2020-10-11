@@ -7,6 +7,7 @@ import logging
 import json
 import datetime
 import argparse
+import mysql.connector
 
 
 logger = logging.getLogger(__name__)
