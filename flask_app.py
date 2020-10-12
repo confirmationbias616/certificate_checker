@@ -298,7 +298,7 @@ def project_entry():
         selected_contact_ids = request.form.getlist("contacts")
         selected_contacts_query = (
             f"SELECT name, email_address FROM contacts WHERE id in "
-            f"({','.join('%s'*len(selected_contact_ids))}) AND company_id=%s"
+            f"({','.join([' %s']*len(selected_contact_ids))}) AND company_id=%s"
         )
         with create_connection() as conn:
             selected_contacts = pd.read_sql(
@@ -341,10 +341,12 @@ def project_entry():
                 conn.cursor().execute(f"""
                     DELETE FROM company_projects WHERE job_number=%s AND company_id=%s
                 """, [new_entry["job_number"], session.get('company_id')])
+                conn.commit()
         with create_connection() as conn:
             conn.cursor().execute(f"""
-                INSERT INTO company_projects (company_id, {', '.join(list(new_entry.keys()))}) VALUES (%s, {','.join(['%s']*len(new_entry))})
+                INSERT INTO company_projects (company_id, {', '.join(list(new_entry.keys()))}) VALUES (%s, {','.join([' %s']*len(new_entry))})
             """, [session.get('company_id')] + list(new_entry.values()))
+            conn.commit()
         geo_update_db_table('company_projects', limit=1)
         if not was_prev_logged:
             return render_template(
@@ -664,7 +666,9 @@ def delete_job():
     project_id = request.args.get("project_id")
     with create_connection() as conn:
         conn.cursor().execute(delete_job_query, [project_id])
+        conn.commit()
         conn.cursor().execute(delete_match_query, [project_id])
+        conn.commit()
     return redirect(url_for("summary_table"))
 
 
@@ -685,10 +689,12 @@ def instant_scan():
         with create_connection() as conn:
             company_projects = pd.read_sql(company_query, conn, params=[job_number, session.get('company_id')])
         hist_query = """ 
-            SELECT * FROM (
+            WITH sub AS (
                 SELECT * FROM web_certificates 
                 WHERE pub_date > %s
             )
+            SELECT *
+            FROM sub
             WHERE 
                 address_lat IS NULL 
                 OR (
@@ -781,6 +787,7 @@ def thanks_for_payment():
     )
     with create_connection() as conn:
         conn.cursor().execute(update_account_type_query, [session.get('company_id')])
+        conn.commit()
     session['account_type'] = 'full'
     return render_template("thanks_for_payment.html")
 
@@ -838,6 +845,7 @@ def terminate_account():
         )
         with create_connection() as conn:
             conn.cursor().execute(update_account_type_query, [session.get('company_id')])
+            conn.commit()
         session.clear()
         return redirect(url_for("index"))
     return render_template("terminate_account.html")
@@ -901,6 +909,7 @@ def delete_contact():
     contact = request.args
     with create_connection() as conn:
         conn.cursor().execute(delete_contact_query, [contact.get("id"), session.get('company_id')])
+        conn.commit()
     return redirect(url_for("contact_config", **contact))
 
 
@@ -922,6 +931,7 @@ def update_contact():
                 update_contact_query,
                 [contact.get("name"), contact.get("email_address"), contact.get("id"), session.get('company_id')],
             )
+            conn.commit()
     return redirect(url_for("contact_config", **contact))
 
 
@@ -941,6 +951,7 @@ def add_contact():
                 add_contact_query,
                 [session.get('company_id'), contact.get("name"), contact.get("email_address")],
             )
+            conn.commit()
     return redirect(url_for("contact_config", **contact))
 
 

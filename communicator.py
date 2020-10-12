@@ -196,6 +196,7 @@ def process_as_feedback(feedback):
         )
         with create_connection() as conn:
             conn.cursor().execute(update_status_query, [project_id])
+            conn.commit()
         logger.info(
             f"updated company_projects to show `closed` status for job #{job_number}"
         )

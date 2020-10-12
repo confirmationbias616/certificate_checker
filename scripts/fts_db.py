@@ -34,12 +34,16 @@ def update_fts():
     with create_connection() as conn:
         try:
             conn.cursor().execute(drop_fts)  # drop fts table if existing so it can be rewritten
+            conn.commit()
         except sqlite3.OperationalError:
             pass
         for column in ['title', 'owner', 'contractor', 'city', 'engineer']:
             conn.cursor().execute(clean_string_column.format(column, column))
+            conn.commit()
         conn.cursor().execute(create_fts)
+        conn.commit()
         conn.cursor().execute(populate_fts)
+        conn.commit()
 
 if __name__ == "__main__":
     update_fts()

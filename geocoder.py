@@ -136,6 +136,7 @@ def geo_update_db_table(table_name, start_date=None, end_date=None, limit=None):
                 row.loc[i, 'city_size'],
                 row.loc[i, match_id]
             ])
+            conn.commit()
         logger.info(f"Job {row.loc[i, match_id]} ({row.pub_date.iloc[0] if table_name == 'web_certificates' else ''})  has been updated with geo data")
 
 if __name__ == "__main__":

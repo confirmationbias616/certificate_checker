@@ -473,6 +473,7 @@ def scrape(
     new_certs = [[row[attr] for attr in attrs] for _, row in df_web.iterrows()]
     with create_connection() as conn:
         conn.cursor().executemany(query, new_certs)
+        conn.commit()
     return True  # signaling that something scrape did return some results
 
 
