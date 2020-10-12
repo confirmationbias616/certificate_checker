@@ -298,7 +298,7 @@ def project_entry():
         selected_contact_ids = request.form.getlist("contacts")
         selected_contacts_query = (
             f"SELECT name, email_address FROM contacts WHERE id in "
-            f"({','.join('%s'*len(selected_contact_ids))}) AND company_id=%s"
+            f"({','.join([' %s']*len(selected_contact_ids))}) AND company_id=%s"
         )
         with create_connection() as conn:
             selected_contacts = pd.read_sql(
@@ -344,7 +344,7 @@ def project_entry():
                 conn.commit()
         with create_connection() as conn:
             conn.cursor().execute(f"""
-                INSERT INTO company_projects (company_id, {', '.join(list(new_entry.keys()))}) VALUES (%s, {','.join(['%s']*len(new_entry))})
+                INSERT INTO company_projects (company_id, {', '.join(list(new_entry.keys()))}) VALUES (%s, {','.join([' %s']*len(new_entry))})
             """, [session.get('company_id')] + list(new_entry.values()))
             conn.commit()
         geo_update_db_table('company_projects', limit=1)
