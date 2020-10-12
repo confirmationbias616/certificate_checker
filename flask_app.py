@@ -689,10 +689,12 @@ def instant_scan():
         with create_connection() as conn:
             company_projects = pd.read_sql(company_query, conn, params=[job_number, session.get('company_id')])
         hist_query = """ 
-            SELECT * FROM (
+            WITH sub AS (
                 SELECT * FROM web_certificates 
                 WHERE pub_date > %s
             )
+            SELECT *
+            FROM sub
             WHERE 
                 address_lat IS NULL 
                 OR (
