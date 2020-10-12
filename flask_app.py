@@ -543,7 +543,7 @@ def summary_table():
                 company_projects.engineer,
                 web.url_key,
                 web.pub_date,
-                CONCAT(base_urls.base_url, web_certificates.url_key) AS link
+                CONCAT(base_urls.base_url, web.url_key) AS link
             FROM (SELECT * FROM web_certificates ORDER BY cert_id DESC LIMIT 16000) as web
             LEFT JOIN
                 attempted_matches
@@ -1165,7 +1165,7 @@ def map():
             company_projects.engineer,
             web.url_key,
             web.pub_date,
-            CONCAT(base_urls.base_url, web_certificates.url_key) AS link,
+            CONCAT(base_urls.base_url, web.url_key) AS link,
             web.source,
             COALESCE(web.address_lat, web.city_lat) as lat,
             COALESCE(web.address_lng, web.city_lng) as lng,
