@@ -14,7 +14,7 @@ matplotlib.use('Agg')
 with create_connection() as conn:
     df = pd.read_sql("""
         SELECT
-            SUBSTR(pub_date,0,5)||'-'||SUBSTR(pub_date,6,2) as yearmonth,
+            CONCAT(SUBSTR(pub_date,0,5),'-',SUBSTR(pub_date,6,2)) as yearmonth,
             source,
             COUNT(*) as count
         FROM (SELECT DISTINCT title, owner, contractor, engineer, cert_type, source, pub_date FROM web_certificates)

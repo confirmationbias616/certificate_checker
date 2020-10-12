@@ -279,7 +279,7 @@ def validate_model(
             attempted_matches.multi_phase,
             web_certificates.pub_date,
             web_certificates.source,
-            (base_urls.base_url || web_certificates.url_key) AS link
+            CONCAT(base_urls.base_url, web_certificates.url_key) AS link
         FROM
             web_certificates
         LEFT JOIN
