@@ -236,7 +236,7 @@ def get_web_certs(east_lat, west_lat, south_lng, north_lng, end_date, select_sou
     web_query = """
         SELECT 
             web_certificates.*, 
-            (base_urls.base_url || web_certificates.url_key) AS link,
+            CONCAT(base_urls.base_url, web_certificates.url_key) AS link,
             COALESCE(web_certificates.address_lat, web_certificates.city_lat) as lat,
             COALESCE(web_certificates.address_lng, web_certificates.city_lng) as lng,
             base_urls.long_name as source_name
@@ -461,7 +461,7 @@ def already_matched():
     job_number = request.args.get("job_number")
     link_query = """
         SELECT
-            (base_urls.base_url || web_certificates.url_key) AS link
+            CONCAT(base_urls.base_url, web_certificates.url_key) AS link
         FROM
             attempted_matches
         LEFT JOIN
@@ -543,7 +543,7 @@ def summary_table():
                 company_projects.engineer,
                 web.url_key,
                 web.pub_date,
-                (base_urls.base_url || web.url_key) AS link
+                CONCAT(base_urls.base_url, web_certificates.url_key) AS link
             FROM (SELECT * FROM web_certificates ORDER BY cert_id DESC LIMIT 16000) as web
             LEFT JOIN
                 attempted_matches
@@ -689,12 +689,11 @@ def instant_scan():
         with create_connection() as conn:
             company_projects = pd.read_sql(company_query, conn, params=[job_number, session.get('company_id')])
         hist_query = """ 
-            WITH sub AS (
+            SELECT *
+            FROM (
                 SELECT * FROM web_certificates 
                 WHERE pub_date > %s
-            )
-            SELECT *
-            FROM sub
+            ) AS s
             WHERE 
                 address_lat IS NULL 
                 OR (
@@ -805,7 +804,7 @@ def admin():
     with create_connection() as conn:
         df_users = pd.read_sql("""
             SELECT
-                SUBSTR(date_added,0,5)||'-'||SUBSTR(date_added,6,2) as yearmonth,
+                CONCAT(SUBSTR(date_added,0,5),'-',SUBSTR(date_added,6,2)) as yearmonth,
                 COUNT(*) as count
             FROM users
             WHERE date_added > '2018-01-01'
@@ -1166,7 +1165,7 @@ def map():
             company_projects.engineer,
             web.url_key,
             web.pub_date,
-            (base_urls.base_url || web.url_key) AS link,
+            CONCAT(base_urls.base_url, web_certificates.url_key) AS link,
             web.source,
             COALESCE(web.address_lat, web.city_lat) as lat,
             COALESCE(web.address_lng, web.city_lng) as lng,
