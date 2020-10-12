@@ -39,6 +39,7 @@ def create_test_db():
             DROP TABLE old_table;
             PRAGMA foreign_keys=on;
         """)
+        conn.commit()
         conn.cursor().executescript("""
             PRAGMA foreign_keys=off;
             ALTER TABLE web_certificates RENAME TO old_table;
@@ -64,6 +65,7 @@ def create_test_db():
             DROP TABLE old_table;
             PRAGMA foreign_keys=on;
         """)
+        conn.commit()
         conn.cursor().executescript("""
             PRAGMA foreign_keys=off;
             ALTER TABLE contacts RENAME TO old_table;
@@ -77,6 +79,7 @@ def create_test_db():
             DROP TABLE old_table;
             PRAGMA foreign_keys=on;
         """)
+        conn.commit()
         conn.cursor().executescript("""
             PRAGMA foreign_keys=off;
             ALTER TABLE users RENAME TO old_table;
@@ -92,6 +95,7 @@ def create_test_db():
             DROP TABLE old_table;
             PRAGMA foreign_keys=on;
         """)
+        conn.commit()
     os.rename(
         abs_dir_path + "test/test_cert_db.sqlite3",
         abs_dir_path + "test_cert_db.sqlite3",
