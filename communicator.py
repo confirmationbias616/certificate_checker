@@ -200,7 +200,7 @@ def process_as_feedback(feedback):
     with create_connection() as conn:
         conn.cursor().execute(f"""
             INSERT INTO attempted_matches (project_id, cert_id, ground_truth, multi_phase, log_date, validate) 
-            VALUES (%s, %s, %s, #s, %s, 0)
+            VALUES (%s, %s, %s, %s, %s, 0)
         """, [project_id, cert_id, 1 if response == 1 else 0, 1 if response == 2 else 0, str(datetime.datetime.now().date())]
         )
         conn.commit()
