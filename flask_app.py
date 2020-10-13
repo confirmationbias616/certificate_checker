@@ -480,7 +480,7 @@ def already_matched():
             attempted_matches.ground_truth = 1
     """
     with create_connection() as conn:
-        link = conn.cursor().execute(link_query, [job_number, session.get('company_id')]).fetchone()[0]
+        link = pd.read_sql(link_query, conn, params=[job_number, session.get('company_id')]).iloc[0].link
     return render_template("already_matched.html", link=link, job_number=job_number)
 
 
@@ -495,7 +495,7 @@ def potential_match():
     source = request.args.get("source")
     source_base_url_query = "SELECT base_url FROM base_urls WHERE source=%s"
     with create_connection() as conn:
-        base_url = conn.cursor().execute(source_base_url_query, [source]).fetchone()[0]
+        base_url = pd.read_sql(source_base_url_query, conn, params=[source]).iloc[0].base_url
     return render_template(
         "potential_match.html",
         project_id=project_id,
