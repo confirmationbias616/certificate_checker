@@ -134,12 +134,12 @@ def geo_update_db_table(table_name, start_date=None, end_date=None, limit=None):
                 return x
         with create_connection() as conn:
             conn.cursor().execute(update_geo_data, [
-                row.loc[i, 'address_lat'],
-                row.loc[i, 'address_lng'],
-                row.loc[i, 'city_lat'],
-                row.loc[i, 'city_lng'],
-                row.loc[i, 'city_size'],
-                row.loc[i, match_id]
+                nullify(row.loc[i, 'address_lat']),
+                nullify(row.loc[i, 'address_lng']),
+                nullify(row.loc[i, 'city_lat']),
+                nullify(row.loc[i, 'city_lng']),
+                nullify(row.loc[i, 'city_size']),
+                nullify(row.loc[i, match_id])
             ])
             conn.commit()
         logger.info(f"Job {row.loc[i, match_id]} ({row.pub_date.iloc[0] if table_name == 'web_certificates' else ''})  has been updated with geo data")
