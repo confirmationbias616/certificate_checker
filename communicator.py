@@ -159,9 +159,6 @@ def process_as_feedback(feedback):
     potential match email that would have been sent out.
     
     """
-    imap_ssl_host = "imap.gmail.com"
-    imap_ssl_port = 993
-    username = "hbr.bot.notifier"
     project_id = feedback["project_id"]
     job_number = feedback["job_number"]
     response = int(feedback["response"])
