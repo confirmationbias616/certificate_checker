@@ -159,9 +159,6 @@ def process_as_feedback(feedback):
     potential match email that would have been sent out.
     
     """
-    imap_ssl_host = "imap.gmail.com"
-    imap_ssl_port = 993
-    username = "hbr.bot.notifier"
     project_id = feedback["project_id"]
     job_number = feedback["job_number"]
     response = int(feedback["response"])
@@ -201,18 +198,21 @@ def process_as_feedback(feedback):
             f"updated company_projects to show `closed` status for job #{job_number}"
         )
     with create_connection() as conn:
+        conn.cursor().execute(f"""
+            INSERT INTO attempted_matches (project_id, cert_id, ground_truth, multi_phase, log_date, validate) 
+            VALUES (%s, %s, %s, #s, %s, 0)
+        """, [project_id, cert_id, 1 if response == 1 else 0, 1 if response == 2 else 0, str(datetime.datetime.now().date())]
+        )
+        conn.commit()
         df = pd.read_sql("SELECT * FROM attempted_matches", conn)
-        match_dict_input = {
-            "project_id": project_id,
-            "cert_id": cert_id,
-            "ground_truth": 1 if response == 1 else 0,
-            "multi_phase": 1 if response == 2 else 0,
-            "log_date": str(datetime.datetime.now().date()),
-            "validate": 0,
-        }
-        df = df.append(match_dict_input, ignore_index=True)
-        df = df.drop_duplicates(subset=["project_id", "cert_id"], keep="last")
-        df.to_sql("attempted_matches", conn, if_exists="replace", index=False)
+        delete_records = df[df.duplicated(subset=["project_id", "cert_id"], keep='last')]
+        for record in delete_records:
+            conn.cursor().execute(f"""
+                DELETE FROM attempted_matches
+                WHERE id = %s
+            """, [record.id]
+            )
+        conn.commit()
         logger.info(
             f"cert_id`{cert_id}` from {source} was a "
             f"{'successful match' if response == 1 else 'mis-match'} for job "
