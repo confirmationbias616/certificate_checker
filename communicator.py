@@ -94,7 +94,7 @@ def communicate(single_web_cert, single_project, test=False):
     source = single_web_cert.iloc[0].source
     source_base_url_query = "SELECT base_url FROM base_urls WHERE source=%s"
     with create_connection() as conn:
-        base_url = conn.cursor().execute(source_base_url_query, [source]).fetchone()[0]
+        base_url = pd.read_sql(source_base_url_query, conn, params=[source]).iloc[0].base_url
     url_key = single_web_cert.iloc[0].url_key
     pub_date = datetime.datetime(
         *[int(single_web_cert.iloc[0].pub_date.split("-")[x]) for x in range(3)]
