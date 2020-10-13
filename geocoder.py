@@ -127,6 +127,11 @@ def geo_update_db_table(table_name, start_date=None, end_date=None, limit=None):
             continue 
         row = pd.DataFrame(row).transpose()
         row = geocode(row)
+        def nullify(x):
+            if np.isnan(x):
+                return None
+            else:
+                return x
         with create_connection() as conn:
             conn.cursor().execute(update_geo_data, [
                 row.loc[i, 'address_lat'],
