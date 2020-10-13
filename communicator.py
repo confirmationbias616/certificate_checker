@@ -209,8 +209,8 @@ def process_as_feedback(feedback):
         for record in delete_records:
             conn.cursor().execute(f"""
                 DELETE FROM attempted_matches
-                WHERE id = %s
-            """, [record.id]
+                WHERE idx = %s
+            """, [record.idx]
             )
         conn.commit()
         logger.info(
