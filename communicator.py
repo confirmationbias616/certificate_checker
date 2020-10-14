@@ -205,14 +205,13 @@ def process_as_feedback(feedback):
         )
         conn.commit()
         df = pd.read_sql("SELECT * FROM attempted_matches", conn)
-        delete_records = df[df.duplicated(subset=["project_id", "cert_id"], keep='last')]
+        delete_record = df[df.duplicated(subset=["project_id", "cert_id"], keep='last')]
         if len(delete_records):
-            for record in delete_records:
-                conn.cursor().execute(f"""
-                    DELETE FROM attempted_matches
-                    WHERE idx = %s
-                """, [record.idx]
-                )
+            conn.cursor().execute(f"""
+                DELETE FROM attempted_matches
+                WHERE idx = %s
+            """, [delete_record.idx]
+            )
             conn.commit()
         logger.info(
             f"cert_id`{cert_id}` from {source} was a "
